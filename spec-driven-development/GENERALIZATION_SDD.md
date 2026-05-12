@@ -509,28 +509,19 @@ Adopting SDD on an existing codebase requires reverse-engineering what the proje
 
 **Brownfield Bootstrap Additions:**
 
-1. Run a codebase scan to auto-generate initial CONTEXT.md:
-   - Language and framework detection
-   - Test runner and test count baseline
-   - Existing commit message format
-   - Branching model (main/develop/feature)
-   - Key modules and their responsibilities
+Use the brownfield CLI to run archaeology before any framework files are adopted. The safe default is to stage only the report and constitution proposal, then review it with the human owner before applying SDD to the host repository.
 
-2. Inventory existing conventions:
-   - How are routes defined?
-   - How are models structured?
-   - How are tests organized?
-   - What patterns exist for error handling?
-   - How is configuration managed?
+```bash
+python spec-driven-development/cli/bootstrap.py brownfield ../my-host-project --draft-only
+# Review ../my-host-project/.sdd-archaeology.json and ../my-host-project/.sdd-proposal/
+python spec-driven-development/cli/bootstrap.py brownfield ../my-host-project --apply
+```
 
-3. Map existing tests and establish baseline:
-   - Current test count (this becomes the "must never decrease" threshold)
-   - Test isolation patterns
-   - Mock patterns
+The archaeology pass inventories languages, package managers, test frameworks, CI systems, convention files, docs, git history, and the inferred branching model. It drafts `mission.md`, `tech-stack.md`, `principles.md`, `roadmap.md`, `decision-policy.md`, and `quality-policy.md` under `.sdd-proposal/constitution/` with evidence-derived content and `TODO(human)` markers where observation is not enough.
 
-4. Generate constitution draft from discovered patterns, then human-review every article
+When dispatching workers in a brownfield host, load the `respect-existing` operational skill. Workers must mimic existing patterns and avoid rewriting code outside their explicit task scope; if a pattern blocks the task, they route to the Architect instead of silently expanding scope.
 
-5. Pilot one small feature through the full lifecycle before committing to SDD for all work
+After review and apply, pilot one small feature through the full lifecycle before committing to SDD for all work.
 
 ### 4.3 Key Difference Summary
 

@@ -70,22 +70,12 @@ For a brand-new repository:
 
 For a repository with established code, tests, and conventions:
 
-1. Read `spec-driven-development/GENERALIZATION_SDD.md` for the full adoption
-   playbook.
-2. Run an **archaeology pass** before writing the constitution: inventory the
-   host's languages, test frameworks, branching model, deploy pipeline, existing
-   convention files. The constitution must reflect what is, not what should be.
-3. Copy `.github/` and `spec-driven-development/` into the host repo.
-4. Author the constitution with your team's input -- this is a one-time
-   investment of an afternoon, not a perpetual exercise.
-5. Pick one small feature or refactor as the **adoption pilot**. Walk it through
-   the lifecycle. Measure friction. Update skills. Don't try to convert the
-   whole project at once.
-6. Define explicit **coexistence rules**: what SDD owns, what stays under the
-   existing process. Emergency hotfixes typically bypass SDD.
-
-A `cli/bootstrap.py brownfield <path>` that automates the archaeology pass and
-proposes a constitution draft is on the PI-2 roadmap (item `s4-brownfield-bootstrap`).
+1. Run `python spec-driven-development/cli/bootstrap.py brownfield ../my-host-project --draft-only`.
+2. Review the staged proposal at `<target>/.sdd-proposal/` and the archaeology report at `<target>/.sdd-archaeology.json`.
+3. Re-run with `--apply` to adopt after human review.
+4. Open the Principal Executive Manager, capture your first idea, and run `/triage`.
+5. Pick one small feature or refactor as the **adoption pilot**. Walk it through the lifecycle, measure friction, and update skills.
+6. Define explicit **coexistence rules**: what SDD owns, what stays under the existing process. Emergency hotfixes typically bypass SDD.
 
 ---
 

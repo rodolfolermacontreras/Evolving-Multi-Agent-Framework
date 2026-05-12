@@ -102,6 +102,12 @@
     "description": "Evaluates structural changes and architecture tradeoffs."
   },
   {
+    "id": "fleet-coordinator",
+    "path": ".github/skills/operational/fleet-coordinator/SKILL.md",
+    "category": "operational",
+    "description": "Applies dispatch logic, conflict checks, and batch management."
+  },
+  {
     "id": "handoff",
     "path": ".github/skills/operational/handoff/SKILL.md",
     "category": "operational",
@@ -114,16 +120,16 @@
     "description": "Append a tagged lesson candidate to the current PI's lessons.md when project work reveals a missing skill, unclear role, template gap, or constitution ambiguity. Feeds /evolve."
   },
   {
-    "id": "fleet-coordinator",
-    "path": ".github/skills/operational/fleet-coordinator/SKILL.md",
-    "category": "operational",
-    "description": "Applies dispatch logic, conflict checks, and batch management."
-  },
-  {
     "id": "pi-planning",
     "path": ".github/skills/operational/pi-planning/SKILL.md",
     "category": "operational",
     "description": "Supports PI planning, sprint planning, and backlog shaping."
+  },
+  {
+    "id": "respect-existing",
+    "path": ".github/skills/operational/respect-existing/SKILL.md",
+    "category": "operational",
+    "description": "Constrains brownfield workers to preserve existing conventions and avoid out-of-scope rewrites."
   },
   {
     "id": "pytest-runner",

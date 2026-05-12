@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Bootstrap helper for greenfield SDD host projects.
+Bootstrap helper for greenfield and brownfield SDD host projects.
 
 Usage:
     python bootstrap.py greenfield <archetype-name> \
@@ -14,8 +14,10 @@ placeholders, and creates the first backlog and ledger placeholders.
 from pathlib import Path
 import argparse
 import datetime
+import json
 import re
 import shutil
+import subprocess
 import sys
 
 CONSTITUTION_FILES = (
@@ -49,7 +51,7 @@ def today_iso() -> str:
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         prog="bootstrap.py",
-        description="Bootstrap SDD into a greenfield host project.",
+        description="Bootstrap SDD into greenfield or brownfield host projects.",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -85,6 +87,38 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "--force",
         action="store_true",
         help="Allow overwriting existing framework files in a non-empty target.",
+    )
+
+    brownfield = subparsers.add_parser(
+        "brownfield",
+        help="Inspect an existing git project and stage an SDD constitution proposal.",
+        description=(
+            "Run a brownfield archaeology pass against an existing git repository, "
+            "write .sdd-archaeology.json, and stage a host-specific constitution "
+            "proposal under .sdd-proposal/constitution/. Use --apply only after "
+            "human review."
+        ),
+    )
+    brownfield.add_argument(
+        "target_path",
+        metavar="target-path",
+        help="Existing git repository to inspect and prepare for SDD adoption.",
+    )
+    brownfield.add_argument(
+        "--owner",
+        default=None,
+        help="Optional human owner to include in the staged proposal.",
+    )
+    brownfield_mode = brownfield.add_mutually_exclusive_group()
+    brownfield_mode.add_argument(
+        "--draft-only",
+        action="store_true",
+        help="Refresh archaeology and proposal only. This is the default safe workflow.",
+    )
+    brownfield_mode.add_argument(
+        "--apply",
+        action="store_true",
+        help="After prompting for approval, copy framework assets and the proposed constitution into the target.",
     )
     return parser.parse_args(argv)
 
@@ -240,6 +274,263 @@ def copy_archetype_skills(archetype: Path, target: Path, force: bool) -> None:
             copy_directory(skill_dir, destination / skill_dir.name, force)
 
 
+
+def run_git(target: Path, *args: str, check: bool = True) -> str:
+    try:
+        result = subprocess.run(["git", "-C", str(target), *args], check=False, capture_output=True, text=True)
+    except OSError as exc:
+        fail("Unable to run git for brownfield archaeology.", f"Install git and ensure it is on PATH. Details: {exc}")
+    if check and result.returncode != 0:
+        detail = (result.stderr or result.stdout).strip()
+        fail(f"Git command failed in {target}: git {' '.join(args)}", detail or "Verify the target is a valid git repository.")
+    return result.stdout.strip()
+
+
+def validate_brownfield_target(target: Path) -> Path:
+    target = target.expanduser().resolve()
+    if not target.exists():
+        fail(f"Target path does not exist: {target}", "Pass the path to an existing host repository.")
+    if not target.is_dir():
+        fail(f"Target path is not a directory: {target}", "Pass a directory that is the root of an existing git repository.")
+    if run_git(target, "rev-parse", "--is-inside-work-tree", check=False).lower() != "true":
+        fail(f"Target is not a git repository: {target}", "Initialize git and create at least one commit before running brownfield bootstrap.")
+    repo_root = Path(run_git(target, "rev-parse", "--show-toplevel")).resolve()
+    if repo_root != target:
+        fail(f"Target must be the git repository root: {target}", f"Rerun against the repository root: {repo_root}")
+    run_git(target, "rev-parse", "--verify", "HEAD")
+    return target
+
+
+LANGUAGE_EXTENSIONS = {
+    ".py": "Python", ".pyw": "Python", ".ts": "TypeScript", ".tsx": "TypeScript",
+    ".js": "JavaScript", ".jsx": "JavaScript", ".mjs": "JavaScript", ".cjs": "JavaScript",
+    ".go": "Go", ".java": "Java", ".cs": "C#", ".rb": "Ruby", ".rs": "Rust",
+    ".php": "PHP", ".swift": "Swift", ".kt": "Kotlin", ".kts": "Kotlin",
+    ".cpp": "C++", ".cc": "C++", ".cxx": "C++", ".c": "C", ".h": "C/C++ Header",
+    ".hpp": "C/C++ Header", ".fs": "F#", ".fsx": "F#", ".scala": "Scala",
+    ".sh": "Shell", ".ps1": "PowerShell",
+}
+SKIP_DIRS = {".git", ".hg", ".svn", ".sdd-proposal", ".tox", ".venv", "venv", "node_modules", "dist", "build", "target", "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache"}
+
+
+def rel(path: Path, root: Path) -> str:
+    return path.relative_to(root).as_posix()
+
+
+def read_if_exists(path: Path) -> str:
+    try:
+        return path.read_text(encoding="utf-8", errors="ignore") if path.is_file() else ""
+    except OSError:
+        return ""
+
+
+def repo_files(target: Path) -> list[Path]:
+    return [p for p in target.rglob("*") if p.is_file() and not any(part in SKIP_DIRS for part in p.relative_to(target).parts)]
+
+
+def detect_languages(files: list[Path]) -> list[dict[str, object]]:
+    counts: dict[str, int] = {}
+    for path in files:
+        if language := LANGUAGE_EXTENSIONS.get(path.suffix.lower()):
+            counts[language] = counts.get(language, 0) + 1
+    return [{"language": lang, "file_count": count} for lang, count in sorted(counts.items(), key=lambda item: (-item[1], item[0]))[:5]]
+
+
+def detect_package_managers(target: Path, files: list[Path]) -> list[dict[str, object]]:
+    rels = {rel(path, target) for path in files}
+    checks = {
+        "Python pyproject": {"pyproject.toml"}, "Python requirements": {"requirements.txt"}, "Python setup": {"setup.py", "setup.cfg"},
+        "npm": {"package.json", "package-lock.json"}, "pnpm": {"pnpm-lock.yaml"}, "Yarn": {"yarn.lock"},
+        "Go modules": {"go.mod"}, "Cargo": {"Cargo.toml"}, "Bundler": {"Gemfile"}, "Maven": {"pom.xml"}, "Gradle": {"build.gradle", "build.gradle.kts"},
+    }
+    detected = [{"name": name, "evidence": sorted(r for r in rels if Path(r).name in names)[:10]} for name, names in checks.items() if any(Path(r).name in names for r in rels)]
+    dotnet = sorted(r for r in rels if r.endswith(".csproj") or r.endswith(".sln"))
+    return detected + ([{"name": ".NET", "evidence": dotnet[:10]}] if dotnet else [])
+
+
+def add_evidence(bucket: dict[str, set[str]], framework: str, evidence: str) -> None:
+    bucket.setdefault(framework, set()).add(evidence)
+
+
+def detect_test_frameworks(target: Path, files: list[Path]) -> list[dict[str, object]]:
+    rels = {rel(path, target) for path in files}
+    found: dict[str, set[str]] = {}
+    package_json = read_if_exists(target / "package.json").lower()
+    pyproject = read_if_exists(target / "pyproject.toml").lower()
+    requirements = "\n".join(read_if_exists(path).lower() for path in [target / "requirements.txt", *target.glob("requirements*.txt")])
+    java_configs = "\n".join(read_if_exists(target / name).lower() for name in ("pom.xml", "build.gradle", "build.gradle.kts"))
+    cs_configs = "\n".join(read_if_exists(path).lower() for path in target.rglob("*.csproj"))
+    if "pytest" in pyproject or "pytest" in requirements:
+        add_evidence(found, "pytest", "pyproject.toml/requirements.txt")
+    if "unittest" in pyproject or any(r.startswith("tests/") and r.endswith(".py") for r in rels):
+        add_evidence(found, "pytest", "tests/ directory with Python tests")
+    for framework in ("vitest", "jest", "mocha"):
+        if framework in package_json:
+            add_evidence(found, framework, "package.json")
+    config_map = {"vitest": {"vitest.config.ts", "vitest.config.js"}, "jest": {"jest.config.js", "jest.config.ts", "jest.config.cjs"}}
+    for framework, names in config_map.items():
+        if any(Path(r).name in names for r in rels):
+            add_evidence(found, framework, f"{framework} config")
+    if read_if_exists(target / "go.mod") or any(r.endswith("_test.go") for r in rels):
+        add_evidence(found, "go test", "go.mod or *_test.go")
+    if "junit" in java_configs or any(r.startswith("src/test/") and r.endswith(".java") for r in rels):
+        add_evidence(found, "junit", "Java test configuration or src/test")
+    for framework in ("xunit", "nunit"):
+        if framework in cs_configs:
+            add_evidence(found, framework, "*.csproj")
+    if "rspec" in read_if_exists(target / "Gemfile").lower() or any("spec/" in r and r.endswith("_spec.rb") for r in rels):
+        add_evidence(found, "rspec", "Gemfile or spec/ directory")
+    if read_if_exists(target / "Cargo.toml") or any(r.endswith(".rs") for r in rels):
+        add_evidence(found, "cargo test", "Cargo.toml or Rust sources")
+    return [{"name": name, "evidence": sorted(evidence)} for name, evidence in sorted(found.items())]
+
+
+def detect_ci_systems(target: Path) -> list[dict[str, object]]:
+    checks = {"GitHub Actions": target / ".github" / "workflows", "Azure Pipelines": target / "azure-pipelines.yml", "GitLab CI": target / ".gitlab-ci.yml", "Jenkins": target / "Jenkinsfile", "CircleCI": target / ".circleci"}
+    return [{"name": name, "evidence": rel(path, target)} for name, path in checks.items() if path.exists()]
+
+
+def detect_convention_files(target: Path, files: list[Path]) -> list[dict[str, object]]:
+    names = {".editorconfig", ".flake8", ".pylintrc", ".ruff.toml", "ruff.toml", "tsconfig.json", "eslint.config.js", "eslint.config.mjs", ".eslintrc", ".eslintrc.json", ".eslintrc.js", "prettier.config.js", "prettier.config.cjs", ".rubocop.yml", "rustfmt.toml", ".gitattributes"}
+    detected = [{"name": p.name, "path": rel(p, target)} for p in files if p.name in names or p.name.startswith(".prettierrc")]
+    tools = sorted(set(re.findall(r"^\[tool\.([^\]]+)\]", read_if_exists(target / "pyproject.toml"), flags=re.MULTILINE)))
+    detected.extend({"name": f"pyproject.toml [tool.{tool}]", "path": "pyproject.toml"} for tool in tools)
+    return sorted(detected, key=lambda item: (str(item["path"]), str(item["name"])))
+
+
+def infer_branching(branch_names: list[str]) -> str:
+    normalized = {name.removeprefix("origin/") for name in branch_names if name and name != "HEAD" and not name.endswith("/HEAD")}
+    if "develop" in normalized:
+        return "git-flow"
+    return "trunk-based" if normalized and normalized.issubset({"main", "master"}) else "unknown"
+
+
+def collect_git_archaeology(target: Path) -> dict[str, object]:
+    branches = run_git(target, "branch", "--format=%(refname:short)").splitlines()
+    branches += [line for line in run_git(target, "branch", "-r", "--format=%(refname:short)", check=False).splitlines() if line and "->" not in line]
+    head = run_git(target, "symbolic-ref", "--short", "HEAD", check=False) or run_git(target, "rev-parse", "--short", "HEAD")
+    return {"branch_count": len(set(branches)), "commit_count": int(run_git(target, "rev-list", "--count", "HEAD")), "default_branch": head, "last_commit_date": run_git(target, "log", "-1", "--format=%cs"), "inferred_branching": infer_branching(branches)}
+
+
+def create_archaeology_report(target: Path) -> dict[str, object]:
+    files = repo_files(target)
+    git = collect_git_archaeology(target)
+    docs = [path.name for path in target.glob("*.md") if path.is_file()]
+    priority = {"readme.md": 0, "contributing.md": 1, "architecture.md": 2, "changelog.md": 3}
+    report = {
+        "target_path": str(target),
+        "git": {key: git[key] for key in ("branch_count", "commit_count", "default_branch", "last_commit_date")},
+        "languages": detect_languages(files),
+        "package_managers": detect_package_managers(target, files),
+        "test_frameworks": detect_test_frameworks(target, files),
+        "ci_systems": detect_ci_systems(target),
+        "convention_files": detect_convention_files(target, files),
+        "existing_docs": sorted(docs, key=lambda name: (priority.get(name.lower(), 50), name.lower())),
+        "inferred_branching": git["inferred_branching"],
+    }
+    (target / ".sdd-archaeology.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    return report
+
+
+def markdown_list(items: list[str], empty: str) -> str:
+    return "".join(f"- {item}\n" for item in items) if items else f"- {empty}\n"
+
+
+def evidence_summary(items: list[dict[str, object]]) -> list[str]:
+    lines = []
+    for item in items:
+        evidence = item.get("evidence")
+        evidence_text = ", ".join(str(value) for value in evidence) if isinstance(evidence, list) else str(evidence)
+        lines.append(f"{item.get('name')}: {evidence_text}")
+    return lines
+
+
+def proposal_frontmatter(date: str) -> str:
+    return "---\nversion: '1.0.0'\n" + f"ratified: {date}\nlast_amended: {date}\nproposal: true\n---\n\n"
+
+
+def write_proposal_file(proposal_dir: Path, name: str, body: str, date: str) -> None:
+    write_text(proposal_dir / name, proposal_frontmatter(date) + body.lstrip("\n"), force=True)
+
+
+def draft_constitution_proposal(target: Path, report: dict[str, object], owner: str | None, date: str) -> Path:
+    """Stage brownfield constitution drafts derived from observed repository evidence."""
+    proposal_dir = target / ".sdd-proposal" / "constitution"
+    proposal_dir.mkdir(parents=True, exist_ok=True)
+    project_name = target.name
+    owner_text = owner or "<!-- TODO(human): name the accountable owner for this host project. -->"
+    language_lines = [f"{item['language']} ({item['file_count']} files)" for item in report["languages"]]
+    package_lines = evidence_summary(report["package_managers"])
+    test_lines = evidence_summary(report["test_frameworks"])
+    ci_lines = evidence_summary(report["ci_systems"])
+    convention_lines = [f"{item['name']} ({item['path']})" for item in report["convention_files"]]
+    docs = [f"Top-level doc: {doc}" for doc in report["existing_docs"]]
+    principles = [
+        "H1: Brownfield changes must preserve existing conventions unless an approved spec explicitly changes them.",
+        "H2: Worker agents must use the respect-existing skill before modifying host code.",
+    ]
+    if any("tests/ directory" in ", ".join(item.get("evidence", [])) for item in report["test_frameworks"]):
+        principles.append("H3: Tests belong under the existing tests/ directory pattern unless the host already uses a more specific convention.")
+    branch_note = {"trunk-based": "stay trunk-based around the observed main/master long-lived branch model", "git-flow": "respect the observed git-flow model with develop as a long-lived branch"}.get(report["inferred_branching"])
+    principles.append(f"H4: Branching should {branch_note}." if branch_note else "H4: <!-- TODO(human): Confirm branching policy; archaeology could not infer it confidently. -->")
+    files = {
+        "mission.md": f"""# Mission\n\nOwner: {owner_text}\n\nThis proposal was extracted from repository archaeology for `{project_name}` at `{report['target_path']}`.\n\n<!-- TODO(human): Replace this section with the actual mission the existing project already serves. Use README, product docs, and stakeholder language. -->\n\n## Observed Evidence\n\n{markdown_list(docs, 'No top-level Markdown docs detected. Add mission evidence manually.')}## Adoption Note\n\nSDD is being wrapped around the existing project. This constitution should describe current reality before it prescribes changes.\n""",
+        "tech-stack.md": f"""# Tech Stack\n\n## Detected Languages\n\n{markdown_list(language_lines, '<!-- TODO(human): Confirm primary implementation language(s). -->')}## Package and Build Inputs\n\n{markdown_list(package_lines, '<!-- TODO(human): Add package manager or build system details. -->')}## Test Frameworks\n\n{markdown_list(test_lines, '<!-- TODO(human): Confirm test runner and baseline test command. -->')}## CI Systems\n\n{markdown_list(ci_lines, '<!-- TODO(human): Document deployment and release automation. -->')}## Convention Files\n\n{markdown_list(convention_lines, '<!-- TODO(human): Add linting, formatting, and style conventions. -->')}""",
+        "principles.md": f"""# Principles\n\nFramework Articles I-X are inherited from SDD. The host-specific articles below are proposed from observed repository evidence.\n\n{markdown_list(principles, '<!-- TODO(human): Add host-specific principles. -->')}## Human Review Required\n\n<!-- TODO(human): Confirm each host article, delete anything that does not match current practice, and add missing conventions from team knowledge. -->\n""",
+        "roadmap.md": f"""# Roadmap\n\n## Adoption Roadmap\n\n- Review `.sdd-archaeology.json` and this staged proposal with the project owner.\n- Run one small feature or refactor through SDD before broad rollout.\n- Measure friction and capture missing skills or conventions as lesson-capture candidates.\n\n## Current Repository Signals\n\n- Commit count: {report['git']['commit_count']}\n- Current branch: {report['git']['default_branch']}\n- Last commit date: {report['git']['last_commit_date']}\n\n<!-- TODO(human): Add product roadmap items from existing planning artifacts. -->\n""",
+        "decision-policy.md": f"""# Decision Policy\n\n## Proposed Policy\n\n- Use existing project decision records if present; otherwise introduce ADRs only for new SDD-era decisions.\n- Do not rewrite previous decisions during adoption. Document observed practice first.\n- Escalate out-of-scope architectural changes to the Architect before implementation.\n\n## Branching Evidence\n\nDetected branching model: `{report['inferred_branching']}`.\n\n<!-- TODO(human): Confirm commit, branch, review, and release policies from team practice. -->\n""",
+        "quality-policy.md": f"""# Quality Policy\n\n## Existing Quality Signals\n\n### Test Frameworks\n\n{markdown_list(test_lines, '<!-- TODO(human): Add the test framework and baseline test command. -->')}### CI Systems\n\n{markdown_list(ci_lines, '<!-- TODO(human): Add CI quality gates. -->')}### Convention Files\n\n{markdown_list(convention_lines, '<!-- TODO(human): Add linting and formatting commands. -->')}## Proposed Brownfield Quality Rule\n\nAll SDD work must preserve the existing quality baseline. Workers may add focused tests for their scope, but they must not reorganize unrelated tests, linting, or formatting.\n\n<!-- TODO(human): Record exact commands for test, lint, typecheck, build, and release verification. -->\n""",
+    }
+    for name, body in files.items():
+        write_proposal_file(proposal_dir, name, body, date)
+    return proposal_dir.parent
+
+
+def apply_brownfield_framework(target: Path, proposal_root: Path) -> None:
+    root = framework_root()
+    for source in (root / ".github", root / "spec-driven-development"):
+        if not source.exists():
+            fail(f"Framework source directory is missing: {source}", "Run this script from an intact checkout of the framework repository.")
+    copy_directory(root / ".github", target / ".github", force=True)
+    copy_directory(root / "spec-driven-development", target / "spec-driven-development", force=True)
+    destination = target / "spec-driven-development" / "constitution"
+    for name in CONSTITUTION_FILES:
+        source = proposal_root / "constitution" / name
+        if not source.is_file():
+            fail(f"Staged proposal is missing {name}: {source}", "Rerun brownfield bootstrap without --apply to refresh the proposal, review it, then apply again.")
+        write_text(destination / name, source.read_text(encoding="utf-8"), force=True)
+    initialize_ledger(target)
+
+
+def print_brownfield_next_steps() -> None:
+    print()
+    print("Next steps:")
+    print("(1) Open the Principal Executive Manager.")
+    print("(2) Capture your first idea.")
+    print("(3) Run /triage. The Executive Manager will route to the PM for grilling.")
+
+
+def run_brownfield(args: argparse.Namespace) -> None:
+    """Run brownfield archaeology, stage a host-derived constitution proposal, and optionally adopt SDD."""
+    date = today_iso()
+    target = validate_brownfield_target(Path(args.target_path))
+    report = create_archaeology_report(target)
+    proposal_root = draft_constitution_proposal(target, report, args.owner, date)
+    if not args.apply:
+        print(f"Archaeology report saved at {target / '.sdd-archaeology.json'}")
+        print(f"Proposal staged at {proposal_root}. Review, edit, then run `python bootstrap.py brownfield {target} --apply` to adopt.")
+        print_brownfield_next_steps()
+        return
+    answer = input(f"Apply SDD framework files and staged constitution into {target}? Type 'yes' to continue: ").strip().lower()
+    if answer != "yes":
+        fail("Brownfield apply was not approved.", f"Review the staged proposal at {proposal_root}, then rerun with --apply when ready.")
+    apply_brownfield_framework(target, proposal_root)
+    print(f"SDD brownfield bootstrap applied to {target}.")
+    print(f"Archaeology report: {target / '.sdd-archaeology.json'}")
+    print(f"Constitution source proposal: {proposal_root / 'constitution'}")
+    print_brownfield_next_steps()
+
+
 def run_greenfield(args: argparse.Namespace) -> None:
     root = framework_root()
     date = today_iso()
@@ -267,6 +558,9 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.command == "greenfield":
             run_greenfield(args)
+            return 0
+        if args.command == "brownfield":
+            run_brownfield(args)
             return 0
         fail(f"Unsupported command: {args.command}", "Run python bootstrap.py --help for valid commands.")
     except BootstrapError as exc:

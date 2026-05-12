@@ -1,6 +1,7 @@
 ---
 name: grill-me
 description: "Use when scope is ambiguous, acceptance criteria are weak, user impact is unclear, architecture tradeoffs need judgment, or UX behavior is unclear. Socratic questioning with ONE question at a time."
+argument-hint: "What plan or feature do you want me to grill you on?"
 license: MIT
 metadata:
   author: rodolfolermacontreras

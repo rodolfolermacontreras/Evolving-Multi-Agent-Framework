@@ -1,6 +1,7 @@
 ---
 name: analyze
 description: Analyze codebase impact, dependencies, and blast radius for a proposed change.
+argument-hint: "What proposed change should I analyze?"
 ---
 
 You are running the **Analyze** command for the Day-to-Day Agent SDD workflow.

@@ -1,6 +1,7 @@
 ---
 name: htmx-frontend
 description: "EXAMPLE (Day-to-Day Agent host project). Use when working with HTMX + Jinja2 + Alpine.js frontends in a host project that follows the Day-to-Day Agent template conventions. NOT a framework default -- treat as a reference implementation showing what a domain skill looks like."
+argument-hint: "What HTMX template, component, or UI flow should I work on?"
 license: MIT
 metadata:
   author: rodolfolermacontreras

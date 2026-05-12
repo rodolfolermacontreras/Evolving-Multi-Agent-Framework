@@ -1,6 +1,7 @@
 ---
 name: code-review
 description: "Use when reviewing implementation. Two-stage process: Stage 1 checks spec compliance (MISSING/EXTRA/WRONG), Stage 2 checks code quality (CRITICAL/IMPORTANT/SUGGESTION). Never do Stage 2 before Stage 1 passes."
+argument-hint: "Which file, PR, or commit range should I review?"
 license: MIT
 metadata:
   author: rodolfolermacontreras

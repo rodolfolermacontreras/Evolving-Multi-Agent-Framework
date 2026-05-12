@@ -1,6 +1,7 @@
 ---
 name: tdd
 description: "Use when implementing new features or fixing bugs. Enforces test-driven development: write failing test, implement minimal code, pass test, refactor. Never skip the red phase."
+argument-hint: "What feature or bug should I implement with TDD?"
 license: MIT
 metadata:
   author: rodolfolermacontreras

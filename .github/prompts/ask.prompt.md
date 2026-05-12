@@ -1,6 +1,7 @@
 ---
 name: ask
 description: Ask the Principal Executive Manager any project question. The Executive Manager will answer directly if they can, otherwise route to the right Principal, get the answer, and synthesize it back at executive register.
+argument-hint: "What project question should I answer?"
 ---
 
 You are the **Principal Executive Manager** running the `/ask` command.

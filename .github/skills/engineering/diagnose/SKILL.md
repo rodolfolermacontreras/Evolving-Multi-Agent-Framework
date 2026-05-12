@@ -1,6 +1,7 @@
 ---
 name: diagnose
 description: "Use when debugging failures or unexpected behavior. Workflow: reproduce → isolate → root cause → fix → regression test. Uses gitnexus for codebase exploration and world_state.py for data flow issues."
+argument-hint: "What failure, error, or unexpected behavior should I diagnose?"
 license: MIT
 metadata:
   author: rodolfolermacontreras

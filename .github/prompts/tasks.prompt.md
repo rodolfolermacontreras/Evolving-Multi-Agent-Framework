@@ -1,6 +1,7 @@
 ---
 name: tasks
 description: Break an implementation plan into atomic, assignable tasks.
+argument-hint: "Which implementation plan should I break into tasks?"
 ---
 
 You are running the **Tasks** command for the Day-to-Day Agent SDD workflow.

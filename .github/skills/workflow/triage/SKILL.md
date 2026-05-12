@@ -1,6 +1,7 @@
 ---
 name: triage
 description: "Use when processing new feature ideas from backlog. Applies RICE scoring, assigns P1-P4 priority, and moves through state machine: NEW -> TRIAGED -> SPECCED -> PLANNED -> TASKED -> IMPLEMENTING -> REVIEWING -> DONE."
+argument-hint: "What feature idea or backlog item should I triage?"
 license: MIT
 metadata:
   author: rodolfolermacontreras

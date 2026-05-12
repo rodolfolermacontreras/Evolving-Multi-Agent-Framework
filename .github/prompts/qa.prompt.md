@@ -1,6 +1,7 @@
 ---
 name: qa
 description: Validate an implementation against the spec, plan, and task criteria.
+argument-hint: "Which implementation should I validate?"
 ---
 
 You are running the **QA** command for the Day-to-Day Agent SDD workflow.

@@ -1,6 +1,7 @@
 ---
 name: pytest-runner
 description: "EXAMPLE (Day-to-Day Agent host project). Use when running tests in a host project that uses pytest with the patched_settings + MockLLMClient pattern. NOT a framework default -- treat as a reference implementation showing what a domain skill looks like."
+argument-hint: "Which pytest target or failure should I run or diagnose?"
 license: MIT
 metadata:
   author: rodolfolermacontreras

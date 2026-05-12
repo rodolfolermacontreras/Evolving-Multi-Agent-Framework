@@ -1,6 +1,7 @@
 ---
 name: fastapi-routes
 description: "EXAMPLE (Day-to-Day Agent host project). Use when creating FastAPI routes in a host project that follows the Day-to-Day Agent conventions (APIRouter prefix, Pydantic in schemas.py, safe_path(), esc(), agent/routes/). NOT a framework default -- treat as a reference implementation showing what a domain skill looks like."
+argument-hint: "What FastAPI route or endpoint should I work on?"
 license: MIT
 metadata:
   author: rodolfolermacontreras

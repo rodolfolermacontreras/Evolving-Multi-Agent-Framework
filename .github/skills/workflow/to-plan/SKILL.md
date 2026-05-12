@@ -1,6 +1,7 @@
 ---
 name: to-plan
 description: "Use when transforming a completed spec into an implementation plan. Decomposes into phases, identifies dependencies, estimates effort (S/M/L), and flags parallel-safe tasks."
+argument-hint: "Which completed spec should I turn into a plan?"
 license: MIT
 metadata:
   author: rodolfolermacontreras

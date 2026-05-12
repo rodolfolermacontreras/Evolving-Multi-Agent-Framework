@@ -1,6 +1,7 @@
 ---
 name: to-tasks
 description: "Use when breaking a plan into atomic, executable tasks. Produces task-list.md with file scope, acceptance tests, effort tags, dependencies, and AFK/HITL classification."
+argument-hint: "Which implementation plan should I break into tasks?"
 license: MIT
 metadata:
   author: rodolfolermacontreras

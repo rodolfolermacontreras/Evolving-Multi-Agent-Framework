@@ -1,6 +1,7 @@
 ---
 name: improve-architecture
 description: "Use when identifying pattern violations, technical debt, or architecture improvements. Workflow: identify violation, propose fix with ADR, get approval for Level 1+ changes, implement with tests."
+argument-hint: "What architecture issue or area should I improve?"
 license: MIT
 metadata:
   author: rodolfolermacontreras

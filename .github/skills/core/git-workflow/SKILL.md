@@ -1,6 +1,7 @@
 ---
 name: git-workflow
 description: "Use when creating branches, setting up worktrees, merging features, or any git operation. Enforces master read-only, integration/improvements dev track, and ../wt-{name} worktree conventions."
+argument-hint: "What git operation, branch, or worktree do you need help with?"
 license: MIT
 metadata:
   author: rodolfolermacontreras

@@ -1,6 +1,7 @@
 ---
 name: fleet-coordinator
 description: "Use when dispatching parallel workers. Checks conflict matrix (6 levels), determines batch size (start 2, max 4), generates dispatch packets, tracks in ledger, post-dispatch integration."
+argument-hint: "What work should I coordinate across parallel agents?"
 license: MIT
 metadata:
   author: rodolfolermacontreras

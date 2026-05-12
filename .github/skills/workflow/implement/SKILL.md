@@ -1,6 +1,7 @@
 ---
 name: implement
 description: "Use when executing a task from the task list. Follows TDD loop, self-review, and commit conventions. Includes stop conditions and escalation triggers."
+argument-hint: "Which task from the task list should I implement?"
 license: MIT
 metadata:
   author: rodolfolermacontreras

@@ -1,6 +1,7 @@
 ---
 name: clarify
 description: Run a structured clarification session for a spec or feature request.
+argument-hint: "What spec or feature request should I clarify?"
 ---
 
 You are running the **Clarify** command for the Day-to-Day Agent SDD workflow.

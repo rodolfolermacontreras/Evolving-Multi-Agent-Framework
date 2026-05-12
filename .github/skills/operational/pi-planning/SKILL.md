@@ -1,6 +1,7 @@
 ---
 name: pi-planning
 description: "Use for PI planning ceremony: review backlog, define 3-5 PI objectives, allocate features to sprints, identify risks (ROAM), set capacity, produce CURRENT_PI.md."
+argument-hint: "What backlog, objective, or PI planning input should I use?"
 license: MIT
 metadata:
   author: rodolfolermacontreras

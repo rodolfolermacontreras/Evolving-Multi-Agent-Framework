@@ -1,6 +1,7 @@
 ---
 name: plan
 description: Generate an implementation plan from an approved feature spec.
+argument-hint: "Which approved feature spec should I plan?"
 ---
 
 You are running the **Plan** command for the Day-to-Day Agent SDD workflow.

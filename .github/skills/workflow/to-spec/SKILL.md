@@ -1,6 +1,7 @@
 ---
 name: to-spec
 description: "Use when transforming a raw feature idea into a structured specification. Produces a complete spec.md with problem statement, acceptance criteria, affected modules, data model changes, and traceability matrix."
+argument-hint: "What raw feature idea should I turn into a spec?"
 license: MIT
 metadata:
   author: rodolfolermacontreras

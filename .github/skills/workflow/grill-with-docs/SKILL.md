@@ -1,6 +1,7 @@
 ---
 name: grill-with-docs
 description: "Same as grill-me but ALSO updates CONTEXT.md with new terms/decisions discovered during questioning. Use when decisions will affect vocabulary or architecture."
+argument-hint: "What decision, feature, or vocabulary should I grill and document?"
 license: MIT
 metadata:
   author: rodolfolermacontreras

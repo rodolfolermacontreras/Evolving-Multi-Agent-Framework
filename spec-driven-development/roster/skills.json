@@ -1,0 +1,128 @@
+[
+  {
+    "id": "sdd-constitution",
+    "path": ".github/skills/core/sdd-constitution/SKILL.md",
+    "category": "core",
+    "description": "Loads the SDD constitution and immutable operating rules."
+  },
+  {
+    "id": "project-context",
+    "path": ".github/skills/core/project-context/SKILL.md",
+    "category": "core",
+    "description": "Provides Day-to-Day project context, architecture, and conventions."
+  },
+  {
+    "id": "git-workflow",
+    "path": ".github/skills/core/git-workflow/SKILL.md",
+    "category": "core",
+    "description": "Enforces feature-branch and worktree rules for this repository."
+  },
+  {
+    "id": "testing-conventions",
+    "path": ".github/skills/core/testing-conventions/SKILL.md",
+    "category": "core",
+    "description": "Captures pytest, tmp_path, MockLLMClient, and validation norms."
+  },
+  {
+    "id": "grill-me",
+    "path": ".github/skills/workflow/grill-me/SKILL.md",
+    "category": "workflow",
+    "description": "Runs one-question-at-a-time clarification sessions."
+  },
+  {
+    "id": "grill-with-docs",
+    "path": ".github/skills/workflow/grill-with-docs/SKILL.md",
+    "category": "workflow",
+    "description": "Extends clarification sessions with CONTEXT.md and ADR updates."
+  },
+  {
+    "id": "to-spec",
+    "path": ".github/skills/workflow/to-spec/SKILL.md",
+    "category": "workflow",
+    "description": "Converts clarified requirements into a feature spec."
+  },
+  {
+    "id": "to-plan",
+    "path": ".github/skills/workflow/to-plan/SKILL.md",
+    "category": "workflow",
+    "description": "Builds an implementation plan from an approved spec."
+  },
+  {
+    "id": "to-tasks",
+    "path": ".github/skills/workflow/to-tasks/SKILL.md",
+    "category": "workflow",
+    "description": "Breaks approved plans into dispatchable tasks."
+  },
+  {
+    "id": "triage",
+    "path": ".github/skills/workflow/triage/SKILL.md",
+    "category": "workflow",
+    "description": "Scores and prioritizes incoming ideas using backlog rules."
+  },
+  {
+    "id": "implement",
+    "path": ".github/skills/workflow/implement/SKILL.md",
+    "category": "workflow",
+    "description": "Guides workers through task implementation and reporting."
+  },
+  {
+    "id": "tdd",
+    "path": ".github/skills/engineering/tdd/SKILL.md",
+    "category": "engineering",
+    "description": "Enforces red-green-refactor and test-first delivery."
+  },
+  {
+    "id": "diagnose",
+    "path": ".github/skills/engineering/diagnose/SKILL.md",
+    "category": "engineering",
+    "description": "Performs root-cause analysis before any proposed fix."
+  },
+  {
+    "id": "code-review",
+    "path": ".github/skills/engineering/code-review/SKILL.md",
+    "category": "engineering",
+    "description": "Runs stage-1 and stage-2 review checks for completed work."
+  },
+  {
+    "id": "improve-architecture",
+    "path": ".github/skills/engineering/improve-architecture/SKILL.md",
+    "category": "engineering",
+    "description": "Evaluates structural changes and architecture tradeoffs."
+  },
+  {
+    "id": "handoff",
+    "path": ".github/skills/operational/handoff/SKILL.md",
+    "category": "operational",
+    "description": "Produces structured session handoff updates."
+  },
+  {
+    "id": "fleet-coordinator",
+    "path": ".github/skills/operational/fleet-coordinator/SKILL.md",
+    "category": "operational",
+    "description": "Applies dispatch logic, conflict checks, and batch management."
+  },
+  {
+    "id": "pi-planning",
+    "path": ".github/skills/operational/pi-planning/SKILL.md",
+    "category": "operational",
+    "description": "Supports PI planning, sprint planning, and backlog shaping."
+  },
+  {
+    "id": "pytest-runner",
+    "path": ".github/skills/domain/pytest-runner/SKILL.md",
+    "category": "domain",
+    "description": "Encodes project-specific pytest execution and triage patterns."
+  },
+  {
+    "id": "fastapi-routes",
+    "path": ".github/skills/domain/fastapi-routes/SKILL.md",
+    "category": "domain",
+    "description": "Captures FastAPI route conventions for Day-to-Day."
+  },
+  {
+    "id": "htmx-frontend",
+    "path": ".github/skills/domain/htmx-frontend/SKILL.md",
+    "category": "domain",
+    "description": "Captures HTMX, Jinja2, and template-level UI conventions."
+  }
+]

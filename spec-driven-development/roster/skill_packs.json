@@ -1,0 +1,33 @@
+{
+  "frontend": [
+    "htmx-frontend",
+    "testing-conventions",
+    "git-workflow"
+  ],
+  "backend": [
+    "fastapi-routes",
+    "testing-conventions",
+    "git-workflow"
+  ],
+  "full-stack": [
+    "tdd",
+    "diagnose",
+    "code-review",
+    "improve-architecture",
+    "pytest-runner",
+    "fastapi-routes",
+    "htmx-frontend"
+  ],
+  "planning": [
+    "to-spec",
+    "to-plan",
+    "to-tasks",
+    "triage",
+    "pi-planning"
+  ],
+  "review": [
+    "code-review",
+    "tdd",
+    "testing-conventions"
+  ]
+}

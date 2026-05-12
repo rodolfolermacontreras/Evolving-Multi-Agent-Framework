@@ -1,0 +1,58 @@
+{
+  "principals": [
+    {
+      "id": "principal-executive-manager",
+      "role": "executive-manager",
+      "type": "agent",
+      "file": ".github/agents/principal-executive-manager.agent.md"
+    },
+    {
+      "id": "principal-product-manager",
+      "role": "product-manager",
+      "type": "agent",
+      "file": ".github/agents/principal-product-manager.agent.md"
+    },
+    {
+      "id": "principal-architect",
+      "role": "architect",
+      "type": "agent",
+      "file": ".github/agents/principal-architect.agent.md"
+    },
+    {
+      "id": "principal-software-developer",
+      "role": "software-developer",
+      "type": "agent",
+      "file": ".github/agents/principal-software-developer.agent.md"
+    }
+  ],
+  "workers": [
+    {
+      "id": "developer-general",
+      "role": "developer",
+      "type": "agent",
+      "file": ".github/agents/developer-general.agent.md",
+      "specialized": false
+    },
+    {
+      "id": "ux-designer-general",
+      "role": "ux-designer",
+      "type": "agent",
+      "file": ".github/agents/ux-designer-general.agent.md",
+      "specialized": false
+    },
+    {
+      "id": "data-scientist-general",
+      "role": "data-scientist",
+      "type": "agent",
+      "file": ".github/agents/data-scientist-general.agent.md",
+      "specialized": false
+    },
+    {
+      "id": "qa-engineer-general",
+      "role": "qa-engineer",
+      "type": "agent",
+      "file": ".github/agents/qa-engineer-general.agent.md",
+      "specialized": false
+    }
+  ]
+}

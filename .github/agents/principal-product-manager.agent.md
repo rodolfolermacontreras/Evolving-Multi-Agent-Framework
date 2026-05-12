@@ -7,6 +7,9 @@ handoffs:
   - label: Hand Off to SW Dev for Implementation
     agent: principal-software-developer
     prompt: "The PM has approved the spec and plan. Please create tasks and begin implementation."
+  - label: Return to Executive Manager with Answer
+    agent: principal-executive-manager
+    prompt: "The PM has the answer to your routed question. Please synthesize for the human at executive register."
 ---
 
 # Principal Product Manager -- Day-to-Day Agent

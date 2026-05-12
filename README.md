@@ -57,11 +57,12 @@ For a brand-new repository:
    actual stack). Use the existing files as a structural template.
 3. Open VS Code with the GitHub Copilot extension. Confirm the four Principal
    agents appear in the Copilot Chat agent picker.
-4. Capture your first idea in `spec-driven-development/backlog/IDEAS.md`.
-5. Open the **Principal Product Manager** agent and run `/triage` against that
-   idea.
-6. Walk the lifecycle: `/clarify` -> `/spec` -> `/plan` -> `/tasks` -> `/implement`
-   -> `/qa`.
+4. Open the **Principal Executive Manager** agent. This is your single human-facing
+   entry point: tell it your first idea in plain language. It will capture it in
+   `backlog/IDEAS.md` and hand off to the Principal Product Manager for `/triage`.
+5. From there, walk the lifecycle: `/clarify` -> `/spec` -> `/plan` -> `/tasks`
+   -> `/implement` -> `/qa`. Use `/ask` against the Executive Manager any time
+   you have a question about who is doing what or why.
 
 A `cli/bootstrap.py greenfield` automation that scaffolds steps 1-3 from a few
 prompts is on the PI-1 roadmap (item `s3-greenfield-bootstrap`).
@@ -96,7 +97,7 @@ Human (1 person)
   |
   v
 Four Principal agents (strategic, in VS Code Copilot Chat)
-  |- Executive Manager:  status routing, escalation, curated briefings
+  |- Executive Manager:  SINGLE HUMAN ENTRY POINT -- kickoff, Q&A routing with answer synthesis, status, escalation, big-picture awareness
   |- Product Manager:    backlog, RICE scoring, acceptance criteria
   |- Architect:          specs, ADRs, architectural quality, pattern enforcement
   |- Software Developer: task decomposition, fleet dispatch, code review
@@ -110,8 +111,13 @@ Workers are constrained to 1-3 files per task. Reviews are two-stage: spec
 compliance first (different reviewer), then code quality. Generic workers earn
 permanent specialist identity by demonstrating competence in a domain.
 
-The Executive Manager only ever reads `exec/state.md` -- a curated summary under
-2KB. It never sees raw artifacts. This isolation is deliberate.
+The Executive Manager is the human's default entry point: it captures kickoffs,
+routes ad-hoc questions to the right Principal, synthesizes answers back at
+executive register, and surfaces escalations. It defaults to a curated
+`exec/state.md` summary (under 2KB) but may read raw artifacts when needed to
+answer a routed question. It never modifies any artifact except (optionally)
+`state.md`. The human is welcome to attend ceremonies directly; the Executive
+Manager is the *default* entry point, not a wall. See ADR-0004.
 
 ---
 

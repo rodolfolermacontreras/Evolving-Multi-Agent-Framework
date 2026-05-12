@@ -62,7 +62,7 @@ their own non-negotiables on top via their own `.github/copilot-instructions.md`
 - No feature merges without an approved spec (except bug fixes < 3 files)
 - Two-stage review order is fixed: spec compliance first, code quality second
 - Fleet ledger is the source of truth for all dispatches
-- Executive Manager sees only `exec/state.md`, never raw artifacts
+- Executive Manager is the single human-facing entry point: owns kickoff, ad-hoc Q&A routing with answer synthesis, status, escalation. Reads `exec/state.md` by default; may read raw artifacts to answer routed questions but never modifies any artifact except (optionally) `state.md`. Output to the human is always at executive register. (See ADR-0004.)
 - Completed roadmap items are never deleted -- mark done with date
 - Small, frequent commits -- format: `type: short description`
 - No emojis in code, docs, or commits

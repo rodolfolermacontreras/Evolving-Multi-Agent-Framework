@@ -42,29 +42,51 @@ Everything else lives under `spec-driven-development/`.
 
 ## How to Get Started
 
+The Principal Executive Manager is your single human-facing entry point. Talk to
+the Executive Manager first; it will answer directly when it can, otherwise route
+to the right Principal, get the answer, and synthesize it back at executive
+register. You are also welcome to attend ceremonies (sprint planning, PI planning,
+retros) directly -- the Executive Manager is the *default* entry point, not a wall.
+
 ### Starting a new feature
 
-1. Capture the idea in `backlog/IDEAS.md`
-2. Open the **Principal Product Manager** agent in VS Code Copilot Chat
-3. Run `/triage` -- grill the idea, RICE score, assign priority
-4. Run `/clarify` -- resolve ambiguities one question at a time
-5. Run `/spec` -- generate the feature spec (human must approve before next step)
-6. Open the **Principal Architect** agent, run `/plan`
-7. Open the **Principal Software Developer** agent, run `/tasks`
-8. Run `/implement` for sequential tasks or `/fleet` for parallel batches
-9. Two-stage review (spec compliance first, then quality)
-10. Merge to `integration/improvements`
+1. Open the **Principal Executive Manager** agent in VS Code Copilot Chat.
+2. Tell it the idea in plain language. The Executive Manager captures it in
+   `backlog/IDEAS.md` and hands off to the Principal Product Manager.
+3. The PM runs `/triage` -- grills the idea, RICE-scores it, assigns priority.
+4. The PM (or Architect, depending on what `/triage` surfaces) runs `/clarify` to
+   resolve ambiguities one question at a time.
+5. The PM runs `/spec` to generate the feature spec. **Human approves before next
+   step.**
+6. Open the **Principal Architect** agent and run `/plan`.
+7. Open the **Principal Software Developer** agent and run `/tasks`.
+8. Run `/implement` for sequential tasks or `/fleet` for parallel batches.
+9. Two-stage review: spec compliance first, then code quality.
+10. Merge to your integration branch.
+
+### Asking ad-hoc questions
+
+Use `/ask` against the Executive Manager (or just ask in plain language). It
+will:
+
+1. Try to answer from `exec/state.md` and big-picture awareness.
+2. If not, classify the question, route to the right Principal, wait, and
+   synthesize the answer back to you with TL;DR, detail, implication, and a
+   recommended next action.
 
 ### Attending a sprint ceremony
 
-- Sprint planning: open Principal PM agent, review `sprints/PI-{N}/sprint-{M}/PLAN.md`
-- Sprint retro: open Principal PM agent, run `/retro`
-- PI planning: open Principal PM agent, run `/state` to get current PI summary, then ceremony
+- Sprint planning: the PM has the draft ready. The Executive Manager will tell
+  you when it is. Walk through it with the PM directly.
+- PI planning: PM + Architect + SW Dev + you. Executive Manager coordinates and
+  briefs you beforehand.
+- Sprint retro: the PM runs `/retro`; the Executive Manager summarizes outcomes
+  and ensures lessons are captured.
 
 ### Checking project state (any time)
 
-Open the **Principal Executive Manager** agent. It reads only `exec/state.md` and gives
-a curated, brief status summary. Do not give it raw artifacts.
+Ask the Executive Manager: "what's the status?" or run `/state` to refresh the
+underlying `exec/state.md` snapshot.
 
 ---
 
@@ -72,8 +94,8 @@ a curated, brief status summary. Do not give it raw artifacts.
 
 | Chatmode | When to Use |
 |----------|-------------|
-| Principal Executive Manager | Status summaries, escalations, PI-level decisions |
-| Principal Product Manager | Backlog, PI planning, sprint planning, acceptance review |
+| Principal Executive Manager | **Default entry point.** Any question, new idea, status check, or ad-hoc routing. Owns kickoff and answer synthesis. |
+| Principal Product Manager | Backlog, PI planning, sprint planning, acceptance review, triage, clarify, spec authoring (with Architect) |
 | Principal Architect | Specs, plans, ADRs, tech debt, architecture review |
 | Principal Software Developer | Tasks, dispatch, code review, integration, fleet coordination |
 
@@ -83,6 +105,7 @@ a curated, brief status summary. Do not give it raw artifacts.
 
 | Command | Phase | What It Does |
 |---------|-------|-------------|
+| `/ask` | Any | Ask the Executive Manager any project question. It answers directly or routes, synthesizes, and returns at executive register. |
 | `/triage` | Backlog | Grill idea, RICE score, assign P1-P4 |
 | `/clarify` | Pre-spec | Structured Q&A, one question at a time with recommendation |
 | `/spec` | Specify | Generate feature spec from clarified requirements |

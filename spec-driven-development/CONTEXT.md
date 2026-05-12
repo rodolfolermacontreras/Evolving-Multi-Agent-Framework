@@ -23,6 +23,9 @@ Updated by `grill-with-docs` sessions and ADRs. Acts as a living glossary.
 |------|------------|
 | **Framework** | This repository -- the agent definitions, skills, prompts, templates, constitution, and process docs that constitute SDD |
 | **Host Project** | Any project that adopts SDD by copying `.github/` and `spec-driven-development/` into its own root |
+| **Orchestrator / Entry Point** | The Principal Executive Manager in its expanded role: the single human-facing entry point that captures kickoffs, routes ad-hoc questions, synthesizes answers, surfaces escalations, and holds the big picture on the human's behalf. See ADR-0004. |
+| **Routing Memo** | The internal handoff format the Executive Manager uses to dispatch a question to the right Principal: original question, relevant state.md context, urgency, and the explicit ask "answer at engineering depth; I will translate to executive register." |
+| **Executive Register** | The communication style the Executive Manager uses when speaking to the human: TL;DR + detail in plain language + implication for timeline/scope/risk + recommended next action. No jargon. |
 | **PI** | Program Increment -- a planning horizon containing 5 sprints (symbolic; AI fleet compresses wall-clock time) |
 | **Sprint** | A development cycle within a PI (symbolic cadence -- not a fixed calendar duration) |
 | **Spec** | A formal feature specification document in `specs/YYYY-MM-DD-feature-name/spec.md` |
@@ -83,7 +86,7 @@ Spec sizing rule (prevents ceremony bloat):
 
 | Role | Type | Responsibility |
 |------|------|----------------|
-| Principal Executive Manager | Principal | Status routing, escalation, curated briefings -- reads only `exec/state.md` |
+| **Principal Executive Manager** | Principal | **Single human-facing entry point.** Owns kickoff, ad-hoc Q&A routing with answer synthesis, status, escalation, big-picture awareness. Reads `exec/state.md` by default; may read raw artifacts to answer routed questions; never modifies any artifact except (optionally) `state.md`. Output to the human is always at executive register. |
 | Principal Product Manager | Principal | Backlog ownership, RICE scoring, acceptance criteria, sprint and PI planning |
 | Principal Architect | Principal | Specs, plans, ADRs, architectural quality, pattern enforcement |
 | Principal Software Developer | Principal | Task decomposition, fleet dispatch, code review, integration |

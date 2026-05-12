@@ -47,7 +47,7 @@ Human Developer (1 person -- Rodolfo)
   |
   v
 Four Principal Agents (strategic roles, run as VS Code Copilot agents)
-  |-- Executive Manager:  Status routing, escalation, curated briefings
+  |-- Executive Manager:  SINGLE HUMAN ENTRY POINT. Owns kickoff, ad-hoc Q&A routing with answer synthesis, status, escalation, big-picture awareness. (See ADR-0004.)
   |-- Product Manager:    Backlog ownership, RICE scoring, acceptance criteria
   |-- Architect:          Specs, ADRs, architectural quality, pattern enforcement
   |-- Software Developer: Task decomposition, fleet dispatch, code review, integration
@@ -68,7 +68,7 @@ Four Principal Agents (strategic roles, run as VS Code Copilot agents)
 3. **Generic by default, specialized on demand**: Workers start generic. If a worker excels at a domain, it earns a permanent identity and specialized skill pack.
 4. **Two-folder split**: `.github/` for Copilot-native files (auto-discovered by VS Code). `spec-driven-development/` for process state.
 5. **Spec sizing prevents ceremony bloat**: Bug fix <3 files = no spec. Not every change deserves full ceremony.
-6. **Executive isolation**: The Principal Executive Manager sees only a curated `exec/state.md` -- never raw artifacts.
+6. **Executive entry point**: The Principal Executive Manager is the single human-facing entry point. The human talks to the Executive Manager first; it answers directly or routes to the right Principal, gets the answer, and synthesizes it back at executive register. Reads `exec/state.md` by default; may read raw artifacts to answer routed questions; never modifies any artifact except (optionally) `state.md`. (See ADR-0004.)
 7. **Fleet ledger**: Every dispatch, decision, and artifact is traceable in SQLite (`ledger/fleet.db`).
 
 ### Lifecycle

@@ -7,6 +7,9 @@ handoffs:
   - label: Return to PM for Approval
     agent: principal-product-manager
     prompt: "The Architect has completed the technical spec. Please review for product alignment."
+  - label: Return to Executive Manager with Answer
+    agent: principal-executive-manager
+    prompt: "The Architect has the answer to your routed question. Please synthesize for the human at executive register."
 ---
 
 # Principal Architect -- Day-to-Day Agent

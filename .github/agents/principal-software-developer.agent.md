@@ -7,6 +7,9 @@ handoffs:
   - label: Report to PM
     agent: principal-product-manager
     prompt: "The SW Dev has completed implementation. Please validate acceptance criteria."
+  - label: Return to Executive Manager with Answer
+    agent: principal-executive-manager
+    prompt: "The SW Dev has the answer to your routed question. Please synthesize for the human at executive register."
 ---
 
 # Principal Software Developer -- Day-to-Day Agent

@@ -485,20 +485,13 @@ Starting a new project with SDD is simpler because there are no existing convent
 
 **Greenfield Bootstrap Additions:**
 
-1. Run a "constitution wizard" session: answer 10 questions to populate all 6 constitution files:
-   - What is the project name and purpose?
-   - Who is the primary user?
-   - What language and framework?
-   - What database?
-   - What test runner and CI/CD?
-   - What git branching model?
-   - What deployment model?
-   - What external APIs or services?
-   - What are the non-negotiable rules?
-   - What is the first PI objective?
+Use the stdlib-only bootstrap helper to copy the framework into an empty host repo, apply the first archetype, personalize constitution placeholders, and initialize the starter backlog and ledger placeholder. The helper preserves the Markdown-as-distribution model; it is not a Python wheel or `uvx` distribution path.
 
-2. Create initial ADR-001: "Why we chose [framework]"
-3. Scaffold the minimal project structure before writing any features
+```bash
+python spec-driven-development/cli/bootstrap.py greenfield python-library --project-name MyLib --owner "Your Name" --target ../MyLib
+```
+
+After bootstrapping, open the Principal Executive Manager, capture the first idea, run `/triage`, create initial ADR-001 for the stack choice, and scaffold the minimal project structure before writing features.
 
 ### 4.2 Brownfield (Existing Project)
 

@@ -51,21 +51,20 @@ place; the first end-to-end pilot run is the next milestone.
 
 For a brand-new repository:
 
-1. Copy `.github/` and `spec-driven-development/` into the new repo's root.
-2. Open `spec-driven-development/constitution/` and rewrite each file for your
-   project. Start with `mission.md` (who, what, why) and `tech-stack.md` (your
-   actual stack). Use the existing files as a structural template.
-3. Open VS Code with the GitHub Copilot extension. Confirm the four Principal
-   agents appear in the Copilot Chat agent picker.
-4. Open the **Principal Executive Manager** agent. This is your single human-facing
+1. Run the bootstrap script:
+
+   ```bash
+   python spec-driven-development/cli/bootstrap.py greenfield python-library --project-name MyLib --owner "Your Name" --target ../MyLib
+   ```
+
+2. Open the target repo in VS Code with the GitHub Copilot extension. Confirm the
+   Principal agents appear in the Copilot Chat agent picker.
+3. Open the **Principal Executive Manager** agent. This is your single human-facing
    entry point: tell it your first idea in plain language. It will capture it in
    `backlog/IDEAS.md` and hand off to the Principal Product Manager for `/triage`.
-5. From there, walk the lifecycle: `/clarify` -> `/spec` -> `/plan` -> `/tasks`
+4. From there, walk the lifecycle: `/clarify` -> `/spec` -> `/plan` -> `/tasks`
    -> `/implement` -> `/qa`. Use `/ask` against the Executive Manager any time
    you have a question about who is doing what or why.
-
-A `cli/bootstrap.py greenfield` automation that scaffolds steps 1-3 from a few
-prompts is on the PI-1 roadmap (item `s3-greenfield-bootstrap`).
 
 ### Brownfield (existing project)
 

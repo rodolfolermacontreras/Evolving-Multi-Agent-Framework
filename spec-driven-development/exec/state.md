@@ -1,13 +1,20 @@
 # Executive State
 
-Auto-generated. Do not edit manually.
-Last rebuilt: (pending first build)
+Generated date: 2026-05-12
+Current PI: Not started
+Active focus: SDD framework initialized. Awaiting first PI planning session.
 
-## Current Status
-- PI: Not started
-- Sprint: Not started
-- Active specs: 0
-- Blockers: None
+## Fleet
 
-## Summary
-SDD framework initialized. Awaiting first PI planning session.
+- Principals: 4 (Executive Manager, Product Manager, Architect, Software Developer)
+- Generic workers: 4 (developer-general, ux-designer-general, qa-engineer-general, data-scientist-general)
+- Specialists: 0 (none)
+- Last role created: none
+
+## Blockers
+
+- None
+
+## Next milestones
+
+- Begin first PI planning session.

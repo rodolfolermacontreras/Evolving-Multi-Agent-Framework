@@ -287,6 +287,10 @@ python spec-driven-development\cli\bootstrap.py brownfield ..\MyExistingProject 
           <tr><td><code>/evolve</code></td><td>Curate lessons backlog into framework changes (SHIP/DEFER/DISCARD)</td></tr>
           <tr><td><code>/constitution</code></td><td>Amend constitution with semver + propagation scan</td></tr>
         </table>
+        <h3>Fleet ops</h3>
+        <table>
+          <tr><td><code>/hire</code></td><td>Create a new worker role or promote a proven specialist</td></tr>
+        </table>
         <p class="muted" style="margin-top:8px;"><strong>Tags on tasks:</strong> <span class="pill">[P]</span> parallelizable, <span class="pill">[S]</span> sequential, <span class="pill">[AFK]</span> safe to autonomous-run, <span class="pill pill-warn">[HITL]</span> needs human-in-the-loop.</p>
       </div>
     </div>
@@ -300,8 +304,8 @@ python spec-driven-development\cli\bootstrap.py brownfield ..\MyExistingProject 
 &#9500;&#9472; .github/                          (Copilot-native, auto-discovered)
 &#9474;  &#9500;&#9472; copilot-instructions.md         session-start authority
 &#9474;  &#9500;&#9472; agents/                          4 Principals + N workers
-&#9474;  &#9500;&#9472; skills/                          26 composable skills
-&#9474;  &#9500;&#9472; prompts/                         16 slash commands
+&#9474;  &#9500;&#9472; skills/                          27 composable skills
+&#9474;  &#9500;&#9472; prompts/                         17 slash commands
 &#9474;  &#9492;&#9472; instructions/                    scoped guidance
 &#9492;&#9472; spec-driven-development/
    &#9500;&#9472; CONTEXT.md                       shared vocabulary
@@ -352,6 +356,7 @@ python spec-driven-development\cli\bootstrap.py brownfield ..\MyExistingProject 
       <div>
         <h3>2. Specialization is earned</h3>
         <p class="muted">A worker that excels in a domain over multiple dispatches gets a permanent identity (e.g. <code>data-scientist-bob-forecast-1.agent.md</code>) plus a domain-specific skill pack. Triggered through <code>/evolve</code> as an <code>agent-update</code> lesson. Old generic agents are kept; specialists join the fleet alongside.</p>
+        <p class="muted"><code>/hire</code> is the approved path for creating new worker roles and promoting generic workers into permanent specialists with roster, Fleet state, and ledger provenance.</p>
       </div>
       <div>
         <h3>3. Workers are never deleted</h3>

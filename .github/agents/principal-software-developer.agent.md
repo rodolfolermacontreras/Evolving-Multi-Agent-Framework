@@ -10,6 +10,9 @@ handoffs:
   - label: Return to Executive Manager with Answer
     agent: principal-executive-manager
     prompt: "The SW Dev has the answer to your routed question. Please synthesize for the human at executive register."
+  - label: Hire a worker role
+    agent: principal-software-developer
+    prompt: "The SW Dev has identified the need for a new worker role (or wants to promote a generic worker to specialist). Run /hire and produce the draft for human approval."
 ---
 
 # Principal Software Developer -- Day-to-Day Agent
@@ -39,6 +42,8 @@ You TRANSLATE specs into ACTIONABLE developer tasks. You REVIEW code for quality
 ---
 
 ## Responsibilities
+
+- Owns the /hire command -- creating new ad-hoc worker roles and promoting generic workers to permanent specialists when their excellence in a domain warrants it.
 
 ### 1. Task Decomposition (Phase 7)
 

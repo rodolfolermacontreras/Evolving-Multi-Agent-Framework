@@ -132,6 +132,12 @@
     "description": "Constrains brownfield workers to preserve existing conventions and avoid out-of-scope rewrites."
   },
   {
+    "id": "role-creation",
+    "path": ".github/skills/operational/role-creation/SKILL.md",
+    "category": "operational",
+    "description": "Drafts new generic worker roles and specialist promotions for /hire, including agent templates, roster schema, Fleet state, and ledger decision convention."
+  },
+  {
     "id": "pytest-runner",
     "path": ".github/skills/domain/pytest-runner/SKILL.md",
     "category": "domain",

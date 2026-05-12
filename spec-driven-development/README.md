@@ -113,6 +113,7 @@ underlying `exec/state.md` snapshot.
 | `/tasks` | Tasks | Decompose plan into tagged, batched tasks |
 | `/analyze` | Spec-Plan | Cross-artifact consistency check |
 | `/fleet` | Implement | Parallel dispatch of [P][AFK] tasks |
+| `/hire` | Fleet ops | Create a new worker role -- generic or specialist |
 | `/implement` | Implement | Execute single task (TDD workflow) |
 | `/qa` | Review | Validate implementation against spec |
 | `/retro` | Ceremony | Sprint retrospective, max 3 action items |

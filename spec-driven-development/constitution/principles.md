@@ -1,94 +1,144 @@
-# Architectural Principles
+# Framework Principles
 
-> **STATUS NOTE (2026-05-12): These nine articles were written for the Day-to-Day Agent
-> host project (FastAPI/HTMX/SQLite/MSAL) and reference its specific modules
-> (`agent/engine.py`, `world_state.py`, `safe_path()`, the 743-test baseline, etc.).
->
-> They are NOT yet generalized to describe the framework's own architectural rules.
-> They remain here as a working example of what host-project principles look like, but
-> they should not be read as binding rules for the framework repository itself.
->
-> Generalization of `principles.md` is tracked as a PI-1 deliverable in
-> `constitution/roadmap.md`. The generalized version will describe framework-level
-> rules (two-folder split, agent format, two-stage review order, ledger immutability,
-> spec sizing, etc.) rather than host-project-level rules.
->
-> Until then, the binding rules for the framework are:
-> - `constitution/mission.md` (Non-Negotiables section)
-> - `.github/copilot-instructions.md` (Conventions section)
-> - `constitution/decision-policy.md` and `constitution/quality-policy.md`
+Nine binding articles. They define how the **framework itself** works -- the rules
+that any host project adopting SDD inherits. All agents (Principals and workers)
+must honor these. Exceptions require a Level 2 decision and an ADR entry.
+
+These are framework-level rules. The host project's own engineering principles
+(coding conventions, testing baselines, security rules tied to its stack) live in
+a separate `principles.md` *inside the host project's adapted constitution*. When
+a host project bootstraps SDD, it inherits these nine framework articles and adds
+its own host-level articles on top.
 
 ---
 
-# Architectural Principles (Day-to-Day Agent example -- pending generalization)
+## Article I: Two-Folder Split Is Invariant
 
-Nine binding articles. All agents must honor these. Exceptions require a Level 1 or Level 2
-decision and an ADR entry.
+`.github/` holds Copilot-native files (agents, skills, prompts, instructions) so
+VS Code Copilot Chat auto-discovers them. `spec-driven-development/` holds
+process state (constitution, specs, sprints, ledger, templates, CLI). The
+boundary is non-negotiable: process state never leaks into `.github/`,
+agent definitions never leak into `spec-driven-development/`. This split is
+what makes the framework portable. Documented in ADR-0002.
 
----
+## Article II: Single Human Entry Point
 
-## Article I: Single Responsibility Engines
+The Principal Executive Manager is the human's default entry point to the
+fleet. The human talks to one agent first; the Executive Manager either
+answers from its big-picture context or routes to the right Principal,
+synthesizes the answer, and returns it at executive register. The human is
+welcome to attend ceremonies (sprint planning, PI planning, retros) directly,
+but ad-hoc questions and new ideas flow through the Executive Manager by
+default. Documented in ADR-0004.
 
-Each module in `agent/` owns exactly one domain. `engine.py` orchestrates but does not
-implement business logic. If a module is doing two unrelated things, it must be split.
+## Article III: Two-Stage Review Order Is Fixed
 
-## Article II: Data Flows Through World State
+Every implementation passes through two distinct review gates, in order:
+**spec compliance first** (does the implementation match the spec?), then
+**code quality second** (is it well-written?). The two reviews must be
+performed by different agents. Quality review never starts before compliance
+review passes -- the order prevents wasted review cycles on
+spec-non-compliant code. This is the framework's primary defense against the
+"AI wrote something that looks right but doesn't match the spec" failure
+mode.
 
-All LLM prompts consume `world_state`. No prompt builder queries data sources directly.
-Every piece of context reaches the LLM through `get_world_state()` in `agent/world_state.py`.
-This is the single source of truth for what the agent knows.
+## Article IV: Specialization Over Generalism
 
-## Article III: Testing Is Non-Negotiable
+Agents have constrained scopes by design. A worker dispatched on a task
+modifies 1-3 files maximum. A reviewer reviews; it does not implement. A
+Principal owns one strategic dimension (product, architecture, implementation,
+or orchestration); it does not encroach on the others. Constrained agents
+catch more, miss less, and produce more consistent output than general
+assistants given the same context budget.
 
-Every code change ships with tests. The test count must never decrease from its current
-baseline (743 tests, 36 files). Isolation via `patched_settings`. LLM calls mocked via
-`MockLLMClient`. There is no definition of "done" that does not include passing tests.
+## Article V: Generic By Default, Specialized On Demand
 
-## Article IV: Security by Convention
+Workers (Developer, UX Designer, QA Engineer, Data Scientist) start generic.
+A worker that demonstrates excellence in a domain across multiple dispatches
+earns a permanent identity and a domain-specific skill pack
+(e.g. `Data Scientist Bob Forecast Expert 1`). Specialization is *earned* by
+demonstrated competence, not assigned by configuration. This prevents the
+sprawl of pre-emptively defined agent roles that never get used.
+Documented in ADR-0003.
 
-User input touching file paths must use `safe_path()` (prevents path traversal).
-User input rendered in HTML must use `esc()` (prevents XSS).
-API mutations must use Pydantic validation via `agent/schemas.py` (returns 422 on failure).
-No inline user content in templates without escaping.
+## Article VI: Ceremony Proportional To Risk (Spec Sizing Rule)
 
-## Article V: Git Discipline
+Not every change deserves the full lifecycle. The framework enforces
+proportionality:
 
-`master` is production -- read-only. `integration/improvements` is the development trunk.
-All work happens on feature branches via worktrees (`../wt-{shortname}`).
-Merge direction: feature -> integration. Never merge integration -> master without human approval.
-Failed experiments are deleted (worktree + branch), never merged.
+- Bug fix, less than 3 files: no spec; task + test + review only
+- Feature, less than 5 files: lightweight spec (user story + requirements + success criteria)
+- Feature, 5 or more files: full spec with all sections
+- Cross-cutting change or schema change: full spec + ADR + Level 2 human approval
 
-## Article VI: Observability Is Built In
+The rule prevents two failure modes: (a) ceremony bloat that strangles small
+changes, and (b) under-specified large changes that arrive at review without
+acceptance criteria.
 
-Every LLM call is logged with model, tokens, latency, and cost via `record_llm_call`.
-No silent failures. Errors surface as structured responses, not bare exceptions.
-The `_eval/` directory captures comparison artifacts -- delete when done.
+## Article VII: Every Artifact Is A File; Every Dispatch Is Logged
 
-## Article VII: Prefer Stdlib Over Dependencies
+Specs, plans, tasks, ADRs, retros, and clarification logs are all Markdown
+files committed to the repo. No project state lives in chat history or in any
+agent's memory alone. Every fleet dispatch (one task assigned to one worker)
+is recorded in `spec-driven-development/ledger/fleet.db` with timestamp,
+task, agent, and outcome. The answer to "why was this built this way?" is
+always a file you can open. The answer to "who did this and when?" is always
+a ledger row.
 
-New dependencies require Architect approval + an ADR entry.
-Approved production dependencies: FastAPI, SQLModel, Jinja2, MSAL, python-dotenv, httpx,
-APScheduler, python-multipart, aiofiles.
-When a stdlib module can do the job, use it.
+## Article VIII: Constitution Is Immutable Without An ADR
 
-## Article VIII: Configuration Is Explicit
+The six constitution files (`mission.md`, `tech-stack.md`, `principles.md`,
+`roadmap.md` -- excluding entry additions, `decision-policy.md`,
+`quality-policy.md`) define the project's identity and rules. They cannot be
+modified without an Architecture Decision Record explaining the change, the
+alternatives considered, and the consequences. This applies both to the
+framework's own constitution and to any host project's adapted constitution.
+Roadmap *additions* (new completed items, new tech-debt entries) do not
+require an ADR; *removals* and *direction changes* do.
 
-All settings live in `agent/config.py` as frozen dataclasses, composed into a single
-`settings` object. Secrets come from environment variables. No magic globals.
-No runtime monkey-patching outside of tests. All paths derive from `REPO_ROOT`.
+## Article IX: Human Holds Final Approval
 
-## Article IX: Incremental Migration
-
-Legacy JSON dotfiles in `agent/` coexist with the SQLite database.
-Migration is iterative, not big-bang. Each tech debt item (D1-D10) has its own spec.
-Do not attempt to migrate all stores in one feature branch.
+Decision authority is tiered. **Level 0** (status, routing, capture) belongs
+to the Executive Manager. **Level 1** (cross-module decisions, ADRs,
+product/technical choices) belongs to the four Principals. **Level 2**
+(irreversible decisions: new dependencies, schema migrations, external
+integrations, production merges, scope changes after sprint commitment)
+**always requires a human-in-the-loop**. No agent ever makes a Level 2
+decision unilaterally, no matter how confident. Gates with Level 2 stakes
+include the human as a mandatory approver.
 
 ---
 
 ## Design Heuristics (not binding articles, but strong defaults)
 
-- Convention over configuration: follow existing patterns before introducing new ones
-- Existing patterns over new abstractions: read the codebase before deciding something is missing
-- Small, frequent commits over large batches: each commit should be explainable in one sentence
-- Read before modifying: open the file, understand the last-processed marker, show diffs before committing
-- Clean as you go: no orphan code, no commented-out blocks, no unused variables, no stale scripts
+These are not enforceable rules; they are biases the framework prefers when
+trade-offs are otherwise balanced.
+
+- **Convention over configuration**: follow existing patterns before introducing new ones.
+- **Existing patterns over new abstractions**: read the codebase before deciding something is missing.
+- **Small, frequent commits over large batches**: each commit explainable in one sentence.
+- **Read before modifying**: open the file, understand current state, show diffs before committing.
+- **Clean as you go**: no orphan code, no commented-out blocks, no unused variables, no stale scripts.
+- **Symbolic cadence over wall-clock cadence**: PI/Sprint exist to provide ceremony rhythm, not to gate calendar weeks. The AI fleet compresses wall-clock time dramatically.
+- **Stdlib over dependencies (for the framework's own CLI)**: new third-party dependencies in the framework's CLI require Architect approval and an ADR.
+
+---
+
+## Host Project Articles
+
+A host project that adopts SDD inherits these nine framework articles and
+adds its own articles capturing host-specific rules: coding conventions tied
+to its language/framework, security rules tied to its data sensitivity,
+testing baselines tied to its current state, deployment rules tied to its
+infrastructure. Host articles are numbered starting from H1 to distinguish
+them from framework articles (I-IX).
+
+The Day-to-Day Agent host project's articles -- the original nine that lived
+in this file before generalization -- are an example of host articles. They
+described that project's specific rules (Engine singleton, World State
+contract, 743-test baseline, FastAPI route discipline, etc.). Those articles
+remain valid for the Day-to-Day Agent project; they do not belong here in the
+framework's constitution.
+
+Reference: see `spec-driven-development/GENERALIZATION_SDD.md` for the
+procedure a host project follows to bootstrap its own articles.

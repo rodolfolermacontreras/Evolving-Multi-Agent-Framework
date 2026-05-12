@@ -67,12 +67,12 @@ Constitution check:
 ### Example 2: Validating Implementation Approach
 
 ```markdown
-Task: "Refactor board.py to use global state variable"
+Task: "Code quality reviewer is asked to review a PR before the spec compliance reviewer has signed off"
 
 Constitution check:
-- principles.md Article 3: "No global mutable state"
+- principles.md Article III: "Two-Stage Review Order Is Fixed -- spec compliance first, then code quality"
 - Violation: YES
-- Action: Redesign to use Engine singleton pattern
+- Action: Block the quality review. Route the PR to the spec compliance reviewer first; quality review proceeds only after compliance passes.
 ```
 
 ## Common Mistakes

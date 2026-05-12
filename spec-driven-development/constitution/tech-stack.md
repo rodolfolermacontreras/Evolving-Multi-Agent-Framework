@@ -45,8 +45,9 @@ GitHub Copilot extension.
 
 - Git, with worktree-based parallelism (`../wt-{shortname}`)
 - Branch convention: feature branches off the host project's integration trunk
-- The framework does not mandate a specific branching model -- it documents conventions in
-  `principles.md` Article V that host projects can adopt or override
+- The framework does not mandate a specific branching model. Host projects document
+  their branching conventions in their own host-level articles, not in framework
+  `principles.md`.
 
 ## Testing
 

@@ -51,7 +51,7 @@ The framework is scaffolded but unproven. PI-1 makes it project-agnostic and val
 lifecycle end-to-end on a real feature.
 
 - [ ] Constitution generalized: `mission.md`, `tech-stack.md`, `CONTEXT.md`, `roadmap.md` decoupled from Day-to-Day Agent specifics (in progress)
-- [ ] `principles.md` generalized -- nine binding articles rewritten to describe framework rules, not host project rules
+- [x] `principles.md` generalized -- nine binding articles rewritten to describe framework rules, not host project rules
 - [ ] Root `README.md` created -- explains what the framework is and how to bootstrap it
 - [ ] Day-to-Day-specific domain skills (`fastapi-routes`, `htmx-frontend`, `pytest-runner`) marked as examples or replaced with framework-relevant skills
 - [ ] First pilot feature delivered through the full SDD lifecycle (idea -> backlog -> clarify -> spec -> plan -> tasks -> implement -> review -> done)

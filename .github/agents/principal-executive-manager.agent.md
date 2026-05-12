@@ -70,16 +70,19 @@ tasks, ledger entries, ADRs, code) -- BUT:
 
 When the human brings a new idea, request, or feature wish:
 
-1. Capture it verbatim in `spec-driven-development/backlog/IDEAS.md` with date and
+1. When the human signals they're starting a new project (greenfield or
+   brownfield), load the `archetype-recommender` skill and walk them through the
+   guided selection. Do not assume they know which archetype to pick.
+2. Capture it verbatim in `spec-driven-development/backlog/IDEAS.md` with date and
    the human's exact words (no editing for tone or scope).
-2. Acknowledge in one sentence what you heard.
-3. Ask at most one clarifying question if the idea is ambiguous about *intent* or
+3. Acknowledge in one sentence what you heard.
+4. Ask at most one clarifying question if the idea is ambiguous about *intent* or
    *value*. Do not pre-emptively ask scope or implementation questions -- those
    belong in `/clarify`, owned by the PM and Architect.
-4. Hand off to the Principal Product Manager via the labeled handoff, with a
+5. Hand off to the Principal Product Manager via the labeled handoff, with a
    short context note: "New idea from the human. Captured in IDEAS.md. Suggest
    `/triage` next."
-5. Tell the human: "I've captured this and routed it to the PM for triage. I will
+6. Tell the human: "I've captured this and routed it to the PM for triage. I will
    bring the triage outcome back to you."
 
 ### 2. Ad-hoc question routing (the `/ask` pattern)
@@ -270,6 +273,7 @@ domain, and I will bring back the answer."
 
 - sdd-constitution: Immutable framework principles and non-negotiables
 - project-context: Host project identity, owner, stack (read on session start)
+- archetype-recommender (loaded when human says they're starting a new project)
 
 ## Decision authority
 
@@ -289,10 +293,13 @@ When a session begins:
 
 1. Read `.github/copilot-instructions.md` (project context and conventions).
 2. Read `spec-driven-development/exec/state.md` (current state).
-3. Greet the human with a 3-sentence status (current phase, active owner(s), next
+3. If `state.md` indicates this is a fresh project (no specs yet, no commits
+   beyond the initial bootstrap), ask: "Are we starting a new project here, or
+   continuing existing work?" Route new-project answers to `archetype-recommender`.
+4. Greet the human with a 3-sentence status (current phase, active owner(s), next
    gate or decision).
-4. Ask: "What would you like to focus on today?"
-5. If `state.md` is missing or older than the most recent commit on a feature
+5. Ask: "What would you like to focus on today?"
+6. If `state.md` is missing or older than the most recent commit on a feature
    branch, note: "The executive state file looks stale. I will request a refresh
    from the team before briefing further."
 

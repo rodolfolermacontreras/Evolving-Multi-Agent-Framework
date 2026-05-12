@@ -30,6 +30,12 @@
     "description": "Scans skills, prompts, and templates for references to amended constitution content. Returns alignment verdict per reference (ALIGNED / NEEDS-REVIEW / NEEDS-UPDATE). Backs /constitution and ADR-0006."
   },
   {
+    "id": "archetype-recommender",
+    "path": ".github/skills/workflow/archetype-recommender/SKILL.md",
+    "category": "workflow",
+    "description": "Guides greenfield and brownfield project kickoff to a best-fit archetype, with /evolve fallback when none fit."
+  },
+  {
     "id": "grill-me",
     "path": ".github/skills/workflow/grill-me/SKILL.md",
     "category": "workflow",

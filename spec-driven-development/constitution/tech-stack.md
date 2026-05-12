@@ -83,7 +83,7 @@ GitHub Copilot extension.
 | `spec-driven-development/cli/` | Python automation scaffolds (fleet, qa, retro, state_builder) |
 | `spec-driven-development/roster/` | Machine-readable agent and skill registries |
 | `spec-driven-development/templates/` | Reusable document templates (spec, plan, tasks, agent brief, ADR, retro) |
-| `spec-driven-development/specs/` | One directory per feature (spec, plan, tasks, clarification log, review) |
+| `spec-driven-development/specs/` | One directory per feature using `YYYY-MM-DD-feature-name/`; co-locates `spec.md`, `plan.md`, `tasks.md`, `validation.md`, `clarification-log.md`, and optional `research.md` |
 | `spec-driven-development/sprints/` | Sprint artifacts under `PI-{N}/sprint-{M}/` |
 | `spec-driven-development/backlog/` | `IDEAS.md` (raw) and `BACKLOG.md` (RICE-scored) |
 | `spec-driven-development/exec/state.md` | Auto-built executive summary (<= 2KB) |

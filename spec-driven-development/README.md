@@ -116,6 +116,7 @@ underlying `exec/state.md` snapshot.
 | `/implement` | Implement | Execute single task (TDD workflow) |
 | `/qa` | Review | Validate implementation against spec |
 | `/retro` | Ceremony | Sprint retrospective, max 3 action items |
+| `/replan` | Ceremony | Review constitution/roadmap/skills/lessons after every feature DONE |
 | `/state` | Any | Refresh and present exec/state.md |
 
 ---

@@ -95,14 +95,14 @@ Each phase has a gate. Gates have defined approvers. Nothing proceeds to impleme
     data-scientist-general.agent.md
     qa-engineer-general.agent.md
     ux-designer-general.agent.md
-  skills/                            (22 skill files across 5 categories)
+  skills/                            (23 skill files across 5 categories)
     AI-AGENT-SUPER-SKILL.md
     core/                            (sdd-constitution, project-context, git-workflow, testing-conventions)
     workflow/                        (triage, grill-me, grill-with-docs, to-spec, to-plan, to-tasks, implement)
     engineering/                     (tdd, diagnose, code-review, improve-architecture)
     operational/                     (handoff, fleet-coordinator, pi-planning)
     domain/                          (pytest-runner, fastapi-routes, htmx-frontend)
-  prompts/                           (12 slash commands)
+  prompts/                           (13 slash commands)
     triage, clarify, spec, plan, tasks, analyze, fleet, implement, qa, retro, state
   instructions/                      (2 scoped instruction files)
     sdd-workflow.instructions.md     (applies to spec-driven-development/**)

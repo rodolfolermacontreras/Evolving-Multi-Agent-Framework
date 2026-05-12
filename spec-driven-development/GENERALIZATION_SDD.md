@@ -218,6 +218,8 @@ A file is `[PROJECT-SPECIFIC]` when its **content is unique** to one project:
 |-----------|-----|-----------|
 | `YYYY-MM-DD-feature-name/` | [PROJECT-SPECIFIC] | All spec content (spec.md, plan.md, tasks.md, etc.) is unique per feature per project |
 
+Use `specs/YYYY-MM-DD-feature-name/` as the canonical feature directory convention so date metadata travels with the spec, plan, tasks, validation, clarification log, and optional research artifacts.
+
 #### spec-driven-development/sprints/
 
 | Directory | Tag | Rationale |

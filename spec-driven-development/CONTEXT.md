@@ -29,6 +29,7 @@ Updated by `grill-with-docs` sessions and ADRs. Acts as a living glossary.
 | **PI** | Program Increment -- a planning horizon containing 5 sprints (symbolic; AI fleet compresses wall-clock time) |
 | **Sprint** | A development cycle within a PI (symbolic cadence -- not a fixed calendar duration) |
 | **Spec** | A formal feature specification document in `specs/YYYY-MM-DD-feature-name/spec.md` |
+| **Feature Directory** | A per-feature directory under `specs/YYYY-MM-DD-feature-name/` that co-locates `spec.md`, `plan.md`, `tasks.md`, `validation.md`, `clarification-log.md`, and optional `research.md`. |
 | **Plan** | Implementation plan co-authored by Architect and SW Dev, lives next to the spec |
 | **Task** | An atomic unit of work (1-3 files max) derived from a plan, tagged with [P]/[S]/[AFK]/[HITL] |
 | **Gate** | A formal checkpoint between lifecycle phases requiring approval before proceeding |

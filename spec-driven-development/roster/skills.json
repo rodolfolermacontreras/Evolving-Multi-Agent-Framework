@@ -93,7 +93,7 @@
     "id": "handoff",
     "path": ".github/skills/operational/handoff/SKILL.md",
     "category": "operational",
-    "description": "Produces structured session handoff updates."
+    "description": "Compacts a session into a short handoff document for the next session or agent, referencing artifacts by path."
   },
   {
     "id": "fleet-coordinator",

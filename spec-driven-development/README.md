@@ -117,6 +117,9 @@ underlying `exec/state.md` snapshot.
 | `/qa` | Review | Validate implementation against spec |
 | `/retro` | Ceremony | Sprint retrospective, max 3 action items |
 | `/replan` | Ceremony | Review constitution/roadmap/skills/lessons after every feature DONE |
+| `/evolve` | Ceremony | Curate the lessons backlog into framework changes (SHIP/DEFER/DISCARD) |
+| `/constitution` | Governance | Amend a constitution file with semver bump + propagation scan + Sync Impact Report |
+| `/grill` | Pre-spec | Free-form grilling session to sharpen an idea before /clarify |
 | `/state` | Any | Refresh and present exec/state.md |
 
 ---

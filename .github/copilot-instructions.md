@@ -95,14 +95,14 @@ Each phase has a gate. Gates have defined approvers. Nothing proceeds to impleme
     data-scientist-general.agent.md
     qa-engineer-general.agent.md
     ux-designer-general.agent.md
-  skills/                            (23 skill files across 5 categories)
+  skills/                            (25 skill files across 5 categories)
     AI-AGENT-SUPER-SKILL.md
     core/                            (sdd-constitution, project-context, git-workflow, testing-conventions)
     workflow/                        (triage, grill-me, grill-with-docs, to-spec, to-plan, to-tasks, implement)
     engineering/                     (tdd, diagnose, code-review, improve-architecture)
     operational/                     (handoff, fleet-coordinator, pi-planning)
     domain/                          (pytest-runner, fastapi-routes, htmx-frontend)
-  prompts/                           (13 slash commands)
+  prompts/                           (16 slash commands)
     triage, clarify, spec, plan, tasks, analyze, fleet, implement, qa, retro, state
   instructions/                      (2 scoped instruction files)
     sdd-workflow.instructions.md     (applies to spec-driven-development/**)
@@ -152,7 +152,7 @@ The framework plan was created using a dual-LLM approach:
 - 4 Principal agent definitions (`.agent.md` format for VS Code auto-discovery)
 - 4 Generic worker agent definitions
 - 12 slash command prompts (`/triage`, `/grill`, `/spec`, `/plan`, `/tasks`, etc.)
-- 21 composable skills across 5 categories
+- 25 composable skills across 5 categories
 - 6 constitution files (mission, principles, tech-stack, roadmap, decision-policy, quality-policy)
 - 8 document templates (spec, plan, tasks, review, etc.)
 - 3 ADRs, 8 CLI scaffolds, 3 roster JSONs

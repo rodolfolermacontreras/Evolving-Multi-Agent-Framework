@@ -24,6 +24,12 @@
     "description": "Captures pytest, tmp_path, MockLLMClient, and validation norms."
   },
   {
+    "id": "constitution-sync",
+    "path": ".github/skills/core/constitution-sync/SKILL.md",
+    "category": "core",
+    "description": "Scans skills, prompts, and templates for references to amended constitution content. Returns alignment verdict per reference (ALIGNED / NEEDS-REVIEW / NEEDS-UPDATE). Backs /constitution and ADR-0006."
+  },
+  {
     "id": "grill-me",
     "path": ".github/skills/workflow/grill-me/SKILL.md",
     "category": "workflow",
@@ -72,6 +78,12 @@
     "description": "Enforces red-green-refactor and test-first delivery."
   },
   {
+    "id": "tdd-gate",
+    "path": ".github/skills/engineering/tdd-gate/SKILL.md",
+    "category": "engineering",
+    "description": "Mechanical diff check for spec-compliance reviewer: production code added without tests is flagged unless tagged [NO-TEST-NEEDED]. Backs Article X."
+  },
+  {
     "id": "diagnose",
     "path": ".github/skills/engineering/diagnose/SKILL.md",
     "category": "engineering",
@@ -94,6 +106,12 @@
     "path": ".github/skills/operational/handoff/SKILL.md",
     "category": "operational",
     "description": "Compacts a session into a short handoff document for the next session or agent, referencing artifacts by path."
+  },
+  {
+    "id": "lesson-capture",
+    "path": ".github/skills/operational/lesson-capture/SKILL.md",
+    "category": "operational",
+    "description": "Append a tagged lesson candidate to the current PI's lessons.md when project work reveals a missing skill, unclear role, template gap, or constitution ambiguity. Feeds /evolve."
   },
   {
     "id": "fleet-coordinator",

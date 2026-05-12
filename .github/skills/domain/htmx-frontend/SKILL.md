@@ -1,13 +1,26 @@
 ---
 name: htmx-frontend
-description: "Use when working with HTMX + Jinja2 frontend for Day-to-Day Agent. Knows base.html shell, pages/ templates, ui_macros.html components, hx-* attributes, Alpine.js for UI state, main.css with --accent-* variables."
+description: "EXAMPLE (Day-to-Day Agent host project). Use when working with HTMX + Jinja2 + Alpine.js frontends in a host project that follows the Day-to-Day Agent template conventions. NOT a framework default -- treat as a reference implementation showing what a domain skill looks like."
 license: MIT
 metadata:
   author: rodolfolermacontreras
   version: '1.0'
+  status: example
+  origin: day-to-day-agent
 ---
 
-# HTMX Frontend
+> **STATUS: EXAMPLE SKILL.** This skill was extracted from the Day-to-Day Agent host
+> project and ships with the framework as a reference implementation, not as a
+> framework default. It demonstrates the shape of a `domain/` skill (project-specific
+> frontend conventions) but its contents -- HTMX, the `base.html` shell, the
+> `pages/` template layout, the `--accent-*` CSS variables -- are specific to that
+> host project.
+>
+> Host projects that adopt the framework should either delete this skill or replace
+> it with one tuned to their own frontend stack (React, Svelte, Blazor, etc.). See
+> `.github/skills/domain/README.md`.
+
+# HTMX Frontend (example)
 
 Day-to-Day Agent frontend patterns: HTMX + Jinja2 templates, base.html shell, UI macros, Alpine.js for client state, and CSS conventions.
 

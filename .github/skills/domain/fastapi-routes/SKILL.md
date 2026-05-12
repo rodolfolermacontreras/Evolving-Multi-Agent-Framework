@@ -1,13 +1,25 @@
 ---
 name: fastapi-routes
-description: "Use when creating FastAPI routes for Day-to-Day Agent. Knows APIRouter patterns, Pydantic request models in schemas.py, safe_path() for paths, esc() for XSS prevention, route modules under agent/routes/."
+description: "EXAMPLE (Day-to-Day Agent host project). Use when creating FastAPI routes in a host project that follows the Day-to-Day Agent conventions (APIRouter prefix, Pydantic in schemas.py, safe_path(), esc(), agent/routes/). NOT a framework default -- treat as a reference implementation showing what a domain skill looks like."
 license: MIT
 metadata:
   author: rodolfolermacontreras
   version: '1.0'
+  status: example
+  origin: day-to-day-agent
 ---
 
-# FastAPI Routes
+> **STATUS: EXAMPLE SKILL.** This skill was extracted from the Day-to-Day Agent host
+> project and ships with the framework as a reference implementation, not as a
+> framework default. It demonstrates the shape of a `domain/` skill (project-specific
+> framework knowledge) but its contents -- FastAPI, the `safe_path()` and `esc()`
+> helpers, the `agent/routes/` layout -- are specific to that host project.
+>
+> Host projects that adopt the framework should either delete this skill or replace
+> it with one tuned to their own web framework. See
+> `.github/skills/domain/README.md`.
+
+# FastAPI Routes (example)
 
 Day-to-Day Agent FastAPI conventions: APIRouter with prefix, Pydantic request models, safe_path(), esc() for XSS, route organization.
 

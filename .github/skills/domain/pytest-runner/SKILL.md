@@ -1,13 +1,25 @@
 ---
 name: pytest-runner
-description: "Use when running tests for Day-to-Day Agent. Knows pytest command patterns, patched_settings fixture, MockLLMClient, factory helpers, and test file locations. Enforces 743+ baseline."
+description: "EXAMPLE (Day-to-Day Agent host project). Use when running tests in a host project that uses pytest with the patched_settings + MockLLMClient pattern. NOT a framework default -- treat as a reference implementation showing what a domain skill looks like."
 license: MIT
 metadata:
   author: rodolfolermacontreras
   version: '1.0'
+  status: example
+  origin: day-to-day-agent
 ---
 
-# Pytest Runner
+> **STATUS: EXAMPLE SKILL.** This skill was extracted from the Day-to-Day Agent host
+> project and ships with the framework as a reference implementation, not as a
+> framework default. It demonstrates the shape of a `domain/` skill (project-specific
+> tooling knowledge) but its contents -- the 743-test baseline, `patched_settings`
+> fixture, `MockLLMClient`, factory helpers -- are specific to that host project.
+>
+> Host projects that adopt the framework should either delete this skill or replace
+> it with their own `pytest-runner` (or `vitest-runner`, `go-test-runner`, etc.)
+> tuned to their actual test setup. See `.github/skills/domain/README.md`.
+
+# Pytest Runner (example)
 
 Day-to-Day Agent pytest knowledge: command patterns, fixtures, mocks, factories, and test file organization. Enforces 743+ test baseline.
 

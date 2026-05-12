@@ -1,3 +1,9 @@
+---
+version: '1.0.0'
+ratified: 2026-05-12
+last_amended: 2026-05-12
+---
+
 # Framework Principles
 
 Ten binding articles. They define how the **framework itself** works -- the rules
@@ -156,3 +162,21 @@ framework's constitution.
 
 Reference: see `spec-driven-development/GENERALIZATION_SDD.md` for the
 procedure a host project follows to bootstrap its own articles.
+---
+
+## Governance
+
+The constitution is versioned per file using semantic versioning (`version`,
+`ratified`, `last_amended` in YAML frontmatter). Amendments use the
+`/constitution` slash command:
+
+- **MAJOR**: principle changed or removed (e.g. Article III rewritten)
+- **MINOR**: new article or principle added, or new section appended
+- **PATCH**: clarification, example added, typo, or non-semantic edit
+
+Every amendment runs a propagation scan via the `constitution-sync` skill,
+which lists all skills, prompts, and templates that reference the amended
+content. The `/constitution` command emits a Sync Impact Report attached to
+the amending commit. References found NEEDS-REVIEW or NEEDS-UPDATE are
+flagged; resolution is the Architect's responsibility before the
+amendment commit lands. Documented in ADR-0006.

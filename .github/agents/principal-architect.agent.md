@@ -10,6 +10,9 @@ handoffs:
   - label: Return to Executive Manager with Answer
     agent: principal-executive-manager
     prompt: "The Architect has the answer to your routed question. Please synthesize for the human at executive register."
+  - label: Amend Constitution
+    agent: principal-architect
+    prompt: "The Architect needs to amend a constitution file. Run /constitution and emit the Sync Impact Report."
 ---
 
 # Principal Architect -- Day-to-Day Agent

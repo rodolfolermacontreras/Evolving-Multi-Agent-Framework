@@ -1,3 +1,9 @@
+---
+version: '1.0.0'
+ratified: 2026-05-12
+last_amended: 2026-05-12
+---
+
 # Technology Stack
 
 This file describes the technologies the **framework itself** is built on. Host projects

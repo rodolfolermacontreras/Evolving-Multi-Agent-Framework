@@ -1,3 +1,9 @@
+---
+version: '1.0.0'
+ratified: 2026-05-12
+last_amended: 2026-05-12
+---
+
 # Mission
 
 ## Project

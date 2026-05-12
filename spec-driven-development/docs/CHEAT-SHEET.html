@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SDD Framework Cheat Sheet</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+    padding: 24px;
+    background: #f6f8fa;
+    color: #1f2328;
+    line-height: 1.45;
+    font-size: 13px;
+  }
+  .page {
+    max-width: 1280px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 28px 36px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  h1 {
+    margin: 0 0 4px 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #0969da;
+  }
+  .tagline {
+    color: #57606a;
+    font-size: 13px;
+    margin: 0 0 18px 0;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+  .card {
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    padding: 12px 14px;
+    background: #fafbfc;
+  }
+  .card h2 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0969da;
+    border-bottom: 1px solid #d0d7de;
+    padding-bottom: 4px;
+  }
+  .card h3 {
+    margin: 10px 0 4px 0;
+    font-size: 12px;
+    font-weight: 700;
+    color: #1f2328;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 4px;
+  }
+  th, td {
+    text-align: left;
+    padding: 4px 6px;
+    border-bottom: 1px solid #eaeef2;
+    vertical-align: top;
+  }
+  th {
+    font-weight: 600;
+    color: #57606a;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  code, .cmd {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    background: #eff1f3;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 12px;
+    color: #0969da;
+  }
+  pre {
+    background: #1f2328;
+    color: #f6f8fa;
+    padding: 8px 10px;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 11px;
+    line-height: 1.4;
+    margin: 4px 0;
+  }
+  pre code { background: transparent; padding: 0; color: #f6f8fa; }
+  ol, ul {
+    margin: 4px 0 4px 0;
+    padding-left: 18px;
+  }
+  li { margin-bottom: 2px; }
+  .muted { color: #57606a; font-size: 11px; }
+  .pill {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+    background: #ddf4ff;
+    color: #0969da;
+    margin-right: 4px;
+  }
+  .pill-warn { background: #fff8c5; color: #9a6700; }
+  .pill-ok   { background: #dafbe1; color: #1a7f37; }
+  .pill-rule { background: #ffd8b5; color: #9a3412; }
+  .lifecycle {
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 11px;
+    background: #1f2328;
+    color: #f6f8fa;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 6px 0;
+    text-align: center;
+    letter-spacing: 0.3px;
+  }
+  .lifecycle .arrow { color: #79c0ff; }
+  .span-2 { grid-column: span 2; }
+  .footer {
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px solid #d0d7de;
+    color: #57606a;
+    font-size: 11px;
+    text-align: center;
+  }
+  .footer a { color: #0969da; text-decoration: none; }
+  @media print {
+    body { background: #fff; padding: 0; font-size: 11px; }
+    .page { box-shadow: none; padding: 16px; max-width: none; }
+    pre { font-size: 9px; }
+    .lifecycle { font-size: 9px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>Evolving Multi-Agent Framework &mdash; Cheat Sheet</h1>
+  <p class="tagline">One human + a fleet of AI agents shipping spec-driven features. Print, share, pin to the wall.</p>
+
+  <!-- TL;DR + LIFECYCLE -->
+  <div class="grid">
+    <div class="card">
+      <h2>TL;DR &mdash; in 60 seconds</h2>
+      <ol>
+        <li>Bootstrap a project (greenfield or brownfield).</li>
+        <li>Open VS Code, pick the <strong>Principal Executive Manager</strong> agent.</li>
+        <li>Tell it your first idea in plain English. It captures + routes.</li>
+        <li>Walk the lifecycle. Approve specs at the gate. Trust the two-stage review.</li>
+        <li>Run <code>/replan</code> after every DONE; <code>/evolve</code> when lessons accumulate.</li>
+      </ol>
+      <p class="muted"><strong>Golden rule:</strong> Talk to the Executive Manager first. It either answers or routes; you never chase Principals yourself.</p>
+    </div>
+    <div class="card">
+      <h2>The lifecycle</h2>
+      <div class="lifecycle">
+        IDEA <span class="arrow">&rarr;</span> BACKLOG <span class="arrow">&rarr;</span> CLARIFY <span class="arrow">&rarr;</span> SPEC <span class="arrow">&rarr;</span> PLAN <span class="arrow">&rarr;</span> TASKS <span class="arrow">&rarr;</span> IMPLEMENT <span class="arrow">&rarr;</span> REVIEW <span class="arrow">&rarr;</span> DONE <span class="arrow">&rarr;</span> REPLAN
+      </div>
+      <p class="muted"><strong>Spec sizing rule (Article VI):</strong> bug fix &lt;3 files = no spec. Feature &lt;5 files = lightweight spec. Feature &ge;5 files = full spec. Schema/cross-cutting = full spec + ADR + human approval.</p>
+      <p class="muted"><strong>Two-stage review (Article III):</strong> spec compliance FIRST, then code quality. Different reviewers. Order is fixed.</p>
+    </div>
+  </div>
+
+  <!-- BOOTSTRAP -->
+  <div class="card" style="margin-top:18px;">
+    <h2>How to start a new project</h2>
+    <div class="grid">
+      <div>
+        <h3>Greenfield (new repo)</h3>
+        <pre><code>cd C:\Training\Projects\Evolving-Multi-Agent-Framework
+python spec-driven-development\cli\bootstrap.py greenfield <archetype> `
+  --project-name MyProject `
+  --owner "Your Name" `
+  --target ..\MyProject
+
+# What it does:
+# - Copies .github/ + spec-driven-development/
+# - Copies the chosen archetype's constitution
+# - Substitutes {{PROJECT_NAME}}, {{OWNER}}, {{DATE}}
+# - Initializes IDEAS.md, BACKLOG.md, fleet.db</code></pre>
+      </div>
+      <div>
+        <h3>Brownfield (existing repo)</h3>
+        <pre><code># Step 1 -- safe draft (touches nothing in your repo)
+python spec-driven-development\cli\bootstrap.py brownfield ..\MyExistingProject `
+  --owner "Your Name" --draft-only
+
+# Review .sdd-proposal/ in your repo. Edit TODO(human) markers.
+
+# Step 2 -- adopt
+python spec-driven-development\cli\bootstrap.py brownfield ..\MyExistingProject `
+  --owner "Your Name" --apply
+
+# What the archaeology pass detects:
+# languages, test frameworks, CI, branching model,
+# package managers, convention files, existing docs</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARCHETYPES + AGENTS -->
+  <div class="grid" style="margin-top:18px;">
+    <div class="card">
+      <h2>The 5 archetypes &mdash; pick one</h2>
+      <table>
+        <thead><tr><th>Archetype</th><th>Choose when</th></tr></thead>
+        <tbody>
+          <tr><td><code>python-library</code></td><td>Reusable package others import (PyPI-bound or internal lib)</td></tr>
+          <tr><td><code>python-web-service</code></td><td>HTTP API + persistence (FastAPI default; Flask/Django alt)</td></tr>
+          <tr><td><code>data-pipeline</code></td><td>ETL or analytics flow (pandas/polars + Prefect/Airflow + DuckDB/Postgres)</td></tr>
+          <tr><td><code>cli-tool</code></td><td>Command-line tool (Typer/Click; cross-platform; PyPI-publishable)</td></tr>
+          <tr><td><code>research-repo</code></td><td>Notebooks + analysis + reproducibility (papermill, nbval, lockfile)</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">Each archetype = constitution skeleton (6 files, all with semver frontmatter) + 1-2 archetype-specific skills. Don't fit? Fork an archetype, or invent a new one via <code>/evolve</code>.</p>
+    </div>
+    <div class="card">
+      <h2>The 4 Principal agents</h2>
+      <table>
+        <thead><tr><th>Agent</th><th>Owns</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Executive Manager</strong></td><td><span class="pill pill-ok">YOUR ENTRY POINT</span> Routing, status synthesis, escalation, kickoff capture, big-picture awareness</td></tr>
+          <tr><td><strong>Product Manager</strong></td><td>Backlog, RICE scoring, sprint/PI planning, acceptance criteria, triage, clarify, spec authoring</td></tr>
+          <tr><td><strong>Architect</strong></td><td>Specs, plans, ADRs, architectural quality, tech debt, constitution amendments via /constitution</td></tr>
+          <tr><td><strong>Software Developer</strong></td><td>Tasks, fleet dispatch, code review, integration, TDD enforcement</td></tr>
+        </tbody>
+      </table>
+      <p class="muted"><strong>Worker fleet:</strong> generic Developer / UX Designer / QA Engineer / Data Scientist agents. Constrained to 1-3 files per task. Specialize on demand &mdash; a worker that excels in a domain earns a permanent identity (e.g. "Data Scientist Bob Forecast Expert 1") with its own skill pack.</p>
+    </div>
+  </div>
+
+  <!-- SLASH COMMANDS -->
+  <div class="card" style="margin-top:18px;">
+    <h2>All 16 slash commands</h2>
+    <div class="grid-3">
+      <div>
+        <h3>Entry &amp; Status</h3>
+        <table>
+          <tr><td><code>/ask</code></td><td>Ask the Executive Manager anything; routes + synthesizes</td></tr>
+          <tr><td><code>/state</code></td><td>Refresh + present <code>exec/state.md</code></td></tr>
+          <tr><td><code>/grill</code></td><td>Free-form grilling to sharpen an idea before <code>/clarify</code></td></tr>
+        </table>
+        <h3>Lifecycle</h3>
+        <table>
+          <tr><td><code>/triage</code></td><td>RICE-score idea, assign P1-P4</td></tr>
+          <tr><td><code>/clarify</code></td><td>One question at a time, with recommendation</td></tr>
+          <tr><td><code>/spec</code></td><td>Generate feature spec + validation contract (Article X)</td></tr>
+        </table>
+      </div>
+      <div>
+        <h3>Plan &amp; Build</h3>
+        <table>
+          <tr><td><code>/plan</code></td><td>Implementation plan from approved spec</td></tr>
+          <tr><td><code>/tasks</code></td><td>Decompose plan into tagged 1-3-file tasks</td></tr>
+          <tr><td><code>/analyze</code></td><td>Read-only consistency check (spec vs plan vs tasks)</td></tr>
+          <tr><td><code>/implement</code></td><td>Execute one task (TDD, Article X gate)</td></tr>
+          <tr><td><code>/fleet</code></td><td>Parallel dispatch of <span class="pill">[P]</span><span class="pill">[AFK]</span> tasks</td></tr>
+          <tr><td><code>/qa</code></td><td>Validate implementation against spec (two-stage)</td></tr>
+        </table>
+      </div>
+      <div>
+        <h3>Ceremony &amp; Evolution</h3>
+        <table>
+          <tr><td><code>/retro</code></td><td>Sprint retro, max 3 action items</td></tr>
+          <tr><td><code>/replan</code></td><td>After every DONE: review constitution/roadmap/skills/lessons</td></tr>
+          <tr><td><code>/evolve</code></td><td>Curate lessons backlog into framework changes (SHIP/DEFER/DISCARD)</td></tr>
+          <tr><td><code>/constitution</code></td><td>Amend constitution with semver + propagation scan</td></tr>
+        </table>
+        <p class="muted" style="margin-top:8px;"><strong>Tags on tasks:</strong> <span class="pill">[P]</span> parallelizable, <span class="pill">[S]</span> sequential, <span class="pill">[AFK]</span> safe to autonomous-run, <span class="pill pill-warn">[HITL]</span> needs human-in-the-loop.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHERE THINGS LIVE -->
+  <div class="grid" style="margin-top:18px;">
+    <div class="card">
+      <h2>Where things live</h2>
+      <pre><code>your-host-project/
+&#9500;&#9472; .github/                          (Copilot-native, auto-discovered)
+&#9474;  &#9500;&#9472; copilot-instructions.md         session-start authority
+&#9474;  &#9500;&#9472; agents/                          4 Principals + N workers
+&#9474;  &#9500;&#9472; skills/                          26 composable skills
+&#9474;  &#9500;&#9472; prompts/                         16 slash commands
+&#9474;  &#9492;&#9472; instructions/                    scoped guidance
+&#9492;&#9472; spec-driven-development/
+   &#9500;&#9472; CONTEXT.md                       shared vocabulary
+   &#9500;&#9472; constitution/                    mission, principles, etc (semver)
+   &#9500;&#9472; backlog/                         IDEAS.md + BACKLOG.md
+   &#9500;&#9472; specs/YYYY-MM-DD-feature/        per-feature artifacts
+   &#9474;  &#9500;&#9472; spec.md                       feature specification
+   &#9474;  &#9500;&#9472; plan.md                       implementation plan
+   &#9474;  &#9500;&#9472; tasks.md                      tagged task list
+   &#9474;  &#9500;&#9472; validation.md                 PRE-IMPL contract (Article X)
+   &#9474;  &#9500;&#9472; clarification-log.md          Q&amp;A history
+   &#9474;  &#9492;&#9472; RETRO.md                      what worked, lessons
+   &#9500;&#9472; sprints/PI-{N}/
+   &#9474;  &#9500;&#9472; lessons.md                    candidates for /evolve
+   &#9474;  &#9492;&#9472; sprint-{M}/                   PLAN.md, BOARD.md, RETRO.md
+   &#9500;&#9472; ledger/fleet.db                  SQLite dispatch audit trail
+   &#9500;&#9472; templates/                       reusable doc templates
+   &#9500;&#9472; archetypes/                      5 starter constitutions
+   &#9500;&#9472; cli/bootstrap.py                 greenfield + brownfield
+   &#9492;&#9472; docs/ADR/                        Architecture Decision Records</code></pre>
+    </div>
+    <div class="card">
+      <h2>The 10 binding articles &mdash; one line each</h2>
+      <ol>
+        <li><strong>I.</strong> Two-folder split is invariant (<code>.github/</code> + <code>spec-driven-development/</code>)</li>
+        <li><strong>II.</strong> Single human entry point: the Executive Manager</li>
+        <li><strong>III.</strong> Two-stage review order is fixed: spec compliance, then code quality</li>
+        <li><strong>IV.</strong> Specialization over generalism: workers 1-3 files; reviewers review only</li>
+        <li><strong>V.</strong> Generic by default, specialized on demand</li>
+        <li><strong>VI.</strong> Ceremony proportional to risk (the spec sizing rule)</li>
+        <li><strong>VII.</strong> Every artifact is a file; every dispatch is logged</li>
+        <li><strong>VIII.</strong> Constitution is immutable without an ADR</li>
+        <li><strong>IX.</strong> Human holds final approval on Level-2 decisions</li>
+        <li><strong>X.</strong> Validation is a pre-implementation contract</li>
+      </ol>
+      <p class="muted">Documented in <code>spec-driven-development/constitution/principles.md</code>. Amend only via <code>/constitution</code> &mdash; it semver-bumps and runs the propagation check.</p>
+    </div>
+  </div>
+
+  <!-- WORKER LIFECYCLE + LEARNING LOOP -->
+  <div class="card" style="margin-top:18px;">
+    <h2>How the agent fleet learns and evolves</h2>
+    <div class="grid-3">
+      <div>
+        <h3>1. Workers spawn generic</h3>
+        <p class="muted">Software Developer Principal dispatches one of the generic worker agents (<code>developer-general</code>, <code>ux-designer-general</code>, <code>qa-engineer-general</code>, <code>data-scientist-general</code>) per task. Every dispatch is logged to <code>fleet.db</code> with task, worker, role, outcome.</p>
+      </div>
+      <div>
+        <h3>2. Specialization is earned</h3>
+        <p class="muted">A worker that excels in a domain over multiple dispatches gets a permanent identity (e.g. <code>data-scientist-bob-forecast-1.agent.md</code>) plus a domain-specific skill pack. Triggered through <code>/evolve</code> as an <code>agent-update</code> lesson. Old generic agents are kept; specialists join the fleet alongside.</p>
+      </div>
+      <div>
+        <h3>3. Workers are never deleted</h3>
+        <p class="muted">Article VII: history preserved. Workers get <em>updated</em> when <code>/evolve</code> ships <code>agent-update</code> changes (skill pack tweaks, prompt refinements, deprecation flags). The ledger records every dispatch forever.</p>
+      </div>
+      <div>
+        <h3>4. Lessons captured mid-work</h3>
+        <p class="muted">Any agent can load the <code>lesson-capture</code> skill mid-feature and append a tagged candidate to <code>sprints/PI-{N}/lessons.md</code>. Tags: <code>skill-update</code>, <code>new-skill</code>, <code>agent-update</code>, <code>constitution-amendment</code>, <code>template-update</code>, <code>prompt-update</code>, <code>docs-update</code>.</p>
+      </div>
+      <div>
+        <h3>5. Lessons reviewed at /replan</h3>
+        <p class="muted">After every feature DONE, <code>/replan</code> reviews constitution + roadmap + skills + lessons. Surfaces what should change. Doesn't auto-apply &mdash; queues for curation.</p>
+      </div>
+      <div>
+        <h3>6. Lessons curated via /evolve</h3>
+        <p class="muted"><code>/evolve</code> reads the lessons backlog and decides per candidate: <strong>SHIP</strong> (drafts the diff, references lesson ID + source feature for provenance) / <strong>DEFER</strong> (target PI) / <strong>DISCARD</strong> (with reason). Constitution-affecting lessons route through <code>/constitution</code> (semver + propagation).</p>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:8px;"><strong>The provenance chain:</strong> every framework change carries the lesson ID + source feature that produced it. You can always answer "why does this skill exist?" by walking back through the ledger.</p>
+  </div>
+
+  <!-- FIRST DAY CHECKLIST -->
+  <div class="grid" style="margin-top:18px;">
+    <div class="card">
+      <h2>Your first day &mdash; checklist</h2>
+      <ol>
+        <li>Pick a project (start small &mdash; one week scope, one owner: you).</li>
+        <li>Pick an archetype that fits.</li>
+        <li>Run the bootstrap. Verify <code>.github/</code> and <code>spec-driven-development/</code> appear in the new repo.</li>
+        <li>Open VS Code. Confirm 4 Principal agents show up in Copilot Chat agent picker.</li>
+        <li>Pick the <strong>Principal Executive Manager</strong>. Greet it. Read its 3-sentence status.</li>
+        <li>Tell it your first idea in plain English (1-2 sentences max).</li>
+        <li>Let it route to the PM. Run <code>/triage</code>.</li>
+        <li>Run <code>/clarify</code>. Answer questions; pick recommended answers when unsure.</li>
+        <li>Run <code>/spec</code>. <strong>Read the validation contract.</strong> Approve the spec.</li>
+        <li>Switch to Architect. Run <code>/plan</code>.</li>
+        <li>Switch to Software Developer. Run <code>/tasks</code>, then <code>/implement</code> task-by-task.</li>
+        <li>Run <code>/qa</code>. Verify validation contract is fully checked.</li>
+        <li>Merge. Run <code>/replan</code>. File any frustrations as lessons.</li>
+        <li>If lessons feel ready, run <code>/evolve</code> to ship the small ones now.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h2>How to know it's working</h2>
+      <ul>
+        <li><span class="pill pill-ok">GOOD</span> The Executive Manager answers your first status question without you asking which Principal owns what.</li>
+        <li><span class="pill pill-ok">GOOD</span> Every spec has testable acceptance criteria + a validation contract before any code is written.</li>
+        <li><span class="pill pill-ok">GOOD</span> Two different reviewers sign off &mdash; spec compliance person isn't the code quality person.</li>
+        <li><span class="pill pill-ok">GOOD</span> You can answer "why was this built this way?" by opening files, not by remembering chats.</li>
+        <li><span class="pill pill-ok">GOOD</span> <code>fleet.db</code> shows real dispatch rows for every task you ran.</li>
+        <li><span class="pill pill-ok">GOOD</span> After 1-2 features, <code>sprints/PI-1/lessons.md</code> has real candidates filed.</li>
+        <li><span class="pill pill-warn">WARN</span> You skipped <code>/clarify</code> "to save time" and the spec ended up wrong.</li>
+        <li><span class="pill pill-warn">WARN</span> Same agent did spec compliance AND code quality review (Article III violation).</li>
+        <li><span class="pill pill-warn">WARN</span> You edited a constitution file directly without <code>/constitution</code> &mdash; alignment with skills/templates can drift silently.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- COMMON GOTCHAS -->
+  <div class="card" style="margin-top:18px;">
+    <h2>Discipline that pays off &amp; gotchas to avoid</h2>
+    <div class="grid">
+      <div>
+        <h3 style="color:#1a7f37;">DO</h3>
+        <ul>
+          <li>Talk to the Executive Manager first, always.</li>
+          <li>Approve specs at the gate. Read the validation contract.</li>
+          <li>Trust the spec sizing rule &mdash; don't over-ceremonialize a 2-file bug fix.</li>
+          <li>Run <code>/replan</code> after EVERY feature DONE. 60 seconds.</li>
+          <li>File frustrations as lessons. <code>lesson-capture</code> skill is fast.</li>
+          <li>Use <code>--draft-only</code> for brownfield. Always. The first time.</li>
+          <li>Let workers stay constrained to 1-3 files per task. Big tasks need decomposition, not bigger workers.</li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="color:#9a3412;">DON'T</h3>
+        <ul>
+          <li>Skip <code>/clarify</code>. It's the main grilling moment for a reason.</li>
+          <li>Edit constitution files directly. Use <code>/constitution</code> &mdash; it semver-bumps and propagation-scans.</li>
+          <li>Let one reviewer do both review stages. Article III violation.</li>
+          <li>Merge with unchecked validation boxes. Article X violation.</li>
+          <li>Add a third-party dependency to the framework CLI without an ADR (Article VII / framework guideline).</li>
+          <li>Discard a lesson because it's inconvenient. Discard reasons are public.</li>
+          <li>Try to convert a whole brownfield project at once. Adopt for ONE refactor first.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHERE TO ASK QUESTIONS -->
+  <div class="grid" style="margin-top:18px;">
+    <div class="card">
+      <h2>Where you get grilled / questioned</h2>
+      <table>
+        <thead><tr><th>When</th><th>Who asks</th><th>About what</th></tr></thead>
+        <tbody>
+          <tr><td>Bootstrap</td><td>The CLI (you)</td><td>Project name, owner; <code>TODO(human)</code> markers for mission text, etc.</td></tr>
+          <tr><td>Capture idea</td><td>Executive Manager</td><td>One clarifying question only if intent/value is unclear</td></tr>
+          <tr><td><code>/triage</code></td><td>PM</td><td>RICE inputs (reach, impact, confidence, effort), priority</td></tr>
+          <tr><td><code>/clarify</code></td><td>PM (+ Architect joins)</td><td><span class="pill">main grilling</span> 9-category scan, &le;5 questions, one at a time, with recommendations</td></tr>
+          <tr><td><code>/grill</code> or <code>/grill-with-docs</code></td><td>Any agent</td><td>Free-form deeper grilling on a plan or design at any time</td></tr>
+          <tr><td>Spec gate</td><td>Architect &harr; PM</td><td>You approve before <code>/plan</code> can start</td></tr>
+          <tr><td>Level-2 decisions</td><td>Any Principal</td><td>New dependency, schema migration, scope change after sprint commit</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h2>Daily commands cheat-card</h2>
+      <table>
+        <tbody>
+          <tr><td>Status check</td><td><code>/state</code> (or just ask Exec Mgr)</td></tr>
+          <tr><td>Question of any kind</td><td><code>/ask &lt;question&gt;</code></td></tr>
+          <tr><td>New idea today</td><td>Tell Exec Mgr in plain English</td></tr>
+          <tr><td>Move from idea to spec</td><td><code>/triage</code> &rarr; <code>/clarify</code> &rarr; <code>/spec</code></td></tr>
+          <tr><td>Move spec to code</td><td><code>/plan</code> &rarr; <code>/tasks</code> &rarr; <code>/implement</code></td></tr>
+          <tr><td>Run tasks in parallel</td><td><code>/fleet</code> (only <span class="pill">[P]</span><span class="pill">[AFK]</span> tasks)</td></tr>
+          <tr><td>Verify before merge</td><td><code>/qa</code></td></tr>
+          <tr><td>After merge</td><td><code>/replan</code></td></tr>
+          <tr><td>Improve the framework itself</td><td>Capture via <code>lesson-capture</code> skill mid-work; then <code>/evolve</code></td></tr>
+          <tr><td>Amend a binding article</td><td><code>/constitution</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer">
+    Evolving Multi-Agent Framework v0.1 &middot;
+    <a href="https://github.com/rodolfolermacontreras/Evolving-Multi-Agent-Framework">github.com/rodolfolermacontreras/Evolving-Multi-Agent-Framework</a>
+    &middot; Owner: Rodolfo Lerma &middot; Print this page or share the URL
+  </div>
+
+</div>
+</body>
+</html>

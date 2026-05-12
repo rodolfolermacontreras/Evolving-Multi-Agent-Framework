@@ -2,62 +2,76 @@
 
 ## Project
 
-Day-to-Day Agent -- AI-powered personal work management system
+Evolving Multi-Agent Framework (working title: Spec-Driven Development / SDD) -- a portable,
+replicable system for orchestrating a fleet of AI agents through a structured development
+lifecycle.
 
 ## Owner
 
 Rodolfo Lerma, Senior Data Scientist (L63)
 WWIC Central Analytics / Design & Analytics, Microsoft
-Reporting chain: Rodolfo > Aziz (M+1) > Sam (M+2) > Nandini (M+3)
 
 ## Vision
 
-A single-pane-of-glass operating system providing a 360-degree view of work life:
+A framework that lets one human developer ship production-quality software at the pace of a
+small team, by treating AI agents as first-class team members with defined roles, scoped
+responsibilities, and explicit handoff protocols.
 
-- Priorities and next actions
-- Task completion and accountability tracking
-- Meetings, notes, and follow-ups
-- Reminders and scheduling
-- Status reporting and stakeholder communication
-
-The agent removes the cognitive overhead of tracking what to work on, what is done, and
-what to report -- so Rodolfo can focus on the work itself.
+The framework is project-agnostic. It can be bootstrapped onto any codebase -- web app,
+data pipeline, library, CLI, research repo -- without rewriting its core. The host project
+contributes its own constitution (mission, tech stack, principles); the framework contributes
+the process (lifecycle, agents, skills, gates, ledger).
 
 ## Users
 
-Primary user: Rodolfo (single-user system, local data)
-Indirect audience: Management chain (Aziz, Sam, Nandini) via generated status reports
+Primary users: solo developers and small teams who want to multiply their output by
+delegating tactical work to AI agents while keeping strategic decisions human-controlled.
+
+Indirect users: any downstream project that adopts SDD as its development methodology.
 
 ## Success Criteria
 
-The system succeeds when:
+The framework succeeds when:
 
-- Weekly status reports require no manual editing before sending
-- The project board reflects true work state without manual sync
-- Accountability logs capture daily progress without friction
-- Meeting transcripts are automatically summarized and filed
-- The inbox processes files without intervention
-- All M365 data (calendar, tasks) is surfaced in a single view
+- A new project can bootstrap SDD in under a day, following GENERALIZATION_SDD.md
+- Every shipped feature traces back through tasks -> plan -> spec -> clarified idea
+- The two-stage review (spec compliance + code quality) catches defects before merge
+- The fleet ledger captures every dispatch, decision, and handoff for full auditability
+- Generic worker agents become specialists by demonstrated competence, not configuration
+- The Principal Executive Manager can summarize project state from `exec/state.md` alone
+- A second project can adopt SDD without modifying the framework core
 
 ## Core Values
 
-1. RELIABILITY: Never lose data, corrupt state, or fail silently
-2. SIMPLICITY: Prefer stdlib over dependencies. Prefer simple over clever.
-3. TRANSPARENCY: Every LLM call is traceable. Every decision is auditable.
-4. PRIVACY: All data stays local or within Microsoft tenant. No external data sharing.
-5. VELOCITY: Small, frequent commits. Short feedback loops. TDD enforcement.
+1. SEPARATION OF CONCERNS: Strategy (Principals) and tactics (workers) are different roles with different agents.
+2. TRACEABILITY: Every artifact is a file. Every dispatch is logged. Every decision has an owner.
+3. SPECIALIZATION OVER GENERALISM: A reviewer that only reviews catches more than a general assistant. Workers stay constrained to 1-3 files per task.
+4. GENERIC BY DEFAULT, SPECIALIZED ON DEMAND: Workers start generic. They earn permanent identity through demonstrated competence in a domain.
+5. CEREMONY PROPORTIONAL TO RISK: Bug fixes < 3 files skip the spec. Schema changes require ADRs. Sizing prevents process bloat.
+6. PORTABILITY: The framework owns the process. The host project owns its mission, stack, and principles. Neither overrides the other.
+7. HUMAN IN COMMAND: The human always holds the final approval. Agents propose; humans dispose on Level 1 and Level 2 decisions.
 
 ## Non-Negotiables
 
-Source of truth: `.github/copilot-instructions.md`
+These rules apply to the framework repository itself. Host projects that adopt SDD layer
+their own non-negotiables on top via their own `.github/copilot-instructions.md`.
 
-- Never touch master branch
-- Never commit directly to integration/improvements
-- No package installs without discussion
-- Always use .venv (never global Python)
-- No emojis in code, docs, or commits
-- No new docs unless explicitly asked
-- Completed items are never deleted (mark done with date)
+- Two-folder split is invariant: `.github/` for Copilot-native files, `spec-driven-development/` for process state
+- Principal agents live as `.github/agents/*.agent.md` for VS Code auto-discovery
+- Constitution files are immutable without an ADR
+- No feature merges without an approved spec (except bug fixes < 3 files)
+- Two-stage review order is fixed: spec compliance first, code quality second
+- Fleet ledger is the source of truth for all dispatches
+- Executive Manager sees only `exec/state.md`, never raw artifacts
+- Completed roadmap items are never deleted -- mark done with date
 - Small, frequent commits -- format: `type: short description`
-- Read before modifying
-- Clean as you go (no orphan code, unused variables, stale scripts)
+- No emojis in code, docs, or commits
+- Dates always `YYYY-MM-DD`
+
+## Origin
+
+The framework was extracted from the Day-to-Day Agent project (a personal AI work
+management dashboard built with FastAPI/HTMX) on 2026-05-12 after proving its value
+inside that codebase. It is now a standalone initiative. Day-to-Day Agent remains a
+useful reference implementation and example host project but is no longer the framework's
+target.

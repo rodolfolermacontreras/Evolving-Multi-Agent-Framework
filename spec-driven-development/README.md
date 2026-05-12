@@ -1,8 +1,12 @@
 # Spec-Driven Development Framework
 
-A disciplined, AI-native development process for the Day-to-Day Agent. Four Principal
-agents orchestrate generic workers through a spec-driven lifecycle, producing traceable,
-high-quality features with minimal human ceremony overhead.
+A disciplined, AI-native development process for any project. Four Principal agents
+orchestrate a fleet of generic workers through a spec-driven lifecycle, producing
+traceable, high-quality features with minimal human ceremony overhead.
+
+The framework is project-agnostic. It can be bootstrapped onto any codebase by copying
+`.github/` and `spec-driven-development/` into the host project root and authoring the
+host's own constitution. See `GENERALIZATION_SDD.md` for the bootstrap procedure.
 
 Full details: `spec-driven-development/docs/FINAL_MERGED_PLAN.md`
 

@@ -1,5 +1,27 @@
 # Architectural Principles
 
+> **STATUS NOTE (2026-05-12): These nine articles were written for the Day-to-Day Agent
+> host project (FastAPI/HTMX/SQLite/MSAL) and reference its specific modules
+> (`agent/engine.py`, `world_state.py`, `safe_path()`, the 743-test baseline, etc.).
+>
+> They are NOT yet generalized to describe the framework's own architectural rules.
+> They remain here as a working example of what host-project principles look like, but
+> they should not be read as binding rules for the framework repository itself.
+>
+> Generalization of `principles.md` is tracked as a PI-1 deliverable in
+> `constitution/roadmap.md`. The generalized version will describe framework-level
+> rules (two-folder split, agent format, two-stage review order, ledger immutability,
+> spec sizing, etc.) rather than host-project-level rules.
+>
+> Until then, the binding rules for the framework are:
+> - `constitution/mission.md` (Non-Negotiables section)
+> - `.github/copilot-instructions.md` (Conventions section)
+> - `constitution/decision-policy.md` and `constitution/quality-policy.md`
+
+---
+
+# Architectural Principles (Day-to-Day Agent example -- pending generalization)
+
 Nine binding articles. All agents must honor these. Exceptions require a Level 1 or Level 2
 decision and an ADR entry.
 

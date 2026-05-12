@@ -1,86 +1,115 @@
 # Technology Stack
 
-## Runtime
+This file describes the technologies the **framework itself** is built on. Host projects
+that adopt SDD will have their own tech stack documented in their own constitution; the
+framework imposes nothing on the host beyond the two-folder split and the file formats
+described here.
 
-- Python 3.12+ (required)
-- Virtual environment: `.venv` (mandatory -- never use global Python)
-- Primary OS: Windows (development), Linux (Docker container)
+---
 
-## Web Framework
+## Framework Core (no runtime dependency required)
 
-- FastAPI (ASGI, async support)
-- HTMX + Jinja2 for frontend (server-rendered, no SPA framework)
-- Alpine.js for lightweight client-side interactivity
-- Static assets in `static/` -- all styles in `static/css/main.css`
-- Templates in `templates/` -- `base.html` is the shell, pages in `templates/pages/`
-- Dark theme uses `--accent-*` CSS variables (not `--success`/`--error`/`--warning`)
+The framework is fundamentally a **set of Markdown files, YAML schemas, and conventions**.
+A host project can use SDD with nothing more than a text editor and VS Code with the
+GitHub Copilot extension.
 
-## Database
+- Markdown for all artifacts (specs, plans, tasks, ADRs, retros)
+- YAML frontmatter on agents, skills, and prompts
+- JSON for machine-readable registries (`roster/agents.json`, `roster/skills.json`, `roster/skill_packs.json`)
+- SQLite for the fleet ledger (`ledger/fleet.db`)
 
-- SQLite with WAL mode (`agent/daytoday.db`)
-- SQLModel (SQLAlchemy wrapper) for ORM -- tables defined in `agent/models.py`
-- `get_session()` is the FastAPI dependency for DB access
-- Legacy: JSON dotfiles in `agent/` -- migration to SQLite is ongoing (tech debt D1)
+## Agent Runtime
 
-## Authentication
+- VS Code with the GitHub Copilot extension (Chat + Agents)
+- `.github/agents/*.agent.md` format -- auto-discovered by VS Code Copilot Chat
+- `.github/skills/**/*.md` -- composable skill files loaded on demand by agents
+- `.github/prompts/*.prompt.md` -- slash commands surfaced in Copilot Chat
+- `.github/instructions/*.instructions.md` -- scoped guidance applied by file glob
 
-- MSAL (Microsoft Authentication Library) for M365 integration
-- Single-user passthrough auth (`agent/auth.py`) -- no multi-tenant
+## CLI Automation (optional, currently scaffolded)
 
-## LLM Integration
+- Python 3.12+ for the CLI tooling under `spec-driven-development/cli/`
+- Standard library preferred (`sqlite3`, `json`, `pathlib`, `argparse`)
+- Approved third-party libraries when needed: `gitpython` (worktree management), `jinja2` (template rendering)
+- Virtual environment: `.venv` (mandatory when CLI is used)
+- The CLI is a convenience layer -- the framework remains usable without it
 
-- OpenAI-compatible API (`agent/llm.py`) -- all LLM calls go through this layer
-- Primary endpoint: `models.inference.ai.azure.com` (GitHub Models: GPT-4o, DeepSeek, etc.)
-- Fallback endpoint: `api.githubcopilot.com` (Claude, Gemini, GPT-5.x via Copilot Chat)
-- Token resolved from `GITHUB_TOKEN` env var or `gh auth token` CLI
-- Reasoning models (o3/o4-mini) auto-switch to `max_completion_tokens`, strip system messages
-- Retry with exponential backoff; per-call observability via `record_llm_call`
+## Storage
 
-## Scheduling
+- SQLite (`ledger/fleet.db`) -- single source of truth for fleet dispatches, agent records, skill assignments, and decisions
+- Plain Markdown files for all narrative artifacts (specs, plans, tasks, retros, ADRs)
+- Plain JSON for registry data (rosters)
+- No database server, no message broker, no external state store required
 
-- APScheduler for in-process scheduling
-- Windows Task Scheduler for system-level jobs (`--install-scheduler`)
+## Version Control
+
+- Git, with worktree-based parallelism (`../wt-{shortname}`)
+- Branch convention: feature branches off the host project's integration trunk
+- The framework does not mandate a specific branching model -- it documents conventions in
+  `principles.md` Article V that host projects can adopt or override
 
 ## Testing
 
-- pytest with `tmp_path`-based isolation
-- `patched_settings` fixture (in `conftest.py`) monkeypatches `settings.paths` to temp dir
-- `MockLLMClient` for LLM-dependent tests (set `default_content`, assert on `call_log`)
-- Factory helpers: `make_idea()`, `write_ideas_file()`, `write_project_status()`
-- Patch at the source module, not the import site
-- Current baseline: 743 tests, 36 files, ~75s runtime -- count must never decrease
+- The framework has no runtime tests of its own at v0.1 -- it is a process and document set
+- Future: schema validation tests for agent/skill/prompt frontmatter
+- Future: lint rules enforcing the two-folder split and naming conventions
+- Host project test conventions are documented in the host's own `tech-stack.md`
 
-## Deployment
+## Documentation
 
-- Docker (Dockerfile + `docker-compose.yml`)
-- `DATA_ROOT=/data` redirects user data to mounted volume, app code stays at `/app`
-- Port 8000 (dashboard)
+- All framework documentation in Markdown
+- Diagrams in ASCII art (no binary diagram files committed)
+- ADRs in `spec-driven-development/docs/ADR/` numbered sequentially
+- The portability guide `spec-driven-development/GENERALIZATION_SDD.md` is the source of
+  truth for adopting SDD on a new project
 
-## Key Module Map
+---
 
-| Module | Responsibility |
-|--------|---------------|
-| `agent/engine.py` | Lazy singleton orchestrator -- watcher, scheduler, WebSocket broadcast |
-| `agent/api.py` + `agent/routes/` | FastAPI app + 5 router modules (reminders, ideas, accountability, generation, graph) |
-| `agent/llm.py` | Dual-endpoint LLM client with observability |
-| `agent/config.py` | Frozen dataclasses composed into `settings` object |
-| `agent/world_state.py` | Aggregates all data sources for LLM context |
-| `agent/board.py` | Project board aggregation -- `MAIN_PROJECTS` controls visibility |
-| `agent/status_report.py` + `agent/status_report_renderer.py` | Bi-weekly HTML report pipeline |
-| `agent/workflows/` | Self-contained workflow modules (weekly_plan, transcript, digest, etc.) |
-| `agent/prompts/templates.py` | All LLM prompt templates |
-| `agent/schemas.py` | Pydantic request models for all POST endpoints |
+## Key Files and Directories
 
-## Approval-Required Changes
+| Path | Responsibility |
+|------|----------------|
+| `.github/copilot-instructions.md` | Root authority -- read on every session start |
+| `.github/agents/*.agent.md` | Agent definitions (4 Principals + N generic workers) |
+| `.github/skills/**/*.md` | Composable skills, organized by category (core, workflow, engineering, operational, domain) |
+| `.github/prompts/*.prompt.md` | Slash commands (`/triage`, `/spec`, `/plan`, `/tasks`, `/fleet`, `/implement`, etc.) |
+| `.github/instructions/*.instructions.md` | Scoped guidance applied by file glob |
+| `spec-driven-development/CONTEXT.md` | Shared vocabulary for all agents |
+| `spec-driven-development/GENERALIZATION_SDD.md` | Portability guide for adopting SDD on a new project |
+| `spec-driven-development/constitution/` | Mission, tech stack, principles, roadmap, decision policy, quality policy |
+| `spec-driven-development/docs/FINAL_MERGED_PLAN.md` | Definitive 15-section framework plan |
+| `spec-driven-development/docs/ADR/` | Architecture Decision Records |
+| `spec-driven-development/cli/` | Python automation scaffolds (fleet, qa, retro, state_builder) |
+| `spec-driven-development/roster/` | Machine-readable agent and skill registries |
+| `spec-driven-development/templates/` | Reusable document templates (spec, plan, tasks, agent brief, ADR, retro) |
+| `spec-driven-development/specs/` | One directory per feature (spec, plan, tasks, clarification log, review) |
+| `spec-driven-development/sprints/` | Sprint artifacts under `PI-{N}/sprint-{M}/` |
+| `spec-driven-development/backlog/` | `IDEAS.md` (raw) and `BACKLOG.md` (RICE-scored) |
+| `spec-driven-development/exec/state.md` | Auto-built executive summary (<= 2KB) |
+| `spec-driven-development/ledger/fleet.db` | SQLite source of truth for all dispatches |
 
-The following require human approval (Level 2 decision) before implementation begins:
+---
 
-- New pip dependency
-- Schema migration
-- M365 permission scope change
-- New external API integration
-- Any change to `agent/models.py` table structure
+## Approval-Required Changes (framework repo)
+
+The following require human approval (Level 2 decision) and an ADR before implementation:
+
+- Adding a new principal agent role
+- Changing the lifecycle phase order or gate definitions
+- Modifying the agent or skill frontmatter schema
+- Adding a new top-level directory under `spec-driven-development/`
+- Adding a runtime dependency to the CLI beyond the approved list
+- Changing the ledger schema once it is operational
 
 ## ADR Location
 
 `spec-driven-development/docs/ADR/`
+
+---
+
+## Host Project Tech Stack
+
+When SDD is bootstrapped onto a host project, the host's own technology stack is
+documented separately under that project's constitution. The framework does not impose
+languages, frameworks, or libraries on the host project. See
+`spec-driven-development/GENERALIZATION_SDD.md` for the bootstrap procedure.

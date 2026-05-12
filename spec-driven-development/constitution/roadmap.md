@@ -52,6 +52,7 @@ lifecycle end-to-end on a real feature.
 
 - [ ] Constitution generalized: `mission.md`, `tech-stack.md`, `CONTEXT.md`, `roadmap.md` decoupled from Day-to-Day Agent specifics (in progress)
 - [x] `principles.md` generalized -- nine binding articles rewritten to describe framework rules, not host project rules
+- [ ] Article X validation contract and TDD gate deliverable planned for PI-1
 - [ ] Root `README.md` created -- explains what the framework is and how to bootstrap it
 - [ ] Day-to-Day-specific domain skills (`fastapi-routes`, `htmx-frontend`, `pytest-runner`) marked as examples or replaced with framework-relevant skills
 - [ ] First pilot feature delivered through the full SDD lifecycle (idea -> backlog -> clarify -> spec -> plan -> tasks -> implement -> review -> done)

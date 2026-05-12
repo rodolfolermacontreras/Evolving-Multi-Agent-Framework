@@ -19,9 +19,12 @@
 
 ## Acceptance Criteria
 
-1. {AC_001}
-2. {AC_002}
-3. {AC_003}
+Each criterion MUST be phrased as a testable assertion that an automated or
+manual check can prove true or false.
+
+1. Given {PRECONDITION_001}, when {ACTION_001}, then {ASSERTABLE_OUTCOME_001}.
+2. Given {PRECONDITION_002}, when {ACTION_002}, then {ASSERTABLE_OUTCOME_002}.
+3. Given {PRECONDITION_003}, when {ACTION_003}, then {ASSERTABLE_OUTCOME_003}.
 
 ## Affected Modules
 
@@ -46,6 +49,13 @@
 - Integration: {INTEGRATION_TEST_PLAN}
 - End-to-end/manual: {E2E_OR_MANUAL_TEST_PLAN}
 - Regression: {REGRESSION_TEST_PLAN}
+
+## Validation Contract
+
+The binding validation contract for this feature lives in the sibling file
+`validation.md` in this feature directory. It is written during `/spec`, locked
+at `/tasks`, and must have zero unchecked required items before implementation
+can be considered complete.
 
 ## Traceability Matrix
 

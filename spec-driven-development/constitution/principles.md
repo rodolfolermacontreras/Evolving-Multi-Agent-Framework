@@ -1,13 +1,13 @@
 # Framework Principles
 
-Nine binding articles. They define how the **framework itself** works -- the rules
+Ten binding articles. They define how the **framework itself** works -- the rules
 that any host project adopting SDD inherits. All agents (Principals and workers)
 must honor these. Exceptions require a Level 2 decision and an ADR entry.
 
 These are framework-level rules. The host project's own engineering principles
 (coding conventions, testing baselines, security rules tied to its stack) live in
 a separate `principles.md` *inside the host project's adapted constitution*. When
-a host project bootstraps SDD, it inherits these nine framework articles and adds
+a host project bootstraps SDD, it inherits these ten framework articles and adds
 its own host-level articles on top.
 
 ---
@@ -107,6 +107,20 @@ integrations, production merges, scope changes after sprint commitment)
 decision unilaterally, no matter how confident. Gates with Level 2 stakes
 include the human as a mandatory approver.
 
+## Article X: Validation Is a Pre-Implementation Contract
+
+Every spec ships with a validation block that defines testable acceptance
+criteria before implementation begins; the validation contract is committed
+alongside the spec, reviewed at the SPEC gate, and locked when `/tasks` is
+invoked. Implementation is complete when and only when every checked item in
+the validation contract passes. Production-code changes without a corresponding
+test are rejected at the IMPLEMENT gate unless the task is explicitly tagged
+`[NO-TEST-NEEDED]` with a written justification accepted by the
+spec-compliance reviewer. This codifies the convergent finding from Spec-Kit
+(`/checklist` unit tests for requirements), the DeepLearning.AI SDD course
+(Validation Scorecard), and sc-spec (`validation.md` with Definition of Done):
+validation criteria belong before implementation, not after.
+
 ---
 
 ## Design Heuristics (not binding articles, but strong defaults)
@@ -126,12 +140,12 @@ trade-offs are otherwise balanced.
 
 ## Host Project Articles
 
-A host project that adopts SDD inherits these nine framework articles and
+A host project that adopts SDD inherits these ten framework articles and
 adds its own articles capturing host-specific rules: coding conventions tied
 to its language/framework, security rules tied to its data sensitivity,
 testing baselines tied to its current state, deployment rules tied to its
 infrastructure. Host articles are numbered starting from H1 to distinguish
-them from framework articles (I-IX).
+them from framework articles (I-X).
 
 The Day-to-Day Agent host project's articles -- the original nine that lived
 in this file before generalization -- are an example of host articles. They

@@ -31,9 +31,9 @@ The solution was to formalize the development process itself: a **team of specia
 
 The framework draws from four key sources:
 
-1. **Spec-Kit** (by Cline) -- Command naming convention (`constitution`, `specify`, `clarify`, `plan`, `tasks`, `analyze`, `implement`). We adopted the vocabulary for future interop but own our implementation.
-2. **Matt Pocock's Skills Pattern** -- Composable, single-purpose skill files that agents load on demand. Small, swappable, human-readable. The `SKILL.md` format with YAML frontmatter follows this philosophy.
-3. **DeepLearning.AI SDD Course** -- The concept of spec-driven development as a formal methodology for AI-augmented coding. Specs as first-class artifacts, not afterthoughts.
+1. **Spec-Kit** (by GitHub) -- https://github.com/github/spec-kit -- Command naming convention (`constitution`, `specify`, `clarify`, `plan`, `tasks`, `analyze`, `implement`). We adopted the vocabulary for future interop but own our implementation.
+2. **Matt Pocock's Skills Pattern** -- https://github.com/mattpocock/skills -- Composable, single-purpose skill files that agents load on demand. Small, swappable, human-readable. The `SKILL.md` format with YAML frontmatter follows this philosophy. The *core* `grill-me` concept (interview the user one question at a time until shared understanding) also comes from here; our SDD-lifecycle framing and structure are our own extensions.
+3. **DeepLearning.AI "Spec-Driven Development with Coding Agents" course** by Paul Everitt (JetBrains) -- https://www.deeplearning.ai/short-courses/spec-driven-development-with-coding-agents/ -- Conceptual foundation for the 3-file constitution model (mission + tech-stack + roadmap), the feature loop, the brownfield-via-archaeology approach, and treating specs as versioned first-class artifacts. Companion code repo: https://github.com/rodolfolermacontreras/sc-spec-driven-development-files.
 4. **SAFe (Scaled Agile Framework)** -- Adapted for a single developer + AI fleet. Program Increments (10-week), Sprints (2-week), but treated as **symbolic cadence** -- AI fleet compresses wall-clock time dramatically.
 
 ---

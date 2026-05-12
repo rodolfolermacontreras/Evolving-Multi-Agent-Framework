@@ -196,10 +196,10 @@ is intended for any project, in any tech stack.
 
 ## Inspirations
 
-- **Spec-Kit** (Cline) -- command vocabulary
-- **Matt Pocock's Skills Pattern** -- composable single-purpose `SKILL.md` files
-- **DeepLearning.AI SDD course** -- specs as first-class artifacts
-- **SAFe** -- adapted for a single developer + AI fleet, with symbolic cadence
+- **Spec-Kit (GitHub)** — https://github.com/github/spec-kit. The command vocabulary (`constitution`, `specify`, `clarify`, `plan`, `tasks`, `analyze`, `implement`) and the spec-quality-checklist concept come from here.
+- **DeepLearning.AI "Spec-Driven Development with Coding Agents"** course by Paul Everitt (JetBrains) — https://www.deeplearning.ai/short-courses/spec-driven-development-with-coding-agents/. The 3-file constitution model (`mission.md` + `tech-stack.md` + `roadmap.md`), the feature-loop, the brownfield-via-archaeology approach, and the validation-scorecard-as-pre-implementation-contract idea come from here. Companion code repo: [`sc-spec-driven-development-files`](https://github.com/rodolfolermacontreras/sc-spec-driven-development-files).
+- **Matt Pocock's Skills Pattern** — https://github.com/mattpocock/skills. The composable single-purpose `SKILL.md` format with YAML frontmatter and the *core* `grill-me` concept (interview the user one question at a time until shared understanding is reached). Our SDD-lifecycle framing, question taxonomy, and completion signals are our own extensions on top of his ~60-word original.
+- **SAFe (Scaled Agile Framework)** — adapted for a single developer + AI fleet, with PI/Sprint cadence treated as **symbolic** rhythm, not wall-clock duration.
 
 ## License
 

@@ -257,8 +257,12 @@ The framework has never been used to deliver a real feature. All assets are scaf
 
 On every new session:
 
-1. Read this file
-2. Run `git log --oneline -10` to see recent work
-3. Read `spec-driven-development/CONTEXT.md` for shared vocabulary
-4. Check `spec-driven-development/constitution/roadmap.md` for what is done vs remaining
-5. If working on generalization, read `spec-driven-development/GENERALIZATION_SDD.md`
+1. Read `INSTRUCTIONS.md` at the repo root (entry point for any agent).
+2. Read this file (`.github/copilot-instructions.md`).
+3. Run `git log --oneline -10` to see recent work.
+4. Read `spec-driven-development/CONTEXT.md` for shared vocabulary.
+5. **Read `spec-driven-development/sessions/SESSION-MEMORY.md`** for the most recent checkpoint — full state, commit chain, what's done, what's deferred, ranked next-session recommendations.
+6. Check `spec-driven-development/constitution/roadmap.md` for what is done vs remaining.
+7. If working on generalization, read `spec-driven-development/GENERALIZATION_SDD.md`.
+
+When ending a working session, update `spec-driven-development/sessions/SESSION-MEMORY.md` with the new state and commit it. Use the `handoff` skill (`.github/skills/operational/handoff/SKILL.md`) for the format.

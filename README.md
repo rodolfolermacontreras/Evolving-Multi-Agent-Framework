@@ -157,13 +157,15 @@ spec-driven-development/                   <- process state
 
 | # | Document | Why |
 |---|----------|-----|
-| 1 | `.github/copilot-instructions.md` | Project context, history, what is next |
-| 2 | `spec-driven-development/CONTEXT.md` | Shared vocabulary for all agents |
-| 3 | `spec-driven-development/README.md` | Slash command reference + lifecycle quickstart |
-| 4 | `spec-driven-development/constitution/mission.md` | Mission, vision, non-negotiables |
-| 5 | `spec-driven-development/constitution/roadmap.md` | What is done, what is next |
-| 6 | `spec-driven-development/GENERALIZATION_SDD.md` | Full portability and bootstrap guide |
-| 7 | `spec-driven-development/docs/FINAL_MERGED_PLAN.md` | Definitive 15-section framework plan |
+| 1 | `INSTRUCTIONS.md` (root) | Entry point for any AI agent — points to everything else |
+| 2 | `.github/copilot-instructions.md` | Project context, history, what is next |
+| 3 | `spec-driven-development/CONTEXT.md` | Shared vocabulary for all agents |
+| 4 | `spec-driven-development/sessions/SESSION-MEMORY.md` | Most recent session checkpoint |
+| 5 | `spec-driven-development/README.md` | Slash command reference + lifecycle quickstart |
+| 6 | `spec-driven-development/constitution/mission.md` | Mission, vision, non-negotiables |
+| 7 | `spec-driven-development/constitution/roadmap.md` | What is done, what is next |
+| 8 | `spec-driven-development/GENERALIZATION_SDD.md` | Full portability and bootstrap guide |
+| 9 | `spec-driven-development/docs/FINAL_MERGED_PLAN.md` | Definitive 15-section framework plan |
 
 ---
 

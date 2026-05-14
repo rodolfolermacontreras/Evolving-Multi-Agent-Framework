@@ -19,7 +19,16 @@ Prioritized backlog with RICE scoring. Managed by Principal Product Manager.
 (empty)
 
 ## P3 - Could Have
-(empty)
+
+| ID | Title | Priority | Reach | Impact | Confidence | Effort | RICE | Sprint | Status |
+|----|-------|----------|-------|--------|------------|--------|------|--------|--------|
+| SDD-001 | Fleet Bridge Dashboard -- single-page ops console rendering fleet hierarchy, dispatch ledger, and spec lifecycle | P3 | 4 | 2 | 0.9 | 3 | 2.4 | Unscheduled | Design exploration complete |
+
+Notes:
+- Design spec pre-built at `specs/2026-05-13-fleet-bridge-dashboard/DESIGN.md`
+- Depends on: Fleet Ledger v0.1 (done), `cli/fleet.py` (PI-2)
+- Next step when prioritized: `/clarify` then `/spec`
+- Rationale for P3: high demo value but does not unblock PI-2 CLI maturity work; becomes more valuable after fleet dispatches real work
 
 ## P4 - Won't (this PI)
 (empty)

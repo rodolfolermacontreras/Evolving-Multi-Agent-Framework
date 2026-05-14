@@ -22,6 +22,11 @@
 
 ## Task Breakdown
 
+> **Cross-reference rule:** In the Acceptance Test column, reference the spec's
+> AC identifiers (e.g., "proves AC1, AC3") and the validation contract checkbox
+> names rather than restating criteria. This prevents prose duplication.
+> Provenance: LESSON-003, source feature `specs/2026-05-12-fleet-ledger/`.
+
 | Task ID | Description | File Scope | Acceptance Test | Effort (S/M/L) | Deps | Mode (AFK/HITL) | Fleet Dispatch Eligible | Status |
 |---------|-------------|------------|-----------------|----------------|------|-----------------|-------------------------|--------|
 | T-{SPEC_DATE}-001 | {TASK_001_DESCRIPTION} | {TASK_001_FILE_SCOPE} | {TASK_001_ACCEPTANCE_TEST} | {S_M_L} | {NONE_OR_TASK_IDS} | {AFK_OR_HITL} | {YES_OR_NO} | pending |

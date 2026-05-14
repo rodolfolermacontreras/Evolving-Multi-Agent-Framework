@@ -11,6 +11,12 @@ This contract is written DURING `/spec`, locked at `/tasks`, and verified at `/q
 
 ## Automated Tests
 
+> **Cross-reference rule:** Each test name below maps to one or more AC
+> identifiers from `spec.md`. Use the format `proves AC1` to link the
+> test to its requirement. The spec is the single source of truth for
+> acceptance criteria wording.
+> Provenance: LESSON-003, source feature `specs/2026-05-12-fleet-ledger/`.
+
 - [ ] {AUTOMATED_TEST_001}: proves {AC_OR_FR_REFERENCE_001}
 - [ ] {AUTOMATED_TEST_002}: proves {AC_OR_FR_REFERENCE_002}
 - [ ] {AUTOMATED_TEST_003}: proves {AC_OR_FR_REFERENCE_003}

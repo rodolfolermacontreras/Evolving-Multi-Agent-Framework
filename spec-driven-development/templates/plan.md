@@ -47,6 +47,11 @@
 
 ## Validation Criteria
 
+> **Cross-reference rule:** Use the AC identifiers from `spec.md` (e.g., AC1,
+> AC2) instead of restating acceptance criteria prose. Each checkbox below
+> should reference the spec AC it validates.
+> Provenance: LESSON-003, source feature `specs/2026-05-12-fleet-ledger/`.
+
 - [ ] {VALIDATION_001}
 - [ ] {VALIDATION_002}
 - [ ] {VALIDATION_003}

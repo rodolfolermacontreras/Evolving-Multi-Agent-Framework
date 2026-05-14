@@ -8,12 +8,13 @@ last_amended: 2026-05-12
 
 ## Test Baseline
 
-The test suite must never regress. Current baseline: **743 tests, 36 files**.
+The test suite must never regress.
 
 - Every code change ships with tests
 - Test count at merge must be >= test count at branch creation
 - Failing tests block merge -- no exceptions
-- Run the full suite: `.venv\Scripts\python.exe -m pytest tests/ -v --tb=short`
+- Run tests per the host project's test conventions (e.g., `python -m pytest <test-path> -v --tb=short`)
+- The framework's own tests: `python -m pytest spec-driven-development/ledger/test_ledger.py -v`
 
 ## Two-Stage Code Review
 
@@ -45,9 +46,7 @@ Issue classification:
 Check for:
 - Error handling completeness (no bare `except:`)
 - Edge cases (null, empty, boundary values)
-- Security: `safe_path()` for file paths, `esc()` for HTML output
-- Concurrency: `file_lock()` for JSON store access
-- Pydantic models for all POST endpoints (`agent/schemas.py`)
+- Security: input validation and path sanitization appropriate to the host stack
 - No new dependencies introduced without Level 2 approval
 - No emojis anywhere
 
@@ -55,23 +54,23 @@ Check for:
 
 | Change Type | Required Validation |
 |-------------|---------------------|
-| Backend route | Targeted pytest, Pydantic validation, safe_path/esc review |
-| DB/model change | CRUD tests, migration compatibility, tmp_path isolation |
-| HTMX/UI | Route + template test, accessibility review |
-| LLM workflow | MockLLMClient test, prompt grounding, observability check |
-| Status report | Renderer sanity test, sidecar override test |
-| M365/MSAL | Mocked Graph flow, no token logging |
-| Docs/spec only | Link/path sanity and constitution consistency |
+| Schema / data model change | CRUD tests, migration compatibility, tmp_path isolation |
+| CLI script | Targeted pytest, `--help` smoke check, stdlib-only import scan |
+| Agent / skill / prompt | Link/path sanity and constitution consistency |
+| Docs / spec only | Link/path sanity and constitution consistency |
+
+Host projects should extend this table with stack-specific rows (e.g., backend
+routes, UI templates, LLM workflows) in their own `quality-policy.md`.
 
 ## Security Conventions
 
 These are not optional:
 
-- File path from user input -> `safe_path(base, *parts)` from `agent/routes/__init__.py`
-- User content in HTML template -> `esc(text)` from `agent/routes/__init__.py`
-- API mutation endpoint -> Pydantic model in `agent/schemas.py`, returns 422 on failure
-- JSON store read/write -> `file_lock()` from `agent/utils.py` (thread RLock + OS lock)
-- Credentials/tokens -> environment variables only, never in code or logs
+- Validate and sanitize all external input at system boundaries
+- Never store credentials or tokens in code, logs, or committed files
+- Use environment variables for secrets
+- Host projects document their stack-specific security helpers (e.g., path
+  sanitization, HTML escaping, CSRF protection) in their own `quality-policy.md`
 
 ## SDD Scorecard Metrics
 
@@ -95,5 +94,5 @@ A task is done when ALL of the following are true:
 - [ ] Test count >= baseline
 - [ ] All new tests pass
 - [ ] Committed with `type: short description` format
-- [ ] Merged to `integration/improvements` via feature branch
-- [ ] `BOARD.md` updated in the current sprint
+- [ ] Merged to integration branch via feature branch
+- [ ] Sprint board updated (if applicable)

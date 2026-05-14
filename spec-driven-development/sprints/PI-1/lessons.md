@@ -39,9 +39,9 @@ Each lesson is one entry:
 - Evidence: Fleet Ledger v0.1 intentionally avoided migrations, but the first follow-up field addition will otherwise require ad hoc schema evolution decisions.
 - Affects: `spec-driven-development/ledger/`, `spec-driven-development/constitution/principles.md`, future ledger docs or templates
 - Estimated effort: S
-- Status: open
-- Curator decision: {filled in by /evolve}
-- PR / commit: {filled in when shipped}
+- Status: curated-defer
+- Curator decision: DEFER to PI-2. No schema change is imminent; define when cli/fleet.py drives the first real migration need.
+- PR / commit: n/a (deferred)
 
 ### LESSON-003: Reduce validation prose duplication
 
@@ -52,9 +52,9 @@ Each lesson is one entry:
 - Evidence: The pilot benefited from validation-first work, but repeated the same AC/test mapping across `spec.md`, `plan.md`, `tasks.md`, and `validation.md`.
 - Affects: `spec-driven-development/templates/feature-spec.md`, `spec-driven-development/templates/plan.md`, `spec-driven-development/templates/task-list.md`, `spec-driven-development/templates/validation.md`
 - Estimated effort: M
-- Status: open
-- Curator decision: {filled in by /evolve}
-- PR / commit: {filled in when shipped}
+- Status: curated-ship
+- Curator decision: SHIP. Cross-reference blockquotes added to plan, task-list, and validation templates.
+- PR / commit: bb5a762
 
 ### LESSON-002: Clarify task id convention inside feature directories
 
@@ -65,9 +65,9 @@ Each lesson is one entry:
 - Evidence: The task template prescribes `T-{spec-date}-{NNN}`, while the pilot requested `T-001` through `T-00N`; both are understandable but inconsistent.
 - Affects: `spec-driven-development/templates/task-list.md`, task-writing prompts
 - Estimated effort: S
-- Status: open
-- Curator decision: {filled in by /evolve}
-- PR / commit: {filled in when shipped}
+- Status: curated-ship
+- Curator decision: SHIP. Task ID convention note added to task-list template; local short IDs allowed inside date-prefixed dirs.
+- PR / commit: 2d5d729
 
 ### LESSON-001: Add a Python stdlib CLI utility pattern
 
@@ -78,6 +78,6 @@ Each lesson is one entry:
 - Evidence: ECHO's `bootstrap.py` provided style hints, but the ledger CLI still had to derive its own conventions for subcommands, default paths, and import boundaries.
 - Affects: `spec-driven-development/cli/`, future developer docs or templates
 - Estimated effort: S
-- Status: open
-- Curator decision: {filled in by /evolve}
-- PR / commit: {filled in when shipped}
+- Status: curated-ship
+- Curator decision: SHIP. CLI-PATTERN.md created in docs/ with skeleton and 10 rules extracted from 3 proven scripts.
+- PR / commit: 8ee6840

@@ -9,7 +9,7 @@
     "id": "project-context",
     "path": ".github/skills/core/project-context/SKILL.md",
     "category": "core",
-    "description": "Provides Day-to-Day project context, architecture, and conventions."
+    "description": "Provides host project context, architecture, and conventions."
   },
   {
     "id": "git-workflow",
@@ -21,7 +21,7 @@
     "id": "testing-conventions",
     "path": ".github/skills/core/testing-conventions/SKILL.md",
     "category": "core",
-    "description": "Captures pytest, tmp_path, MockLLMClient, and validation norms."
+    "description": "Captures pytest, tmp_path, and project-specific test fixture norms."
   },
   {
     "id": "constitution-sync",

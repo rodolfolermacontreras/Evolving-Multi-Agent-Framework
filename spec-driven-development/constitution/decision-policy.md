@@ -44,9 +44,9 @@ the shape of the public API. Examples:
 - Moving a function from one module to another
 - Choosing a new architectural pattern (e.g., adding a registry, changing data flow)
 - Deciding between two implementation approaches with different trade-offs
-- Adding a new column to an existing SQLModel table (no migration required)
-- Creating a new module in `agent/`
-- Changing how world state is assembled
+- Adding a new column to an existing database table (no migration required)
+- Creating a new module
+- Changing how shared state is assembled
 
 **Rule**: If it affects files outside the task brief, or sets a precedent, it is Level 1.
 
@@ -61,12 +61,12 @@ the shape of the public API. Examples:
 Decisions that are irreversible, high-risk, privacy-sensitive, or that affect production.
 Implementation must STOP until approval is received. Examples:
 
-- Adding a new pip dependency (any package not already in `agent/requirements.txt`)
+- Adding a new pip dependency (any package not already in the host project's requirements)
 - Schema migration (dropping/renaming columns, changing table structure)
-- Changing M365 permission scopes in MSAL configuration
-- Merging `integration/improvements` into `master`
-- Any operation on the `master` branch
-- Deleting or archiving historical data (accountability logs, meeting summaries)
+- Changing authentication or authorization configuration
+- Merging integration branch into the production branch
+- Any operation on the production branch
+- Deleting or archiving historical data
 - Changing how tokens or credentials are stored or transmitted
 - Introducing a new external API integration
 - Changing privacy-sensitive behavior (what data is logged, what is sent to LLM)

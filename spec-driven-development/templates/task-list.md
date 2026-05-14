@@ -2,10 +2,16 @@
 
 - Spec Reference: {SPEC_REFERENCE}
 - Plan Reference: {PLAN_REFERENCE}
-- Task ID Format: `T-{spec-date}-{NNN}`
+- Task ID Format: `T-{spec-date}-{NNN}` (global default)
 - Owner: {OWNER}
 
 ---
+
+> **Task ID convention:** Use the global format `T-{spec-date}-{NNN}` when tasks
+> may be referenced across features or sprints. Inside a date-prefixed feature
+> directory (`specs/YYYY-MM-DD-name/`), local short IDs `T-NNN` are acceptable
+> because the directory already carries the date namespace.
+> Provenance: LESSON-002, source feature `specs/2026-05-12-fleet-ledger/`.
 
 ## Status Legend
 

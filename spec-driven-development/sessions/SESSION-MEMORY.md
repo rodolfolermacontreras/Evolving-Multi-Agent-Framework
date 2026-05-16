@@ -407,31 +407,32 @@ These should be decided before PI-3 (portability validation).
 
 ---
 
-## Update: 2026-05-16 — PI-2 begins, state-dashboard shipped
+## Update: 2026-05-16 PM — state-dashboard v0.2 + SDD-002 closed
 
-**Triggered by user feedback:** _"it is very easy to get lost into all the words, choices and verbage that this is giving me... we need to develop a graphic user interface that shows exactly where we are."_
+User UX review surfaced 10 issues and one hard requirement: **the dashboard must be live, not a static file**. Both addressed in v0.2 of the same feature, in the same session.
 
-**Shipped in one session through full SDD lifecycle:**
-- Feature: `state-dashboard` at `specs/2026-05-16-state-dashboard/` (spec.md, validation.md, RETRO.md)
-- Implementation: `cli/state_builder.py` (~430 lines, stdlib only per LESSON-001)
-- Tests: `cli/test_state_builder.py` — 4/4 passing
-- Visual output: `exec/state.html` — single self-contained file using Bridge design tokens (carbon bg, paper-cream text, oxblood/amber/jade signals, monospace, lifecycle Kanban, PI progress bar, recommended next action)
-- Textual output: `exec/state.md` — now auto-generated, no longer hand-curated
+**Two specs reconciled, one impl shipped:**
+- `2026-05-16-state-builder/` (SDD-002) — canonical spec for `state.md` 7-section format with `--sdd-root` / `--pi` / `--dry-run` CLI. Author: Principal Software Developer. Closed DONE.
+- `2026-05-16-state-dashboard/` — additive spec for live HTML + Bridge UX. Author: Executive Manager response to user pain. Closed DONE v0.2.
+- Both contracts satisfied by single file `cli/state_builder.py`. Cross-referenced in the docstring.
 
-**Tech debt closed:** F2 (`cli/state_builder.py`) marked DONE in roadmap.
+**Live server:** `python spec-driven-development/cli/state_builder.py serve [--port 8765] [--no-open]` starts a stdlib `ThreadingHTTPServer`. Rebuilds state on every GET. `/healthz` for monitoring. Page auto-refreshes every 20s. Browser auto-opens.
 
-**Behavior fix shipped:** `.github/skills/operational/em-communication-discipline/SKILL.md` — enforces "recommend, do not menu" for the Executive Manager. Wired into `principal-executive-manager.agent.md` as always-active. Registered in `roster/skills.json`. This directly addresses the user's "walls of choices" complaint.
+**v0.2 UX fixes shipped:**
+- Multi-segment PI progress bar (feature distribution across all 9 stages + color legend)
+- All kanban cards have stage-colored left borders (faint → amber → oxblood → jade)
+- Card text contrast bumped to AAA (`--ink-paper-dim` for meta)
+- Column count badges
+- Empty kanban columns get dashed border + dimmed header
+- Recommended-action CTA link to feature dir or roadmap
+- Recent commits get color-coded type tags (feat/docs/chore/design/plan/fix) + relative dates
+- Header `[refresh]` button
+- Dispatch empty state is a bordered card with hint
 
-**3 new lessons captured** in `sprints/PI-2/lessons.md`:
-- LESSON-005: EM should recommend, not present a menu (SHIPPED as the new skill)
-- LESSON-006: Closure ceremonies must touch ALL "current" markers (open)
-- LESSON-007: Pre-spec design exploration transfers cheaply (open)
+**Test count now: 13 passing** (9 SDD-002 ACs + 3 state-dashboard visual + 1 live-server smoke + 13 ledger = 26 total). SDD-002 AC1-AC10 fully covered (AC9 manual `--help` check).
 
-**Roadmap state corrected:** PI-1 now marked `(closed 2026-05-13)`, PI-2 marked `(current)`. The previous closure ceremony updated state.md but missed roadmap.md — caught by the generator and fixed; LESSON-006 captures the pattern.
+**Lesson candidate (LESSON-008):** When two parallel specs target the same implementation file, declare one as canonical for the file's primary contract and treat the other as additive scope.
 
-**Test count now: 17 passing** (13 ledger + 4 state_builder).
+**Next action per the dashboard itself:** start `cli/fleet.py` — next PI-2 commitment, Sprint A. The dashboard now correctly recommends it because both state-builder and state-dashboard are DONE.
 
-**Next action (per the dashboard itself):** start `cli/fleet.py` — second PI-2 commitment, Sprint A. Pattern is now proven: spec → validation → implementation → smoke tests → RETRO → regenerate state, all in one session.
-
-**How to view the dashboard:** open `spec-driven-development/exec/state.html` in any browser. Refresh: `python spec-driven-development/cli/state_builder.py`.
 

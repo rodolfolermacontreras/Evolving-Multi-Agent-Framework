@@ -2,167 +2,203 @@
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bridge -- Executive State -- 2026-05-16</title>
+
+<title>Bridge -- PI-2 -- 2026-05-16 11:57</title>
 <style>
 :root {
   --bg-carbon:       #0a0a0a;
   --bg-graphite:     #141413;
   --bg-graphite-2:   #1c1b18;
   --ink-paper:       #e8e4d8;
-  --ink-paper-dim:   #a8a497;
-  --ink-paper-faint: #6e6a5e;
+  --ink-paper-dim:   #b8b4a8;
+  --ink-paper-faint: #8a8678;
   --accent-oxblood:  #ce2029;
-  --accent-oxblood2: #a01820;
   --signal-amber:    #d29a3b;
+  --signal-amber-2:  #e8b85a;
+  --signal-amber-3:  #8a6a2a;
   --signal-jade:     #6fa37a;
   --rule-line:       #2a2925;
-  --focus-ring:      #e8e4d8;
 }
 * { box-sizing: border-box; }
 html, body {
   margin: 0; padding: 0;
-  background: var(--bg-carbon);
-  color: var(--ink-paper);
+  background: var(--bg-carbon); color: var(--ink-paper);
   font-family: ui-monospace, "Berkeley Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 13px;
-  line-height: 1.45;
+  font-size: 13px; line-height: 1.45;
 }
-a { color: var(--signal-amber); text-decoration: none; }
+.body-sans { font-family: -apple-system, "Segoe UI", Inter, system-ui, sans-serif; }
+a { color: var(--signal-amber-2); text-decoration: none; }
 a:hover { text-decoration: underline; }
 header.bridge-header {
   border-bottom: 2px solid var(--accent-oxblood);
   padding: 14px 22px 12px;
   display: flex; align-items: baseline; justify-content: space-between; gap: 18px; flex-wrap: wrap;
 }
-header.bridge-header h1 {
-  margin: 0; font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700;
+.brand { display: flex; align-items: baseline; gap: 14px; }
+.brand .h-bridge { font-size: 14px; letter-spacing: 0.18em; font-weight: 700; text-transform: uppercase; color: var(--ink-paper); }
+.brand .h-pi { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--signal-amber-2); }
+.brand .h-title { font-size: 12px; color: var(--ink-paper-dim); letter-spacing: 0.04em; }
+.header-actions { display: flex; gap: 14px; align-items: center; font-size: 11px; }
+.header-actions .meta { color: var(--ink-paper-dim); letter-spacing: 0.08em; text-transform: uppercase; }
+.btn-refresh {
+  border: 1px solid var(--rule-line); padding: 5px 12px;
+  color: var(--ink-paper); background: var(--bg-graphite);
+  font-family: inherit; font-size: 11px;
+  letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
 }
-header.bridge-header .meta {
-  color: var(--ink-paper-dim); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
-}
-.layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
-  gap: 0;
-  min-height: calc(100vh - 60px);
-}
-.main { padding: 20px 22px; min-width: 0; }
-.side { padding: 20px 22px; border-left: 1px solid var(--rule-line); background: var(--bg-graphite); min-width: 0; }
-section.panel { margin-bottom: 26px; }
+.btn-refresh:hover { border-color: var(--signal-amber-2); color: var(--signal-amber-2); }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 0; min-height: calc(100vh - 62px); }
+.main { padding: 22px 24px; min-width: 0; }
+.side { padding: 22px 22px; border-left: 1px solid var(--rule-line); background: var(--bg-graphite); min-width: 0; }
+section.panel { margin-bottom: 28px; }
 section.panel h2 {
-  margin: 0 0 10px;
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  margin: 0 0 12px; font-size: 11px;
+  letter-spacing: 0.18em; text-transform: uppercase;
   color: var(--ink-paper-dim);
-  border-bottom: 1px solid var(--rule-line);
-  padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule-line); padding-bottom: 6px;
 }
 .next-action {
-  background: var(--bg-graphite);
-  border-left: 4px solid var(--accent-oxblood);
-  padding: 14px 18px;
-  margin-bottom: 24px;
+  background: var(--bg-graphite); border-left: 4px solid var(--accent-oxblood);
+  padding: 16px 20px; margin-bottom: 26px;
 }
-.next-action .label {
-  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
-  color: var(--accent-oxblood); margin-bottom: 6px;
+.next-action .label { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent-oxblood); margin-bottom: 8px; }
+.next-action .title { font-size: 19px; font-weight: 700; color: var(--ink-paper); margin-bottom: 6px; letter-spacing: -0.01em; }
+.next-action .why { color: var(--ink-paper-dim); font-size: 13px; margin-bottom: 12px; }
+.next-action .cta {
+  display: inline-block; border: 1px solid var(--accent-oxblood);
+  color: var(--ink-paper); background: rgba(206, 32, 41, 0.08);
+  padding: 6px 14px; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
 }
-.next-action .title { font-size: 17px; font-weight: 600; color: var(--ink-paper); margin-bottom: 4px; }
-.next-action .why { color: var(--ink-paper-dim); font-size: 12px; }
-.progress {
-  margin-bottom: 18px;
-}
-.progress .bar {
-  position: relative; height: 22px;
-  background: var(--bg-graphite-2);
-  border: 1px solid var(--rule-line);
-  overflow: hidden;
-}
-.progress .fill {
-  position: absolute; left: 0; top: 0; bottom: 0;
-  background: var(--signal-jade);
-  transition: width 240ms ease;
-}
+.next-action .cta:hover { background: rgba(206, 32, 41, 0.20); text-decoration: none; }
+.progress { margin-bottom: 18px; }
 .progress .label-row {
   display: flex; justify-content: space-between; align-items: baseline;
-  font-size: 11px; color: var(--ink-paper-dim); margin-bottom: 4px;
+  font-size: 11px; color: var(--ink-paper-dim); margin-bottom: 6px;
   letter-spacing: 0.08em; text-transform: uppercase;
 }
 .progress .pct { color: var(--ink-paper); font-weight: 700; font-size: 14px; }
-.commitments { list-style: none; padding: 0; margin: 10px 0 0; font-size: 12px; }
+.progress .seg-bar {
+  height: 22px; display: flex;
+  background: var(--bg-graphite-2); border: 1px solid var(--rule-line); overflow: hidden;
+}
+.progress .seg { transition: width 240ms ease; min-width: 0; }
+.progress .seg.tone-faint        { background: var(--ink-paper-faint); }
+.progress .seg.tone-amber-soft   { background: var(--signal-amber-3); }
+.progress .seg.tone-amber        { background: var(--signal-amber); }
+.progress .seg.tone-amber-bright { background: var(--signal-amber-2); }
+.progress .seg.tone-oxblood      { background: var(--accent-oxblood); }
+.progress .seg.tone-jade         { background: var(--signal-jade); }
+.legend {
+  display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px;
+  font-size: 10px; color: var(--ink-paper-dim); letter-spacing: 0.06em; text-transform: uppercase;
+}
+.legend .item { display: flex; align-items: center; gap: 6px; }
+.legend .swatch { width: 10px; height: 10px; display: inline-block; border: 1px solid var(--rule-line); }
+.legend .swatch.tone-faint        { background: var(--ink-paper-faint); }
+.legend .swatch.tone-amber-soft   { background: var(--signal-amber-3); }
+.legend .swatch.tone-amber        { background: var(--signal-amber); }
+.legend .swatch.tone-amber-bright { background: var(--signal-amber-2); }
+.legend .swatch.tone-oxblood      { background: var(--accent-oxblood); }
+.legend .swatch.tone-jade         { background: var(--signal-jade); }
+.commitments {
+  list-style: none; padding: 0; margin: 14px 0 0; font-size: 12px;
+  border: 1px solid var(--rule-line); background: var(--bg-graphite);
+}
 .commitments li {
   display: flex; gap: 10px; align-items: flex-start;
-  padding: 4px 0; border-bottom: 1px dashed var(--rule-line);
+  padding: 7px 12px; border-bottom: 1px dashed var(--rule-line);
   color: var(--ink-paper-dim);
 }
-.commitments li.done { color: var(--signal-jade); }
-.commitments li .mark {
-  font-family: inherit; color: var(--ink-paper-faint);
-  width: 18px; flex-shrink: 0;
-}
+.commitments li:last-child { border-bottom: none; }
+.commitments li.done { color: var(--signal-jade); background: rgba(111, 163, 122, 0.04); }
+.commitments li .mark { font-family: inherit; color: var(--ink-paper-faint); width: 18px; flex-shrink: 0; }
 .commitments li.done .mark { color: var(--signal-jade); }
-.kanban {
-  display: grid;
-  grid-template-columns: repeat(9, minmax(110px, 1fr));
-  gap: 6px;
-  overflow-x: auto;
-}
+.kanban { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 6px; overflow-x: auto; }
 .kanban .col {
-  background: var(--bg-graphite);
-  border: 1px solid var(--rule-line);
-  padding: 8px 8px 10px;
-  min-height: 110px;
+  background: var(--bg-graphite); border: 1px solid var(--rule-line);
+  padding: 8px 8px 10px; min-height: 130px;
+  display: flex; flex-direction: column;
 }
+.kanban .col.empty { background: transparent; border-style: dashed; border-color: var(--rule-line); }
 .kanban .col h3 {
   margin: 0 0 8px; font-size: 9px; letter-spacing: 0.18em;
   color: var(--ink-paper-dim); text-transform: uppercase;
-  border-bottom: 1px solid var(--rule-line); padding-bottom: 4px;
+  border-bottom: 1px solid var(--rule-line); padding-bottom: 5px;
+  display: flex; justify-content: space-between; align-items: baseline; gap: 6px;
 }
+.kanban .col h3 .count {
+  font-size: 10px; color: var(--ink-paper); font-weight: 700;
+  background: var(--bg-graphite-2); padding: 1px 6px; border: 1px solid var(--rule-line);
+}
+.kanban .col.empty h3 .count { display: none; }
+.kanban .col.empty h3 { color: var(--ink-paper-faint); }
 .kanban .card {
-  background: var(--bg-graphite-2);
-  border-left: 3px solid var(--ink-paper-faint);
-  padding: 6px 8px;
-  margin-bottom: 6px;
-  font-size: 11px;
-  word-break: break-word;
+  background: var(--bg-graphite-2); border-left: 3px solid var(--ink-paper-faint);
+  padding: 7px 10px; margin-bottom: 7px; font-size: 11px; word-break: break-word;
 }
-.kanban .card.done   { border-left-color: var(--signal-jade); }
-.kanban .card.review { border-left-color: var(--signal-amber); }
-.kanban .card.impl   { border-left-color: var(--accent-oxblood); }
-.kanban .card .name { color: var(--ink-paper); font-weight: 600; margin-bottom: 2px; }
-.kanban .card .meta { color: var(--ink-paper-faint); font-size: 10px; }
-table.dense {
-  width: 100%; border-collapse: collapse; font-size: 11px;
+.kanban .card.tone-faint        { border-left-color: var(--ink-paper-faint); }
+.kanban .card.tone-amber-soft   { border-left-color: var(--signal-amber-3); }
+.kanban .card.tone-amber        { border-left-color: var(--signal-amber); }
+.kanban .card.tone-amber-bright { border-left-color: var(--signal-amber-2); }
+.kanban .card.tone-oxblood      { border-left-color: var(--accent-oxblood); }
+.kanban .card.tone-jade         { border-left-color: var(--signal-jade); }
+.kanban .card .name { color: var(--ink-paper); font-weight: 600; margin-bottom: 3px; }
+.kanban .card .meta { color: var(--ink-paper-dim); font-size: 10px; }
+.kanban .col.empty .card-empty {
+  color: var(--ink-paper-faint); font-size: 11px;
+  display: flex; align-items: center; justify-content: center;
+  flex: 1; padding: 12px 0;
 }
+table.dense { width: 100%; border-collapse: collapse; font-size: 11px; }
 table.dense th, table.dense td {
-  padding: 5px 8px; text-align: left;
-  border-bottom: 1px solid var(--rule-line);
-  vertical-align: top;
+  padding: 6px 8px; text-align: left;
+  border-bottom: 1px solid var(--rule-line); vertical-align: top;
 }
 table.dense th {
   font-weight: 600; color: var(--ink-paper-dim);
   font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
 }
-.fleet-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 6px; }
+.fleet-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; }
 .fleet-stats .stat {
-  background: var(--bg-graphite-2);
-  border: 1px solid var(--rule-line);
-  padding: 10px 12px;
+  background: var(--bg-graphite-2); border: 1px solid var(--rule-line); padding: 12px 14px;
 }
-.fleet-stats .stat .n {
-  font-size: 22px; color: var(--ink-paper); font-weight: 700; line-height: 1;
-}
+.fleet-stats .stat.zero { opacity: 0.55; }
+.fleet-stats .stat .n { font-size: 24px; color: var(--ink-paper); font-weight: 700; line-height: 1; }
 .fleet-stats .stat .l {
-  font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--ink-paper-dim); margin-top: 4px;
+  font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink-paper-dim); margin-top: 6px;
 }
+.fleet-stats .stat .hint { font-size: 9px; color: var(--ink-paper-faint); margin-top: 4px; }
 .activity { font-size: 11px; }
-.activity .row { padding: 5px 0; border-bottom: 1px dashed var(--rule-line); display: flex; gap: 10px; }
-.activity .sha { color: var(--signal-amber); flex-shrink: 0; }
-.activity .subj { color: var(--ink-paper-dim); }
-footer { padding: 14px 22px; border-top: 1px solid var(--rule-line); color: var(--ink-paper-faint); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
-.empty { color: var(--ink-paper-faint); font-style: italic; font-size: 11px; }
+.activity .row {
+  padding: 6px 0; border-bottom: 1px dashed var(--rule-line);
+  display: grid; grid-template-columns: 56px auto 1fr; gap: 8px; align-items: baseline;
+}
+.activity .sha { color: var(--signal-amber-2); font-weight: 600; }
+.activity .type {
+  display: inline-block; font-size: 9px; letter-spacing: 0.1em;
+  padding: 1px 6px; border: 1px solid currentColor;
+  text-transform: uppercase; line-height: 1.4;
+}
+.activity .type.t-jade         { color: var(--signal-jade); }
+.activity .type.t-amber        { color: var(--signal-amber); }
+.activity .type.t-amber-soft   { color: var(--signal-amber-3); }
+.activity .type.t-amber-bright { color: var(--signal-amber-2); }
+.activity .type.t-oxblood      { color: var(--accent-oxblood); }
+.activity .type.t-faint        { color: var(--ink-paper-faint); }
+.activity .subj { color: var(--ink-paper-dim); overflow: hidden; text-overflow: ellipsis; }
+.activity .rel  { color: var(--ink-paper-faint); font-size: 10px; }
+.empty-state {
+  border: 1px dashed var(--rule-line); background: var(--bg-graphite-2);
+  padding: 22px; text-align: center; color: var(--ink-paper-dim); font-size: 12px;
+}
+.empty-state .icon { font-size: 18px; color: var(--ink-paper-faint); margin-bottom: 8px; letter-spacing: 0.2em; }
+.empty-state .hint { font-size: 10px; color: var(--ink-paper-faint); margin-top: 6px; letter-spacing: 0.06em; }
+footer {
+  padding: 14px 22px; border-top: 1px solid var(--rule-line);
+  color: var(--ink-paper-faint); font-size: 10px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
 @media (max-width: 1100px) {
   .layout { grid-template-columns: 1fr; }
   .side { border-left: none; border-top: 1px solid var(--rule-line); }
@@ -171,60 +207,43 @@ footer { padding: 14px 22px; border-top: 1px solid var(--rule-line); color: var(
 </style>
 </head><body>
 <header class="bridge-header">
-  <h1>Bridge &nbsp;//&nbsp; PI-2 -- Fleet Maturity and CLI</h1>
-  <div class="meta">Generated 2026-05-16 &nbsp;//&nbsp; symbolic sprint</div>
+  <div class="brand"><span class="h-bridge">Bridge</span><span class="h-pi">PI-2</span><span class="h-title">Fleet Maturity and CLI</span></div>
+  <div class="header-actions">
+    <span class="meta">generated 2026-05-16 11:57</span>
+    <span class="meta">static :: rerun state_builder.py to refresh</span>
+    <a class="btn-refresh" href="state.html" title="Reload the static file">&#x21bb; reload</a>
+  </div>
 </header>
 <div class="layout">
   <main class="main">
     <div class="next-action">
       <div class="label">Recommended next action</div>
       <div class="title">Start: &#x27;CLI Phase 2: `fleet.py`, `qa.py`, `retro.py`, `state_builder.py` operational (state_builder.py shipped 2026-05-16)&#x27;</div>
-      <div class="why">Highest-priority unstarted commitment in PI-2: Fleet Maturity and CLI. Run /clarify to start the lifecycle.</div>
+      <div class="why">Highest-priority unstarted commitment in PI-2. Run /clarify to start the lifecycle.</div>
+      <a class="cta" href="spec-driven-development/constitution/roadmap.md" target="_blank">Open &rarr; spec-driven-development/constitution/roadmap.md</a>
     </div>
-
     
         <section class="panel">
-          <h2>PI-2 Progress</h2>
+          <h2>PI-2 -- Feature Distribution</h2>
           <div class="progress">
             <div class="label-row">
               <span>Fleet Maturity and CLI</span>
-              <span class="pct">0 / 6 &nbsp; (0%)</span>
+              <span class="pct">0 / 6 commitments &nbsp; 0%</span>
             </div>
-            <div class="bar"><div class="fill" style="width:0%"></div></div>
+            <div class="seg-bar"><div class="seg tone-amber-soft" style="width:25.00%" title="CLARIFY: 1"></div><div class="seg tone-jade" style="width:75.00%" title="DONE: 3"></div></div>
+            <div class="legend"><span class="item"><span class="swatch tone-amber-soft"></span>CLARIFY (1)</span><span class="item"><span class="swatch tone-jade"></span>DONE (3)</span></div>
           </div>
-          <ul class="commitments">
-            <li class=""><span class="mark">[ ]</span><span>CLI Phase 2: `fleet.py`, `qa.py`, `retro.py`, `state_builder.py` operational (state_builder.py shipped 2026-05-16)</span></li><li class=""><span class="mark">[ ]</span><span>3-5 features delivered through the SDD pipeline (1 shipped: state-dashboard)</span></li><li class=""><span class="mark">[ ]</span><span>Fleet batch size increased from 2 to 3-4 with parallel dispatch validated</span></li><li class=""><span class="mark">[ ]</span><span>Specialization mechanic exercised: at least one generic worker earns a permanent identity through a domain skill pack</span></li><li class=""><span class="mark">[ ]</span><span>Conflict-detection workflow validated against a real two-worker collision</span></li><li class=""><span class="mark">[ ]</span><span>Schema validation lint for agent/skill/prompt frontmatter</span></li>
-          </ul>
+          <h2 style="margin-top:18px">PI-2 Commitments</h2>
+          <ul class="commitments"><li class=""><span class="mark">[ ]</span><span>CLI Phase 2: `fleet.py`, `qa.py`, `retro.py`, `state_builder.py` operational (state_builder.py shipped 2026-05-16)</span></li><li class=""><span class="mark">[ ]</span><span>3-5 features delivered through the SDD pipeline (1 shipped: state-dashboard)</span></li><li class=""><span class="mark">[ ]</span><span>Fleet batch size increased from 2 to 3-4 with parallel dispatch validated</span></li><li class=""><span class="mark">[ ]</span><span>Specialization mechanic exercised: at least one generic worker earns a permanent identity through a domain skill pack</span></li><li class=""><span class="mark">[ ]</span><span>Conflict-detection workflow validated against a real two-worker collision</span></li><li class=""><span class="mark">[ ]</span><span>Schema validation lint for agent/skill/prompt frontmatter</span></li></ul>
         </section>
         
-
-    <section class="panel">
-      <h2>Lifecycle Kanban</h2>
-      <div class="kanban"><div class="col"><h3>IDEA</h3><div class="empty">—</div></div><div class="col"><h3>BACKLOG</h3><div class="empty">—</div></div><div class="col"><h3>CLARIFY</h3><div class="card "><div class="name">fleet-bridge-dashboard</div><div class="meta">2026-05-13 &middot; DESIGN.md only (pre-spec design exploration)</div></div></div><div class="col"><h3>SPEC</h3><div class="empty">—</div></div><div class="col"><h3>PLAN</h3><div class="empty">—</div></div><div class="col"><h3>TASKS</h3><div class="empty">—</div></div><div class="col"><h3>IMPLEMENT</h3><div class="empty">—</div></div><div class="col"><h3>REVIEW</h3><div class="empty">—</div></div><div class="col"><h3>DONE</h3><div class="card done"><div class="name">fleet-ledger</div><div class="meta">2026-05-12 &middot; validation 100%, RETRO present</div></div><div class="card done"><div class="name">state-dashboard</div><div class="meta">2026-05-16 &middot; validation 100%, RETRO present</div></div></div></div>
-    </section>
-
-    <section class="panel">
-      <h2>Dispatch Stream (fleet.db)</h2>
-      <div class="empty">Dispatch stream is empty. The fleet has not been formally dispatched through the ledger yet.</div>
-    </section>
+    <section class="panel"><h2>Lifecycle Kanban</h2><div class="kanban"><div class="col empty"><h3><span>IDEA</span></h3><div class="card-empty">&mdash;</div></div><div class="col empty"><h3><span>BACKLOG</span></h3><div class="card-empty">&mdash;</div></div><div class="col"><h3><span>CLARIFY</span><span class="count">1</span></h3><div class="card tone-amber-soft"><div class="name">fleet-bridge-dashboard</div><div class="meta">2026-05-13 &middot; DESIGN.md only (pre-spec design exploration)</div></div></div><div class="col empty"><h3><span>SPEC</span></h3><div class="card-empty">&mdash;</div></div><div class="col empty"><h3><span>PLAN</span></h3><div class="card-empty">&mdash;</div></div><div class="col empty"><h3><span>TASKS</span></h3><div class="card-empty">&mdash;</div></div><div class="col empty"><h3><span>IMPLEMENT</span></h3><div class="card-empty">&mdash;</div></div><div class="col empty"><h3><span>REVIEW</span></h3><div class="card-empty">&mdash;</div></div><div class="col"><h3><span>DONE</span><span class="count">3</span></h3><div class="card tone-jade"><div class="name">fleet-ledger</div><div class="meta">2026-05-12 &middot; validation 100%, RETRO present</div></div><div class="card tone-jade"><div class="name">state-builder</div><div class="meta">2026-05-16 &middot; validation 100%, RETRO present</div></div><div class="card tone-jade"><div class="name">state-dashboard</div><div class="meta">2026-05-16 &middot; validation 100%, RETRO present, Status: done</div></div></div></div></section>
+    <section class="panel"><h2>Dispatch Stream (fleet.db)</h2><div class="empty-state"><div class="icon">// // //</div><div>Dispatch stream is empty.</div><div class="hint">The fleet has not yet been dispatched through the ledger. Record one with:<br><code>python spec-driven-development/ledger/ledger_cli.py record-dispatch ...</code></div></div></section>
   </main>
   <aside class="side">
-    <section class="panel">
-      <h2>Fleet Roster</h2>
-      
-    <div class="fleet-stats">
-      <div class="stat"><div class="n">4</div><div class="l">Principals</div></div>
-      <div class="stat"><div class="n">4</div><div class="l">Generic</div></div>
-      <div class="stat"><div class="n">0</div><div class="l">Specialist</div></div>
-      <div class="stat"><div class="n">8</div><div class="l">Total</div></div>
-    </div>
-    
-    </section>
-    <section class="panel">
-      <h2>Recent Commits</h2>
-      <div class="activity"><div class="row"><span class="sha">b7ccaa3</span><span class="subj">plan: begin PI-2 -- state_builder.py first, 3-sprint scope approved</span></div><div class="row"><span class="sha">43423cf</span><span class="subj">backlog: add Fleet Bridge Dashboard as P3 (SDD-001)</span></div><div class="row"><span class="sha">9b2e9c0</span><span class="subj">chore: PI-1 closure -- generalize constitution, curate lessons, refresh state</span></div><div class="row"><span class="sha">8ee6840</span><span class="subj">docs: add canonical Python stdlib CLI pattern -- LESSON-001</span></div><div class="row"><span class="sha">bb5a762</span><span class="subj">docs(templates): add cross-reference rules to reduce validation duplication -- LESSON-003</span></div><div class="row"><span class="sha">2d5d729</span><span class="subj">docs(templates): clarify task ID convention -- LESSON-002</span></div><div class="row"><span class="sha">ee19dbd</span><span class="subj">design: fleet-bridge dashboard -- pre-spec design exploration</span></div><div class="row"><span class="sha">50b12b6</span><span class="subj">docs: add INSTRUCTIONS.md entry point + persist session memory in repo</span></div><div class="row"><span class="sha">23156a0</span><span class="subj">feat(ux): add archetype-recommender skill + visual workflow diagram in cheat sheet (g1)</span></div><div class="row"><span class="sha">8729706</span><span class="subj">feat(fleet): add /hire command + role-creation skill (h1, ADR-0007)</span></div></div>
-    </section>
+    <section class="panel"><h2>Fleet Roster</h2><div class="fleet-stats"><div class="stat" title="EM, PM, Arch, SW Dev"><div class="n">4</div><div class="l">Principals</div><div class="hint">EM, PM, Arch, SW Dev</div></div><div class="stat" title="developer, ux, qa, data-sci"><div class="n">4</div><div class="l">Generic</div><div class="hint">developer, ux, qa, data-sci</div></div><div class="stat zero" title="none earned yet"><div class="n">0</div><div class="l">Specialist</div><div class="hint">none earned yet</div></div><div class="stat" title="28 loadable"><div class="n">28</div><div class="l">Skills</div><div class="hint">28 loadable</div></div></div></section>
+    <section class="panel"><h2>Recent Commits</h2><div class="activity"><div class="row"><span class="sha">14d9cc2</span><span class="type t-amber">spec</span><span class="subj">state_builder.py -- clarification, spec, validation, plan, tasks (SDD-002)<div class="rel">8 minutes ago</div></span></div><div class="row"><span class="sha">89ad225</span><span class="type t-jade">feat</span><span class="subj">(state-dashboard) ship state_builder.py + visual Bridge dashboard (PI-2, F2 done)<div class="rel">12 minutes ago</div></span></div><div class="row"><span class="sha">b7ccaa3</span><span class="type t-amber">plan</span><span class="subj">begin PI-2 -- state_builder.py first, 3-sprint scope approved<div class="rel">22 minutes ago</div></span></div><div class="row"><span class="sha">43423cf</span><span class="type t-amber">backlog</span><span class="subj">add Fleet Bridge Dashboard as P3 (SDD-001)<div class="rel">3 days ago</div></span></div><div class="row"><span class="sha">9b2e9c0</span><span class="type t-faint">chore</span><span class="subj">PI-1 closure -- generalize constitution, curate lessons, refresh state<div class="rel">3 days ago</div></span></div><div class="row"><span class="sha">8ee6840</span><span class="type t-amber-soft">docs</span><span class="subj">add canonical Python stdlib CLI pattern -- LESSON-001<div class="rel">3 days ago</div></span></div><div class="row"><span class="sha">bb5a762</span><span class="type t-amber-soft">docs</span><span class="subj">(templates) add cross-reference rules to reduce validation duplication -- LESSON-003<div class="rel">3 days ago</div></span></div><div class="row"><span class="sha">2d5d729</span><span class="type t-amber-soft">docs</span><span class="subj">(templates) clarify task ID convention -- LESSON-002<div class="rel">3 days ago</div></span></div><div class="row"><span class="sha">ee19dbd</span><span class="type t-amber-bright">design</span><span class="subj">fleet-bridge dashboard -- pre-spec design exploration<div class="rel">3 days ago</div></span></div><div class="row"><span class="sha">50b12b6</span><span class="type t-amber-soft">docs</span><span class="subj">add INSTRUCTIONS.md entry point + persist session memory in repo<div class="rel">3 days ago</div></span></div></div></section>
   </aside>
 </div>
-<footer>Auto-generated by cli/state_builder.py &nbsp;//&nbsp; SDD-001 v0.1 &nbsp;//&nbsp; refresh: python spec-driven-development/cli/state_builder.py</footer>
+<footer>Auto-generated by cli/state_builder.py &middot; file mode &middot; SDD-002 + state-dashboard v0.2</footer>
 </body></html>

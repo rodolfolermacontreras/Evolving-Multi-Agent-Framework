@@ -6,6 +6,7 @@
 - Priority: P2
 - Sprint: PI-2 Sprint A
 - Spec ID: 2026-05-16-state-builder
+- Status: done (validation 100%, 2026-05-16)
 
 ---
 

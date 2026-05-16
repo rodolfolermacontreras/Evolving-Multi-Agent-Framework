@@ -29,13 +29,13 @@
 
 | Task ID | Tag | Description | File Scope | Acceptance Test | Effort | Deps | Mode | Fleet | Status |
 |---------|-----|-------------|------------|-----------------|--------|------|------|-------|--------|
-| T-001 | [S] | Write test_state_builder.py first (red). | `cli/test_state_builder.py` | Proves AC1-AC8, AC10 | M | None | AFK | No | pending |
-| T-002 | [S] | Implement spec pipeline parser (scan specs/ dirs for Status line). | `cli/state_builder.py` | Proves AC4 | S | T-001 | AFK | No | pending |
-| T-003 | [S] | Implement backlog parser (sprint assignments from BACKLOG.md table). | `cli/state_builder.py` | Proves AC5 | S | T-001 | AFK | No | pending |
-| T-004 | [S] | Implement roster counter (agents.json + skills.json). | `cli/state_builder.py` | Proves AC6 | S | T-001 | AFK | No | pending |
-| T-005 | [S] | Implement ledger readers (recently completed + blockers). | `cli/state_builder.py` | Proves AC2, AC3 | S | T-001 | AFK | No | pending |
-| T-006 | [S] | Implement main builder composing all sections + CLI wiring. | `cli/state_builder.py` | Proves AC1, AC7, AC8, AC9, AC10 | M | T-002, T-003, T-004, T-005 | AFK | No | pending |
-| T-007 | [S] | Run tests, manual checks, update validation.md checkboxes. | `validation.md`, `cli/state_builder.py` | All validation contract checkboxes | S | T-006 | AFK | No | pending |
+| T-001 | [S] | Write test_state_builder.py first (red). | `cli/test_state_builder.py` | Proves AC1-AC8, AC10 | M | None | AFK | No | done |
+| T-002 | [S] | Implement spec pipeline parser (scan specs/ dirs for Status line). | `cli/state_builder.py` | Proves AC4 | S | T-001 | AFK | No | done |
+| T-003 | [S] | Implement backlog parser (sprint assignments from BACKLOG.md table). | `cli/state_builder.py` | Proves AC5 | S | T-001 | AFK | No | done |
+| T-004 | [S] | Implement roster counter (agents.json + skills.json). | `cli/state_builder.py` | Proves AC6 | S | T-001 | AFK | No | done |
+| T-005 | [S] | Implement ledger readers (recently completed + blockers). | `cli/state_builder.py` | Proves AC2, AC3 | S | T-001 | AFK | No | done |
+| T-006 | [S] | Implement main builder composing all sections + CLI wiring. | `cli/state_builder.py` | Proves AC1, AC7, AC8, AC9, AC10 | M | T-002, T-003, T-004, T-005 | AFK | No | done |
+| T-007 | [S] | Run tests, manual checks, update validation.md checkboxes. | `validation.md`, `cli/state_builder.py` | All validation contract checkboxes | S | T-006 | AFK | No | done |
 
 ## Notes
 

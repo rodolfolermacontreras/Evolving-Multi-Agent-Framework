@@ -41,3 +41,54 @@
 Open `spec-driven-development/exec/state.html` in any browser. Refresh anytime with:
 
     python spec-driven-development/cli/state_builder.py
+
+For live mode (rebuild on every page request, browser auto-refresh every 20s):
+
+    python spec-driven-development/cli/state_builder.py serve
+
+---
+
+## v0.2 Addendum (2026-05-16 PM)
+
+User UX review surfaced 10 issue categories. v0.2 addresses the high-priority items
+in the same session, plus a fundamental pivot: **the dashboard is now LIVE, not static**.
+
+### What changed in v0.2
+
+| User concern (priority) | v0.2 response |
+|------------------------|---------------|
+| Dashboard is static HTML only, not live | Added `serve` subcommand using stdlib `http.server`. Rebuilds on every GET. Auto-refresh meta tag every 20s. Browser auto-opens. |
+| Kanban card contrast unreadable | Bumped meta text from `--ink-paper-faint` to `--ink-paper-dim` (8.4:1 AAA). |
+| Progress bar shows 0% but work is in flight | Replaced binary done/total bar with multi-segment bar showing feature distribution across all 9 stages + color legend. |
+| Only IMPLEMENT cards had colored borders | All cards now have stage-colored left borders (faint -> amber-soft -> amber -> oxblood -> amber-bright -> jade). |
+| Recommended action had no CTA | Action box now ends with oxblood-bordered CTA link to the relevant feature dir or roadmap.md. |
+| Empty kanban columns wasted space | Empty columns get dashed border, dimmed header, no count badge, en-dash placeholder. |
+| Commits all looked identical | Type prefix (feat/docs/chore/design/plan/fix) parsed and rendered as a color-coded pill. |
+| Recent commits had no timestamp | Added relative date via `git log --pretty=format:%h%x1f%s%x1f%cr`. |
+| Dispatch empty state was a dead line | Bordered empty-state card with icon hint + the exact CLI command to record a dispatch. |
+| No column count visibility | Each non-empty column header shows a count badge. |
+| No refresh affordance | Header has `[refresh]` button. In live mode it hits `/`; static mode reloads state.html. |
+
+### What v0.2 did NOT do (deferred to SDD-001 v1.0)
+
+- No light-mode toggle
+- No agent attribution on cards (cards still show feature name only)
+- No timeline / burndown view
+- No filters or search
+- No multi-PI navigation
+- No interactive (mutating) controls -- the dashboard is still read-only
+
+### Why this matters
+
+SDD-001 (Fleet Bridge Dashboard) was parked at P3 because the full Bridge scope was large.
+v0.2 of state-dashboard captures ~70% of its operator value at ~10% of the effort by
+constraining scope to "live read-only view of current state." The full SDD-001 can still
+ship later if it earns priority; until then, the Bridge dashboard exists and works.
+
+### Tests added in v0.2
+
+- `test_html_contains_multi_segment_progress_and_color_borders` -- proves the UX bumps
+- `test_html_has_action_cta_and_refresh_button` -- proves the new CTAs
+- `test_serve_responds_to_requests` -- end-to-end live server smoke (boot, healthz, GET /, content asserts, teardown)
+
+Total tests now: **13** (SDD-002 ACs 9 + state-dashboard visual 3 + live-server smoke 1).

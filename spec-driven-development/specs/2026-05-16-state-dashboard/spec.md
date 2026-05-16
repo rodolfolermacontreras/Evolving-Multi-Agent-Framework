@@ -1,12 +1,13 @@
 ---
 feature: state-dashboard
-status: implementing
+status: done
 created: 2026-05-16
+shipped: 2026-05-16
 pi: PI-2
 sprint: A
 priority: P1
-related_tech_debt: F2 (cli/state_builder.py) -- primary deliverable
-adjacent_backlog: SDD-001 (Fleet Bridge Dashboard, P3) -- this feature delivers ~70% of its operator-visibility value via state.html side-output, without committing to the full Bridge scope
+related_spec: SDD-002 (cli/state_builder.py shared implementation)
+adjacent_backlog: SDD-001 (Fleet Bridge Dashboard, P3) -- this feature delivers ~70% of its operator-visibility value at v0.2 (live server + UX-polished Bridge dashboard)
 ---
 
 # Feature Spec -- State Dashboard v0.1

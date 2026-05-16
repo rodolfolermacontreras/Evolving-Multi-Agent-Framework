@@ -19,6 +19,24 @@ This file mirrors the validation contract from `spec.md` so the generator can de
 - [x] All 4 smoke tests green
 - [x] Tested on Windows PowerShell
 
+## v0.2 additions (2026-05-16, post user UX feedback)
+
+- [x] Live server mode: `python state_builder.py serve` starts a local ThreadingHTTPServer on port 8765
+- [x] Each GET / triggers a fresh rebuild from artifacts (no stale HTML)
+- [x] `/healthz` endpoint returns 200 ok for monitoring
+- [x] Browser auto-opens unless `--no-open` is passed
+- [x] Page auto-refreshes every 20 seconds via `<meta http-equiv="refresh">`
+- [x] Multi-segment PI progress bar shows feature distribution by stage with color legend
+- [x] All kanban cards have stage-colored left borders (not just IMPLEMENT)
+- [x] Card text contrast bumped: name uses `--ink-paper`, meta uses `--ink-paper-dim`
+- [x] Column headers show count badges (e.g., `CLARIFY (1)`)
+- [x] Empty kanban columns get dashed border + reduced visual weight
+- [x] Recommended next action box has clickable CTA link to the relevant feature dir or roadmap
+- [x] Recent commits get color-coded type tags (feat/docs/chore/design/plan/fix)
+- [x] Header has `[refresh]` button (live mode: hits `/`; static mode: reloads file)
+- [x] Dispatch empty state is a bordered card with hint about how to record one
+- [x] Live-server smoke test: `test_serve_responds_to_requests` passes (port bind, healthz, /, content checks)
+
 ## Notes
 
 - Auto-detection of current PI works via `(current)` marker in roadmap.md `## PI-N:` headers.

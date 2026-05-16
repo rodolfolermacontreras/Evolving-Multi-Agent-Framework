@@ -16,7 +16,14 @@ Prioritized backlog with RICE scoring. Managed by Principal Product Manager.
 (empty -- ready for first PI planning)
 
 ## P2 - Should Have
-(empty)
+
+| ID | Title | Priority | Reach | Impact | Confidence | Effort | RICE | Sprint | Status |
+|----|-------|----------|-------|--------|------------|--------|------|--------|--------|
+| SDD-002 | state_builder.py -- auto-generate exec/state.md from ledger and artifacts | P2 | 8 | 3 | 0.9 | 2 | 10.8 | PI-2 Sprint A | Approved |
+| SDD-003 | fleet.py -- dispatch packets and ledger writes | P2 | 8 | 3 | 0.8 | 3 | 6.4 | PI-2 Sprint A | Approved |
+| SDD-004 | qa.py -- two-stage review automation | P2 | 6 | 2 | 0.8 | 2 | 4.8 | PI-2 Sprint B | Approved |
+| SDD-005 | retro.py -- sprint retro generator | P2 | 6 | 2 | 0.8 | 1 | 9.6 | PI-2 Sprint B | Approved |
+| SDD-006 | Schema validation lint for agent/skill/prompt YAML frontmatter | P2 | 7 | 2 | 0.9 | 2 | 6.3 | PI-2 Sprint B | Approved |
 
 ## P3 - Could Have
 

@@ -80,5 +80,15 @@
     "specialization": null,
     "created_at": "2026-05-07",
     "provenance": null
+  },
+  {
+    "id": "developer-cli-specialist-1",
+    "path": ".github/agents/developer-cli-specialist-1.agent.md",
+    "kind": "specialist",
+    "role": "developer",
+    "specialization": "cli",
+    "created_at": "2026-05-16",
+    "provenance": "Promoted from developer-general via /hire specialist on 2026-05-16. Evidence: 5 CLI features (state_builder, fleet, qa, retro, schema_lint), 70 tests, dispatch IDs 2-4 in fleet.db. ADR-0007.",
+    "status": "active"
   }
 ]

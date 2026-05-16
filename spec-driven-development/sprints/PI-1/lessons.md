@@ -39,9 +39,9 @@ Each lesson is one entry:
 - Evidence: Fleet Ledger v0.1 intentionally avoided migrations, but the first follow-up field addition will otherwise require ad hoc schema evolution decisions.
 - Affects: `spec-driven-development/ledger/`, `spec-driven-development/constitution/principles.md`, future ledger docs or templates
 - Estimated effort: S
-- Status: curated-defer
-- Curator decision: DEFER to PI-2. No schema change is imminent; define when cli/fleet.py drives the first real migration need.
-- PR / commit: n/a (deferred)
+- Status: shipped
+- Curator decision: SHIP in PI-2 Sprint A. Migration policy created at ledger/MIGRATION-POLICY.md.
+- PR / commit: (Sprint A closure commit)
 
 ### LESSON-003: Reduce validation prose duplication
 

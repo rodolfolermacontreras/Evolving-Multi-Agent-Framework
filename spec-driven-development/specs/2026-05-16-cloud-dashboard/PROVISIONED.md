@@ -71,6 +71,29 @@ Effort: 30 seconds. Tracked as v1.1 follow-up (see below).
 5. **Image hardening** -- base image is `python:3.13-slim` by tag, not pinned to a
    specific digest yet.
 
+## Bug fix applied 2026-05-16 (post-initial-deploy)
+
+**Symptom:** First sign-in attempt returned HTTP 401 from the ACA endpoint after
+the Microsoft login completed.
+
+**Root cause:** The app registration was created with the default
+`enableIdTokenIssuance: false`, but Easy Auth's default flow uses
+`response_type=id_token&response_mode=form_post`. The token issuance was
+rejected at the AAD endpoint, Easy Auth could not establish the session, and
+ACA returned 401 to the now-authenticated-but-not-authorized caller.
+
+**Fix (single command):**
+
+    az ad app update --id 625bdb84-d2e6-4853-96a9-f601571e3a0f --enable-id-token-issuance true
+
+**Verification:** `enableIdTokenIssuance` flipped to `true`; sign-in completes
+in an incognito browser window (existing failed-auth cookies need to clear).
+
+**Lesson:** When using `az containerapp auth microsoft update` to bootstrap
+Easy Auth, the CLI does NOT automatically enable id_token issuance on the
+companion app registration. Always pair the two commands. Captured as
+LESSON-010 candidate.
+
 ## Operational commands
 
 | Action | Command |

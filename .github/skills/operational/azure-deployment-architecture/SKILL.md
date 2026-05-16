@@ -84,6 +84,10 @@ When you write a deployment runbook, follow this exact section order:
 2. **Create resource group** (one `az group create` command).
 3. **Create Log Analytics workspace + Container Apps Environment.**
 4. **Create the Entra app registration for auth + federated credential for CI/CD.**
+   **CRITICAL: always pair `az ad app create` with `az ad app update --enable-id-token-issuance true`.**
+   Easy Auth uses implicit flow with `response_type=id_token`; without id_token
+   issuance enabled on the app reg, sign-in completes but ACA returns 401 post-auth
+   (LESSON-010, learned the hard way 2026-05-16).
 5. **Create the Container App** with min/max replicas, ingress, auth, secrets.
 6. **Verify**: open the URL, expect a Microsoft login prompt.
 7. **Tear down**: `az group delete` removes everything.

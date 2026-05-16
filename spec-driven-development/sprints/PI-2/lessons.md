@@ -73,3 +73,19 @@ Format: ID, source, statement, candidate framework change (SHIP / DEFER / DISCAR
 **Candidate change:** Add a "Windows test fixtures" section to the `testing-conventions` skill at `.github/skills/core/testing-conventions/SKILL.md`.
 
 **Status:** OPEN -- triage at PI-2 retro.
+
+---
+
+## LESSON-010 -- ACA Easy Auth needs companion app reg with id_token issuance enabled
+
+**Source:** SDD-007 cloud-dashboard first sign-in attempt returned HTTP 401 (2026-05-16).
+
+**Statement:** When configuring Microsoft Entra Easy Auth on Azure Container Apps via `az containerapp auth microsoft update`, the CLI does NOT automatically enable `enableIdTokenIssuance` on the companion app registration. The Easy Auth default flow uses `response_type=id_token&response_mode=form_post`. Without the implicit grant enabled, sign-in completes at Microsoft's end but token validation fails at the ACA edge, yielding 401 post-auth.
+
+**Fix:** Pair these two commands every time:
+1. `az ad app create --display-name ... --web-redirect-uris https://<app>/.auth/login/aad/callback`
+2. `az ad app update --id <appId> --enable-id-token-issuance true`     <- the missing step
+
+**Candidate change:** Update `.github/skills/operational/azure-deployment-architecture/SKILL.md` runbook section to include the id_token issuance step explicitly. Update PROVISIONED.md template.
+
+**Status:** OPEN -- triage at PI-2 retro.

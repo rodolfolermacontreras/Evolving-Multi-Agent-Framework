@@ -279,7 +279,17 @@ az containerapp create \
 TENANT_ID=$(az account show --query tenantId -o tsv)
 
 # Create an Entra app registration for the dashboard
-APP_ID=$(az ad app create --display-name "Bridge Dashboard Auth" --query appId -o tsv)
+APP_ID=$(az ad app create --display-name "Bridge Dashboard Auth" \
+    --sign-in-audience AzureADMyOrg \
+    --web-redirect-uris "https://$(az containerapp show -g $RG -n $APP --query properties.configuration.ingress.fqdn -o tsv)/.auth/login/aad/callback" \
+    --query appId -o tsv)
+
+# CRITICAL: enable id_token issuance (Easy Auth uses implicit flow with response_type=id_token).
+# Without this, sign-in completes but ACA returns 401 post-auth (LESSON-010).
+az ad app update --id $APP_ID --enable-id-token-issuance true
+
+# Create the service principal so we can assign users to it
+az ad sp create --id $APP_ID
 
 # Configure ACA Easy Auth
 az containerapp auth microsoft update \

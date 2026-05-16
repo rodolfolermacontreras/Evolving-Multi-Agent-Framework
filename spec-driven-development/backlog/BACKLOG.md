@@ -30,6 +30,7 @@ Prioritized backlog with RICE scoring. Managed by Principal Product Manager.
 | ID | Title | Priority | Reach | Impact | Confidence | Effort | RICE | Sprint | Status |
 |----|-------|----------|-------|--------|------------|--------|------|--------|--------|
 | SDD-001 | Fleet Bridge Dashboard -- single-page ops console rendering fleet hierarchy, dispatch ledger, and spec lifecycle | P3 | 4 | 2 | 0.9 | 3 | 2.4 | Unscheduled | Design exploration complete |
+| SDD-007 | Cloud-deployed live Bridge dashboard on Azure Container Apps with Entra ID auth, scale-to-zero, OIDC CI/CD | P3 | 1 | 3 | 0.9 | 3 | 0.9 | Unscheduled | Design exploration complete |
 
 Notes:
 - Design spec pre-built at `specs/2026-05-13-fleet-bridge-dashboard/DESIGN.md`

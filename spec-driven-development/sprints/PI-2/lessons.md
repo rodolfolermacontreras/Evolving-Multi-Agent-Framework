@@ -51,3 +51,25 @@ Format: ID, source, statement, candidate framework change (SHIP / DEFER / DISCAR
 ## Carry-over from PI-1
 
 - **LESSON-004 (ledger migration policy)** -- deferred at PI-1 close. Still open. Will need decision when ledger schema changes.
+
+---
+
+## LESSON-008 -- Two parallel specs for the same file: declare one canonical
+
+**Source:** state-builder + state-dashboard converged on a single implementation file (`cli/state_builder.py`) (2026-05-16).
+
+**Statement:** When two parallel specs target the same implementation file, declare one as canonical for the file's primary contract and treat the other as additive scope. Cross-reference both validation contracts from the implementation file's header docstring.
+
+**Status:** OPEN -- triage at PI-2 retro.
+
+---
+
+## LESSON-009 -- Windows SQLite + tempdir tests need explicit cleanup
+
+**Source:** fleet.py SDD-003 test development (2026-05-16). All 9 acceptance tests passed logically but `tearDown` errored on Windows because `sqlite3.Connection` keeps the db file open until GC, and `TemporaryDirectory.cleanup()` refuses to delete locked files.
+
+**Statement:** Any unittest that opens SQLite databases inside `tempfile.TemporaryDirectory()` must use `TemporaryDirectory(ignore_cleanup_errors=True)` and call `gc.collect()` in `tearDown` to release file handles before cleanup runs. This is a Python stdlib behavior on Windows, not a project bug.
+
+**Candidate change:** Add a "Windows test fixtures" section to the `testing-conventions` skill at `.github/skills/core/testing-conventions/SKILL.md`.
+
+**Status:** OPEN -- triage at PI-2 retro.

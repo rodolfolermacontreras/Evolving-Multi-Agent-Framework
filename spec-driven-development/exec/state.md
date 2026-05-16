@@ -3,7 +3,7 @@
 Generated date: 2026-05-16
 Current PI: PI-2 (Fleet Maturity and CLI)
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
-Active focus: Start: 'CLI Phase 2: `fleet.py`, `qa.py`, `retro.py`, `state_builder.py` operational (state_builder.py shipped 2026-05-16)'
+Active focus: Finish implementation of 'fleet'
 
 PI progress: 0/6 commitments complete (0%)
 
@@ -11,9 +11,12 @@ PI progress: 0/6 commitments complete (0%)
 
 | Feature | Stage | Status | Notes |
 |---------|-------|--------|-------|
-| fleet-ledger | DONE | - | validation 100%, RETRO present |
+| fleet-ledger | DONE | Done | validation 100%, RETRO present, Status: done |
 | fleet-bridge-dashboard | CLARIFY | - | DESIGN.md only (pre-spec design exploration) |
-| state-builder | DONE | - | validation 100%, RETRO present |
+| cloud-dashboard | CLARIFY | - | DESIGN.md only (pre-spec design exploration) |
+| fleet | IMPLEMENT | implementing | Status: implementing |
+| fleet-cli | SPEC | Draft | Status: Draft |
+| state-builder | DONE | Done | validation 100%, RETRO present, Status: done |
 | state-dashboard | DONE | done | validation 100%, RETRO present, Status: done |
 
 ## Sprint Plan
@@ -32,12 +35,6 @@ PI progress: 0/6 commitments complete (0%)
 | SDD-004 | qa.py -- two-stage review automation | P2 | 4.8 | Approved |
 | SDD-005 | retro.py -- sprint retro generator | P2 | 9.6 | Approved |
 | SDD-006 | Schema validation lint for agent/skill/prompt YAML frontmatter | P2 | 6.3 | Approved |
-
-### Unscheduled
-
-| ID | Title | Priority | RICE | Status |
-|----|-------|----------|------|--------|
-| SDD-001 | Fleet Bridge Dashboard -- single-page ops console rendering fleet hierarchy, dispatch ledger, and spec lifecycle | P3 | 2.4 | Design exploration complete |
 
 ### [AFK]
 
@@ -67,15 +64,17 @@ PI progress: 0/6 commitments complete (0%)
 
 ## Fleet
 
-- Principals: 4
+- Principals: 5
 - Generic workers: 4
 - Specialists: 0
-- Total agents: 8
-- Skills registered: 28
+- Total agents: 9
+- Skills: 29 across 5 categories
 
 ## Recently Completed
 
-_no successful dispatches yet_
+| When | Feature | Task | Agent |
+|------|---------|------|-------|
+| 2026-05-16T19:15:41Z | spec-driven-development/specs/2026-05-16-fleet | Ship fleet.py v0.1 (SDD-003) | developer-general |
 
 ## Blockers
 
@@ -83,8 +82,8 @@ _none -- no dispatches without outcome older than 24h_
 
 ## Next Milestones
 
-- CLI Phase 2: `fleet.py`, `qa.py`, `retro.py`, `state_builder.py` operational (state_builder.py shipped 2026-05-16)
-- 3-5 features delivered through the SDD pipeline (1 shipped: state-dashboard)
+- CLI Phase 2: `fleet.py`, `qa.py`, `retro.py`, `state_builder.py` operational (state_builder.py + fleet.py shipped 2026-05-16)
+- 3-5 features delivered through the SDD pipeline (3 shipped: state-builder, state-dashboard, fleet)
 - Fleet batch size increased from 2 to 3-4 with parallel dispatch validated
 - Specialization mechanic exercised: at least one generic worker earns a permanent identity through a domain skill pack
 - Conflict-detection workflow validated against a real two-worker collision

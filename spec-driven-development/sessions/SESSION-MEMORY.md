@@ -435,4 +435,52 @@ User UX review surfaced 10 issues and one hard requirement: **the dashboard must
 
 **Next action per the dashboard itself:** start `cli/fleet.py` — next PI-2 commitment, Sprint A. The dashboard now correctly recommends it because both state-builder and state-dashboard are DONE.
 
+---
+
+## Update: 2026-05-16 evening — fleet.py shipped + cloud-security architect hired (draft)
+
+**Two parallel tracks executed in one session:**
+
+### Track 1: cli/fleet.py (SDD-003) DONE
+
+End-to-end SDD lifecycle in one session, same pattern as state-dashboard:
+- Spec, clarification log, validation contract, tasks, RETRO all at `specs/2026-05-16-fleet/`
+- Implementation: `cli/fleet.py` (~13 KB, stdlib + local ledger_cli only)
+- Tests: `cli/test_fleet.py` (10 acceptance tests, all passing)
+- Subcommands: `dispatch`, `mark-outcome`, `status`, `list`
+- Dispatch packets written to `dispatches/<pi>/<dispatch-id>.md` using `templates/agent-brief.md` as the template
+- **First real dispatch shipped through the system:** dispatch #1 recorded, packet emitted at `dispatches/PI-2/000001.md`, marked success — now visible in state-dashboard's "Recently Completed" section
+- Roadmap F1 (cli/fleet.py) marked DONE
+
+### Track 2: principal-cloud-security-architect hired (draft) + SDD-007 design
+
+User asked for a cloud-security expert. Drafted (Level-2 pending approval per ADR-0007):
+- `.github/agents/principal-cloud-security-architect.agent.md` — new 5th Principal, narrow domain scope (not orchestrator)
+- `.github/skills/operational/azure-deployment-architecture/SKILL.md` — encodes default Azure pattern (ACA + Entra ID + scale-to-zero) with threat-model template and cost ceiling
+- `roster/agents.json` entry with `status: draft`
+- `roster/skills.json` entry for the new skill
+- `docs/ADR/008-hire-cloud-security-architect.md` — Level-2 decision record, awaiting human approval
+
+**Cloud dashboard design (SDD-007, P3):**
+- `specs/2026-05-16-cloud-dashboard/DESIGN.md` (15 KB) — full architecture exploration
+- Recommended: Azure Container Apps + Microsoft Entra ID + scale-to-zero, ~$0/mo under MSDN credit
+- Concrete Dockerfile (pinned 3.13-slim, non-root, stdlib only)
+- Concrete GitHub Actions workflow with OIDC federation (no stored service principal secret)
+- Full step-by-step az CLI runbook (RG → LAW → ACA Env → ACA App → Entra auth → federated credential → cost alert → first deploy → teardown)
+- Threat model with 7 categories + residual risks
+- Added to BACKLOG.md as SDD-007 P3 "Design exploration complete"
+
+**Test count now: 44 passing** (13 ledger + 13 state_builder + 10 fleet + others). +18 tests this round.
+
+**LESSON-009 captured:** Windows tests using sqlite3 + TemporaryDirectory need `ignore_cleanup_errors=True` + `gc.collect()` in tearDown.
+
+**State-dashboard now shows live data:** dispatch #1 visible, next-action heuristic correctly points at the next undone PI-2 commitment.
+
+**Awaiting Level-2 human approval:**
+- ADR-0008 (hire principal-cloud-security-architect)
+- SDD-007 scope confirmation
+- Cost ceiling for cloud deployment ($10/mo recommended, $5/mo alert)
+- Decision on OIDC vs service principal secret
+
+
 

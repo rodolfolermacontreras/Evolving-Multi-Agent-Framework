@@ -150,6 +150,12 @@
     "description": "Default communication mode for the Executive Manager. Enforces 'recommend, do not menu' so routine sequencing decisions do not tax the human's cognitive budget. Triggered by LESSON-005."
   },
   {
+    "id": "azure-deployment-architecture",
+    "path": ".github/skills/operational/azure-deployment-architecture/SKILL.md",
+    "category": "operational",
+    "description": "Default Azure deployment pattern (Container Apps + Entra ID auth + scale-to-zero) with security defaults, threat-model template, and cost ceiling. Owned by principal-cloud-security-architect."
+  },
+  {
     "id": "pytest-runner",
     "path": ".github/skills/domain/pytest-runner/SKILL.md",
     "category": "domain",

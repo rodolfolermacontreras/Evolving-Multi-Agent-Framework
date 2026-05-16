@@ -36,6 +36,16 @@
     "provenance": null
   },
   {
+    "id": "principal-cloud-security-architect",
+    "path": ".github/agents/principal-cloud-security-architect.agent.md",
+    "kind": "principal",
+    "role": "cloud-security-architect",
+    "specialization": "azure",
+    "created_at": "2026-05-16",
+    "provenance": "Hired via /hire 2026-05-16 in response to user request to deploy live dashboard securely to Azure. Draft status pending Level-2 approval per ADR-0007 and ADR-0008.",
+    "status": "draft"
+  },
+  {
     "id": "developer-general",
     "path": ".github/agents/developer-general.agent.md",
     "kind": "generic",

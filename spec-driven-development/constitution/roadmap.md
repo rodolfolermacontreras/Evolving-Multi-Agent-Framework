@@ -75,8 +75,8 @@ Pilot candidates (one will be chosen):
 
 ## PI-2: Fleet Maturity and CLI (current)
 
-- [ ] CLI Phase 2: `fleet.py`, `qa.py`, `retro.py`, `state_builder.py` operational (state_builder.py shipped 2026-05-16)
-- [ ] 3-5 features delivered through the SDD pipeline (1 shipped: state-dashboard)
+- [ ] CLI Phase 2: `fleet.py`, `qa.py`, `retro.py`, `state_builder.py` operational (state_builder.py + fleet.py shipped 2026-05-16)
+- [ ] 3-5 features delivered through the SDD pipeline (3 shipped: state-builder, state-dashboard, fleet)
 - [ ] Fleet batch size increased from 2 to 3-4 with parallel dispatch validated
 - [ ] Specialization mechanic exercised: at least one generic worker earns a permanent identity through a domain skill pack
 - [ ] Conflict-detection workflow validated against a real two-worker collision
@@ -100,7 +100,7 @@ These items are tracked and prioritized but not yet scheduled.
 
 | ID | Description | Effort | Priority |
 |----|-------------|--------|----------|
-| F1 | Implement `cli/fleet.py` -- dispatch and ledger writes | L | P2 |
+| F1 | Implement `cli/fleet.py` -- dispatch and ledger writes (DONE 2026-05-16) | L | DONE |
 | F2 | Implement `cli/state_builder.py` -- auto-generate `exec/state.md` (DONE 2026-05-16, also produces `exec/state.html` Bridge dashboard) | M | DONE |
 | F3 | Implement `cli/qa.py` -- two-stage review automation | M | P3 |
 | F4 | Implement `cli/retro.py` -- sprint retro generator | S | P3 |

@@ -45,6 +45,10 @@ from pathlib import Path
 DEFAULT_SDD_ROOT = Path(__file__).resolve().parents[1]   # spec-driven-development/
 
 
+class StateBuilderError(Exception):
+    """Expected state-builder failure with a human-readable message."""
+
+
 def repo_root_for(sdd_root: Path) -> Path:
     return sdd_root.parent
 
@@ -78,7 +82,7 @@ class Feature:
     notes: str = ""
 
 
-_STATUS_RE = re.compile(r"^\s*[Ss]tatus\s*:\s*(.+?)\s*$", re.MULTILINE)
+_STATUS_RE = re.compile(r"^\s*(?:-\s+)?[Ss]tatus\s*:\s*(.+?)\s*$", re.MULTILINE)
 
 
 def _normalize_status_to_stage(status: str) -> str | None:
@@ -232,6 +236,8 @@ def current_pi(pis: list[PIBlock], override: str | None = None) -> PIBlock | Non
         for p in pis:
             if p.name == override:
                 return p
+        # Override didn't match any existing PI -- create a synthetic one
+        return PIBlock(name=override, title="", is_current=True)
     for p in pis:
         if p.is_current:
             return p
@@ -288,16 +294,30 @@ def load_roster(sdd_root: Path) -> dict:
     skills_path = sdd_root / "roster" / "skills.json"
     agents = json.loads(agents_path.read_text(encoding="utf-8")) if agents_path.is_file() else []
     skills = json.loads(skills_path.read_text(encoding="utf-8")) if skills_path.is_file() else []
-    by_kind: dict[str, int] = {}
+    principals = 0
+    generic = 0
+    specialist = 0
     for a in agents:
         k = a.get("kind", "unknown")
-        by_kind[k] = by_kind.get(k, 0) + 1
+        if k == "principal":
+            principals += 1
+        elif k == "specialist":
+            specialist += 1
+        elif k == "generic":
+            if a.get("specialization"):
+                specialist += 1
+            else:
+                generic += 1
+        else:
+            generic += 1
+    categories = {s.get("category", "") for s in skills if s.get("category")}
     return {
-        "principals": by_kind.get("principal", 0),
-        "generic": by_kind.get("generic", 0),
-        "specialist": by_kind.get("specialist", 0),
+        "principals": principals,
+        "generic": generic,
+        "specialist": specialist,
         "total_agents": len(agents),
         "total_skills": len(skills),
+        "skill_categories": len(categories),
         "agents": agents,
         "skills": skills,
     }
@@ -441,6 +461,8 @@ def render_markdown(*, generated_date: str, pi: PIBlock | None, features: list[F
             key = item.sprint or "Unassigned"
             by_sprint.setdefault(key, []).append(item)
         for sprint_key in sorted(by_sprint.keys()):
+            if sprint_key.lower() in ("unscheduled", "unassigned"):
+                continue
             out.append(f"### {sprint_key}")
             out.append("")
             out.append("| ID | Title | Priority | RICE | Status |")
@@ -457,7 +479,7 @@ def render_markdown(*, generated_date: str, pi: PIBlock | None, features: list[F
             f"- Generic workers: {roster['generic']}",
             f"- Specialists: {roster['specialist']}",
             f"- Total agents: {roster['total_agents']}",
-            f"- Skills registered: {roster['total_skills']}", ""]
+            f"- Skills: {roster['total_skills']} across {roster.get('skill_categories', 0)} categories", ""]
 
     # ---- 5. Recently Completed -------------------------------------------
     out += ["## Recently Completed", ""]
@@ -1036,8 +1058,10 @@ def _resolve_sdd_root(arg: str | None) -> Path:
     return DEFAULT_SDD_ROOT
 
 
-def main(argv: list[str] | None = None) -> int:
+def parse_args(argv: list[str]) -> argparse.Namespace:
+    """Parse command-line arguments (separated per CLI-PATTERN.md)."""
     parser = argparse.ArgumentParser(
+        prog="state_builder.py",
         description="Build (or live-serve) the executive state dashboard. "
                     "Default action: write exec/state.md and exec/state.html.",
     )
@@ -1056,15 +1080,28 @@ def main(argv: list[str] | None = None) -> int:
     sub_serve.add_argument("--port", type=int, default=8765)
     sub_serve.add_argument("--no-open", action="store_true")
 
-    args = parser.parse_args(argv)
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv if argv is not None else sys.argv[1:])
     sdd_root = _resolve_sdd_root(args.sdd_root)
+
+    if not sdd_root.is_dir():
+        print(f"ERROR: --sdd-root directory does not exist: {sdd_root}", file=sys.stderr)
+        return 1
 
     if args.cmd == "serve":
         return serve(sdd_root=sdd_root, host=args.host, port=args.port,
                      open_browser=not args.no_open)
 
     write = not args.dry_run
-    info = build(sdd_root=sdd_root, write=write, pi_override=args.pi)
+    try:
+        info = build(sdd_root=sdd_root, write=write, pi_override=args.pi)
+    except (StateBuilderError, OSError) as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+
     if args.dry_run:
         # SDD-002 AC10: dry-run prints the markdown to stdout
         sys.stdout.write(info["markdown"])

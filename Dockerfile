@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1.7
 # Bridge dashboard container image -- single-user Azure Container App deployment.
 # See spec-driven-development/specs/2026-05-16-cloud-dashboard/DESIGN.md
-FROM python:3.13-slim
+# Base image pinned to digest per SECURITY-REVIEW.md REC-1 (2026-05-16).
+FROM python:3.13-slim@sha256:dc1546eefcbe8caaa1f004f16ab76b204b5e1dbd58ff81b899f21cd40541232f
 
 # Install git so state_builder can run `git log` for the Recent Commits panel.
 RUN apt-get update \

@@ -29,8 +29,9 @@ Prioritized backlog with RICE scoring. Managed by Principal Product Manager.
 
 | ID | Title | Priority | Reach | Impact | Confidence | Effort | RICE | Sprint | Status |
 |----|-------|----------|-------|--------|------------|--------|------|--------|--------|
-| SDD-001 | Fleet Bridge Dashboard -- single-page ops console rendering fleet hierarchy, dispatch ledger, and spec lifecycle | P3 | 4 | 2 | 0.9 | 3 | 2.4 | Unscheduled | Design exploration complete |
+| SDD-001 | Fleet Bridge Dashboard -- single-page ops console rendering fleet hierarchy, dispatch ledger, and spec lifecycle | P3 | 4 | 2 | 0.9 | 3 | 2.4 | Unscheduled | Design exploration complete; partially shipped via state-dashboard v0.2 + v2.1 |
 | SDD-007 | Cloud-deployed live Bridge dashboard on Azure Container Apps with Entra ID auth, scale-to-zero, OIDC CI/CD | P3 | 1 | 3 | 0.9 | 3 | 0.9 | Shipped 2026-05-16 | DEPLOYED (v1 live, see PROVISIONED.md) |
+| SDD-008 | Bridge dashboard v3 -- D3 force-directed agent network graph + WebSocket live push + click-to-expand drill-downs + sprint history + dependency arrows | P3 | 1 | 3 | 0.7 | 8 | 0.26 | Unscheduled | Backlog; UX feedback applied at v2.1 (header/pulse/progress-ring/swim-lanes/activity-feed); v3 requires new JS deps + WebSocket = ADR + new principal-architect decision |
 
 Notes:
 - Design spec pre-built at `specs/2026-05-13-fleet-bridge-dashboard/DESIGN.md`

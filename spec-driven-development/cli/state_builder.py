@@ -533,20 +533,46 @@ def render_markdown(*, generated_date: str, pi: PIBlock | None, features: list[F
 # HTML renderer (state-dashboard feature) -- Bridge tokens, v0.2 UX
 # ---------------------------------------------------------------------------- #
 
+# Cumulative completion weight per stage (UX feedback 2026-05-16):
+# weights chosen so a feature in IMPLEMENT reads as ~80% complete, not 0%.
+STAGE_WEIGHT = {
+    "IDEA":       0,
+    "BACKLOG":    0,
+    "CLARIFY":   10,
+    "SPEC":      30,
+    "PLAN":      40,
+    "TASKS":     50,
+    "IMPLEMENT": 85,
+    "REVIEW":    95,
+    "DONE":     100,
+}
+
+# One-sentence human mission per PI; surfaced in the dashboard top bar.
+# Editable here when a new PI opens. (Future: parse from roadmap.md frontmatter.)
+PI_MISSION = {
+    "PI-1": "Generalize the framework off the original host project and ship the first dogfood feature end-to-end.",
+    "PI-2": "Build the CLI tools that let the fleet self-manage: dispatch, QA, retrospectives, and live state tracking.",
+    "PI-3": "Validate portability by bootstrapping the framework onto a completely different second project.",
+}
+
+
 HTML_CSS = """
 :root {
-  --bg-carbon:       #0a0a0a;
-  --bg-graphite:     #141413;
-  --bg-graphite-2:   #1c1b18;
-  --ink-paper:       #e8e4d8;
-  --ink-paper-dim:   #b8b4a8;
-  --ink-paper-faint: #8a8678;
-  --accent-oxblood:  #ce2029;
-  --signal-amber:    #d29a3b;
-  --signal-amber-2:  #e8b85a;
-  --signal-amber-3:  #8a6a2a;
-  --signal-jade:     #6fa37a;
-  --rule-line:       #2a2925;
+  --bg-carbon:        #0a0a0a;
+  --bg-graphite:      #141413;
+  --bg-graphite-2:    #1c1b18;
+  --bg-graphite-3:    #232220;
+  --ink-paper:        #e8e4d8;
+  --ink-paper-dim:    #b8b4a8;
+  --ink-paper-faint:  #8a8678;
+  --accent-oxblood:   #ce2029;
+  --accent-oxblood-2: #a01820;
+  --signal-amber:     #d29a3b;
+  --signal-amber-2:   #e8b85a;
+  --signal-amber-3:   #8a6a2a;
+  --signal-jade:      #6fa37a;
+  --signal-jade-dim:  #486a52;
+  --rule-line:        #2a2925;
 }
 * { box-sizing: border-box; }
 html, body {
@@ -558,180 +584,289 @@ html, body {
 .body-sans { font-family: -apple-system, "Segoe UI", Inter, system-ui, sans-serif; }
 a { color: var(--signal-amber-2); text-decoration: none; }
 a:hover { text-decoration: underline; }
-header.bridge-header {
-  border-bottom: 2px solid var(--accent-oxblood);
-  padding: 14px 22px 12px;
-  display: flex; align-items: baseline; justify-content: space-between; gap: 18px; flex-wrap: wrap;
+
+/* TOP BAR --------------------------------------------------------------- */
+header.topbar {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 24px; align-items: center;
+  padding: 14px 22px; border-bottom: 2px solid var(--accent-oxblood);
 }
-.brand { display: flex; align-items: baseline; gap: 14px; }
-.brand .h-bridge { font-size: 14px; letter-spacing: 0.18em; font-weight: 700; text-transform: uppercase; color: var(--ink-paper); }
-.brand .h-pi { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--signal-amber-2); }
-.brand .h-title { font-size: 12px; color: var(--ink-paper-dim); letter-spacing: 0.04em; }
-.header-actions { display: flex; gap: 14px; align-items: center; font-size: 11px; }
-.header-actions .meta { color: var(--ink-paper-dim); letter-spacing: 0.08em; text-transform: uppercase; }
+.mission { display: flex; align-items: baseline; gap: 14px; min-width: 0; }
+.mission .h-bridge {
+  font-size: 14px; letter-spacing: 0.18em;
+  text-transform: uppercase; font-weight: 700; color: var(--ink-paper);
+  flex-shrink: 0;
+}
+.mission .mission-text {
+  font-family: -apple-system, "Segoe UI", Inter, system-ui, sans-serif;
+  font-size: 13px; color: var(--ink-paper-dim);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sprint-pills { display: flex; gap: 4px; }
+.sprint-pills .pill {
+  padding: 4px 12px; border: 1px solid var(--rule-line);
+  background: var(--bg-graphite); color: var(--ink-paper-dim);
+  font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+  cursor: default;
+}
+.sprint-pills .pill.active {
+  background: var(--accent-oxblood); border-color: var(--accent-oxblood);
+  color: var(--ink-paper); font-weight: 700;
+}
+.sprint-pills .pill.future { opacity: 0.45; }
+.live-pulse {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; color: var(--ink-paper-dim); letter-spacing: 0.06em;
+}
+.live-pulse .dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  display: inline-block; flex-shrink: 0;
+}
+.dot.dot-green { background: var(--signal-jade); animation: pulse-green 1.6s ease-in-out infinite; }
+.dot.dot-amber { background: var(--signal-amber); animation: pulse-amber 2.2s ease-in-out infinite; }
+.dot.dot-red   { background: var(--accent-oxblood); animation: pulse-red 1.0s ease-in-out infinite; }
+.dot.dot-gray  { background: var(--ink-paper-faint); }
+@keyframes pulse-green { 0%,100% { box-shadow: 0 0 0 0 rgba(111,163,122,0.55); } 50% { box-shadow: 0 0 0 8px rgba(111,163,122,0); } }
+@keyframes pulse-amber { 0%,100% { box-shadow: 0 0 0 0 rgba(210,154,59,0.55); } 50% { box-shadow: 0 0 0 8px rgba(210,154,59,0); } }
+@keyframes pulse-red   { 0%,100% { box-shadow: 0 0 0 0 rgba(206,32,41,0.55); } 50% { box-shadow: 0 0 0 8px rgba(206,32,41,0); } }
+.live-pulse .meta { color: var(--ink-paper-faint); margin-left: 8px; }
 .btn-refresh {
   border: 1px solid var(--rule-line); padding: 5px 12px;
   color: var(--ink-paper); background: var(--bg-graphite);
   font-family: inherit; font-size: 11px;
   letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+  margin-left: 12px;
 }
 .btn-refresh:hover { border-color: var(--signal-amber-2); color: var(--signal-amber-2); }
-.layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 0; min-height: calc(100vh - 62px); }
-.main { padding: 22px 24px; min-width: 0; }
-.side { padding: 22px 22px; border-left: 1px solid var(--rule-line); background: var(--bg-graphite); min-width: 0; }
-section.panel { margin-bottom: 28px; }
-section.panel h2 {
-  margin: 0 0 12px; font-size: 11px;
-  letter-spacing: 0.18em; text-transform: uppercase;
+
+/* 4-ZONE LAYOUT --------------------------------------------------------- */
+main.layout-4zone {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "a b"
+    "c c"
+    "d d";
+  gap: 14px;
+  padding: 18px 22px;
+}
+.zone { background: var(--bg-graphite); border: 1px solid var(--rule-line); padding: 16px 18px; min-width: 0; }
+.zone-a { grid-area: a; }
+.zone-b { grid-area: b; }
+.zone-c { grid-area: c; }
+.zone-d { grid-area: d; }
+.zone h2 {
+  margin: 0 0 12px; font-size: 10px;
+  letter-spacing: 0.22em; text-transform: uppercase;
   color: var(--ink-paper-dim);
   border-bottom: 1px solid var(--rule-line); padding-bottom: 6px;
 }
-.next-action {
-  background: var(--bg-graphite); border-left: 4px solid var(--accent-oxblood);
-  padding: 16px 20px; margin-bottom: 26px;
+.zone h2 .sub { color: var(--ink-paper-faint); letter-spacing: 0.06em; margin-left: 8px; font-weight: normal; }
+.zone .defer-note {
+  margin: 12px 0 0; padding: 8px 10px;
+  border-left: 2px solid var(--signal-amber-3);
+  background: var(--bg-graphite-2);
+  font-size: 10px; color: var(--ink-paper-faint);
+  letter-spacing: 0.06em;
 }
-.next-action .label { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent-oxblood); margin-bottom: 8px; }
-.next-action .title { font-size: 19px; font-weight: 700; color: var(--ink-paper); margin-bottom: 6px; letter-spacing: -0.01em; }
-.next-action .why { color: var(--ink-paper-dim); font-size: 13px; margin-bottom: 12px; }
-.next-action .cta {
+.zone .defer-note code { color: var(--signal-amber-2); }
+
+/* ZONE A: Big picture ---------------------------------------------------- */
+.big-picture { display: grid; grid-template-columns: 140px 1fr; gap: 18px; align-items: start; }
+.progress-ring { position: relative; width: 140px; height: 140px; }
+.progress-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.progress-ring .ring-bg { fill: none; stroke: var(--bg-graphite-3); stroke-width: 12; }
+.progress-ring .ring-fg {
+  fill: none; stroke: var(--signal-jade); stroke-width: 12; stroke-linecap: round;
+  transition: stroke-dashoffset 700ms ease;
+}
+.progress-ring .ring-center {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.progress-ring .pct-big { font-size: 28px; font-weight: 700; color: var(--ink-paper); line-height: 1; }
+.progress-ring .pct-sub { font-size: 9px; color: var(--ink-paper-dim); letter-spacing: 0.14em; margin-top: 4px; text-transform: uppercase; }
+.feature-stack { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.feature-stack .row {
+  display: grid; grid-template-columns: 14px minmax(0, 1fr) auto;
+  gap: 10px; align-items: center;
+  padding: 6px 0; border-bottom: 1px dashed var(--rule-line);
+  font-size: 11px; color: var(--ink-paper-dim);
+}
+.feature-stack .row:last-child { border-bottom: none; }
+.feature-stack .dot {
+  width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+}
+.feature-stack .dot.tone-faint        { background: var(--ink-paper-faint); }
+.feature-stack .dot.tone-amber-soft   { background: var(--signal-amber-3); }
+.feature-stack .dot.tone-amber        { background: var(--signal-amber); }
+.feature-stack .dot.tone-amber-bright { background: var(--signal-amber-2); }
+.feature-stack .dot.tone-oxblood      { background: var(--accent-oxblood); }
+.feature-stack .dot.tone-jade         { background: var(--signal-jade); }
+.feature-stack .name { color: var(--ink-paper); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.feature-stack .meta { color: var(--ink-paper-faint); font-size: 10px; text-align: right; letter-spacing: 0.04em; }
+
+.next-card {
+  margin-top: 14px; padding: 12px 14px;
+  background: var(--bg-graphite-2); border-left: 3px solid var(--accent-oxblood);
+}
+.next-card .label { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent-oxblood); margin-bottom: 4px; }
+.next-card .title { font-size: 14px; font-weight: 700; color: var(--ink-paper); margin-bottom: 4px; }
+.next-card .why   { font-size: 11px; color: var(--ink-paper-dim); margin-bottom: 8px; }
+.next-card .cta {
   display: inline-block; border: 1px solid var(--accent-oxblood);
   color: var(--ink-paper); background: rgba(206, 32, 41, 0.08);
-  padding: 6px 14px; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  padding: 4px 12px; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
 }
-.next-action .cta:hover { background: rgba(206, 32, 41, 0.20); text-decoration: none; }
-.progress { margin-bottom: 18px; }
-.progress .label-row {
-  display: flex; justify-content: space-between; align-items: baseline;
-  font-size: 11px; color: var(--ink-paper-dim); margin-bottom: 6px;
-  letter-spacing: 0.08em; text-transform: uppercase;
-}
-.progress .pct { color: var(--ink-paper); font-weight: 700; font-size: 14px; }
-.progress .seg-bar {
-  height: 22px; display: flex;
-  background: var(--bg-graphite-2); border: 1px solid var(--rule-line); overflow: hidden;
-}
-.progress .seg { transition: width 240ms ease; min-width: 0; }
-.progress .seg.tone-faint        { background: var(--ink-paper-faint); }
-.progress .seg.tone-amber-soft   { background: var(--signal-amber-3); }
-.progress .seg.tone-amber        { background: var(--signal-amber); }
-.progress .seg.tone-amber-bright { background: var(--signal-amber-2); }
-.progress .seg.tone-oxblood      { background: var(--accent-oxblood); }
-.progress .seg.tone-jade         { background: var(--signal-jade); }
-.legend {
-  display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px;
-  font-size: 10px; color: var(--ink-paper-dim); letter-spacing: 0.06em; text-transform: uppercase;
-}
-.legend .item { display: flex; align-items: center; gap: 6px; }
-.legend .swatch { width: 10px; height: 10px; display: inline-block; border: 1px solid var(--rule-line); }
-.legend .swatch.tone-faint        { background: var(--ink-paper-faint); }
-.legend .swatch.tone-amber-soft   { background: var(--signal-amber-3); }
-.legend .swatch.tone-amber        { background: var(--signal-amber); }
-.legend .swatch.tone-amber-bright { background: var(--signal-amber-2); }
-.legend .swatch.tone-oxblood      { background: var(--accent-oxblood); }
-.legend .swatch.tone-jade         { background: var(--signal-jade); }
-.commitments {
-  list-style: none; padding: 0; margin: 14px 0 0; font-size: 12px;
-  border: 1px solid var(--rule-line); background: var(--bg-graphite);
-}
-.commitments li {
-  display: flex; gap: 10px; align-items: flex-start;
-  padding: 7px 12px; border-bottom: 1px dashed var(--rule-line);
-  color: var(--ink-paper-dim);
-}
-.commitments li:last-child { border-bottom: none; }
-.commitments li.done { color: var(--signal-jade); background: rgba(111, 163, 122, 0.04); }
-.commitments li .mark { font-family: inherit; color: var(--ink-paper-faint); width: 18px; flex-shrink: 0; }
-.commitments li.done .mark { color: var(--signal-jade); }
-.kanban { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 6px; overflow-x: auto; }
-.kanban .col {
-  background: var(--bg-graphite); border: 1px solid var(--rule-line);
-  padding: 8px 8px 10px; min-height: 130px;
-  display: flex; flex-direction: column;
-}
-.kanban .col.empty { background: transparent; border-style: dashed; border-color: var(--rule-line); }
-.kanban .col h3 {
-  margin: 0 0 8px; font-size: 9px; letter-spacing: 0.18em;
-  color: var(--ink-paper-dim); text-transform: uppercase;
-  border-bottom: 1px solid var(--rule-line); padding-bottom: 5px;
-  display: flex; justify-content: space-between; align-items: baseline; gap: 6px;
-}
-.kanban .col h3 .count {
-  font-size: 10px; color: var(--ink-paper); font-weight: 700;
-  background: var(--bg-graphite-2); padding: 1px 6px; border: 1px solid var(--rule-line);
-}
-.kanban .col.empty h3 .count { display: none; }
-.kanban .col.empty h3 { color: var(--ink-paper-faint); }
-.kanban .card {
+.next-card .cta:hover { background: rgba(206, 32, 41, 0.2); text-decoration: none; }
+
+/* ZONE B: Agent activity (text-mode v2.1; D3 graph deferred to SDD-008) -- */
+.feature-cluster {
+  margin-bottom: 12px; padding: 10px 12px;
   background: var(--bg-graphite-2); border-left: 3px solid var(--ink-paper-faint);
-  padding: 7px 10px; margin-bottom: 7px; font-size: 11px; word-break: break-word;
 }
-.kanban .card.tone-faint        { border-left-color: var(--ink-paper-faint); }
-.kanban .card.tone-amber-soft   { border-left-color: var(--signal-amber-3); }
-.kanban .card.tone-amber        { border-left-color: var(--signal-amber); }
-.kanban .card.tone-amber-bright { border-left-color: var(--signal-amber-2); }
-.kanban .card.tone-oxblood      { border-left-color: var(--accent-oxblood); }
-.kanban .card.tone-jade         { border-left-color: var(--signal-jade); }
-.kanban .card .name { color: var(--ink-paper); font-weight: 600; margin-bottom: 3px; }
-.kanban .card .meta { color: var(--ink-paper-dim); font-size: 10px; }
-.kanban .col.empty .card-empty {
-  color: var(--ink-paper-faint); font-size: 11px;
-  display: flex; align-items: center; justify-content: center;
-  flex: 1; padding: 12px 0;
+.feature-cluster.tone-faint        { border-left-color: var(--ink-paper-faint); }
+.feature-cluster.tone-amber-soft   { border-left-color: var(--signal-amber-3); }
+.feature-cluster.tone-amber        { border-left-color: var(--signal-amber); }
+.feature-cluster.tone-amber-bright { border-left-color: var(--signal-amber-2); }
+.feature-cluster.tone-oxblood      { border-left-color: var(--accent-oxblood); }
+.feature-cluster.tone-jade         { border-left-color: var(--signal-jade); }
+.feature-cluster .feat-title { font-size: 11px; color: var(--ink-paper); font-weight: 700; margin-bottom: 6px; }
+.feature-cluster .feat-title .stage-tag {
+  font-size: 9px; letter-spacing: 0.14em; color: var(--ink-paper-faint); font-weight: normal;
+  margin-left: 8px; text-transform: uppercase;
 }
-table.dense { width: 100%; border-collapse: collapse; font-size: 11px; }
-table.dense th, table.dense td {
-  padding: 6px 8px; text-align: left;
-  border-bottom: 1px solid var(--rule-line); vertical-align: top;
+.feature-cluster .agents { display: flex; flex-wrap: wrap; gap: 6px; }
+.agent-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 9px; background: var(--bg-graphite-3); border: 1px solid var(--rule-line);
+  font-size: 10px; color: var(--ink-paper-dim);
 }
-table.dense th {
-  font-weight: 600; color: var(--ink-paper-dim);
+.agent-chip .avatar {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--signal-jade-dim); color: var(--ink-paper);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700;
+}
+.agent-chip.principal .avatar { background: var(--accent-oxblood-2); }
+.agent-chip.active .avatar  { background: var(--signal-jade); }
+.agent-chip.idle .avatar    { background: var(--ink-paper-faint); }
+
+.fleet-summary {
+  margin-top: 12px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+}
+.fleet-summary .stat { background: var(--bg-graphite-3); padding: 8px 10px; border: 1px solid var(--rule-line); }
+.fleet-summary .stat.zero { opacity: 0.55; }
+.fleet-summary .stat .n { font-size: 18px; font-weight: 700; color: var(--ink-paper); line-height: 1; }
+.fleet-summary .stat .l { font-size: 8px; letter-spacing: 0.18em; color: var(--ink-paper-dim); text-transform: uppercase; margin-top: 4px; }
+
+/* ZONE C: Feature swim lanes -------------------------------------------- */
+.swim-lanes { display: flex; flex-direction: column; gap: 8px; }
+.swim-row {
+  display: grid; grid-template-columns: 200px minmax(0, 1fr) 100px;
+  gap: 12px; align-items: center;
+}
+.swim-row .label { font-size: 11px; color: var(--ink-paper); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.swim-track {
+  position: relative; height: 18px;
+  background: var(--bg-graphite-3); border: 1px solid var(--rule-line); overflow: hidden;
+}
+.swim-fill {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  background: var(--signal-amber-3);
+  transition: width 700ms ease;
+}
+.swim-fill.tone-faint        { background: var(--ink-paper-faint); }
+.swim-fill.tone-amber-soft   { background: var(--signal-amber-3); }
+.swim-fill.tone-amber        { background: var(--signal-amber); }
+.swim-fill.tone-amber-bright { background: var(--signal-amber-2); }
+.swim-fill.tone-oxblood      { background: var(--accent-oxblood); }
+.swim-fill.tone-jade         { background: var(--signal-jade); }
+.swim-marker {
+  position: absolute; top: 50%; transform: translate(-50%, -50%);
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--ink-paper); border: 2px solid var(--bg-carbon);
+  z-index: 2;
+}
+.swim-stages {
+  position: absolute; left: 0; right: 0; top: 0; bottom: 0;
+  display: flex; pointer-events: none;
+}
+.swim-stages .tick {
+  flex: 1; border-right: 1px dashed rgba(138,134,120,0.18);
+}
+.swim-stages .tick:last-child { border-right: none; }
+.swim-row .stage-text {
   font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-paper-dim); text-align: right;
 }
-.fleet-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; }
-.fleet-stats .stat {
-  background: var(--bg-graphite-2); border: 1px solid var(--rule-line); padding: 12px 14px;
+.swim-axis {
+  margin-top: 4px;
+  display: grid; grid-template-columns: 200px minmax(0, 1fr) 100px; gap: 12px;
 }
-.fleet-stats .stat.zero { opacity: 0.55; }
-.fleet-stats .stat .n { font-size: 24px; color: var(--ink-paper); font-weight: 700; line-height: 1; }
-.fleet-stats .stat .l {
-  font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
-  color: var(--ink-paper-dim); margin-top: 6px;
+.swim-axis .stages {
+  display: grid; grid-template-columns: repeat(9, 1fr);
+  font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-paper-faint);
 }
-.fleet-stats .stat .hint { font-size: 9px; color: var(--ink-paper-faint); margin-top: 4px; }
-.activity { font-size: 11px; }
-.activity .row {
-  padding: 6px 0; border-bottom: 1px dashed var(--rule-line);
-  display: grid; grid-template-columns: 56px auto 1fr; gap: 8px; align-items: baseline;
+.swim-axis .stages span { text-align: center; }
+.swim-axis .stages span.active { color: var(--ink-paper); font-weight: 700; }
+
+/* ZONE D: Unified activity feed ----------------------------------------- */
+.activity-controls { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; }
+.activity-controls .toggle {
+  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink-paper-faint);
 }
-.activity .sha { color: var(--signal-amber-2); font-weight: 600; }
-.activity .type {
-  display: inline-block; font-size: 9px; letter-spacing: 0.1em;
+.activity-list { display: flex; flex-direction: column; }
+.activity-row {
+  display: grid; grid-template-columns: 70px 18px 60px minmax(0, 1fr) auto;
+  gap: 10px; align-items: baseline;
+  padding: 7px 0; border-bottom: 1px dashed var(--rule-line);
+  font-size: 11px;
+}
+.activity-row:last-child { border-bottom: none; }
+.activity-row .when { color: var(--ink-paper-faint); font-size: 10px; }
+.activity-row .avatar {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--bg-graphite-3); color: var(--ink-paper-dim);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 8px; font-weight: 700; border: 1px solid var(--rule-line);
+}
+.activity-row .badge {
+  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
   padding: 1px 6px; border: 1px solid currentColor;
-  text-transform: uppercase; line-height: 1.4;
+  display: inline-block; text-align: center;
 }
-.activity .type.t-jade         { color: var(--signal-jade); }
-.activity .type.t-amber        { color: var(--signal-amber); }
-.activity .type.t-amber-soft   { color: var(--signal-amber-3); }
-.activity .type.t-amber-bright { color: var(--signal-amber-2); }
-.activity .type.t-oxblood      { color: var(--accent-oxblood); }
-.activity .type.t-faint        { color: var(--ink-paper-faint); }
-.activity .subj { color: var(--ink-paper-dim); overflow: hidden; text-overflow: ellipsis; }
-.activity .rel  { color: var(--ink-paper-faint); font-size: 10px; }
-.empty-state {
-  border: 1px dashed var(--rule-line); background: var(--bg-graphite-2);
-  padding: 22px; text-align: center; color: var(--ink-paper-dim); font-size: 12px;
+.badge.t-jade         { color: var(--signal-jade); }
+.badge.t-amber        { color: var(--signal-amber); }
+.badge.t-amber-soft   { color: var(--signal-amber-3); }
+.badge.t-amber-bright { color: var(--signal-amber-2); }
+.badge.t-oxblood      { color: var(--accent-oxblood); }
+.badge.t-faint        { color: var(--ink-paper-faint); }
+.activity-row .desc { color: var(--ink-paper-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.activity-row .feat-tag {
+  font-size: 9px; color: var(--ink-paper-faint);
+  border: 1px solid var(--rule-line); padding: 1px 6px;
+  letter-spacing: 0.06em;
 }
-.empty-state .icon { font-size: 18px; color: var(--ink-paper-faint); margin-bottom: 8px; letter-spacing: 0.2em; }
-.empty-state .hint { font-size: 10px; color: var(--ink-paper-faint); margin-top: 6px; letter-spacing: 0.06em; }
+
+/* footer ---------------------------------------------------------------- */
 footer {
   padding: 14px 22px; border-top: 1px solid var(--rule-line);
   color: var(--ink-paper-faint); font-size: 10px;
   letter-spacing: 0.08em; text-transform: uppercase;
 }
+
 @media (max-width: 1100px) {
-  .layout { grid-template-columns: 1fr; }
-  .side { border-left: none; border-top: 1px solid var(--rule-line); }
-  .kanban { grid-template-columns: repeat(3, minmax(140px, 1fr)); }
+  main.layout-4zone {
+    grid-template-columns: 1fr;
+    grid-template-areas: "a" "b" "c" "d";
+  }
+  .big-picture { grid-template-columns: 100px 1fr; }
+  .progress-ring { width: 100px; height: 100px; }
+  .swim-row, .swim-axis { grid-template-columns: 120px minmax(0, 1fr) 80px; }
 }
 """
 
@@ -757,174 +892,333 @@ def h(s) -> str:
     return html.escape(str(s) if s is not None else "")
 
 
+def _pulse(roster: dict, ledger: LedgerView, features: list[Feature]) -> tuple[str, str]:
+    """Return (dot_class, text) for the live-pulse indicator in the top bar."""
+    in_flight = [d for d in (ledger.recent or []) if d.get("outcome") is None]
+    blocked = ledger.blockers or []
+    impl_features = [f for f in features if f.stage in ("IMPLEMENT", "TASKS")]
+    if blocked:
+        return "dot-red", f"{len(blocked)} dispatch{'es' if len(blocked) != 1 else ''} blocked / stale"
+    if in_flight:
+        bits = [f"{len(in_flight)} dispatch{'es' if len(in_flight) != 1 else ''} in flight"]
+        if impl_features:
+            bits.append(f"{len(impl_features)} feature{'s' if len(impl_features) != 1 else ''} implementing")
+        return "dot-green", " | ".join(bits)
+    if impl_features:
+        return "dot-amber", f"{len(impl_features)} feature{'s' if len(impl_features) != 1 else ''} implementing, no dispatch in flight"
+    return "dot-gray", "fleet idle"
+
+
+def _weighted_progress(features: list[Feature]) -> int:
+    """Mission-level % complete weighted by lifecycle stage."""
+    if not features:
+        return 0
+    total = sum(STAGE_WEIGHT.get(f.stage, 0) for f in features)
+    return round(total / len(features))
+
+
+def _next_what(features: list[Feature]) -> str:
+    """One-line forward-looking trajectory for the next-action card."""
+    impl = [f for f in features if f.stage == "IMPLEMENT"]
+    review = [f for f in features if f.stage == "REVIEW"]
+    spec = [f for f in features if f.stage == "SPEC"]
+    bits = []
+    if impl:
+        bits.append(f"finish {len(impl)} in implementation")
+    if review:
+        bits.append(f"close {len(review)} in review")
+    if spec:
+        bits.append(f"advance {len(spec)} to plan")
+    return "; then ".join(bits) if bits else "open the next backlog item"
+
+
+def _agents_for_feature(roster: dict, feature: Feature, ledger: LedgerView) -> list[dict]:
+    """Best-effort: which agents have been dispatched to this feature recently?"""
+    if not ledger.recent:
+        return []
+    seen: dict[str, dict] = {}
+    for d in ledger.recent:
+        if (d.get("feature_dir") or "").endswith(feature.feature_dir.name):
+            aid = d.get("agent_id", "")
+            if aid and aid not in seen:
+                role = d.get("agent_role", "?")
+                status = "active" if d.get("outcome") is None else "idle"
+                seen[aid] = {"id": aid, "role": role, "status": status}
+    return list(seen.values())
+
+
+def _stage_short(stage: str) -> str:
+    return {"IDEA": "Idea", "BACKLOG": "Backlog", "CLARIFY": "Clarifying",
+            "SPEC": "Specifying", "PLAN": "Planning", "TASKS": "Task breakdown",
+            "IMPLEMENT": "Implementing", "REVIEW": "In review", "DONE": "Done"}.get(stage, stage)
+
+
+def _next_for(feature: Feature) -> str:
+    nxt = {"IDEA": "triage to backlog", "BACKLOG": "clarify",
+           "CLARIFY": "draft spec", "SPEC": "plan", "PLAN": "decompose tasks",
+           "TASKS": "implement", "IMPLEMENT": "review", "REVIEW": "close",
+           "DONE": "shipped"}
+    return nxt.get(feature.stage, "")
+
+
 def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature],
                 roster: dict, ledger: LedgerView, commits: list[tuple[str, str, str]],
                 next_action: tuple[str, str, str | None],
-                live: bool = False, port: int | None = None) -> str:
+                live: bool = False, port: int | None = None,
+                all_pis: list[PIBlock] | None = None) -> str:
+    """Render the 4-zone v3 Bridge dashboard."""
 
-    by_stage: dict[str, list[Feature]] = {s: [] for s in STAGES}
-    for f in features:
-        by_stage.setdefault(f.stage, []).append(f)
+    # ---- TOP BAR ---------------------------------------------------------
+    pi_name = pi.name if pi else "no PI"
+    mission_text = PI_MISSION.get(pi_name, pi.title if pi else "")
+    pulse_class, pulse_text = _pulse(roster, ledger, features)
 
-    # PI panel
-    pi_block_html = ""
-    if pi:
-        counts = {s: len(by_stage.get(s, [])) for s in STAGES}
-        total_features = sum(counts.values()) or 1
-        seg_html = ""
-        legend_html = ""
-        for s in STAGES:
-            n = counts.get(s, 0)
-            if n == 0:
-                continue
-            tone = STAGE_TONE[s]
-            pct = n * 100 / total_features
-            seg_html += f'<div class="seg {tone}" style="width:{pct:.2f}%" title="{s}: {n}"></div>'
-            legend_html += f'<span class="item"><span class="swatch {tone}"></span>{s} ({n})</span>'
-        commitments_html = ""
-        for c, label in pi.checkboxes:
-            commitments_html += (
-                f'<li class="{"done" if c else ""}">'
-                f'<span class="mark">{"[x]" if c else "[ ]"}</span>'
-                f'<span>{h(label)}</span></li>'
-            )
-        pi_block_html = f"""
-        <section class="panel">
-          <h2>{h(pi.name)} -- Feature Distribution</h2>
-          <div class="progress">
-            <div class="label-row">
-              <span>{h(pi.title)}</span>
-              <span class="pct">{pi.done} / {pi.total} commitments &nbsp; {pi.pct}%</span>
-            </div>
-            <div class="seg-bar">{seg_html or '<div class="seg tone-faint" style="width:100%"></div>'}</div>
-            <div class="legend">{legend_html}</div>
-          </div>
-          <h2 style="margin-top:18px">{h(pi.name)} Commitments</h2>
-          <ul class="commitments">{commitments_html}</ul>
-        </section>
-        """
-
-    # Kanban
-    kanban_html = '<div class="kanban">'
-    for s in STAGES:
-        cards = by_stage.get(s, [])
-        col_class = "col" if cards else "col empty"
-        count_badge = f'<span class="count">{len(cards)}</span>' if cards else ''
-        kanban_html += f'<div class="{col_class}"><h3><span>{h(s)}</span>{count_badge}</h3>'
-        if not cards:
-            kanban_html += '<div class="card-empty">&mdash;</div>'
-        for f in cards:
-            tone = STAGE_TONE[s]
-            kanban_html += (
-                f'<div class="card {tone}">'
-                f'<div class="name">{h(f.name)}</div>'
-                f'<div class="meta">{h(f.created)} &middot; {h(f.notes)}</div>'
-                f'</div>'
-            )
-        kanban_html += '</div>'
-    kanban_html += '</div>'
-
-    # Fleet stats
-    def stat(n, label, hint=""):
-        cls = "stat zero" if n == 0 else "stat"
-        return (f'<div class="{cls}" title="{h(hint)}"><div class="n">{n}</div>'
-                f'<div class="l">{h(label)}</div>' +
-                (f'<div class="hint">{h(hint)}</div>' if hint else '') + '</div>')
-    fleet_html = '<div class="fleet-stats">'
-    fleet_html += stat(roster['principals'], "Principals", "EM, PM, Arch, SW Dev")
-    fleet_html += stat(roster['generic'], "Generic", "developer, ux, qa, data-sci")
-    fleet_html += stat(roster['specialist'], "Specialist", "none earned yet")
-    fleet_html += stat(roster['total_skills'], "Skills", f"{roster['total_skills']} loadable")
-    fleet_html += '</div>'
-
-    # Commits with type tags
-    commits_html = '<div class="activity">'
-    if not commits:
-        commits_html += '<div class="empty-state"><div class="icon">//</div>No commits found.</div>'
-    for sha, subj, rel in commits:
-        ctype, rest = split_commit_type(subj)
-        if ctype:
-            tone = COMMIT_TYPE_TONE.get(ctype, "faint")
-            type_html = f'<span class="type t-{tone}">{h(ctype)}</span>'
-            subj_html = h(rest)
-        else:
-            type_html = '<span></span>'
-            subj_html = h(subj)
-        commits_html += (
-            f'<div class="row">'
-            f'<span class="sha">{h(sha)}</span>{type_html}'
-            f'<span class="subj">{subj_html}<div class="rel">{h(rel)}</div></span>'
-            f'</div>'
-        )
-    commits_html += '</div>'
-
-    # Dispatch stream (use ledger.recent)
-    if ledger.recent:
-        rows = "".join(
-            f"<tr><td>{h(d['dispatched_at'])}</td><td>{h(d['pi'])}</td>"
-            f"<td>{h(d.get('feature_dir',''))}</td><td>{h(d['task_id'])}</td>"
-            f"<td>{h(d['agent_id'])}</td><td>{h(d.get('outcome') or 'pending')}</td></tr>"
-            for d in ledger.recent
-        )
-        dispatch_html = (
-            '<table class="dense">'
-            '<thead><tr><th>When</th><th>PI</th><th>Feature</th><th>Task</th><th>Agent</th><th>Outcome</th></tr></thead>'
-            f'<tbody>{rows}</tbody></table>'
-        )
-    else:
-        dispatch_html = (
-            '<div class="empty-state"><div class="icon">// // //</div>'
-            '<div>Dispatch stream is empty.</div>'
-            '<div class="hint">The fleet has not yet been dispatched through the ledger. Record one with:<br>'
-            '<code>python spec-driven-development/ledger/ledger_cli.py record-dispatch ...</code></div></div>'
-        )
-
-    action_title, why, link = next_action
-    cta_html = f'<a class="cta" href="{h(link)}" target="_blank">Open &rarr; {h(link)}</a>' if link else ''
+    sprint_pills_html = ""
+    if all_pis:
+        for p in all_pis:
+            cls = "pill"
+            if p.is_current or (pi and p.name == pi.name):
+                cls += " active"
+            elif p.pct < 100 and not p.is_current:
+                cls += " future"
+            sprint_pills_html += f'<span class="{cls}">{h(p.name)}</span>'
 
     refresh_meta = '<meta http-equiv="refresh" content="20">' if live else ''
-    live_badge = (f'<span class="meta">live :: rebuilds on every request :: auto-refresh 20s</span>'
-                  if live else '<span class="meta">static :: rerun state_builder.py to refresh</span>')
+    live_badge = ('live' if live else 'static')
     refresh_btn = (
         '<a class="btn-refresh" href="/" title="Reload now">&#x21bb; refresh</a>' if live else
         '<a class="btn-refresh" href="state.html" title="Reload the static file">&#x21bb; reload</a>'
     )
-    pi_label_html = (f'<span class="h-pi">{h(pi.name)}</span><span class="h-title">{h(pi.title)}</span>' if pi else '')
+
+    # ---- ZONE A: Big Picture --------------------------------------------
+    pct = _weighted_progress(features)
+    circumference = 2 * 3.14159 * 60
+    dash_offset = circumference * (1 - pct / 100)
+
+    feature_stack_html = ""
+    if features:
+        # Order: in-flight first, then by stage descending, then alphabetical
+        order_key = lambda f: (-STAGE_WEIGHT.get(f.stage, 0), f.name)
+        for f in sorted(features, key=order_key):
+            tone = STAGE_TONE[f.stage]
+            nxt = _next_for(f)
+            meta = f"next: {nxt}" if f.stage != "DONE" else "shipped"
+            feature_stack_html += (
+                f'<div class="row">'
+                f'<span class="dot {tone}"></span>'
+                f'<span class="name" title="{h(f.notes)}">{h(f.name)}</span>'
+                f'<span class="meta">{h(_stage_short(f.stage))} -&gt; {h(meta)}</span>'
+                f'</div>'
+            )
+    else:
+        feature_stack_html = '<div class="row"><span class="meta">no features yet</span></div>'
+
+    action_title, why, link = next_action
+    nxt_summary = _next_what(features)
+    cta_html = f'<a class="cta" href="{h(link)}" target="_blank">Open &rarr; {h(link)}</a>' if link else ''
+
+    zone_a_html = f"""
+    <section class="zone zone-a">
+      <h2>Mission Progress <span class="sub">(weighted by stage)</span></h2>
+      <div class="big-picture">
+        <div class="progress-ring">
+          <svg viewBox="0 0 140 140">
+            <circle class="ring-bg" cx="70" cy="70" r="60"></circle>
+            <circle class="ring-fg" cx="70" cy="70" r="60"
+                    stroke-dasharray="{circumference:.2f}"
+                    stroke-dashoffset="{dash_offset:.2f}"></circle>
+          </svg>
+          <div class="ring-center">
+            <div class="pct-big">{pct}%</div>
+            <div class="pct-sub">{len(features)} feat</div>
+          </div>
+        </div>
+        <div class="feature-stack">{feature_stack_html}</div>
+      </div>
+      <div class="next-card">
+        <div class="label">Recommended next action</div>
+        <div class="title">{h(action_title)}</div>
+        <div class="why">{h(why)} &middot; Trajectory: {h(nxt_summary)}.</div>
+        {cta_html}
+      </div>
+    </section>
+    """
+
+    # ---- ZONE B: Agent activity (text-mode v2.1; D3 graph -> SDD-008) ----
+    cluster_html = ""
+    active_features = [f for f in features if f.stage not in ("DONE", "BACKLOG", "IDEA")]
+    if not active_features:
+        cluster_html = '<div class="defer-note">No active features. Fleet is idle.</div>'
+    for f in active_features:
+        agents = _agents_for_feature(roster, f, ledger)
+        tone = STAGE_TONE[f.stage]
+        chips_html = ""
+        if agents:
+            for a in agents:
+                initials = "".join(p[0].upper() for p in a["id"].split("-")[:2])
+                role_short = a["role"].split("-")[0]
+                kind_cls = "active" if a["status"] == "active" else "idle"
+                chips_html += (
+                    f'<span class="agent-chip {kind_cls}" title="{h(a["id"])} - {h(a["role"])}">'
+                    f'<span class="avatar">{h(initials)}</span>{h(role_short)}'
+                    f'</span>'
+                )
+        else:
+            chips_html = '<span class="agent-chip"><span class="avatar">??</span>no dispatch yet</span>'
+        cluster_html += (
+            f'<div class="feature-cluster {tone}">'
+            f'<div class="feat-title">{h(f.name)}<span class="stage-tag">{h(_stage_short(f.stage))}</span></div>'
+            f'<div class="agents">{chips_html}</div>'
+            f'</div>'
+        )
+
+    fleet_summary_html = ""
+    def _stat(n, label):
+        cls = "stat zero" if n == 0 else "stat"
+        return f'<div class="{cls}"><div class="n">{n}</div><div class="l">{label}</div></div>'
+    fleet_summary_html = (
+        f'<div class="fleet-summary">'
+        f'{_stat(roster["principals"], "Principals")}'
+        f'{_stat(roster["generic"], "Generic")}'
+        f'{_stat(roster["specialist"], "Specialist")}'
+        f'{_stat(roster["total_skills"], "Skills")}'
+        f'</div>'
+    )
+
+    zone_b_html = f"""
+    <section class="zone zone-b">
+      <h2>Agent Activity <span class="sub">(by feature)</span></h2>
+      {cluster_html}
+      {fleet_summary_html}
+      <div class="defer-note">Live force-directed network graph -&gt; <code>SDD-008</code> (deferred: requires JS deps + WebSocket).</div>
+    </section>
+    """
+
+    # ---- ZONE C: Swim lanes ----------------------------------------------
+    lanes_html = ""
+    if features:
+        # Active features first (descending by stage), DONE last (alphabetical)
+        active = sorted([f for f in features if f.stage != "DONE"],
+                        key=lambda f: (-STAGE_WEIGHT.get(f.stage, 0), f.name))
+        done = sorted([f for f in features if f.stage == "DONE"], key=lambda f: f.name)
+        ordered = active + done
+        for f in ordered:
+            tone = STAGE_TONE[f.stage]
+            fill_pct = STAGE_WEIGHT.get(f.stage, 0)
+            ticks = "".join('<div class="tick"></div>' for _ in STAGES)
+            lanes_html += (
+                f'<div class="swim-row">'
+                f'<span class="label" title="{h(f.notes)}">{h(f.name)}</span>'
+                f'<div class="swim-track">'
+                f'<div class="swim-stages">{ticks}</div>'
+                f'<div class="swim-fill {tone}" style="width:{fill_pct}%"></div>'
+                f'<div class="swim-marker" style="left:{fill_pct}%"></div>'
+                f'</div>'
+                f'<span class="stage-text">{h(_stage_short(f.stage))}</span>'
+                f'</div>'
+            )
+    else:
+        lanes_html = '<div class="defer-note">No features registered yet.</div>'
+
+    axis_html = (
+        '<div class="swim-axis">'
+        '<span></span>'
+        '<div class="stages">'
+        + "".join(f'<span>{s.title()}</span>' for s in STAGES) +
+        '</div><span></span></div>'
+    )
+
+    zone_c_html = f"""
+    <section class="zone zone-c">
+      <h2>Feature Pipeline <span class="sub">(stage-weighted; bigger fill = closer to done)</span></h2>
+      <div class="swim-lanes">{lanes_html}</div>
+      {axis_html}
+    </section>
+    """
+
+    # ---- ZONE D: Unified activity feed -----------------------------------
+    # Merge commits and dispatches into one chronological feed.
+    feed: list[tuple[str, dict]] = []
+    for sha, subj, rel in commits:
+        ctype, rest = split_commit_type(subj)
+        feed.append((rel, {
+            "kind": "commit", "when": rel, "actor": sha,
+            "actor_short": sha[:5], "badge_type": ctype or "chore",
+            "badge_tone": COMMIT_TYPE_TONE.get(ctype or "chore", "faint"),
+            "desc": rest, "feat": "",
+        }))
+    if ledger.recent:
+        for d in ledger.recent:
+            actor = d.get("agent_id", "?")
+            initials = "".join(p[0].upper() for p in actor.split("-")[:2]) or "??"
+            outcome = d.get("outcome") or "pending"
+            tone = {"success": "jade", "failed": "oxblood",
+                    "blocked": "oxblood", "pending": "amber"}.get(outcome, "amber")
+            feat = (d.get("feature_dir") or "").rsplit("/", 1)[-1] or ""
+            feed.append((d.get("dispatched_at", ""), {
+                "kind": "dispatch", "when": "ledger",
+                "actor_short": initials,
+                "badge_type": f"dispatch:{outcome}",
+                "badge_tone": tone,
+                "desc": f"{d.get('task_id','')} {d.get('task_title','')}",
+                "feat": feat,
+            }))
+    # Sort: dispatches have ISO timestamps that sort lexicographically; commits use relative dates.
+    # Show all dispatches first (most authoritative), then commits in repo order.
+    dispatch_items = [item for ts, item in feed if item["kind"] == "dispatch"]
+    commit_items = [item for ts, item in feed if item["kind"] == "commit"]
+    feed_ordered = dispatch_items + commit_items
+
+    feed_rows_html = ""
+    for item in feed_ordered[:20]:
+        feat_tag = f'<span class="feat-tag">{h(item["feat"])}</span>' if item["feat"] else '<span></span>'
+        feed_rows_html += (
+            f'<div class="activity-row">'
+            f'<span class="when">{h(item["when"])}</span>'
+            f'<span class="avatar" title="{h(item.get("actor", item["actor_short"]))}">{h(item["actor_short"])}</span>'
+            f'<span class="badge t-{item["badge_tone"]}">{h(item["badge_type"])}</span>'
+            f'<span class="desc">{h(item["desc"])}</span>'
+            f'{feat_tag}'
+            f'</div>'
+        )
+    if not feed_rows_html:
+        feed_rows_html = '<div class="defer-note">No activity yet. Dispatches and commits will appear here.</div>'
+
+    zone_d_html = f"""
+    <section class="zone zone-d">
+      <h2>Activity Feed <span class="sub">(dispatches + commits, newest first, top 20)</span></h2>
+      <div class="activity-list">{feed_rows_html}</div>
+    </section>
+    """
 
     return f"""<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 {refresh_meta}
-<title>Bridge -- {h(pi.name if pi else 'no PI')} -- {h(generated_at)}</title>
+<title>Bridge -- {h(pi_name)} -- {h(generated_at)}</title>
 <style>{HTML_CSS}</style>
 </head><body>
-<header class="bridge-header">
-  <div class="brand"><span class="h-bridge">Bridge</span>{pi_label_html}</div>
-  <div class="header-actions">
-    <span class="meta">generated {h(generated_at)}</span>
-    {live_badge}
+<header class="topbar">
+  <div class="mission">
+    <span class="h-bridge">Bridge</span>
+    <span class="mission-text">{h(mission_text)}</span>
+  </div>
+  <div class="sprint-pills">{sprint_pills_html}</div>
+  <div class="live-pulse">
+    <span class="dot {pulse_class}"></span>
+    <span>{h(pulse_text)}</span>
+    <span class="meta">| {live_badge}</span>
     {refresh_btn}
   </div>
 </header>
-<div class="layout">
-  <main class="main">
-    <div class="next-action">
-      <div class="label">Recommended next action</div>
-      <div class="title">{h(action_title)}</div>
-      <div class="why">{h(why)}</div>
-      {cta_html}
-    </div>
-    {pi_block_html}
-    <section class="panel"><h2>Lifecycle Kanban</h2>{kanban_html}</section>
-    <section class="panel"><h2>Dispatch Stream (fleet.db)</h2>{dispatch_html}</section>
-  </main>
-  <aside class="side">
-    <section class="panel"><h2>Fleet Roster</h2>{fleet_html}</section>
-    <section class="panel"><h2>Recent Commits</h2>{commits_html}</section>
-  </aside>
-</div>
-<footer>Auto-generated by cli/state_builder.py &middot; {("live mode @ :" + str(port)) if (live and port) else "file mode"} &middot; SDD-002 + state-dashboard v0.2</footer>
+<main class="layout-4zone">
+  {zone_a_html}
+  {zone_b_html}
+  {zone_c_html}
+  {zone_d_html}
+</main>
+<footer>Auto-generated by cli/state_builder.py &middot; {("live mode @ :" + str(port)) if (live and port) else "file mode"} &middot; v2.1 (4-zone) &middot; v3 (D3 + WebSocket) tracked as SDD-008</footer>
 </body></html>
 """
 
@@ -958,7 +1252,7 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
     htm = render_html(
         generated_at=generated_at, pi=pi, features=features, roster=roster,
         ledger=ledger, commits=commits, next_action=next_action,
-        live=live_html, port=port,
+        live=live_html, port=port, all_pis=pis,
     )
 
     result = {
@@ -992,6 +1286,19 @@ class DashboardHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
+        # Security headers (REC-2 from SECURITY-REVIEW.md)
+        self.send_header("Content-Security-Policy",
+                         "default-src 'none'; "
+                         "style-src 'unsafe-inline'; "
+                         "img-src 'self' data:; "
+                         "font-src 'self'; "
+                         "connect-src 'self'; "
+                         "frame-ancestors 'none'; "
+                         "base-uri 'none'; "
+                         "form-action 'self'")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("Referrer-Policy", "no-referrer")
+        self.send_header("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
         self.end_headers()
         self.wfile.write(body)
 

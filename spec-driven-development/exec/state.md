@@ -15,7 +15,9 @@ PI progress: 0/6 commitments complete (0%)
 | fleet-bridge-dashboard | CLARIFY | - | DESIGN.md only (pre-spec design exploration) |
 | cloud-dashboard | CLARIFY | - | DESIGN.md only (pre-spec design exploration) |
 | fleet | IMPLEMENT | implementing | Status: implementing |
-| fleet-cli | SPEC | Draft | Status: Draft |
+| fleet-cli | REVIEW | Done | Status: done but RETRO or validation incomplete |
+| qa-cli | SPEC | Draft | Status: Draft |
+| retro-cli | REVIEW | Done | Status: done but RETRO or validation incomplete |
 | state-builder | DONE | Done | validation 100%, RETRO present, Status: done |
 | state-dashboard | DONE | done | validation 100%, RETRO present, Status: done |
 

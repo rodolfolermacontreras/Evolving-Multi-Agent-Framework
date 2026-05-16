@@ -16,8 +16,9 @@ PI progress: 0/6 commitments complete (0%)
 | cloud-dashboard | CLARIFY | - | DESIGN.md only (pre-spec design exploration) |
 | fleet | IMPLEMENT | implementing | Status: implementing |
 | fleet-cli | REVIEW | Done | Status: done but RETRO or validation incomplete |
-| qa-cli | SPEC | Draft | Status: Draft |
+| qa-cli | REVIEW | Done | Status: done but RETRO or validation incomplete |
 | retro-cli | REVIEW | Done | Status: done but RETRO or validation incomplete |
+| schema-lint | IMPLEMENT | implementing | Status: implementing |
 | state-builder | DONE | Done | validation 100%, RETRO present, Status: done |
 | state-dashboard | DONE | done | validation 100%, RETRO present, Status: done |
 
@@ -90,8 +91,8 @@ _none -- no dispatches without outcome older than 24h_
 
 ## Next Milestones
 
-- CLI Phase 2: `fleet.py`, `qa.py`, `retro.py`, `state_builder.py` operational (state_builder.py + fleet.py shipped 2026-05-16)
-- 3-5 features delivered through the SDD pipeline (3 shipped: state-builder, state-dashboard, fleet)
+- CLI Phase 2: `fleet.py`, `qa.py`, `retro.py`, `state_builder.py` operational (ALL SHIPPED 2026-05-16)
+- 3-5 features delivered through the SDD pipeline (5 shipped: state-builder, state-dashboard, fleet, qa-cli, retro-cli, schema-lint)
 - Fleet batch size increased from 2 to 3-4 with parallel dispatch validated
 - Specialization mechanic exercised: at least one generic worker earns a permanent identity through a domain skill pack
 - Conflict-detection workflow validated against a real two-worker collision

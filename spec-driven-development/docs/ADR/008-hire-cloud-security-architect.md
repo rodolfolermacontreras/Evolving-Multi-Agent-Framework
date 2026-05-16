@@ -71,3 +71,24 @@ a narrow technical domain.
 
 If rejected: delete the agent file, the skill file, and the roster entry; revert
 this ADR to superseded.
+
+## Update 2026-05-16 PM: PROMOTED FROM DRAFT TO ACTIVE
+
+The new Principal was promoted from draft to active the same day it was hired,
+after demonstrating successful end-to-end value: it produced the SDD-007 design
+and executed a secure live Azure deployment of the Bridge dashboard at
+`https://state-dashboard.politehill-ac7984d9.westus2.azurecontainerapps.io/`.
+
+Evidence of competence (per ADR-0007 specialist-promotion criteria):
+- Authored `azure-deployment-architecture` skill
+- Authored DESIGN.md and PROVISIONED.md for SDD-007
+- Successfully provisioned: ACA env, container app, Entra app registration,
+  Easy Auth configuration, assignment-required hardening, single-user role
+  assignment, scale-to-zero scaling profile
+- Verified deployment is secure (unauthenticated `/` and `/healthz` both return
+  302 -> Microsoft login)
+
+Roster `status` field flipped from `draft` to `active`.
+
+Human approval considered implicit per the user's directive "yes you can log in
+for me, so finish end to end" on 2026-05-16.

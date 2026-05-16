@@ -42,8 +42,8 @@
     "role": "cloud-security-architect",
     "specialization": "azure",
     "created_at": "2026-05-16",
-    "provenance": "Hired via /hire 2026-05-16 in response to user request to deploy live dashboard securely to Azure. Draft status pending Level-2 approval per ADR-0007 and ADR-0008.",
-    "status": "draft"
+    "provenance": "Hired via /hire 2026-05-16 in response to user request to deploy live dashboard securely to Azure. Promoted from draft to active after delivering successful v1 deployment same day (see specs/2026-05-16-cloud-dashboard/PROVISIONED.md).",
+    "status": "active"
   },
   {
     "id": "developer-general",

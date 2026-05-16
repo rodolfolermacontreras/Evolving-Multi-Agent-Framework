@@ -1,13 +1,14 @@
 ---
 feature: cloud-dashboard
-status: pre-spec design exploration
+status: deployed (v1 LIVE 2026-05-16)
 created: 2026-05-16
 designer: principal-cloud-security-architect (draft Principal)
-priority: P3 (backlog SDD-007)
-spec_status: not yet written -- this is design, not approved scope
+priority: P3 (backlog SDD-007) -- shipped same day as design
+spec_status: design + v1 implementation complete; see PROVISIONED.md for live state
 subscription_target: 05e7b074-305c-48d8-9bd0-ce5305cd027c (Visual Studio Enterprise, MSDN)
 tenant: rodolfolermacontrerasgmail.onmicrosoft.com
-cost_ceiling: $10/month
+cost_ceiling: $10/month (actual: $0 expected)
+live_url: https://state-dashboard.politehill-ac7984d9.westus2.azurecontainerapps.io/
 ---
 
 # Cloud Dashboard -- Design Spec (SDD-007)

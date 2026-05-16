@@ -482,5 +482,46 @@ User asked for a cloud-security expert. Drafted (Level-2 pending approval per AD
 - Cost ceiling for cloud deployment ($10/mo recommended, $5/mo alert)
 - Decision on OIDC vs service principal secret
 
+---
+
+## Update: 2026-05-16 late evening -- LIVE CLOUD DEPLOYMENT
+
+User authorized end-to-end execution: "yes you can log in for me, so finish end to end". Cloud-Security Architect promoted draft -> active by delivering a working secure deployment same day.
+
+**THE DASHBOARD IS LIVE AT:**
+
+    https://state-dashboard.politehill-ac7984d9.westus2.azurecontainerapps.io/
+
+(Requires Microsoft Entra ID sign-in as rodolfolermacontreras@gmail.com -- single allowed user.)
+
+**Azure resources provisioned in rg-bridge-dashboard (West US 2):**
+- Container Apps Environment: cae-bridge-dashboard
+- Container App: state-dashboard (min=0, max=2, 0.25 vCPU / 0.5 GiB, scale-to-zero)
+- Auto-created Azure Container Registry (ca24921a026cacr.azurecr.io, Basic)
+- Auto-created Log Analytics workspace
+- Entra app registration "Bridge Dashboard Auth" (client id 625bdb84-d2e6-4853-96a9-f601571e3a0f)
+- Enterprise app with appRoleAssignmentRequired=true, user assigned
+
+**Security posture verified:**
+- HTTPS enforced
+- Unauthenticated GET / returns 302 -> login.microsoftonline.com
+- /healthz also auth-gated (no information disclosure)
+- Single user allow-list via assignment-required + only Rodolfo assigned
+- Non-root container (UID 10001), no secrets baked in image, scale-to-zero saves cost
+
+**Cost: $0/month expected** under MSDN credit (free tier covers single-user usage).
+
+**Deployed via** `az containerapp up --source .` which used ACR Build (no local Docker required). For repeat deploys see `specs/2026-05-16-cloud-dashboard/PROVISIONED.md` operational commands or set up the GitHub Actions OIDC workflow from DESIGN.md §6.
+
+**Deferred to v1.1:**
+- Cost budget alert (set up in Portal in 30 seconds; CLI shorthand parser issue documented)
+- GitHub Actions push-to-deploy (workflow YAML ready in DESIGN.md §6)
+- Custom domain
+- Image digest pinning
+
+**ADR-0008** updated: Cloud-Security Architect promoted draft -> active. SDD-007 marked DEPLOYED in BACKLOG.
+
+**Roadmap state:** PI-1 closed, PI-2 ongoing (state_builder + fleet shipped, qa.py + retro.py + schema lint remain). PI-2 informally now also includes the unscheduled SDD-007 which shipped as a bonus.
+
 
 

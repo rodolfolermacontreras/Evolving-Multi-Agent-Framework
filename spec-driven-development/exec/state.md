@@ -36,6 +36,12 @@ PI progress: 0/6 commitments complete (0%)
 | SDD-005 | retro.py -- sprint retro generator | P2 | 9.6 | Approved |
 | SDD-006 | Schema validation lint for agent/skill/prompt YAML frontmatter | P2 | 6.3 | Approved |
 
+### Shipped 2026-05-16
+
+| ID | Title | Priority | RICE | Status |
+|----|-------|----------|------|--------|
+| SDD-007 | Cloud-deployed live Bridge dashboard on Azure Container Apps with Entra ID auth, scale-to-zero, OIDC CI/CD | P3 | 0.9 | DEPLOYED (v1 live, see PROVISIONED.md) |
+
 ### [AFK]
 
 | ID | Title | Priority | RICE | Status |

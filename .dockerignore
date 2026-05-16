@@ -1,0 +1,19 @@
+# Exclude build artifacts and editor cruft but INCLUDE .git so state_builder
+# can run `git log` for the Recent Commits panel.
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.venv
+.vscode
+.idea
+.copilot
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+node_modules
+Dockerfile.bak
+*.log

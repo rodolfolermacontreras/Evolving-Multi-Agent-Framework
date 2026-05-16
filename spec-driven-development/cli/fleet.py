@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
-"""Fleet CLI -- dispatch packet generation + ledger writes (SDD-003).
+"""Fleet CLI -- dispatch, mark, and status for the SDD fleet (SDD-003).
 
 Subcommands:
-
-    dispatch       Emit a markdown dispatch packet AND insert a fleet.db row.
-    mark-outcome   Close a dispatch by id with outcome success | failed | blocked.
-    status         List in-flight dispatches (outcome IS NULL).
-    list           List dispatches by PI and/or feature directory.
-
-Style: pure Python stdlib + the local ledger_cli module. No third-party deps.
+    dispatch    Parse tasks.md, generate agent briefs, write ledger rows.
+    mark        Update outcome on a dispatch by ID.
+    status      List dispatches for a feature directory.
 """
 
 from __future__ import annotations
@@ -19,309 +15,324 @@ import re
 import sys
 from pathlib import Path
 
+# Framework layout ---------------------------------------------------------- #
 SDD_ROOT = Path(__file__).resolve().parents[1]
-LEDGER_DIR = SDD_ROOT / "ledger"
-DISPATCHES_DIR = SDD_ROOT / "dispatches"
+_LEDGER_DIR = SDD_ROOT / "ledger"
+if str(_LEDGER_DIR) not in sys.path:
+    sys.path.insert(0, str(_LEDGER_DIR))
+
+from ledger_cli import (  # noqa: E402
+    OUTCOMES,
+    connect_initialized,
+    fetch_dispatches,
+    mark_outcome,
+    print_dispatch_table,
+    record_dispatch,
+    utc_now,
+)
+
+DEFAULT_DB = _LEDGER_DIR / "fleet.db"
 ROSTER_PATH = SDD_ROOT / "roster" / "agents.json"
-TEMPLATE_PATH = SDD_ROOT / "templates" / "agent-brief.md"
-DEFAULT_DB = LEDGER_DIR / "fleet.db"
-
-sys.path.insert(0, str(LEDGER_DIR))
-import ledger_cli  # noqa: E402  (local module, executed for its helpers)
-
-OUTCOMES = ledger_cli.OUTCOMES   # ('success', 'failed', 'blocked')
 
 
-# ---------------------------------------------------------------------------- #
-# Roster
-# ---------------------------------------------------------------------------- #
-
-def load_agents(roster_path: Path = ROSTER_PATH) -> list[dict]:
-    if not roster_path.is_file():
-        return []
-    return json.loads(roster_path.read_text(encoding="utf-8"))
+# Exception ----------------------------------------------------------------- #
 
 
-def resolve_agent(agent_id: str, agents: list[dict]) -> dict:
-    """Return the roster entry for agent_id, raising KeyError with hint if missing."""
-    for a in agents:
-        if a.get("id") == agent_id:
-            return a
-    valid = ", ".join(a.get("id", "?") for a in agents) or "(roster empty)"
-    raise KeyError(f"unknown agent '{agent_id}'. Valid agent ids: {valid}")
+class FleetError(Exception):
+    """Expected fleet CLI failure."""
 
 
-# ---------------------------------------------------------------------------- #
-# Tasks.md scraping (best-effort)
-# ---------------------------------------------------------------------------- #
+# Task parser --------------------------------------------------------------- #
 
-def extract_task_row(feature_dir: Path, task_id: str) -> dict:
-    """Return {'title': ..., 'file_scope': ..., 'acceptance': ...} for the given task id.
 
-    Best-effort. If tasks.md is missing or the task row cannot be parsed, returns
-    empty strings; the operator can always pass --title explicitly.
+def parse_tasks_md(feature_dir: Path) -> list[dict]:
+    """Parse tasks.md from *feature_dir* into a list of task dicts.
+
+    Handles both the full ``Fleet Dispatch Eligible`` column name and the
+    abbreviated ``Fleet`` column name.
     """
     tasks_md = feature_dir / "tasks.md"
     if not tasks_md.is_file():
-        return {"title": "", "file_scope": "", "acceptance": ""}
-    text = tasks_md.read_text(encoding="utf-8", errors="replace")
-    row_re = re.compile(
-        rf"^\|\s*{re.escape(task_id)}\s*\|"
-        r"\s*(?P<tag>[^|]*?)\s*\|"
-        r"\s*(?P<desc>[^|]*?)\s*\|"
-        r"\s*(?P<scope>[^|]*?)\s*\|"
-        r"\s*(?P<accept>[^|]*?)\s*\|",
-        re.MULTILINE,
+        raise FleetError(f"tasks.md not found in {feature_dir}")
+
+    lines = tasks_md.read_text(encoding="utf-8").strip().splitlines()
+
+    # Find the header row (contains "Task ID")
+    header_idx: int | None = None
+    for i, line in enumerate(lines):
+        if line.strip().startswith("|") and re.search(r"task\s*id", line, re.IGNORECASE):
+            header_idx = i
+            break
+    if header_idx is None:
+        raise FleetError(f"No task table header found in {tasks_md}")
+
+    # Map column headers to logical names
+    headers = [h.strip() for h in lines[header_idx].strip().strip("|").split("|")]
+    col_map: dict[str, int] = {}
+    for i, h in enumerate(headers):
+        hl = h.lower().strip()
+        if "task" in hl and "id" in hl:
+            col_map["task_id"] = i
+        elif "desc" in hl:
+            col_map["description"] = i
+        elif "file" in hl and "scope" in hl:
+            col_map["file_scope"] = i
+        elif "accept" in hl:
+            col_map["acceptance"] = i
+        elif "fleet" in hl:
+            col_map["fleet_eligible"] = i
+        elif hl == "status":
+            col_map["status"] = i
+
+    # Parse data rows
+    tasks: list[dict] = []
+    for line in lines[header_idx + 1:]:
+        line = line.strip()
+        if not line.startswith("|"):
+            continue
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        # Skip separator rows (cells are only dashes / colons)
+        if all(re.match(r"^[\-:]+$", c) for c in cells if c):
+            continue
+        task: dict[str, str] = {}
+        for key, idx in col_map.items():
+            task[key] = cells[idx].strip() if idx < len(cells) else ""
+        if task.get("task_id"):
+            tasks.append(task)
+
+    return tasks
+
+
+def find_task(tasks: list[dict], task_id: str) -> dict:
+    """Return the task dict for *task_id* or raise FleetError."""
+    for t in tasks:
+        if t.get("task_id") == task_id:
+            return t
+    valid = ", ".join(t.get("task_id", "?") for t in tasks)
+    raise FleetError(f"Task {task_id} not found in tasks.md. Available: {valid}")
+
+
+def is_eligible(task: dict) -> bool:
+    """Return True unless Fleet Dispatch Eligible is explicitly 'No'."""
+    return task.get("fleet_eligible", "").strip().lower() != "no"
+
+
+# Brief renderer ------------------------------------------------------------ #
+
+
+def render_brief(
+    *,
+    dispatch_id: int,
+    task_id: str,
+    description: str,
+    agent_role: str,
+    feature_dir: str,
+    file_scope: str,
+    acceptance: str,
+) -> str:
+    """Render a Markdown agent brief matching templates/agent-brief.md."""
+    items = [s.strip().strip("`") for s in re.split(r"[,;]", file_scope) if s.strip()]
+    scope_lines = "\n".join(f"  - {item}" for item in items) if items else "  - (see tasks.md)"
+
+    return (
+        f"# Agent Brief: {task_id}\n"
+        f"\n"
+        f"- Task Reference: {feature_dir}/tasks.md\n"
+        f"- Worker Role: {agent_role}\n"
+        f"- Dispatch ID: {dispatch_id}\n"
+        f"\n"
+        f"---\n"
+        f"\n"
+        f"## Task\n"
+        f"\n"
+        f"{description}\n"
+        f"\n"
+        f"## File Scope\n"
+        f"\n"
+        f"- Allowed files:\n"
+        f"{scope_lines}\n"
+        f"\n"
+        f"## Acceptance Criteria\n"
+        f"\n"
+        f"{acceptance}\n"
+        f"\n"
+        f"## Constraints\n"
+        f"\n"
+        f"- Do not modify files outside the allowed scope.\n"
+        f"- Do not add new dependencies.\n"
     )
-    m = row_re.search(text)
-    if not m:
-        return {"title": "", "file_scope": "", "acceptance": ""}
-    return {
-        "title": m.group("desc").strip(),
-        "file_scope": m.group("scope").strip(),
-        "acceptance": m.group("accept").strip(),
-    }
 
 
-# ---------------------------------------------------------------------------- #
-# Dispatch packet rendering
-# ---------------------------------------------------------------------------- #
-
-def render_packet(*, dispatch_id: int, task_id: str, task_title: str,
-                  worker_role: str, agent_id: str, feature_dir: str,
-                  file_scope: str, acceptance: str, verification: str) -> str:
-    """Render a self-contained dispatch packet (markdown).
-
-    Loads `templates/agent-brief.md` if present, otherwise uses an inline default.
-    Substitutes {TOKEN} placeholders. Unknown placeholders are left as the empty string.
-    """
-    if TEMPLATE_PATH.is_file():
-        template = TEMPLATE_PATH.read_text(encoding="utf-8")
-    else:
-        template = (
-            "# Agent Brief: {TASK_ID}\n\n"
-            "- Task: {TASK_TITLE}\n"
-            "- Worker: {WORKER_ROLE} ({AGENT_ID})\n"
-            "- Dispatch ID: {DISPATCH_ID}\n"
-            "- Feature: {FEATURE_DIR}\n\n"
-            "## File Scope\n\n{FILE_SCOPE}\n\n"
-            "## Acceptance\n\n{ACCEPTANCE}\n\n"
-            "## Verification\n\n{VERIFICATION}\n"
-        )
-
-    repl = {
-        "{TASK_ID}": task_id,
-        "{TASK_REFERENCE}": f"{feature_dir} :: {task_id}",
-        "{WORKER_ROLE}": worker_role,
-        "{AGENT_ID}": agent_id,
-        "{DISPATCH_ID}": str(dispatch_id),
-        "{FEATURE_DIR}": feature_dir,
-        "{TASK_TITLE}": task_title or "(see tasks.md)",
-        "{FILE_SCOPE}": file_scope or "(see tasks.md File Scope column)",
-        "{ACCEPTANCE}": acceptance or "(see spec.md acceptance criteria)",
-        "{VERIFICATION}": verification or "Run the tests named in the validation contract.",
-        "{ALLOWED_FILE_001}": file_scope or "(see tasks.md)",
-        "{ALLOWED_FILE_002}": "",
-        "{BLOCKED_FILE_001}": "",
-        "{BLOCKED_FILE_002}": "",
-        "{AC_001}": acceptance or "",
-        "{AC_002}": "",
-        "{AC_003}": "",
-        "{CONSTRAINT_001}": "Do not modify files outside the allowed scope.",
-        "{CONSTRAINT_002}": "Do not add new dependencies without escalating.",
-        "{RELEVANT_SPEC_EXCERPT_ONLY}": f"See {feature_dir}/spec.md for full context.",
-        "{WHAT_CHANGED}": "<fill in on completion>",
-        "{FILE_001}": "<fill in on completion>",
-        "{COMMAND}": verification or "<fill in on completion>",
-        "{PASS_FAIL}": "<PASS|FAIL>",
-        "{NONE_OR_ISSUE}": "<NONE or describe>",
-    }
-    out = template
-    for k, v in repl.items():
-        out = out.replace(k, v)
-    return out
+# Roster -------------------------------------------------------------------- #
 
 
-def write_packet(*, pi: str, dispatch_id: int, content: str,
-                 dispatches_root: Path = DISPATCHES_DIR) -> Path:
-    target_dir = dispatches_root / pi
-    target_dir.mkdir(parents=True, exist_ok=True)
-    target = target_dir / f"{dispatch_id:06d}.md"
-    target.write_text(content, encoding="utf-8")
-    return target
+def load_roster(path: Path) -> list[dict]:
+    """Load agent roster from JSON file."""
+    if not path.is_file():
+        return []
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
-# ---------------------------------------------------------------------------- #
-# Subcommand: dispatch
-# ---------------------------------------------------------------------------- #
+def resolve_agent(agent_id: str, roster: list[dict]) -> dict:
+    """Look up agent in roster; raise FleetError if roster exists but id missing."""
+    for a in roster:
+        if a.get("id") == agent_id:
+            return a
+    if roster:
+        valid = ", ".join(a.get("id", "?") for a in roster)
+        raise FleetError(f"Unknown agent '{agent_id}'. Valid: {valid}")
+    return {"id": agent_id, "role": agent_id}
+
+
+# Subcommands --------------------------------------------------------------- #
+
 
 def cmd_dispatch(args: argparse.Namespace) -> int:
-    agents = load_agents(Path(args.roster) if args.roster else ROSTER_PATH)
-    try:
-        agent = resolve_agent(args.agent, agents)
-    except KeyError as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
-        return 2
+    """Parse tasks.md, validate eligibility, write briefs + ledger rows."""
+    feature_path = Path(args.feature).resolve()
+    feature_str = str(feature_path)
 
-    feature_dir = Path(args.feature).resolve()
-    feature_rel = (feature_dir.relative_to(SDD_ROOT.parent).as_posix()
-                   if SDD_ROOT.parent in feature_dir.parents or feature_dir == SDD_ROOT.parent
-                   else feature_dir.as_posix())
+    tasks = parse_tasks_md(feature_path)
 
-    scrape = extract_task_row(feature_dir, args.task)
-    title = args.title or scrape["title"] or args.task
-    file_scope = args.file_scope or scrape["file_scope"]
-    acceptance = scrape["acceptance"]
-    verification = args.verification or "Run the tests named in the validation contract."
+    roster_path = Path(args.roster) if args.roster else ROSTER_PATH
+    agent = resolve_agent(args.agent, load_roster(roster_path))
+    agent_role = agent.get("role") or agent.get("kind") or args.agent
+
+    task_ids = [t.strip() for t in args.tasks.split(",") if t.strip()]
+
+    # Validate all tasks before writing anything
+    resolved: list[tuple[str, dict]] = []
+    for tid in task_ids:
+        task = find_task(tasks, tid)
+        if not is_eligible(task):
+            raise FleetError(f"Task {tid} is not eligible for fleet dispatch.")
+        resolved.append((tid, task))
 
     db_path = Path(args.db) if args.db else DEFAULT_DB
-    values = {
-        "dispatched_at": ledger_cli.utc_now(),
-        "pi": args.pi,
-        "sprint": args.sprint,
-        "feature_dir": feature_rel,
-        "task_id": args.task,
-        "task_title": title,
-        "agent_id": agent["id"],
-        "agent_role": agent.get("role") or agent.get("kind") or "unknown",
-        "outcome": None,
-        "outcome_at": None,
-        "notes": args.notes,
-    }
-    dispatch_id = ledger_cli.record_dispatch(db_path, values)
+    output_dir = Path(args.output_dir) if args.output_dir else None
+    if output_dir:
+        output_dir.mkdir(parents=True, exist_ok=True)
 
-    packet = render_packet(
-        dispatch_id=dispatch_id, task_id=args.task, task_title=title,
-        worker_role=values["agent_role"], agent_id=agent["id"],
-        feature_dir=feature_rel, file_scope=file_scope,
-        acceptance=acceptance, verification=verification,
-    )
-    dispatches_root = Path(args.dispatches_dir) if args.dispatches_dir else DISPATCHES_DIR
-    packet_path = write_packet(pi=args.pi, dispatch_id=dispatch_id,
-                               content=packet, dispatches_root=dispatches_root)
+    for tid, task in resolved:
+        values = {
+            "dispatched_at": utc_now(),
+            "pi": args.pi,
+            "sprint": getattr(args, "sprint", None),
+            "feature_dir": feature_str,
+            "task_id": tid,
+            "task_title": task.get("description", tid),
+            "agent_id": agent["id"],
+            "agent_role": agent_role,
+            "outcome": None,
+            "outcome_at": None,
+            "notes": getattr(args, "notes", None),
+        }
+        dispatch_id = record_dispatch(db_path, values)
 
-    print(f"Dispatch #{dispatch_id} recorded.")
-    print(f"Packet:  {packet_path}")
-    print(f"Agent:   {agent['id']} ({values['agent_role']})")
-    print(f"PI:      {args.pi}  Sprint: {args.sprint or '-'}")
-    print(f"Feature: {feature_rel}")
-    print(f"Task:    {args.task} -- {title}")
+        brief = render_brief(
+            dispatch_id=dispatch_id,
+            task_id=tid,
+            description=task.get("description", ""),
+            agent_role=agent_role,
+            feature_dir=feature_str,
+            file_scope=task.get("file_scope", ""),
+            acceptance=task.get("acceptance", ""),
+        )
+
+        if output_dir:
+            out_file = output_dir / f"dispatch-{dispatch_id}-{tid}.md"
+            out_file.write_text(brief, encoding="utf-8")
+            print(f"Brief saved: {out_file}")
+        else:
+            print(brief)
+
     return 0
 
 
-# ---------------------------------------------------------------------------- #
-# Subcommand: mark-outcome
-# ---------------------------------------------------------------------------- #
-
-def cmd_mark_outcome(args: argparse.Namespace) -> int:
+def cmd_mark(args: argparse.Namespace) -> int:
+    """Update outcome on a dispatch."""
     db_path = Path(args.db) if args.db else DEFAULT_DB
-    ok = ledger_cli.mark_outcome(db_path, args.dispatch_id, args.outcome, ledger_cli.utc_now())
+    ok = mark_outcome(db_path, args.dispatch_id, args.outcome, utc_now())
     if not ok:
-        print(f"ERROR: no dispatch with id {args.dispatch_id}", file=sys.stderr)
-        return 3
+        print(f"ERROR: No dispatch with id {args.dispatch_id}.", file=sys.stderr)
+        return 1
+    if getattr(args, "notes", None):
+        with connect_initialized(db_path) as conn:
+            conn.execute(
+                "UPDATE dispatches SET notes = ? WHERE id = ?",
+                (args.notes, args.dispatch_id),
+            )
+            conn.commit()
     print(f"Dispatch #{args.dispatch_id} marked {args.outcome}.")
     return 0
 
 
-# ---------------------------------------------------------------------------- #
-# Subcommand: status
-# ---------------------------------------------------------------------------- #
-
 def cmd_status(args: argparse.Namespace) -> int:
+    """List dispatches for a feature directory."""
     db_path = Path(args.db) if args.db else DEFAULT_DB
-    import sqlite3
-    if not db_path.is_file():
-        # No ledger yet -> behave as empty
-        print("no in-flight dispatches")
-        return 0
-    with sqlite3.connect(db_path) as conn:
-        conn.row_factory = sqlite3.Row
-        rows = list(conn.execute(
-            "SELECT id, dispatched_at, pi, sprint, feature_dir, task_id, task_title, "
-            "agent_id, agent_role, outcome, outcome_at FROM dispatches "
-            "WHERE outcome IS NULL ORDER BY dispatched_at, id"
-        ).fetchall())
+    feature_str = str(Path(args.feature).resolve())
+    rows = fetch_dispatches(db_path, "feature_dir", feature_str)
+    if getattr(args, "pi", None):
+        rows = [r for r in rows if r["pi"] == args.pi]
     if not rows:
-        print("no in-flight dispatches")
+        print("No dispatches found for this feature.")
         return 0
-    ledger_cli.print_dispatch_table(rows)
+    print_dispatch_table(rows)
     return 0
 
 
-# ---------------------------------------------------------------------------- #
-# Subcommand: list
-# ---------------------------------------------------------------------------- #
-
-def cmd_list(args: argparse.Namespace) -> int:
-    db_path = Path(args.db) if args.db else DEFAULT_DB
-    if args.feature:
-        rows = ledger_cli.fetch_dispatches(db_path, "feature_dir", args.feature)
-    elif args.pi:
-        rows = ledger_cli.fetch_dispatches(db_path, "pi", args.pi)
-    else:
-        print("ERROR: pass --pi PI-N and/or --feature <dir>", file=sys.stderr)
-        return 2
-    ledger_cli.print_dispatch_table(rows)
-    return 0
+# CLI parser ---------------------------------------------------------------- #
 
 
-# ---------------------------------------------------------------------------- #
-# CLI
-# ---------------------------------------------------------------------------- #
-
-def _common_db(p: argparse.ArgumentParser) -> None:
-    p.add_argument("--db", default=None, help="Path to fleet.db (default: ledger/fleet.db).")
-
-
-def build_parser() -> argparse.ArgumentParser:
+def parse_args(argv: list[str]) -> argparse.Namespace:
+    """Build and parse CLI arguments."""
     parser = argparse.ArgumentParser(
         prog="fleet.py",
-        description="Fleet CLI: dispatch packet generation + ledger writes (SDD-003).",
+        description="Fleet CLI: dispatch, mark, and status for the SDD fleet.",
     )
-    sub = parser.add_subparsers(dest="cmd", required=True)
+    sub = parser.add_subparsers(dest="command", required=True)
 
-    p_disp = sub.add_parser("dispatch", help="Emit a packet and record a dispatch.")
-    _common_db(p_disp)
-    p_disp.add_argument("--task", required=True, help="Task id, e.g. T-001.")
-    p_disp.add_argument("--agent", required=True, help="Agent id from roster (e.g. developer-general).")
-    p_disp.add_argument("--feature", required=True, help="Feature dir path (relative or absolute).")
-    p_disp.add_argument("--pi", required=True, help="Program increment, e.g. PI-2.")
-    p_disp.add_argument("--sprint", default=None, help="Sprint label, e.g. A.")
-    p_disp.add_argument("--title", default=None, help="Override task title (otherwise scraped from tasks.md).")
-    p_disp.add_argument("--file-scope", default=None, help="Override allowed-files scope text.")
-    p_disp.add_argument("--verification", default=None, help="Override verification command text.")
-    p_disp.add_argument("--notes", default=None, help="Optional notes column.")
-    p_disp.add_argument("--roster", default=None, help="Override roster JSON path (testing).")
-    p_disp.add_argument("--dispatches-dir", default=None, help="Override dispatches output dir (testing).")
+    # dispatch
+    p_disp = sub.add_parser("dispatch", help="Parse tasks.md, generate briefs, write ledger rows.")
+    p_disp.add_argument("--feature", required=True, help="Feature directory path.")
+    p_disp.add_argument("--tasks", required=True, help="Comma-separated task IDs (e.g. T-001,T-002).")
+    p_disp.add_argument("--agent", required=True, help="Agent ID (e.g. developer-general).")
+    p_disp.add_argument("--pi", required=True, help="Program increment (e.g. PI-2).")
+    p_disp.add_argument("--sprint", default=None, help="Sprint label (e.g. A).")
+    p_disp.add_argument("--output-dir", default=None, help="Save briefs to directory instead of stdout.")
+    p_disp.add_argument("--notes", default=None, help="Optional notes for dispatch rows.")
+    p_disp.add_argument("--db", default=None, help="Path to fleet.db.")
+    p_disp.add_argument("--roster", default=None, help="Path to agents.json.")
 
-    p_mark = sub.add_parser("mark-outcome", help="Set outcome on a dispatch id.")
-    _common_db(p_mark)
-    p_mark.add_argument("dispatch_id", type=int)
-    p_mark.add_argument("--outcome", choices=OUTCOMES, required=True)
+    # mark
+    p_mark = sub.add_parser("mark", help="Update outcome on a dispatch.")
+    p_mark.add_argument("--dispatch-id", type=int, required=True, help="Dispatch ID to update.")
+    p_mark.add_argument("--outcome", choices=OUTCOMES, required=True, help="Outcome: success, failed, or blocked.")
+    p_mark.add_argument("--notes", default=None, help="Optional notes.")
+    p_mark.add_argument("--db", default=None, help="Path to fleet.db.")
 
-    p_stat = sub.add_parser("status", help="List in-flight dispatches (no outcome yet).")
-    _common_db(p_stat)
+    # status
+    p_stat = sub.add_parser("status", help="List dispatches for a feature directory.")
+    p_stat.add_argument("--feature", required=True, help="Feature directory path.")
+    p_stat.add_argument("--pi", default=None, help="Filter by program increment.")
+    p_stat.add_argument("--db", default=None, help="Path to fleet.db.")
 
-    p_list = sub.add_parser("list", help="List dispatches by --pi and/or --feature.")
-    _common_db(p_list)
-    p_list.add_argument("--pi", default=None)
-    p_list.add_argument("--feature", default=None)
-
-    return parser
-
-
-HANDLERS = {
-    "dispatch": cmd_dispatch,
-    "mark-outcome": cmd_mark_outcome,
-    "status": cmd_status,
-    "list": cmd_list,
-}
+    return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
-    handler = HANDLERS[args.cmd]
-    return handler(args)
+    """Entry point."""
+    args = parse_args(argv if argv is not None else sys.argv[1:])
+    handlers = {
+        "dispatch": cmd_dispatch,
+        "mark": cmd_mark,
+        "status": cmd_status,
+    }
+    try:
+        return handlers[args.command](args)
+    except FleetError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

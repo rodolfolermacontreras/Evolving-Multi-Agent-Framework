@@ -2,7 +2,7 @@
 
 - Date: 2026-05-16
 - Author: Principal Software Developer
-- Status: Draft
+- Status: Done
 - Priority: P2
 - Sprint: PI-2 Sprint A
 - Spec ID: 2026-05-16-fleet-cli

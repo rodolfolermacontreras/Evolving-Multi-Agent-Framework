@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bridge -- Executive State -- 2026-05-16</title>
+<style>
+:root {
+  --bg-carbon:       #0a0a0a;
+  --bg-graphite:     #141413;
+  --bg-graphite-2:   #1c1b18;
+  --ink-paper:       #e8e4d8;
+  --ink-paper-dim:   #a8a497;
+  --ink-paper-faint: #6e6a5e;
+  --accent-oxblood:  #ce2029;
+  --accent-oxblood2: #a01820;
+  --signal-amber:    #d29a3b;
+  --signal-jade:     #6fa37a;
+  --rule-line:       #2a2925;
+  --focus-ring:      #e8e4d8;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--bg-carbon);
+  color: var(--ink-paper);
+  font-family: ui-monospace, "Berkeley Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+a { color: var(--signal-amber); text-decoration: none; }
+a:hover { text-decoration: underline; }
+header.bridge-header {
+  border-bottom: 2px solid var(--accent-oxblood);
+  padding: 14px 22px 12px;
+  display: flex; align-items: baseline; justify-content: space-between; gap: 18px; flex-wrap: wrap;
+}
+header.bridge-header h1 {
+  margin: 0; font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700;
+}
+header.bridge-header .meta {
+  color: var(--ink-paper-dim); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+}
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 0;
+  min-height: calc(100vh - 60px);
+}
+.main { padding: 20px 22px; min-width: 0; }
+.side { padding: 20px 22px; border-left: 1px solid var(--rule-line); background: var(--bg-graphite); min-width: 0; }
+section.panel { margin-bottom: 26px; }
+section.panel h2 {
+  margin: 0 0 10px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-paper-dim);
+  border-bottom: 1px solid var(--rule-line);
+  padding-bottom: 6px;
+}
+.next-action {
+  background: var(--bg-graphite);
+  border-left: 4px solid var(--accent-oxblood);
+  padding: 14px 18px;
+  margin-bottom: 24px;
+}
+.next-action .label {
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--accent-oxblood); margin-bottom: 6px;
+}
+.next-action .title { font-size: 17px; font-weight: 600; color: var(--ink-paper); margin-bottom: 4px; }
+.next-action .why { color: var(--ink-paper-dim); font-size: 12px; }
+.progress {
+  margin-bottom: 18px;
+}
+.progress .bar {
+  position: relative; height: 22px;
+  background: var(--bg-graphite-2);
+  border: 1px solid var(--rule-line);
+  overflow: hidden;
+}
+.progress .fill {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  background: var(--signal-jade);
+  transition: width 240ms ease;
+}
+.progress .label-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 11px; color: var(--ink-paper-dim); margin-bottom: 4px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+.progress .pct { color: var(--ink-paper); font-weight: 700; font-size: 14px; }
+.commitments { list-style: none; padding: 0; margin: 10px 0 0; font-size: 12px; }
+.commitments li {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 4px 0; border-bottom: 1px dashed var(--rule-line);
+  color: var(--ink-paper-dim);
+}
+.commitments li.done { color: var(--signal-jade); }
+.commitments li .mark {
+  font-family: inherit; color: var(--ink-paper-faint);
+  width: 18px; flex-shrink: 0;
+}
+.commitments li.done .mark { color: var(--signal-jade); }
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(110px, 1fr));
+  gap: 6px;
+  overflow-x: auto;
+}
+.kanban .col {
+  background: var(--bg-graphite);
+  border: 1px solid var(--rule-line);
+  padding: 8px 8px 10px;
+  min-height: 110px;
+}
+.kanban .col h3 {
+  margin: 0 0 8px; font-size: 9px; letter-spacing: 0.18em;
+  color: var(--ink-paper-dim); text-transform: uppercase;
+  border-bottom: 1px solid var(--rule-line); padding-bottom: 4px;
+}
+.kanban .card {
+  background: var(--bg-graphite-2);
+  border-left: 3px solid var(--ink-paper-faint);
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  font-size: 11px;
+  word-break: break-word;
+}
+.kanban .card.done   { border-left-color: var(--signal-jade); }
+.kanban .card.review { border-left-color: var(--signal-amber); }
+.kanban .card.impl   { border-left-color: var(--accent-oxblood); }
+.kanban .card .name { color: var(--ink-paper); font-weight: 600; margin-bottom: 2px; }
+.kanban .card .meta { color: var(--ink-paper-faint); font-size: 10px; }
+table.dense {
+  width: 100%; border-collapse: collapse; font-size: 11px;
+}
+table.dense th, table.dense td {
+  padding: 5px 8px; text-align: left;
+  border-bottom: 1px solid var(--rule-line);
+  vertical-align: top;
+}
+table.dense th {
+  font-weight: 600; color: var(--ink-paper-dim);
+  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.fleet-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 6px; }
+.fleet-stats .stat {
+  background: var(--bg-graphite-2);
+  border: 1px solid var(--rule-line);
+  padding: 10px 12px;
+}
+.fleet-stats .stat .n {
+  font-size: 22px; color: var(--ink-paper); font-weight: 700; line-height: 1;
+}
+.fleet-stats .stat .l {
+  font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-paper-dim); margin-top: 4px;
+}
+.activity { font-size: 11px; }
+.activity .row { padding: 5px 0; border-bottom: 1px dashed var(--rule-line); display: flex; gap: 10px; }
+.activity .sha { color: var(--signal-amber); flex-shrink: 0; }
+.activity .subj { color: var(--ink-paper-dim); }
+footer { padding: 14px 22px; border-top: 1px solid var(--rule-line); color: var(--ink-paper-faint); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+.empty { color: var(--ink-paper-faint); font-style: italic; font-size: 11px; }
+@media (max-width: 1100px) {
+  .layout { grid-template-columns: 1fr; }
+  .side { border-left: none; border-top: 1px solid var(--rule-line); }
+  .kanban { grid-template-columns: repeat(3, minmax(140px, 1fr)); }
+}
+</style>
+</head><body>
+<header class="bridge-header">
+  <h1>Bridge &nbsp;//&nbsp; PI-2 -- Fleet Maturity and CLI</h1>
+  <div class="meta">Generated 2026-05-16 &nbsp;//&nbsp; symbolic sprint</div>
+</header>
+<div class="layout">
+  <main class="main">
+    <div class="next-action">
+      <div class="label">Recommended next action</div>
+      <div class="title">Start: &#x27;CLI Phase 2: `fleet.py`, `qa.py`, `retro.py`, `state_builder.py` operational (state_builder.py shipped 2026-05-16)&#x27;</div>
+      <div class="why">Highest-priority unstarted commitment in PI-2: Fleet Maturity and CLI. Run /clarify to start the lifecycle.</div>
+    </div>
+
+    
+        <section class="panel">
+          <h2>PI-2 Progress</h2>
+          <div class="progress">
+            <div class="label-row">
+              <span>Fleet Maturity and CLI</span>
+              <span class="pct">0 / 6 &nbsp; (0%)</span>
+            </div>
+            <div class="bar"><div class="fill" style="width:0%"></div></div>
+          </div>
+          <ul class="commitments">
+            <li class=""><span class="mark">[ ]</span><span>CLI Phase 2: `fleet.py`, `qa.py`, `retro.py`, `state_builder.py` operational (state_builder.py shipped 2026-05-16)</span></li><li class=""><span class="mark">[ ]</span><span>3-5 features delivered through the SDD pipeline (1 shipped: state-dashboard)</span></li><li class=""><span class="mark">[ ]</span><span>Fleet batch size increased from 2 to 3-4 with parallel dispatch validated</span></li><li class=""><span class="mark">[ ]</span><span>Specialization mechanic exercised: at least one generic worker earns a permanent identity through a domain skill pack</span></li><li class=""><span class="mark">[ ]</span><span>Conflict-detection workflow validated against a real two-worker collision</span></li><li class=""><span class="mark">[ ]</span><span>Schema validation lint for agent/skill/prompt frontmatter</span></li>
+          </ul>
+        </section>
+        
+
+    <section class="panel">
+      <h2>Lifecycle Kanban</h2>
+      <div class="kanban"><div class="col"><h3>IDEA</h3><div class="empty">—</div></div><div class="col"><h3>BACKLOG</h3><div class="empty">—</div></div><div class="col"><h3>CLARIFY</h3><div class="card "><div class="name">fleet-bridge-dashboard</div><div class="meta">2026-05-13 &middot; DESIGN.md only (pre-spec design exploration)</div></div></div><div class="col"><h3>SPEC</h3><div class="empty">—</div></div><div class="col"><h3>PLAN</h3><div class="empty">—</div></div><div class="col"><h3>TASKS</h3><div class="empty">—</div></div><div class="col"><h3>IMPLEMENT</h3><div class="empty">—</div></div><div class="col"><h3>REVIEW</h3><div class="empty">—</div></div><div class="col"><h3>DONE</h3><div class="card done"><div class="name">fleet-ledger</div><div class="meta">2026-05-12 &middot; validation 100%, RETRO present</div></div><div class="card done"><div class="name">state-dashboard</div><div class="meta">2026-05-16 &middot; validation 100%, RETRO present</div></div></div></div>
+    </section>
+
+    <section class="panel">
+      <h2>Dispatch Stream (fleet.db)</h2>
+      <div class="empty">Dispatch stream is empty. The fleet has not been formally dispatched through the ledger yet.</div>
+    </section>
+  </main>
+  <aside class="side">
+    <section class="panel">
+      <h2>Fleet Roster</h2>
+      
+    <div class="fleet-stats">
+      <div class="stat"><div class="n">4</div><div class="l">Principals</div></div>
+      <div class="stat"><div class="n">4</div><div class="l">Generic</div></div>
+      <div class="stat"><div class="n">0</div><div class="l">Specialist</div></div>
+      <div class="stat"><div class="n">8</div><div class="l">Total</div></div>
+    </div>
+    
+    </section>
+    <section class="panel">
+      <h2>Recent Commits</h2>
+      <div class="activity"><div class="row"><span class="sha">b7ccaa3</span><span class="subj">plan: begin PI-2 -- state_builder.py first, 3-sprint scope approved</span></div><div class="row"><span class="sha">43423cf</span><span class="subj">backlog: add Fleet Bridge Dashboard as P3 (SDD-001)</span></div><div class="row"><span class="sha">9b2e9c0</span><span class="subj">chore: PI-1 closure -- generalize constitution, curate lessons, refresh state</span></div><div class="row"><span class="sha">8ee6840</span><span class="subj">docs: add canonical Python stdlib CLI pattern -- LESSON-001</span></div><div class="row"><span class="sha">bb5a762</span><span class="subj">docs(templates): add cross-reference rules to reduce validation duplication -- LESSON-003</span></div><div class="row"><span class="sha">2d5d729</span><span class="subj">docs(templates): clarify task ID convention -- LESSON-002</span></div><div class="row"><span class="sha">ee19dbd</span><span class="subj">design: fleet-bridge dashboard -- pre-spec design exploration</span></div><div class="row"><span class="sha">50b12b6</span><span class="subj">docs: add INSTRUCTIONS.md entry point + persist session memory in repo</span></div><div class="row"><span class="sha">23156a0</span><span class="subj">feat(ux): add archetype-recommender skill + visual workflow diagram in cheat sheet (g1)</span></div><div class="row"><span class="sha">8729706</span><span class="subj">feat(fleet): add /hire command + role-creation skill (h1, ADR-0007)</span></div></div>
+    </section>
+  </aside>
+</div>
+<footer>Auto-generated by cli/state_builder.py &nbsp;//&nbsp; SDD-001 v0.1 &nbsp;//&nbsp; refresh: python spec-driven-development/cli/state_builder.py</footer>
+</body></html>

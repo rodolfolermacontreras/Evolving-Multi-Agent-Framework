@@ -404,3 +404,34 @@ These should be decided before PI-3 (portability validation).
 - `framework-foundations-strategy.md` — strategic memo from earlier in the session about evolution loops, greenfield/brownfield convergence, SDD+TDD integration, adoption barriers
 - `inspiration-repos-research-findings.md` — full synthesis of the 4 research subagent reports
 - `SESSION-MEMORY.md` — this file
+
+---
+
+## Update: 2026-05-16 — PI-2 begins, state-dashboard shipped
+
+**Triggered by user feedback:** _"it is very easy to get lost into all the words, choices and verbage that this is giving me... we need to develop a graphic user interface that shows exactly where we are."_
+
+**Shipped in one session through full SDD lifecycle:**
+- Feature: `state-dashboard` at `specs/2026-05-16-state-dashboard/` (spec.md, validation.md, RETRO.md)
+- Implementation: `cli/state_builder.py` (~430 lines, stdlib only per LESSON-001)
+- Tests: `cli/test_state_builder.py` — 4/4 passing
+- Visual output: `exec/state.html` — single self-contained file using Bridge design tokens (carbon bg, paper-cream text, oxblood/amber/jade signals, monospace, lifecycle Kanban, PI progress bar, recommended next action)
+- Textual output: `exec/state.md` — now auto-generated, no longer hand-curated
+
+**Tech debt closed:** F2 (`cli/state_builder.py`) marked DONE in roadmap.
+
+**Behavior fix shipped:** `.github/skills/operational/em-communication-discipline/SKILL.md` — enforces "recommend, do not menu" for the Executive Manager. Wired into `principal-executive-manager.agent.md` as always-active. Registered in `roster/skills.json`. This directly addresses the user's "walls of choices" complaint.
+
+**3 new lessons captured** in `sprints/PI-2/lessons.md`:
+- LESSON-005: EM should recommend, not present a menu (SHIPPED as the new skill)
+- LESSON-006: Closure ceremonies must touch ALL "current" markers (open)
+- LESSON-007: Pre-spec design exploration transfers cheaply (open)
+
+**Roadmap state corrected:** PI-1 now marked `(closed 2026-05-13)`, PI-2 marked `(current)`. The previous closure ceremony updated state.md but missed roadmap.md — caught by the generator and fixed; LESSON-006 captures the pattern.
+
+**Test count now: 17 passing** (13 ledger + 4 state_builder).
+
+**Next action (per the dashboard itself):** start `cli/fleet.py` — second PI-2 commitment, Sprint A. Pattern is now proven: spec → validation → implementation → smoke tests → RETRO → regenerate state, all in one session.
+
+**How to view the dashboard:** open `spec-driven-development/exec/state.html` in any browser. Refresh: `python spec-driven-development/cli/state_builder.py`.
+

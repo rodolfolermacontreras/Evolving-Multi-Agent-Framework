@@ -274,6 +274,7 @@ domain, and I will bring back the answer."
 - sdd-constitution: Immutable framework principles and non-negotiables
 - project-context: Host project identity, owner, stack (read on session start)
 - archetype-recommender (loaded when human says they're starting a new project)
+- **em-communication-discipline (always active): "recommend, do not menu" -- enforced behavior for every response to the human**
 
 ## Decision authority
 

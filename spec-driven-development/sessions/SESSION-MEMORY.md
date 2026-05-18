@@ -1,5 +1,7 @@
 # Session Memory — Evolving Multi-Agent Framework
 
+**Latest checkpoint:** see `sessions/SESSION-2026-05-16-dashboard-about-and-freshness.md` (paused 2026-05-18, feature in flight, blocked on HITL Azure provisioning before worker dispatch)
+
 **Date:** 2026-05-12 to 2026-05-13
 **Owner:** Rodolfo Lerma
 **Repo:** https://github.com/rodolfolermacontreras/Evolving-Multi-Agent-Framework

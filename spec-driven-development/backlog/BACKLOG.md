@@ -24,6 +24,8 @@ Prioritized backlog with RICE scoring. Managed by Principal Product Manager.
 | SDD-004 | qa.py -- two-stage review automation | P2 | 6 | 2 | 0.8 | 2 | 4.8 | PI-2 Sprint B | Approved |
 | SDD-005 | retro.py -- sprint retro generator | P2 | 6 | 2 | 0.8 | 1 | 9.6 | PI-2 Sprint B | Approved |
 | SDD-006 | Schema validation lint for agent/skill/prompt YAML frontmatter | P2 | 7 | 2 | 0.9 | 2 | 6.3 | PI-2 Sprint B | Approved |
+| SDD-009 | Dashboard data-freshness -- live values reflect new commits/ledger writes without manual redeploy | P2 | 5 | 2 | 0.8 | 2 | 4.0 | PI-3 Sprint A (proposed) | Triaged 2026-05-16; bundled spec dir `2026-05-16-dashboard-about-and-freshness`; needs /clarify to choose option (a) document-as-expected, (b) GH Actions OIDC auto-redeploy (REC-3 from cloud-dashboard SECURITY-REVIEW), or (c) runtime repo sync (volume mount or git pull on startup) |
+| SDD-010 | Dashboard "About / Where we are" section -- newcomer-facing purpose + high-level project state (meta-aware) | P2 | 3 | 1 | 1.0 | 1 | 3.0 | PI-3 Sprint A (proposed) | Triaged 2026-05-16; bundled with SDD-009 in spec dir `2026-05-16-dashboard-about-and-freshness`; pure content addition to `state_builder.py` HTTP handler |
 
 ## P3 - Could Have
 

@@ -1,11 +1,11 @@
 # Executive State
 
-Generated date: 2026-05-16
-Current PI: PI-2 (Fleet Maturity and CLI)
+Generated date: 2026-05-18
+Current PI: PI-3 (Portability Validation)
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
 Active focus: Finish implementation of 'fleet'
 
-PI progress: 0/6 commitments complete (0%)
+PI progress: 0/5 commitments complete (0%)
 
 ## Spec Pipeline
 
@@ -14,11 +14,14 @@ PI progress: 0/6 commitments complete (0%)
 | fleet-ledger | DONE | Done | validation 100%, RETRO present, Status: done |
 | fleet-bridge-dashboard | CLARIFY | - | DESIGN.md only (pre-spec design exploration) |
 | cloud-dashboard | CLARIFY | - | DESIGN.md only (pre-spec design exploration) |
+| dashboard-about-and-freshness | SPEC | Draft -- pending PM + human approval | Status: Draft -- pending PM + human approval |
 | fleet | IMPLEMENT | implementing | Status: implementing |
-| fleet-cli | REVIEW | Done | Status: done but RETRO or validation incomplete |
-| qa-cli | REVIEW | Done | Status: done but RETRO or validation incomplete |
-| retro-cli | REVIEW | Done | Status: done but RETRO or validation incomplete |
+| fleet-cli | DONE | Done | validation 100%, RETRO present, Status: done |
+| qa-cli | DONE | Done | validation 100%, RETRO present, Status: done |
+| retro-cli | DONE | Done | validation 100%, RETRO present, Status: done |
+| retro-closure | TASKS | - | tasks.md present |
 | schema-lint | IMPLEMENT | implementing | Status: implementing |
+| sprint-c-validation | BACKLOG | - | directory exists, no artifacts yet |
 | state-builder | DONE | Done | validation 100%, RETRO present, Status: done |
 | state-dashboard | DONE | done | validation 100%, RETRO present, Status: done |
 
@@ -38,6 +41,13 @@ PI progress: 0/6 commitments complete (0%)
 | SDD-004 | qa.py -- two-stage review automation | P2 | 4.8 | Approved |
 | SDD-005 | retro.py -- sprint retro generator | P2 | 9.6 | Approved |
 | SDD-006 | Schema validation lint for agent/skill/prompt YAML frontmatter | P2 | 6.3 | Approved |
+
+### PI-3 Sprint A (proposed)
+
+| ID | Title | Priority | RICE | Status |
+|----|-------|----------|------|--------|
+| SDD-009 | Dashboard data-freshness -- live values reflect new commits/ledger writes without manual redeploy | P2 | 4.0 | Triaged 2026-05-16; bundled spec dir `2026-05-16-dashboard-about-and-freshness`; needs /clarify to choose option (a) document-as-expected, (b) GH Actions OIDC auto-redeploy (REC-3 from cloud-dashboard SECURITY-REVIEW), or (c) runtime repo sync (volume mount or git pull on startup) |
+| SDD-010 | Dashboard "About / Where we are" section -- newcomer-facing purpose + high-level project state (meta-aware) | P2 | 3.0 | Triaged 2026-05-16; bundled with SDD-009 in spec dir `2026-05-16-dashboard-about-and-freshness`; pure content addition to `state_builder.py` HTTP handler |
 
 ### Shipped 2026-05-16
 
@@ -75,14 +85,17 @@ PI progress: 0/6 commitments complete (0%)
 
 - Principals: 5
 - Generic workers: 4
-- Specialists: 0
-- Total agents: 9
+- Specialists: 1
+- Total agents: 10
 - Skills: 29 across 5 categories
 
 ## Recently Completed
 
 | When | Feature | Task | Agent |
 |------|---------|------|-------|
+| 2026-05-16T20:35:57Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-05-16-retro-closure | Write RETRO.md for qa-cli feature (SDD-004). | developer-general |
+| 2026-05-16T20:35:57Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-05-16-retro-closure | Write RETRO.md for retro-cli feature (SDD-005). | developer-general |
+| 2026-05-16T20:35:56Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-05-16-retro-closure | Write RETRO.md for fleet-cli feature (SDD-003). | developer-general |
 | 2026-05-16T19:15:41Z | spec-driven-development/specs/2026-05-16-fleet | Ship fleet.py v0.1 (SDD-003) | developer-general |
 
 ## Blockers
@@ -91,11 +104,11 @@ _none -- no dispatches without outcome older than 24h_
 
 ## Next Milestones
 
-- CLI Phase 2: `fleet.py`, `qa.py`, `retro.py`, `state_builder.py` operational (ALL SHIPPED 2026-05-16)
-- 3-5 features delivered through the SDD pipeline (5 shipped: state-builder, state-dashboard, fleet, qa-cli, retro-cli, schema-lint)
-- Fleet batch size increased from 2 to 3-4 with parallel dispatch validated
-- Specialization mechanic exercised: at least one generic worker earns a permanent identity through a domain skill pack
-- Conflict-detection workflow validated against a real two-worker collision
+- Bootstrap SDD on a second project with a different tech stack (validates GENERALIZATION_SDD.md)
+- GENERALIZATION_SDD.md v1.0 published after second-project bootstrap
+- SDD process metrics baseline established (cycle time per phase, defect escape rate, fleet utilization)
+- Optional: package as a GitHub template repo or scaffolding CLI
+- Optional: publish skill pack for distribution to other developers
 
 ---
 

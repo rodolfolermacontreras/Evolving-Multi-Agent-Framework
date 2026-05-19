@@ -1,6 +1,6 @@
 ---
 feature: schema-lint
-status: implementing
+status: done
 created: 2026-05-16
 pi: PI-2
 sprint: B

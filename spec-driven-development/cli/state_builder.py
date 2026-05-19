@@ -133,14 +133,16 @@ def detect_stage(feature_dir: Path) -> tuple[str, str, str]:
         if m:
             status_line = m.group(1).strip()
 
-    # 1. Explicit status wins -- but DONE still requires RETRO + 100% validation as a check
+    # 1. Evidence-first: RETRO.md + 100% validation == DONE, regardless of stale Status line.
+    #    Prevents stale "status: implementing" from masking shipped features.
+    if has_retro and has_validation:
+        v = (feature_dir / "validation.md").read_text(encoding="utf-8", errors="replace")
+        if not re.findall(r"^\s*- \[ \]", v, re.MULTILINE):
+            return "DONE", status_line or "done", "validation 100%, RETRO present"
+
     explicit = _normalize_status_to_stage(status_line)
     if explicit:
         if explicit == "DONE":
-            if has_retro and has_validation:
-                v = (feature_dir / "validation.md").read_text(encoding="utf-8", errors="replace")
-                if not re.findall(r"^\s*- \[ \]", v, re.MULTILINE):
-                    return "DONE", status_line, "validation 100%, RETRO present, Status: done"
             # Status says done but evidence missing -> fall back to REVIEW
             return "REVIEW", status_line, "Status: done but RETRO or validation incomplete"
         # For all other explicit stages, trust the spec line

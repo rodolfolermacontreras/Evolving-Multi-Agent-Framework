@@ -172,5 +172,11 @@
     "path": ".github/skills/domain/htmx-frontend/SKILL.md",
     "category": "domain",
     "description": "Captures HTMX, Jinja2, and template-level UI conventions."
+  },
+  {
+    "id": "weekly-status-report",
+    "path": ".github/skills/operational/weekly-status-report/SKILL.md",
+    "category": "operational",
+    "description": "Generates or updates the weekly 1:1 status report by scanning git commits, code changes, tests, specs, sessions, and sprints. Appends a new week section to docs/1_1_STATUS_REPORT_SDD.md."
   }
 ]

@@ -31,7 +31,7 @@ Read [`RULES.md`](RULES.md) for the binding rules.
 | **Tests passing** | 70 across 5 CLI suites + ledger (last verified at HEAD `b2b5d59`) |
 | **Branch state** | `master` at `b2b5d59`, **37 commits ahead of origin** (HITL gate #10) |
 | **Open lessons** | 5 (LESSON-006, 007, 008, 009, 010 -- see Sprint 3) |
-| **HITL pending** | 9 Azure provisioning steps for Sprint 1; ADR-0010 approval for S4; ADR-0011 approval for S5 |
+| **HITL pending** | 9 Azure provisioning steps for Sprint 1; ADR-0010 approval for S4 |
 | **External feedback in flight** | Parallel team reports visibility/transparency gap -- S5 plans the response |
 | **Navigation layer** | flat `docs/Temp/` (legacy); migrating to `docs/Management/PI-N/Sprint-N-{title}/` per S5 plan |
 
@@ -39,12 +39,10 @@ Read [`RULES.md`](RULES.md) for the binding rules.
 
 ## Top 3 Next Moves
 
-1. **Approve S5 (Navigation Layer Migration) and execute FIRST.** External
-   feedback from the parallel team identified visibility/transparency as the
-   adoption blocker. S5 is purely additive (ledger + dashboard untouched),
-   parallel-safe with S1, and has the highest leverage right now -- once the
-   `Management/PI-N/Sprint-N-{title}/` structure exists, S2/S3/S4 adopt it
-   from day one. Plan: [Temp/SPRINT_5_DETAILED_MANAGEMENT_NAVIGATION_LAYER.md](Temp/SPRINT_5_DETAILED_MANAGEMENT_NAVIGATION_LAYER.md).
+1. **Execute S5 (Navigation Layer Migration) -- IN FLIGHT.** ADR-0011 approved,
+   Rule 13 landed. T-001 and T-009 DONE. Next: dispatch T-002 (skeleton), then
+   parallel set T-003/T-004/T-005/T-010. SW Dev owns dispatch from here.
+   Plan: [Temp/SPRINT_5_DETAILED_MANAGEMENT_NAVIGATION_LAYER.md](Temp/SPRINT_5_DETAILED_MANAGEMENT_NAVIGATION_LAYER.md).
 2. **Human runs the 9 HITL Azure provisioning steps for Sprint 1.** Listed in
    [`Temp/SPRINT_1_DETAILED_DASHBOARD_FRESHNESS_UNBLOCK.md`](Temp/SPRINT_1_DETAILED_DASHBOARD_FRESHNESS_UNBLOCK.md)
    Section 8. ~5 min once `az login` is done. Unblocks the entire SDD-009/010
@@ -63,7 +61,7 @@ Read [`RULES.md`](RULES.md) for the binding rules.
 | **S2** | Day-to-Day Brownfield Bootstrap | **Proposed** | PM + Architect (spec), SW Dev (dispatch) | `wt-pi3-s2-brownfield` | Parallel-safe with S1, S3, S4, S5; will create artifacts in a SEPARATE repo, no master collision | [SPRINT_2_DETAILED](Temp/SPRINT_2_DETAILED_DAY_TO_DAY_BROWNFIELD_BOOTSTRAP.md) |
 | **S3** | PI-2 Lessons Curation via /evolve | **Proposed** | PM (lead), Architect (constitution impact) | `wt-pi3-s3-lessons` | Parallel-safe; touches only `sprints/PI-2/lessons.md` + possibly `.github/skills/` | [SPRINT_3_DETAILED](Temp/SPRINT_3_DETAILED_PI2_LESSONS_CURATION.md) |
 | **S4** | Live UI v2 Spec (Principal UI Designer kickoff) | **Proposed** (blocked on ADR-0010 approval) | UI Designer (lead, ADR-0010), Architect (review) | `wt-pi3-s4-ui-v2` | Parallel-safe for the SPEC phase; implementation deferred to PI-4 | [SPRINT_4_DETAILED](Temp/SPRINT_4_DETAILED_LIVE_UI_V2_SPEC.md) |
-| **S5** | Navigation Layer Migration -- Management/ Structure | **Proposed** (blocked on ADR-0011 approval) | EM (lead), SW Dev (build-index), PM (Rule 13) | `wt-pi3-s5-management-layer` | Parallel-safe with S1; **strongly preferred to land BEFORE S2/S3/S4 dispatch** so those sprints adopt the new structure from day one | [SPRINT_5_DETAILED](Temp/SPRINT_5_DETAILED_MANAGEMENT_NAVIGATION_LAYER.md) |
+| **S5** | Navigation Layer Migration -- Management/ Structure | **In-Flight** (ADR-0011 approved, T-002 ready for dispatch) | EM (lead), SW Dev (build-index), PM (Rule 13) | `wt-pi3-s5-management-layer` | Parallel-safe with S1; **strongly preferred to land BEFORE S2/S3/S4 dispatch** so those sprints adopt the new structure from day one | [SPRINT_5_DETAILED](Temp/SPRINT_5_DETAILED_MANAGEMENT_NAVIGATION_LAYER.md) |
 
 ### Status legend
 - **Proposed** -- sprint scope drafted, awaiting Principal sign-off + dispatch

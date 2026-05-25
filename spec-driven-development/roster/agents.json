@@ -46,6 +46,16 @@
     "status": "active"
   },
   {
+    "id": "principal-ui-designer",
+    "path": ".github/agents/principal-ui-designer.agent.md",
+    "kind": "principal",
+    "role": "ui-designer",
+    "specialization": null,
+    "created_at": "2026-05-25",
+    "provenance": "Hired via /hire generic at PI-3 kickoff (2026-05-25) in response to user decision via vscode_askQuestions. See ADR-0010. First sprint: PI-3/S4 (Live UI v2 Spec).",
+    "status": "draft"
+  },
+  {
     "id": "developer-general",
     "path": ".github/agents/developer-general.agent.md",
     "kind": "generic",

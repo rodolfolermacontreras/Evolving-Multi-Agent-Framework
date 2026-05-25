@@ -1,14 +1,31 @@
-# Kick-Off Guide -- Evolving Multi-Agent Framework
+# Onboarding & Kick-Off Guide -- Evolving Multi-Agent Framework
 
-**Date:** 2026-05-21
+**Date:** 2026-05-25 (originally 2026-05-21; renamed from `kick_off.md` and amended for onboarding role on PI-3 kickoff)
 **Owner:** Rodolfo Lerma, Senior Data Scientist (L63), Microsoft WWIC Central Analytics
 **Repo:** [rodolfolermacontreras/Evolving-Multi-Agent-Framework](https://github.com/rodolfolermacontreras/Evolving-Multi-Agent-Framework)
 **License:** MIT
 
 ---
 
+## How to Use This Document
+
+This is the single entry point for any agent or human joining the project from
+zero. If you read only this document plus the four pointers in Section 0 below,
+you will be fully up to speed to start your first sprint.
+
+Read order:
+
+1. Sections 0-8 of this file (project framing, architecture, lifecycle, structure)
+2. [`RULES.md`](RULES.md) -- the 12 binding rules + HITL gates
+3. [`HIGH_LEVEL_DEV_TRACKER.md`](HIGH_LEVEL_DEV_TRACKER.md) -- current PI/sprint state
+4. Your assigned [`Temp/SPRINT_#_DETAILED_*.md`](Temp/) -- the deep spec for your work
+5. Sections 13-16 of this file (codebase reading guide, getting started, what's next)
+
+---
+
 ## Table of Contents
 
+0. [Required Reading (4-pointer onboarding)](#0-required-reading-4-pointer-onboarding)
 1. [What This Project Is](#1-what-this-project-is)
 2. [The Problem It Solves](#2-the-problem-it-solves)
 3. [Origin Story](#3-origin-story)
@@ -20,9 +37,34 @@
 9. [What Has Been Built](#9-what-has-been-built)
 10. [Current State and Metrics](#10-current-state-and-metrics)
 11. [Key Architecture Decisions](#11-key-architecture-decisions)
-12. [Where to Read More](#12-where-to-read-more)
-13. [Getting Started](#13-getting-started)
-14. [What Is Next](#14-what-is-next)
+12. [Where to Read More (full document directory)](#12-where-to-read-more-full-document-directory)
+13. [Agent Dispatch Flow](#13-agent-dispatch-flow)
+14. [Codebase Reading Guide for Brownfield Agents](#14-codebase-reading-guide-for-brownfield-agents)
+15. [Getting Started](#15-getting-started)
+16. [What Is Next](#16-what-is-next)
+
+---
+
+## 0. Required Reading (4-pointer onboarding)
+
+Any agent picking up work in this project must read these four documents
+before touching code. In order:
+
+| # | Path | Why |
+|---|------|-----|
+| 1 | [`ONBOARDING_KICK_OFF.md`](ONBOARDING_KICK_OFF.md) (this file) | Project framing, architecture, lifecycle |
+| 2 | [`RULES.md`](RULES.md) | 12 binding rules + 11 HITL gates |
+| 3 | [`HIGH_LEVEL_DEV_TRACKER.md`](HIGH_LEVEL_DEV_TRACKER.md) | Current PI/sprint state + dependency graph |
+| 4 | `Temp/SPRINT_#_DETAILED_<your-sprint>.md` | Your sprint's spec, tasks, validation |
+
+If you are a Principal, also read:
+- `constitution/principles.md` -- the 10 binding articles
+- `constitution/decision-policy.md` -- Level 0/1/2 authority
+- `INSTRUCTIONS.md` at repo root and `.github/copilot-instructions.md`
+
+If you are a Worker, also read:
+- The skill files your sprint doc cites under `Skills:` in its frontmatter
+- `docs/CLI-PATTERN.md` if you are touching any `cli/*.py` file
 
 ---
 
@@ -442,14 +484,18 @@ Full text: `spec-driven-development/docs/ADR/`
 
 ---
 
-## 12. Where to Read More
+## 12. Where to Read More (full document directory)
 
-These documents are ordered by priority for someone getting up to speed.
+These documents are ordered by priority for someone getting up to speed. Section
+0 above is the minimum 4-pointer onboarding; this section is the full directory.
 
 ### Tier 1: Start Here (required reading)
 
 | Document | Purpose | Size |
 |----------|---------|------|
+| `docs/RULES.md` | 12 binding rules + HITL gates -- agent-facing rulebook | 6 KB |
+| `docs/HIGH_LEVEL_DEV_TRACKER.md` | Current PI/sprint state, dependency graph, top 3 next moves | live |
+| `docs/Temp/SPRINT_#_DETAILED_*.md` | Your sprint's deep spec (one file per active sprint) | varies |
 | `INSTRUCTIONS.md` (root) | Entry point for any AI agent -- points to everything else | 2 KB |
 | `.github/copilot-instructions.md` | Full project context, history, conventions, session recovery protocol | 12 KB |
 | `spec-driven-development/CONTEXT.md` | Shared vocabulary for all agents -- terms, lifecycle, roles | 5 KB |
@@ -503,7 +549,144 @@ All CLI tools follow the canonical pattern in `docs/CLI-PATTERN.md`: stdlib-only
 
 ---
 
-## 13. Getting Started
+## 13. Agent Dispatch Flow
+
+How work flows from human intent to merged code.
+
+```
+Human (executive sponsor + sole HITL gate)
+  |
+  v
+Principal Executive Manager  <-- the single phone number
+  |  Captures idea, routes to right Principal(s), synthesizes answers back
+  |
+  +--> Principal Product Manager      (backlog, RICE scoring, sprint/PI planning)
+  +--> Principal Architect            (spec.md, ADRs, pattern enforcement)
+  +--> Principal Software Developer   (plan.md, tasks.md, worker dispatch, two-stage review)
+  +--> Principal UI Designer          (UI specs, design tokens, visual layer) [ADR-0010]
+  +--> Principal Cloud Security Arch. (Azure, identity, secrets, threat modeling)
+         |
+         | Each Principal hires the workers it needs PER TASK:
+         v
+      Worker Agents (1-3 files each, disposable per task)
+         +-- developer-general
+         +-- ux-designer-general
+         +-- qa-engineer-general
+         +-- data-scientist-general
+         +-- developer-cli-specialist-1   (earned via ADR-0007)
+         +-- <hired on demand via /hire>
+```
+
+### Dispatch protocol (per task)
+
+1. **PM** triages the idea in `backlog/BACKLOG.md` (RICE-scored).
+2. **Architect** writes `specs/YYYY-MM-DD-{slug}/spec.md` + `validation.md`
+   (validation locked BEFORE implementation per Article X).
+3. **SW Dev** writes `plan.md` and decomposes into `tasks.md`. Tasks are tagged
+   `[P]` (parallel) or `[S]` (sequential), `[AFK]` (autonomous) or `[HITL]`
+   (human gate). Tasks are 1-3 files in scope (Rule 8 / Article IV).
+4. **SW Dev** creates a worktree `wt-pi{N}-s{M}-{slug}` (Rule 7) and dispatches
+   the worker via `cli/fleet.py dispatch` -- this writes a packet to
+   `dispatches/PI-N/<id>.md` and a row to `ledger/fleet.db`.
+5. **Worker** receives the dispatch packet (contains: task description, embedded
+   spec, file scope, validation criteria, the four required-reading pointers).
+   Worker executes TDD against the validation contract.
+6. **QA Engineer** (different worker) runs spec-compliance review FIRST. If
+   COMPLIANT, a second reviewer runs code-quality review. Rule 10.
+7. **SW Dev** merges the worktree into `master` (human-approved if cross-cutting
+   per HITL #4) and tears down the worktree.
+8. **PM** marks the feature DONE in `BACKLOG.md` and `HIGH_LEVEL_DEV_TRACKER.md`.
+9. **EM** updates `exec/state.md` (via `cli/state_builder.py`) and routes the
+   close-of-loop back to the human.
+
+### How the Executive Manager talks to the human
+
+- **Default mode:** "I recommend X because Y. OK?" -- single recommendation
+  with one-line reasoning. (Per LESSON-005, `em-communication-discipline`.)
+- **Menu mode** (max 3 options): only when the choice is irreversible,
+  expensive, or genuinely ambiguous.
+- **Routing mode:** "Routing this to Principal X. Will report back with the
+  synthesized answer."
+- **Status mode:** "Here is the tracker state. Top 3 next moves: ..."
+
+The EM never absorbs deep sprint context -- it points to detail docs and lets
+the Principals own the depth.
+
+---
+
+## 14. Codebase Reading Guide for Brownfield Agents
+
+This project is brownfield as of 2026-05-25: PI-1 and PI-2 are closed, 70 tests
+pass, the Bridge dashboard is live on Azure. Before you write your first line
+of code, read the existing implementations in this order so your additions
+match the established patterns.
+
+### Reading order (brownfield)
+
+| # | Path | What you learn | Reading time |
+|---|------|----------------|--------------|
+| 1 | [`docs/CLI-PATTERN.md`](CLI-PATTERN.md) | Canonical Python stdlib CLI pattern: `main(argv)`, argparse subcommands, custom exceptions, pathlib | 5 min |
+| 2 | [`ledger/schema.sql`](../ledger/schema.sql) | SQLite schema -- `dispatches` and `decisions` tables. Source of truth for traceability. | 3 min |
+| 3 | [`ledger/ledger_cli.py`](../ledger/ledger_cli.py) | First production CLI in the project; the canonical CRUD pattern. 13 tests. | 15 min |
+| 4 | [`cli/state_builder.py`](../cli/state_builder.py) | The largest CLI (~1,273 lines). Generates `exec/state.md` AND serves the live HTML dashboard. Read the docstring header first -- it cross-references two specs. 21 tests. | 30 min |
+| 5 | [`cli/fleet.py`](../cli/fleet.py) | Fleet dispatch CLI. Writes packets, calls ledger. The pattern for any new CLI that interacts with the ledger. 9 tests. | 15 min |
+| 6 | [`cli/qa.py`](../cli/qa.py) | Two-stage review automation. Pattern for any review/validation tool. 9 tests. | 10 min |
+| 7 | [`cli/retro.py`](../cli/retro.py) | Sprint retro generator from ledger data. Pattern for any reporting tool. 8 tests. | 10 min |
+| 8 | [`cli/schema_lint.py`](../cli/schema_lint.py) | YAML frontmatter validator. Pattern for any lint/validation tool. 10 tests. | 10 min |
+| 9 | [`cli/bootstrap.py`](../cli/bootstrap.py) | Greenfield + brownfield project scaffolding. Read if you are touching anything portability-related. | 20 min |
+| 10 | Any `cli/test_*.py` file | The test pattern: unittest, `TemporaryDirectory(ignore_cleanup_errors=True)` on Windows (LESSON-009), `gc.collect()` in `tearDown` for SQLite-touching tests. | 10 min |
+
+Total: about 2 hours of reading before any new CLI work.
+
+### Code that is NOT canonical (skip unless directly needed)
+
+- `cli/common/*.py` -- scaffolds, not all implemented. Refer to actual CLIs above.
+- `.github/skills/domain/*` -- marked as EXAMPLES from the Day-to-Day Agent
+  project. Not framework canon.
+- `docs/FINAL_MERGED_PLAN.md` -- 85 KB historical planning doc. Skim only if
+  you need to understand a decision; current state lives in roadmap +
+  HIGH_LEVEL_DEV_TRACKER.
+
+### What to read by role
+
+**Worker -- Developer:** rows 1, 3, 5, 6, 10 (~50 min), plus the CLI most
+adjacent to your task.
+
+**Worker -- QA Engineer:** rows 1, 6, 7, 10 (~35 min), plus the spec + tests
+for the feature under review.
+
+**Worker -- UX Designer:** row 4 (state_builder.py serves the dashboard), plus
+`exec/state.html` and the `state-builder` and `state-dashboard` spec dirs.
+
+**Principal -- Architect:** rows 1, 2, 4 (~40 min), plus ALL files in
+`docs/ADR/`, plus `constitution/`.
+
+**Principal -- SW Developer:** rows 1, 3, 4, 5, 10 (~80 min). You will dispatch
+workers and need to know the established patterns to review their PRs.
+
+**Principal -- PM:** `backlog/BACKLOG.md`, `constitution/roadmap.md`,
+`sprints/PI-1/lessons.md`, `sprints/PI-2/lessons.md`, and the
+`HIGH_LEVEL_DEV_TRACKER.md`. Skip CLI internals.
+
+**Principal -- UI Designer:** row 4 (the dashboard server), plus
+`specs/2026-05-16-state-dashboard/`, `specs/2026-05-16-cloud-dashboard/DESIGN.md`,
+and the live dashboard at https://state-dashboard.politehill-ac7984d9.westus2.azurecontainerapps.io/.
+
+### Critical patterns to honor (from the reading)
+
+- **Stdlib only.** No `requests`, no `pydantic`, no `flask`. `urllib`, `http.server`,
+  `sqlite3`, `argparse`, `pathlib`, `dataclasses`. This is the portability claim.
+- **`main(argv)` signature.** Every CLI's entry point takes `argv` for testability.
+- **Custom exception classes.** Don't raise bare `Exception`. See `cli/state_builder.py`
+  for `StateBuilderError` pattern.
+- **UTC timestamps.** `datetime.now(timezone.utc)`, ISO 8601 format.
+- **No emojis.** Plain ASCII (Rule 1).
+- **TDD.** Test file goes in before implementation (Rule 2 / Article X).
+- **Worktrees.** Never work on `master` directly (Rule 7).
+
+---
+
+## 15. Getting Started
 
 ### If You Want to Understand the Framework
 
@@ -547,7 +730,7 @@ python spec-driven-development/cli/bootstrap.py brownfield ../my-existing-projec
 
 ---
 
-## 14. What Is Next
+## 16. What Is Next
 
 ### Immediate (in-flight)
 

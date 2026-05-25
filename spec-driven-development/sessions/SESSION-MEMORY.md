@@ -1,6 +1,8 @@
 # Session Memory — Evolving Multi-Agent Framework
 
-**Latest checkpoint:** see `sessions/SESSION-2026-05-16-dashboard-about-and-freshness.md` (paused 2026-05-18, feature in flight, blocked on HITL Azure provisioning before worker dispatch)
+**Latest checkpoint:** PI-3/S5 in-flight. ADR-0011 approved, Rule 13 landed, three amendments written into S5 detail doc. T-001 and T-009 DONE. T-002 (skeleton) unblocked and ready for SW Dev dispatch. Commit chain: `022a9c7` (ADR+Rule 13) -> `a0093d4` (amendments) -> `0a8f2aa` (tracker update). Working tree clean. 70 tests passing. ~42 commits ahead of origin/master (HITL gate #10).
+
+**Previous checkpoint:** see `sessions/SESSION-2026-05-16-dashboard-about-and-freshness.md` (paused 2026-05-18, feature in flight, blocked on HITL Azure provisioning before worker dispatch)
 
 **Date:** 2026-05-12 to 2026-05-13
 **Owner:** Rodolfo Lerma
@@ -63,25 +65,43 @@ A portable, replicable system for orchestrating a fleet of AI agents through a s
 
 | SHA | Subject |
 |---|---|
-| `23156a0` | feat(ux): add archetype-recommender skill + visual workflow diagram in cheat sheet (g1) |
-| `8729706` | feat(fleet): add /hire command + role-creation skill (h1, ADR-0007) |
-| `691c7eb` | docs: add CHEAT-SHEET.html one-pager for sharing |
-| `ba738f3` | chore: consolidator — bump skill count to 26 after Wave 3 (respect-existing) |
-| `e8bf182` | feat(archetypes): expand archetype library to 5 (s6) |
-| `fc18361` | feat(bootstrap): add brownfield subcommand with archaeology pass + respect-existing skill (s4) |
-| `9ace815` | feat(ledger): fleet ledger v0.1 — first feature shipped through SDD lifecycle (p2 pilot) |
-| `0773379` | chore: consolidator — register Wave 1+2 skills/prompts in roster, README table, copilot-instructions |
-| `d36594e` | feat(constitution): add semantic versioning + propagation check (b5, ADR-0006) |
-| `fbac302` | feat(bootstrap): add greenfield bootstrap script + python-library archetype (s3) |
-| `e4ff074` | feat: project-to-framework evolution loop — lessons + /evolve + lesson-capture (s5) |
-| `43115fd` | docs(skills): add argument-hint frontmatter field to skills and prompts (b3) |
-| `c4e9956` | feat: add date-prefix feature dir convention + handoff skill + /replan ceremony |
-| `2b1d272` | feat(constitution): bind TDD + pre-implementation validation contract (Article X, ADR-0005) |
-| `6825943` | docs: fix inspirations attribution (Spec-Kit is GitHub; sc-spec is DLAI companion) |
-| `946a224` | docs(constitution): rewrite principles.md as framework articles (closes PI-1 generalization) |
-| `68d229a` | feat(agents): promote Executive Manager to orchestrator and single human entry point (ADR-0004) |
-| `bafe0d5` | docs: add root README and annotate Day-to-Day domain skills as examples |
-| `6dac9d7` | docs: generalize constitution and CONTEXT to describe framework, not Day-to-Day host |
+| `0a8f2aa` | docs(tracker): S5 in-flight, ADR-0011 approved, HITL cleared |
+| `a0093d4` | docs(s5): apply three amendments + mark T-001/T-009 DONE |
+| `022a9c7` | docs(rules): add Rule 13 + ADR-0011 three-tier navigation layer |
+| `ee56265` | plan(pi-3): add S5 Navigation Layer Migration in response to external feedback |
+| `b2b5d59` | feat(agents): hire principal-ui-designer (draft) -- ADR-0010 |
+| `cde5727` | plan(pi-3): create 4 sprint detail docs (S1-S4) + PI-3 kickoff artifacts |
+| `5cc36b2` | docs(pi-3): kickoff foundation -- RULES.md, ONBOARDING, TRACKER |
+
+### PI-3/S5 task status (as of 2026-05-25)
+
+| Task | Description | Status |
+|------|-------------|--------|
+| T-001 | ADR-0011 (Three-Tier Navigation Layer) | DONE (`022a9c7`) |
+| T-009 | Rule 13 + DONE ceremony bindings in RULES.md | DONE (`022a9c7`) |
+| T-002 | Create Management/ skeleton (PI-1, PI-2, PI-3 INDEX.md) | Unblocked, ready for dispatch |
+| T-003 | Migrate Temp/ sprint docs to Management/PI-3/Sprint-N-{title}/SPEC.md | Blocked on T-002 |
+| T-004 | Backfill PI-1 INDEX (summaries only, not full specs) | Blocked on T-002 |
+| T-005 | Backfill PI-2 INDEX | Blocked on T-002 |
+| T-010 | Implement build-index subcommand in state_builder.py | Blocked on T-002 |
+| T-006 | Populate PI-3 INDEX | Blocked on T-003/T-004/T-005 |
+| T-007 | Update tracker links | Blocked on T-006 |
+| T-008 | Extend ONBOARDING to 5-pointer read | Blocked on T-006 |
+| T-011 | Tests for build-index | Blocked on T-010 |
+| T-012 | Update INSTRUCTIONS.md | Blocked on T-008 |
+| T-013 | Deprecate docs/Temp/ | Blocked on T-003 |
+| T-014 | Closure dry-run (S5 itself populates new structure) | At end of sprint |
+
+### Next dispatch sequence
+
+1. SW Dev dispatches T-002 (skeleton creation)
+2. After T-002: parallel set T-003 + T-004 + T-005 + T-010
+3. After parallel set: T-006, then T-007/T-008/T-012 in parallel, then T-011
+4. T-013 after T-003; T-014 at sprint close
+
+### Coordination directive
+
+S5/T-010 (build-index) merges to master BEFORE S1/T-004 (About-section template) dispatches. Both modify `cli/state_builder.py` but different subcommands. S1's HITL block makes this natural.
 
 ---
 
@@ -272,14 +292,17 @@ Evolving-Multi-Agent-Framework/
     │   ├── FINAL_MERGED_PLAN.md            (85KB historical planning doc)
     │   ├── SCORECARD.md
     │   ├── CHEAT-SHEET.html                (one-pager with SVG workflow diagram)
-    │   └── ADR/                            (7 ADRs)
+    │   └── ADR/                            (11 ADRs)
     │       ├── 001-sdd-framework.md
     │       ├── 002-two-folder-split.md
     │       ├── 003-specialization-naming.md
     │       ├── 004-executive-manager-as-orchestrator.md
     │       ├── 005-validation-as-pre-implementation-contract.md
     │       ├── 006-constitution-semantic-versioning.md
-    │       └── 007-hire-command-and-role-lifecycle.md
+    │       ├── 007-hire-command-and-role-lifecycle.md
+    │       ├── ...008, 009...
+    │       ├── 010-hire-principal-ui-designer.md (draft)
+    │       └── 011-three-tier-navigation-layer.md (accepted)
     ├── cli/
     │   ├── __init__.py
     │   ├── bootstrap.py                    (greenfield + brownfield subcommands)
@@ -328,15 +351,15 @@ Evolving-Multi-Agent-Framework/
 
 These are honest gaps. Future PIs.
 
-1. **No second-project portability test.** Framework claims to work on any project. Dogfood proved it works on its OWN project. PI-3 milestone: bootstrap onto a totally different stack to validate.
+1. **No second-project portability test.** Framework claims to work on any project. Dogfood proved it works on its OWN project. PI-3/S2 plans the Day-to-Day brownfield bootstrap.
 2. **No GitHub Issues integration.** Spec-Kit has `/taskstoissues`. Deferred.
-3. **CLI scripts are stdlib-only and minimal.** Work but not pretty. Polish is PI-2 work.
+3. **CLI scripts are stdlib-only and minimal.** `state_builder.py` operational (~430 lines); `fleet.py`, `qa.py`, `retro.py` still scaffolds.
 4. **`fleet.db` schema is v0.1.** Just dispatches and decisions. Migration policy is LESSON-004 for /evolve.
-5. **No web UI / dashboard.** Everything is files + Copilot Chat. Future feature.
-6. **Brownfield archaeology is shallow heuristic.** Complex codebases still need human grilling for hidden conventions, undocumented agreements, deploy quirks.
-7. **`/replan` and `/evolve` exist but never been run for real.** Framework's own retro on the dogfood is captured in PI-1 lessons.md but not yet curated.
-8. **No `/hire` ever actually invoked.** Mechanism exists, never exercised.
-9. **CLI scaffolds (fleet.py, qa.py, retro.py, state_builder.py) still empty.** Their functionality is provided through the agent/skill/prompt layer today; CLI implementations would be future polish.
+5. **No web UI / dashboard.** `exec/state.html` provides a live view; full UI deferred to PI-3/S4 (Live UI v2, blocked on ADR-0010).
+6. **Brownfield archaeology is shallow heuristic.** Complex codebases still need human grilling.
+7. **Navigation layer migration in progress.** S5 is in-flight; T-002 through T-014 remain. Structure exists in plan; not yet on disk.
+8. **5 PI-2 lessons still OPEN.** PI-3/S3 plans the `/evolve` curation.
+9. **ADR-0010 (UI Designer hire) still pending.** Human approval needed to activate the 6th Principal and unblock S4.
 
 ---
 
@@ -344,24 +367,20 @@ These are honest gaps. Future PIs.
 
 In priority order:
 
-### Highest value: actually use the framework on a real project
-- Pick a small new internal tool (1-week scope) OR a focused refactor in an existing project
-- Run `bootstrap.py greenfield` (with archetype-recommender) OR `bootstrap.py brownfield --draft-only`
-- Walk one feature end-to-end through the lifecycle
-- Run `/replan` after DONE
-- File real frustrations as lessons via `lesson-capture` skill
-- This is the second dogfood — proves portability
+### Highest value: continue S5 execution (navigation layer)
+- SW Dev dispatches T-002 (create Management/ skeleton with three PI INDEX templates)
+- After T-002 lands: dispatch parallel set T-003 (migrate Temp), T-004 (PI-1 backfill), T-005 (PI-2 backfill), T-010 (build-index CLI)
+- This is the critical path; everything else in PI-3 benefits from the new structure existing
 
-### Medium value: close the open loops on the dogfood
-- Run `/replan` against the fleet-ledger pilot
-- Curate the 4 LESSON-* candidates in `spec-driven-development/sprints/PI-1/lessons.md` via `/evolve`
-- Mark PI-1 as DONE in roadmap.md, define PI-2 scope
-- This validates the evolution loop end-to-end (project → framework feedback)
+### Medium value: unblock S1 (9 Azure HITL steps)
+- Listed in `docs/Temp/SPRINT_1_DETAILED_DASHBOARD_FRESHNESS_UNBLOCK.md` Section 8
+- ~5 min once `az login` is done
+- Coordination: S5/T-010 must merge before S1/T-004 dispatches (both touch state_builder.py)
 
-### Lower value: tactical polish
-- Implement the CLI scaffolds (fleet.py, qa.py, retro.py, state_builder.py)
-- Write more domain skills as projects demand them
-- Consider GitHub Issues bridge (`/taskstoissues` from Spec-Kit)
+### Lower value: approve ADR-0010 (UI Designer hire)
+- One-word approval flips the agent from draft to active
+- Enables S4 (Live UI v2 Spec) to begin CLARIFY
+- Independent of S5 and S1; can resolve in any order
 
 ---
 

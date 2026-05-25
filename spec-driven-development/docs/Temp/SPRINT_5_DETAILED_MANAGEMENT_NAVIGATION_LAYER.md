@@ -1,7 +1,7 @@
 ---
 sprint: PI-3 / S5
 title: Navigation Layer Migration -- Management/ Structure
-status: Proposed (planning complete; awaiting human approval to execute)
+status: In-Flight (ADR-0011 approved, Rule 13 landed; T-002 unblocked for dispatch)
 owner: principal-executive-manager (lead, owns tracker + INDEXes), principal-software-developer (ledger -> INDEX automation), principal-product-manager (rule + ceremony binding)
 worktree: wt-pi3-s5-management-layer
 deps: Soft preference -- LAND BEFORE S2/S3/S4 dispatch begins so those sprints adopt the new structure from day one. Parallel-safe with S1 (S1 is HITL-blocked, no file collision).
@@ -90,20 +90,21 @@ dashboard remain authoritative for their respective dimensions.
 | AC10 | New tests cover `build-index`: at minimum, 3 tests (empty PI, populated PI, marker-block preservation) | `python -m pytest cli/test_state_builder.py -k "build_index" -v` >= 3 passed |
 | AC11 | ADR-0011 (Three-Tier Navigation Layer) authored and approved -- captures the decision, alternatives considered (single tracker only, dashboard-only, Wiki external), and the rationale for adopting the borrowed pattern | File exists in `docs/ADR/` |
 | AC12 | First closure dry-run: when S5 itself closes, its INDEX entry and ground notes are populated through the new ceremony -- proving the discipline works on its first eligible event | `Management/PI-3/INDEX.md` reflects S5 DONE with rationale |
+| AC13 | Onboarding smoke test: a fresh agent (or human) starting from `HIGH_LEVEL_DEV_TRACKER.md` can navigate to the active sprint's `SPEC.md` in under 60 seconds using only the links in the three-tier hierarchy. Validates glanceability, not just file existence. | Timed walkthrough by a fresh agent or manual test |
 
 ## 5. Task Decomposition
 
 | ID | Description | Owner | Tag | Status | File scope |
 |----|-------------|-------|-----|--------|------------|
-| T-001 | Author ADR-0011 (Three-Tier Navigation Layer): context, decision, alternatives, scope, reversibility. Cite the verbatim feedback as provenance. | EM (drafts), Architect (reviews) | [S][HITL] (Level-1 + ADR binding requires human sign-off per RULES HITL #8) | Proposed | 1 file |
-| T-002 | Create skeleton: `Management/PI-1/INDEX.md`, `Management/PI-2/INDEX.md`, `Management/PI-3/INDEX.md`. Empty/templated for PI-1 and PI-2 until T-004/T-005 backfill them. | developer-general | [P][AFK] | Blocked on T-001 | 3 files |
+| T-001 | Author ADR-0011 (Three-Tier Navigation Layer): context, decision, alternatives, scope, reversibility. Cite the verbatim feedback as provenance. | EM (drafts), Architect (reviews) | [S][HITL] (Level-1 + ADR binding requires human sign-off per RULES HITL #8) | DONE (022a9c7) | 1 file |
+| T-002 | Create skeleton: `Management/PI-1/INDEX.md`, `Management/PI-2/INDEX.md`, `Management/PI-3/INDEX.md`. Empty/templated for PI-1 and PI-2 until T-004/T-005 backfill them. | developer-general | [P][AFK] | Unblocked (T-001 DONE) | 3 files |
 | T-003 | Migrate `docs/Temp/SPRINT_1_DETAILED_*.md` through `SPRINT_4_DETAILED_*.md` to `Management/PI-3/Sprint-N-{title}/SPEC.md`. Create empty `AGENT_NOTES.md` per sprint as templates. Move (`git mv`) not copy to preserve history. | developer-general | [P][AFK] | Blocked on T-002 | 4 moves + 4 new template files |
-| T-004 | Backfill `Management/PI-1/INDEX.md` from `sprints/PI-1/lessons.md`, `specs/2026-05-12-fleet-ledger/`, ledger rows for PI-1 dispatches (if any), and `roadmap.md` PI-1 section. Include: theme, sprint list, what-was-done, ADRs 001-007, lessons, links | qa-engineer-general (research + draft), EM (review) | [S] | Blocked on T-002 | 1 file + new `Management/PI-1/Sprint-N-{title}/SPEC.md` summary per PI-1 sprint (sprints aren't formally numbered in PI-1; use logical groupings from commit log) |
+| T-004 | Backfill `Management/PI-1/INDEX.md` from `sprints/PI-1/lessons.md`, `specs/2026-05-12-fleet-ledger/`, ledger rows for PI-1 dispatches (if any), and `roadmap.md` PI-1 section. Include: theme, sprint list, what-was-done, ADRs 001-007, lessons, links. **PI-1 sprint SPEC.md files are summaries only** (what happened, key commits, outcome) -- not full coordination specs, since PI-1 never produced formal sprints. | qa-engineer-general (research + draft), EM (review) | [S] | Blocked on T-002 | 1 file + new `Management/PI-1/Sprint-N-{title}/SPEC.md` summary per PI-1 sprint (sprints aren't formally numbered in PI-1; use logical groupings from commit log) |
 | T-005 | Backfill `Management/PI-2/INDEX.md` from `sprints/PI-2/lessons.md`, `sprints/PI-2-retro.md`, the 5 PI-2 spec dirs, ADRs 008-009, ledger rows for PI-2. Include Sprint-A, Sprint-B, Sprint-C as the three same-day sprints documented in retro. | qa-engineer-general (research + draft), EM (review) | [S] | Blocked on T-002 (can run parallel to T-004) | 1 INDEX + 3 sprint folders |
 | T-006 | Populate `Management/PI-3/INDEX.md` for the IN-FLIGHT PI: theme (portability validation + live UI v2), 5 sprints with current status (S1 BLOCKED, S2-S4 Proposed, S5 in-flight executing this very sprint), key decisions (ADR-0010, ADR-0011), in-flight feature SDD-009/010, open lessons table | EM | [S] | Blocked on T-003, T-004, T-005 | 1 file |
 | T-007 | Update `HIGH_LEVEL_DEV_TRACKER.md`: PI rows now link to `Management/PI-N/INDEX.md`. Sprint board rows link to `Management/PI-3/Sprint-N-{title}/SPEC.md`. Add a "Navigation Layer" line to the Snapshot table. Refresh dep graph. | EM | [S] | Blocked on T-006 | 1 file |
 | T-008 | Extend `ONBOARDING_KICK_OFF.md` Section 0 to **5-pointer read** (insert PI INDEX between tracker and sprint detail). Update Section 13 (Agent Dispatch Flow) to mention AGENT_NOTES.md as the per-sprint ground-truth artifact. | EM | [S][P with T-009] | Blocked on T-006 | 1 file |
-| T-009 | Add **Rule 13: No untracked sprint work** to `RULES.md`. Update Section 4 (DONE) with the new ceremony bindings (SPEC updated each REVIEW, INDEX updated at DONE + /replan, tracker every session). Bump RULES version (MINOR: added rule). | PM (drafts), Architect (reviews per Article VIII), Human (approves per HITL #8 if binding) | [S][HITL] | Blocked on T-001 (depends on ADR landing) | 1 file |
+| T-009 | Add **Rule 13: No untracked sprint work** to `RULES.md`. Update Section 4 (DONE) with the new ceremony bindings (SPEC updated each REVIEW, INDEX updated at DONE + /replan, tracker every session). Bump RULES version (MINOR: added rule). | PM (drafts), Architect (reviews per Article VIII), Human (approves per HITL #8 if binding) | [S][HITL] | DONE (022a9c7) | 1 file |
 | T-010 | Implement `cli/state_builder.py build-index --pi PI-N` subcommand. Reads ledger; emits mechanical INDEX sections (sprint list, dispatch counts, last-marked outcomes) inside `<!-- BEGIN/END auto-generated -->` marker blocks that preserve human prose outside the markers. | developer-cli-specialist-1 | [S] | Blocked on T-002 (needs INDEX template format finalized) | 1 file (state_builder.py) |
 | T-011 | Write 3+ tests for `build-index`: empty PI, populated PI from ledger fixture, marker-block preservation across re-runs. Follow LESSON-009 Windows SQLite cleanup pattern. | developer-cli-specialist-1 | [S] | Blocked on T-010 | 1 file (test_state_builder.py) |
 | T-012 | Update `INSTRUCTIONS.md` (repo root) to mention the new navigation layer as the first stop after CONTEXT.md. | EM | [S][AFK] | Blocked on T-008 | 1 file |
@@ -116,6 +117,14 @@ After T-001 (ADR) and T-002 (skeleton), the following sets are parallel-safe:
 
 - Set A: T-004 (PI-1 backfill) + T-005 (PI-2 backfill) + T-010 (build-index impl)
 - Set B (after Set A): T-006 (PI-3 INDEX), then T-007/T-008/T-009/T-012 in parallel (different files), then T-011 (tests for T-010)
+
+### Coordination directive: `cli/state_builder.py`
+
+Both S5/T-010 and S1/T-004 modify `cli/state_builder.py` (different subcommands:
+`build-index` vs. About-section template). **Single rule: S5/T-010 merges to
+master before S1/T-004 dispatches.** No worktree-sharing alternative. S1's HITL
+block on 9 Azure provisioning steps makes this sequencing natural -- S1 cannot
+dispatch until those steps are completed by the human.
 
 Estimated wall-clock with parallel dispatch: 1-2 sessions.
 
@@ -180,7 +189,7 @@ in `specs/2026-05-25-navigation-layer/` once that dir is created in CLARIFY.
 
 Per [`RULES.md`](../RULES.md) Section 4, AND:
 
-- [ ] AC1-AC12 verified
+- [ ] AC1-AC13 verified
 - [ ] ADR-0011 approved and landed
 - [ ] Rule 13 added to RULES.md (semver bump: 1.0.0 -> 1.1.0); RULES.md version-history block updated
 - [ ] All four PI-3 sprint detail docs migrated; `docs/Temp/` is empty (or contains only deprecation README)
@@ -200,6 +209,8 @@ Per [`RULES.md`](../RULES.md) Section 4, AND:
 | 2026-05-25 | External feedback from parallel team received; visibility/transparency identified as adoption blocker |
 | 2026-05-25 | EM authored this S5 plan; open question on file naming resolved (Option B with refinements: folder carries title, SPEC.md + AGENT_NOTES.md inside) |
 | _next_ | Human approves: (a) execute S5 immediately to give parallel team early benefit, OR (b) approve plan and queue for after S1 unblocks |
+| 2026-05-25 | Parallel EM review completed; three amendments accepted: AC13 (onboarding smoke test), A2 (single coordination directive for state_builder.py), A3 (PI-1 backfill scope constrained to summaries) |
+| 2026-05-25 | ADR-0011 approved (HITL #8), committed at `022a9c7`. Rule 13 + DONE ceremony bindings landed in RULES.md v1.1.0. T-001 and T-009 marked DONE. |
 
 ---
 

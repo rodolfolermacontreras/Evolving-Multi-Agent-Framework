@@ -1,5 +1,5 @@
 ---
-version: '1.0.0'
+version: '1.1.0'
 ratified: 2026-05-25
 last_amended: 2026-05-25
 owner: principal-executive-manager
@@ -27,7 +27,7 @@ this file via `/constitution` (Level 1, ADR required) to reconcile.
 
 ---
 
-## The 12 Standing Rules
+## The 13 Standing Rules
 
 ### Rule 1 -- No emojis
 No emojis in code, commits, documentation, agent prompts, skill files, or
@@ -104,6 +104,15 @@ Pause for explicit human approval before any irreversible or high-stakes
 action.
 **Source:** `constitution/decision-policy.md` Level-2 + Section 2 below.
 
+### Rule 13 -- No untracked sprint work
+No work on a sprint may begin without a corresponding
+`docs/Management/PI-#/Sprint-#-{title}/` folder and a tracker entry in
+`HIGH_LEVEL_DEV_TRACKER.md`. Untracked work is not permitted. The Executive
+Manager owns the tracker and PI INDEX files. This rule applies prospectively
+from ratification; existing in-flight sprints are grandfathered via the
+migration in PI-3/S5.
+**Source:** ADR-0011 (Three-Tier Navigation Layer).
+
 ---
 
 ## Section 2 -- HITL Gates (Human-in-the-Loop)
@@ -158,18 +167,29 @@ A task is DONE when ALL of the following are true:
 - [ ] All new code covered by automated tests (Rule 2).
 - [ ] Two-stage review passed: COMPLIANT + APPROVED (Rule 10).
 - [ ] Dispatch outcome marked in `ledger/fleet.db` (Rule 4).
-- [ ] Detail sprint doc in `docs/Temp/` updated; tracker updated.
+- [ ] Sprint `SPEC.md` in `docs/Management/PI-#/Sprint-#-{title}/` updated with
+      current task status and any notes from this dispatch/REVIEW cycle.
 - [ ] Worktree merged to `master` (human-approved per HITL #4 if cross-cutting).
 - [ ] Scaffolding deleted (Rule 3).
 
 A feature is DONE when all its tasks are DONE and the feature's
 `specs/YYYY-MM-DD-{slug}/RETRO.md` exists.
 
-A sprint is DONE when all its features are DONE and the sprint's
-`Temp/SPRINT_#_DETAILED_*.md` is moved to `sprints/PI-N/` for archive.
+A sprint is DONE when all its features are DONE and:
+- [ ] The sprint's `SPEC.md` is finalized in `docs/Management/PI-#/Sprint-#-{title}/`.
+- [ ] `AGENT_NOTES.md` in the same folder is populated with on-the-ground findings.
+- [ ] The PI `INDEX.md` (`docs/Management/PI-#/INDEX.md`) is updated with what was
+      done, key decisions, and lessons from this sprint.
+- [ ] `HIGH_LEVEL_DEV_TRACKER.md` sprint row updated to reflect DONE status.
 
-A PI is DONE when all its sprints are DONE, `roadmap.md` is updated, and
-`sprints/PI-N/lessons.md` is curated via `/evolve`.
+A PI is DONE when all its sprints are DONE, `roadmap.md` is updated,
+`sprints/PI-N/lessons.md` is curated via `/evolve`, and the PI `INDEX.md`
+is finalized.
+
+**Ceremony bindings (ADR-0011):**
+- `SPEC.md` updated each dispatch/REVIEW cycle (task-level).
+- PI `INDEX.md` updated at sprint DONE and at `/replan` (sprint-level).
+- `HIGH_LEVEL_DEV_TRACKER.md` updated every session (project-level).
 
 ---
 

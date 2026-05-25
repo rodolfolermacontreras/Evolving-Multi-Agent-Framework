@@ -1,5 +1,5 @@
 ---
-version: '1.0.0'
+version: '1.1.0'
 last_updated: 2026-05-25
 owner: principal-executive-manager
 co_owner: principal-product-manager
@@ -23,41 +23,47 @@ Read [`RULES.md`](RULES.md) for the binding rules.
 
 | Field | Value |
 |-------|-------|
-| **Current PI** | PI-3 (Portability Validation + Live UI v2) |
+| **Current PI** | PI-3 (Portability Validation + Live UI v2 + Navigation Layer) |
 | **PI started** | 2026-05-25 (kickoff today; PI-2 closed 2026-05-16) |
-| **Current sprint** | Sprint 1 of 4 (Dashboard Freshness Unblock) |
+| **Current sprint** | Sprint 1 of 5 (Dashboard Freshness Unblock) |
 | **Cadence** | Symbolic; ~1 day per sprint, ~5 sprints per PI (ADR-0003) |
 | **Active worktrees** | 0 (S1 awaiting HITL provisioning) |
-| **Tests passing** | 70 across 5 CLI suites + ledger (last verified at HEAD `39d2266`) |
-| **Branch state** | `master` at `39d2266`, **34 commits ahead of origin** (HITL gate #10) |
+| **Tests passing** | 70 across 5 CLI suites + ledger (last verified at HEAD `b2b5d59`) |
+| **Branch state** | `master` at `b2b5d59`, **37 commits ahead of origin** (HITL gate #10) |
 | **Open lessons** | 5 (LESSON-006, 007, 008, 009, 010 -- see Sprint 3) |
-| **HITL pending** | 9 Azure provisioning steps for Sprint 1 |
+| **HITL pending** | 9 Azure provisioning steps for Sprint 1; ADR-0010 approval for S4; ADR-0011 approval for S5 |
+| **External feedback in flight** | Parallel team reports visibility/transparency gap -- S5 plans the response |
+| **Navigation layer** | flat `docs/Temp/` (legacy); migrating to `docs/Management/PI-N/Sprint-N-{title}/` per S5 plan |
 
 ---
 
 ## Top 3 Next Moves
 
-1. **Human runs the 9 HITL Azure provisioning steps for Sprint 1.** Listed in
-   [`Temp/SPRINT_1_DETAILED_DASHBOARD_FRESHNESS_UNBLOCK.md`](Temp/SPRINT_1_DETAILED_DASHBOARD_FRESHNESS_UNBLOCK.md) Section 8. ~5 min once `az login` is done. This unblocks the
-   entire PI-3 dispatch chain.
-2. **SW Dev dispatches T-003 + T-004 to `developer-general`** in parallel
-   worktrees `wt-pi3-s1-freshness-workflow` and `wt-pi3-s1-freshness-about`
-   the moment the human says "done".
-3. **PM amends `BACKLOG.md`** to move SDD-009 + SDD-010 from "PI-3 Sprint A
-   (proposed)" to "PI-3 Sprint 1 (active)" and add SDD-011..SDD-014 for
-   sprints 2-4. (Single-paragraph backlog hygiene; can be done in parallel
-   with #1.)
+1. **Approve S5 (Navigation Layer Migration) and execute FIRST.** External
+   feedback from the parallel team identified visibility/transparency as the
+   adoption blocker. S5 is purely additive (ledger + dashboard untouched),
+   parallel-safe with S1, and has the highest leverage right now -- once the
+   `Management/PI-N/Sprint-N-{title}/` structure exists, S2/S3/S4 adopt it
+   from day one. Plan: [Temp/SPRINT_5_DETAILED_MANAGEMENT_NAVIGATION_LAYER.md](Temp/SPRINT_5_DETAILED_MANAGEMENT_NAVIGATION_LAYER.md).
+2. **Human runs the 9 HITL Azure provisioning steps for Sprint 1.** Listed in
+   [`Temp/SPRINT_1_DETAILED_DASHBOARD_FRESHNESS_UNBLOCK.md`](Temp/SPRINT_1_DETAILED_DASHBOARD_FRESHNESS_UNBLOCK.md)
+   Section 8. ~5 min once `az login` is done. Unblocks the entire SDD-009/010
+   feature dispatch.
+3. **Approve ADR-0010 (UI Designer hire)** -- one-word approval flips the agent
+   from draft to active and enables S4 to begin CLARIFY. Independent of #1 and
+   #2; can resolve in any order.
 
 ---
 
-## PI-3 Sprint Board (4 sprints)
+## PI-3 Sprint Board (5 sprints)
 
 | # | Title | Status | Owner | Worktree | Deps | Detail Doc |
 |---|-------|--------|-------|----------|------|------------|
 | **S1** | Dashboard About + Freshness Unblock | **BLOCKED on HITL** | SW Dev | `wt-pi3-s1-freshness-*` | None (Sprint 0 already shipped spec/plan/tasks/validation) | [SPRINT_1_DETAILED](Temp/SPRINT_1_DETAILED_DASHBOARD_FRESHNESS_UNBLOCK.md) |
-| **S2** | Day-to-Day Brownfield Bootstrap | **Proposed** | PM + Architect (spec), SW Dev (dispatch) | `wt-pi3-s2-brownfield` | Parallel-safe with S1; will create artifacts in a SEPARATE repo, no master collision | [SPRINT_2_DETAILED](Temp/SPRINT_2_DETAILED_DAY_TO_DAY_BROWNFIELD_BOOTSTRAP.md) |
+| **S2** | Day-to-Day Brownfield Bootstrap | **Proposed** | PM + Architect (spec), SW Dev (dispatch) | `wt-pi3-s2-brownfield` | Parallel-safe with S1, S3, S4, S5; will create artifacts in a SEPARATE repo, no master collision | [SPRINT_2_DETAILED](Temp/SPRINT_2_DETAILED_DAY_TO_DAY_BROWNFIELD_BOOTSTRAP.md) |
 | **S3** | PI-2 Lessons Curation via /evolve | **Proposed** | PM (lead), Architect (constitution impact) | `wt-pi3-s3-lessons` | Parallel-safe; touches only `sprints/PI-2/lessons.md` + possibly `.github/skills/` | [SPRINT_3_DETAILED](Temp/SPRINT_3_DETAILED_PI2_LESSONS_CURATION.md) |
-| **S4** | Live UI v2 Spec (Principal UI Designer kickoff) | **Proposed** | UI Designer (lead, ADR-0010), Architect (review) | `wt-pi3-s4-ui-v2` | Parallel-safe for the SPEC phase; implementation deferred to PI-4 | [SPRINT_4_DETAILED](Temp/SPRINT_4_DETAILED_LIVE_UI_V2_SPEC.md) |
+| **S4** | Live UI v2 Spec (Principal UI Designer kickoff) | **Proposed** (blocked on ADR-0010 approval) | UI Designer (lead, ADR-0010), Architect (review) | `wt-pi3-s4-ui-v2` | Parallel-safe for the SPEC phase; implementation deferred to PI-4 | [SPRINT_4_DETAILED](Temp/SPRINT_4_DETAILED_LIVE_UI_V2_SPEC.md) |
+| **S5** | Navigation Layer Migration -- Management/ Structure | **Proposed** (blocked on ADR-0011 approval) | EM (lead), SW Dev (build-index), PM (Rule 13) | `wt-pi3-s5-management-layer` | Parallel-safe with S1; **strongly preferred to land BEFORE S2/S3/S4 dispatch** so those sprints adopt the new structure from day one | [SPRINT_5_DETAILED](Temp/SPRINT_5_DETAILED_MANAGEMENT_NAVIGATION_LAYER.md) |
 
 ### Status legend
 - **Proposed** -- sprint scope drafted, awaiting Principal sign-off + dispatch
@@ -76,31 +82,42 @@ Read [`RULES.md`](RULES.md) for the binding rules.
             |  Kickoff  |
             +-----+-----+
                   |
-        +---------+----------+--------------+--------------+
-        v                    v              v              v
-    +-------+            +-------+      +-------+      +-------+
-    |  S1   |            |  S2   |      |  S3   |      |  S4   |
-    | Fresh |            |Brown- |      |Lesson |      |UI v2  |
-    | -ness |            | field |      |Curate |      | Spec  |
-    +---+---+            +-------+      +-------+      +---+---+
-        |                                                  |
-        | (S2 may want to demo live dashboard               |
-        |  after S1 deploys; soft dep, not hard)            |
-        |                                                  |
-        | (S4 design tokens may inform a future PI-4        |
-        |  UI v2 IMPLEMENTATION sprint; S4 here is          |
-        |  SPEC ONLY)                                       |
-        |                                                  |
-        +----- S1 must merge to master before --------------+
-               cross-sprint visual changes from S4 land
+        +---------+----------+--------------+--------------+--------------+
+        v                    v              v              v              v
+    +-------+            +-------+      +-------+      +-------+      +-------+
+    |  S1   |            |  S2   |      |  S3   |      |  S4   |      |  S5   |
+    | Fresh |            |Brown- |      |Lesson |      |UI v2  |      | Nav   |
+    | -ness |            | field |      |Curate |      | Spec  |      | Layer |
+    +---+---+            +---+---+      +---+---+      +---+---+      +---+---+
+        |                    ^              ^              ^              |
+        |  (S2 demo benefits |              |              |              |
+        |   from S1 deploy)  |              |              |              |
+        |                    |              |              |              |
+        |                    +--------------+--------------+--------------+
+        |                                                                 |
+        |                  S5 SHOULD land first so S2/S3/S4 adopt the new
+        |                  Management/ structure from day one
+        |                  (soft preference; technically parallel-safe)
+        |
+        +----- S1 must merge to master before any cross-sprint visual
+               changes from S4 can land (PI-4 work; out of scope here)
 ```
 
-- **S1 is the only HARD blocker** in this PI. S2/S3/S4 are parallel-safe.
+- **S1 is the only HARD blocker** in this PI. S2/S3/S4/S5 are parallel-safe.
+- **S5 -> S2/S3/S4** is a SOFT preference: if S5 lands first, the other sprints
+  adopt `Management/PI-3/Sprint-N-{title}/SPEC.md` from inception and avoid a
+  retroactive migration. If S5 lands later, T-003 in S5 picks up whatever
+  is in `Temp/` at that time.
 - **S1 -> any UI implementation** is a soft dependency (S4 here is SPEC only).
-- **S2 has zero collision risk with master** because all its file writes land
-  in the Day-to-Day Agent repo (separate workspace).
+- **S2 has zero collision risk** with this repo's `master` because all its file
+  writes land in the Day-to-Day Agent repo.
 - **S3 touches** `sprints/PI-2/lessons.md` and may amend skill files; coordinate
-  with S4 if S4 proposes new UI-related skills.
+  with S5 if S5 proposes new skills (S5 does not).
+- **S5** touches `docs/Temp/` (migration), `docs/Management/` (new),
+  `HIGH_LEVEL_DEV_TRACKER.md`, `ONBOARDING_KICK_OFF.md`, `RULES.md` (Rule 13
+  add), `cli/state_builder.py` (build-index subcommand), `INSTRUCTIONS.md`.
+  Coordinate with S3 on `RULES.md` if S3 amends rules too (S3 currently does
+  not).
 
 ---
 

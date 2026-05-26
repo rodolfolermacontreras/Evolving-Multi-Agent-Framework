@@ -2,6 +2,89 @@
 
 ---
 
+## Week of May 22-26, 2026
+
+Date: May 26, 2026 | Owner: Rodolfo Lerma | Branch: master at 7e433a8 (86 commits)
+
+### Progress since last week (May 21)
+
+**PI-3 Kickoff: Foundation + Navigation Layer + Lessons Curation (30 commits this week)**
+
+PI-3 (Portability Validation) kicked off with 5 sprints scoped. Two sprints completed (S3, S5), one blocked (S1), two prepped with CLARIFY docs (S2, S4). New governance artifacts (RULES, ONBOARDING, HIGH_LEVEL_DEV_TRACKER) established.
+
+**PI-3 Foundation Kickoff (May 25, commits 5cc36b2..cde5727)**
+- Created `docs/RULES.md` (v1.1.0, 13 binding rules) -- operational governance layer above constitution articles.
+- Created `docs/ONBOARDING_KICK_OFF.md` -- 5-pointer onboarding guide for new agents.
+- Created `docs/HIGH_LEVEL_DEV_TRACKER.md` -- bird's-eye sprint board with dependency graph.
+- Scoped 5 sprints: S1 Dashboard Freshness, S2 Day-to-Day Brownfield, S3 PI-2 Lessons Curation, S4 Live UI v2 Spec, S5 Navigation Layer Migration.
+- Hired Principal UI Designer (draft) via ADR-0010.
+
+**Sprint S5 -- Navigation Layer Migration (COMPLETE, May 25, 14/14 tasks)**
+- Created `docs/Management/` three-tier navigation structure (ADR-0011, Rule 13): PI-level INDEX.md files linking to sprint-level SPEC docs.
+- Backfilled PI-1 and PI-2 INDEX files with sprint summaries from commit history.
+- Migrated temporary sprint docs from `docs/Temp/` to `docs/Management/PI-3/Sprint-N-{title}/` structure.
+- Implemented `build-index` subcommand in `state_builder.py` (+161 lines) for auto-generating INDEX.md files from Management/ directory structure.
+- Updated INSTRUCTIONS.md, ONBOARDING, tracker with new navigation links. Deprecated `docs/Temp/`.
+- 73 tests passing (3 new tests for build-index).
+
+**Sprint S3 -- PI-2 Lessons Curation (COMPLETE, May 26, 7-way parallel dispatch)**
+- All 6 open PI-2 lessons curated in a single session:
+  - LESSON-004: CLOSED retrospectively (already shipped in PI-2 Sprint A).
+  - LESSON-006: SHIPPED -- `constitution-sync` skill v1.0->1.1 (stale-marker detection for closure ceremonies).
+  - LESSON-007: DEFERRED to S4 (UI Designer to author design-tokens skill).
+  - LESSON-008: SHIPPED -- `to-spec` skill v1.0->1.1 (canonical-declaration prompt for parallel specs on same file).
+  - LESSON-009: SHIPPED -- `testing-conventions` skill v1.0->1.1 (Windows SQLite + tempdir cleanup fixtures).
+  - LESSON-010: CLOSED retrospectively (fix already in azure-deployment-architecture skill).
+- Filed tech debt spec at `specs/2026-05-26-principal-agent-hygiene/spec.md` for PI-4 agent roster cleanup.
+- ADR-0010 (Principal UI Designer hire) approved, unblocking S4.
+- All PI-2 open lessons resolved: 0 remaining.
+
+**Sprint S2 Prep -- Day-to-Day Brownfield Bootstrap (CLARIFY doc created, May 26)**
+- Created `specs/2026-05-26-day-to-day-brownfield-bootstrap/clarification.md` -- human needs to pick which Day-to-Day feature to dogfood through the SDD lifecycle.
+
+**Sprint S4 Prep -- Live UI v2 Spec (CLARIFY doc created, May 26)**
+- Created `specs/2026-05-26-live-ui-v2/clarification.md` -- 6 design questions for human (visual style, info priority, nav depth, agent visibility, responsive targets, animation).
+- Two new dashboard ideas captured in backlog: navigation layer view + live agent visibility panel.
+
+### Blockers / Next Steps
+
+| Item | Status | Blocker |
+|------|--------|---------|
+| S1 Dashboard Freshness (SDD-009/010) | BLOCKED | Human needs to run 9 HITL Azure provisioning steps (~5 min) |
+| S2 Day-to-Day Brownfield Bootstrap | HITL-gated | Human picks dogfood feature in CLARIFY doc |
+| S4 Live UI v2 Spec | HITL-gated | Human answers 6 design questions in CLARIFY doc |
+| Push local commits to origin | 57+ commits ahead of origin | Awaiting human push |
+
+### Key Meetings This Week
+
+| Meeting | Date | Key Outcome |
+|---------|------|-------------|
+| _(No external meetings this week -- framework internal work)_ | -- | -- |
+
+### Scorecard
+
+| Metric | Last Week (May 21) | This Week (May 26) | Delta |
+|--------|-------------------|-------------------|-------|
+| Total commits | 55 | 86 | +31 |
+| Tests passing | 70 | 73 | +3 (build-index tests) |
+| PI status | PI-2 closed, PI-3 approved | PI-3 active (S3 DONE, S5 DONE, S1/S2/S4 gated) | Active |
+| CLI tools operational | 6 | 6 + build-index subcommand | +1 subcommand |
+| CLI code lines | ~3,038 | ~3,199 | +161 |
+| Agent definitions | 11 | 12 (added principal-ui-designer) | +1 |
+| Skills | 29 | 30 (added weekly-status-report) | +1 |
+| Slash commands | 17 | 17 | Unchanged |
+| ADRs | 9 | 11 (added 010, 011) | +2 |
+| Features DONE through SDD | 8 | 8 | Unchanged |
+| Fleet dispatch success rate | 100% | 100% | Unchanged |
+| Lessons captured | 10 | 10 | Unchanged |
+| Lessons open | 5 (PI-2) | 0 (all curated in S3) | -5 resolved |
+| Specs in flight | 5 | 8 (added brownfield, live-ui-v2, agent-hygiene) | +3 |
+| Specialists promoted | 1 | 1 | Unchanged |
+| Navigation structure | Not exists | Management/ 3-tier with auto-index CLI | New |
+| Governance docs | copilot-instructions only | RULES + ONBOARDING + TRACKER | New |
+
+---
+
 ## Week of May 15-21, 2026
 
 Date: May 21, 2026 | Owner: Rodolfo Lerma | Branch: master at 4a2084c (55 commits)

@@ -5,7 +5,7 @@ argument-hint: "What raw feature idea should I turn into a spec?"
 license: MIT
 metadata:
   author: rodolfolermacontreras
-  version: '1.0'
+  version: '1.1'
 ---
 
 # To Spec
@@ -155,6 +155,35 @@ No breaking changes. Additive only.
 - Historical event sync (>7 days past) - future only
 ```
 
+## Canonical File Declaration (LESSON-008)
+
+When creating a new spec, check whether any **open** spec already targets the same implementation file(s).
+
+### Detection
+
+Before filling the "Affected Modules" section, run:
+```
+grep -rl "<target-filename>" spec-driven-development/specs/*/spec.md
+```
+
+If matches are found in open (non-DONE) spec directories:
+
+### Resolution
+
+1. **Declare one spec as canonical** for the shared file's primary contract.
+2. **Declare the other spec as additive** -- it extends or modifies behavior but does not own the file's core contract.
+3. Document this in both specs' "Affected Modules" sections:
+   ```markdown
+   - MODIFY: cli/state_builder.py (+80 LoC)
+     - **Canonical spec:** specs/2026-05-16-state-dashboard/
+     - **This spec adds:** build-index subcommand (additive scope)
+   ```
+4. Cross-reference both specs' validation contracts from the implementation file's header docstring.
+
+### Why this matters
+
+Without a canonical declaration, two parallel specs may write conflicting acceptance criteria for the same file, leading to validation deadlocks at review time.
+
 ## Common Mistakes
 
 - Vague acceptance criteria - use FR-NNN format with MUST/SHOULD/MAY
@@ -163,3 +192,4 @@ No breaking changes. Additive only.
 - Ignoring data model changes - leads to migration issues
 - Skipping "Out of Scope" section - invites scope creep
 - Not reviewing against constitution - violates principles mid-implementation
+- Not checking for parallel open specs on the same file - leads to conflicting ACs (LESSON-008)

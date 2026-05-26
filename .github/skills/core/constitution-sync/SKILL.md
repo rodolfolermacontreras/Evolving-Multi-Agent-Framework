@@ -5,7 +5,7 @@ argument-hint: "Which constitution file is being amended?"
 license: MIT
 metadata:
   author: rodolfolermacontreras
-  version: '1.0'
+  version: '1.1'
 ---
 
 # Constitution Sync
@@ -91,3 +91,24 @@ Before returning results:
 - Confirm each finding includes file and line.
 - Confirm no skill, prompt, or template was modified.
 - Confirm the result can be pasted into a Sync Impact Report.
+
+## Stale Marker Detection (LESSON-006)
+
+When invoked during a PI or sprint **closure ceremony**, perform an additional scan for stale `(current)` markers:
+
+### Files to scan
+
+- `spec-driven-development/constitution/roadmap.md` -- look for `(current)` on PI headings
+- `spec-driven-development/exec/state.md` -- look for PI/sprint indicators
+- Any `CURRENT_PI.md` files in the repo
+
+### Detection logic
+
+1. Identify the PI and sprint being closed from the ceremony context.
+2. Search scanned files for `(current)` markers that reference the closing PI/sprint.
+3. If a `(current)` marker still references a PI or sprint that is closing, flag it as `NEEDS-UPDATE` with the reason: "Stale (current) marker -- this PI/sprint is closing."
+4. Include stale-marker findings in the Sync Impact Report table alongside constitution reference findings.
+
+### When NOT to use
+
+This check is only relevant during closure ceremonies (`/replan`, sprint DONE, PI close). Do not flag `(current)` markers during mid-sprint constitution amendments -- they are expected to be present.

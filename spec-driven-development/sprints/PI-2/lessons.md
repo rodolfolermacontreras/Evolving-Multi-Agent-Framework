@@ -72,7 +72,7 @@ Format: ID, source, statement, candidate framework change (SHIP / DEFER / DISCAR
 
 **Candidate change:** Add a "Windows test fixtures" section to the `testing-conventions` skill at `.github/skills/core/testing-conventions/SKILL.md`.
 
-**Status:** OPEN -- triage at PI-2 retro.
+**Status:** SHIPPED in PI-3/S3. See `.github/skills/core/testing-conventions/SKILL.md` v1.1, "Windows Test Fixtures" section.
 
 ---
 

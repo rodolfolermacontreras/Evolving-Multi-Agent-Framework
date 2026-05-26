@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from cli.state_builder import (
     StateBuilderError,
     build,
+    build_index,
     load_backlog,
     load_features,
     load_ledger,
@@ -506,3 +507,166 @@ class TestEdgeCases:
         assert "PI-2 Sprint A" in sprints
         assert "PI-2 Sprint B" in sprints
         assert "Unscheduled" in sprints
+
+
+# ---------------------------------------------------------------------------
+# build-index tests (T-011)
+# ---------------------------------------------------------------------------
+
+_INDEX_TEMPLATE = """\
+# PI-X -- Test PI
+
+Some intro prose.
+
+## Sprint List
+
+<!-- BEGIN auto-generated:sprints (refreshed by `cli/state_builder.py build-index`) -->
+<!-- END auto-generated:sprints -->
+
+## Footer
+
+Human prose that must survive regeneration.
+"""
+
+
+class TestBuildIndexEmpty:
+    """build_index on a PI with no sprint folders produces an empty table."""
+
+    def test_empty_pi_produces_empty_table(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "sdd"
+        pi_dir = sdd / "docs" / "Management" / "PI-X"
+        pi_dir.mkdir(parents=True)
+        (pi_dir / "INDEX.md").write_text(_INDEX_TEMPLATE, encoding="utf-8")
+
+        result = build_index(sdd_root=sdd, pi="PI-X", write=True)
+
+        assert result["pi"] == "PI-X"
+        assert result["sprints_found"] == 0
+        assert result["wrote"] is not None
+
+        updated = (pi_dir / "INDEX.md").read_text(encoding="utf-8")
+        # Table header should still be present (even with 0 data rows)
+        assert "| Sprint | Title |" in updated
+        # No data rows (only header + separator)
+        table_lines = [
+            ln for ln in result["table_content"].splitlines()
+            if ln.startswith("|") and not ln.startswith("| Sprint") and not ln.startswith("|--")
+        ]
+        assert len(table_lines) == 0
+
+
+class TestBuildIndexPopulated:
+    """build_index with sprint folders and ledger data produces correct rows."""
+
+    def test_populated_pi_with_ledger(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "sdd"
+        pi_dir = sdd / "docs" / "Management" / "PI-X"
+        pi_dir.mkdir(parents=True)
+        (pi_dir / "INDEX.md").write_text(_INDEX_TEMPLATE, encoding="utf-8")
+
+        # Create two sprint folders with SPEC.md
+        s1 = pi_dir / "Sprint-1-alpha"
+        s1.mkdir()
+        (s1 / "SPEC.md").write_text(
+            "---\nstatus: In-Flight\n---\n# Sprint 1\n", encoding="utf-8"
+        )
+
+        s2 = pi_dir / "Sprint-2-beta"
+        s2.mkdir()
+        (s2 / "SPEC.md").write_text(
+            "---\nstatus: DONE\n---\n# Sprint 2\n", encoding="utf-8"
+        )
+
+        # Create a temporary fleet.db with dispatch rows
+        ledger_dir = sdd / "ledger"
+        ledger_dir.mkdir(parents=True)
+        db_path = ledger_dir / "fleet.db"
+        conn = sqlite3.connect(db_path)
+        conn.execute(
+            "CREATE TABLE dispatches ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  dispatched_at TEXT NOT NULL,"
+            "  pi TEXT NOT NULL,"
+            "  sprint TEXT,"
+            "  feature_dir TEXT,"
+            "  task_id TEXT NOT NULL,"
+            "  task_title TEXT NOT NULL,"
+            "  agent_id TEXT NOT NULL,"
+            "  agent_role TEXT NOT NULL,"
+            "  outcome TEXT,"
+            "  outcome_at TEXT,"
+            "  notes TEXT"
+            ")"
+        )
+        now = datetime.now(timezone.utc).isoformat()
+        conn.execute(
+            "INSERT INTO dispatches (dispatched_at, pi, sprint, feature_dir, "
+            "task_id, task_title, agent_id, agent_role, outcome, outcome_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (now, "PI-X", "S1", "feat-1", "T-001", "Task A", "dev-1", "dev", "success", now),
+        )
+        conn.execute(
+            "INSERT INTO dispatches (dispatched_at, pi, sprint, feature_dir, "
+            "task_id, task_title, agent_id, agent_role, outcome, outcome_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (now, "PI-X", "S1", "feat-1", "T-002", "Task B", "dev-1", "dev", "failure", now),
+        )
+        conn.execute(
+            "INSERT INTO dispatches (dispatched_at, pi, sprint, feature_dir, "
+            "task_id, task_title, agent_id, agent_role, outcome, outcome_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (now, "PI-X", "S2", "feat-2", "T-003", "Task C", "dev-2", "dev", "success", now),
+        )
+        conn.commit()
+        conn.close()
+
+        import gc
+        gc.collect()
+
+        result = build_index(sdd_root=sdd, pi="PI-X", write=True)
+
+        assert result["sprints_found"] == 2
+        table = result["table_content"]
+        # Sprint 1: 2 dispatches, last outcome = failure
+        assert "| 1 | Alpha | In-Flight | 2 | failure |" in table
+        # Sprint 2: 1 dispatch, last outcome = success
+        assert "| 2 | Beta | DONE | 1 | success |" in table
+
+        # Verify the written file has the table
+        updated = (pi_dir / "INDEX.md").read_text(encoding="utf-8")
+        assert "| 1 | Alpha |" in updated
+        assert "| 2 | Beta |" in updated
+
+
+class TestBuildIndexMarkerPreservation:
+    """Running build_index twice preserves human prose outside marker blocks."""
+
+    def test_prose_survives_double_run(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "sdd"
+        pi_dir = sdd / "docs" / "Management" / "PI-X"
+        pi_dir.mkdir(parents=True)
+        (pi_dir / "INDEX.md").write_text(_INDEX_TEMPLATE, encoding="utf-8")
+
+        # Add one sprint folder
+        s1 = pi_dir / "Sprint-1-gamma"
+        s1.mkdir()
+        (s1 / "SPEC.md").write_text(
+            "---\nstatus: Proposed\n---\n# Sprint 1\n", encoding="utf-8"
+        )
+
+        # First run
+        result1 = build_index(sdd_root=sdd, pi="PI-X", write=True)
+        content_after_first = (pi_dir / "INDEX.md").read_text(encoding="utf-8")
+
+        # Second run
+        result2 = build_index(sdd_root=sdd, pi="PI-X", write=True)
+        content_after_second = (pi_dir / "INDEX.md").read_text(encoding="utf-8")
+
+        # Human prose before markers
+        assert "Some intro prose." in content_after_second
+        # Human prose after markers
+        assert "Human prose that must survive regeneration." in content_after_second
+        # The two runs produce identical content
+        assert content_after_first == content_after_second
+        # Table content is stable
+        assert result1["table_content"] == result2["table_content"]

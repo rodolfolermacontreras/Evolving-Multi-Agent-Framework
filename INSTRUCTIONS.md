@@ -11,8 +11,10 @@ This repo is the **Evolving Multi-Agent Framework** — a portable spec-driven d
 1. **This file** (`INSTRUCTIONS.md`) — entry point.
 2. **`.github/copilot-instructions.md`** — full session-start authority: project identity, history, conventions, current state, what is next.
 3. **`spec-driven-development/CONTEXT.md`** — shared vocabulary used across the framework.
-4. **`spec-driven-development/sessions/SESSION-MEMORY.md`** — checkpoint of the most recent working session. Always read the latest one for what shipped, what's open, and the recommended next moves.
-5. **`spec-driven-development/constitution/roadmap.md`** — current PI status and tech-debt backlog.
+4. **`spec-driven-development/docs/HIGH_LEVEL_DEV_TRACKER.md`** — bird's-eye operational view: which PI is active, which sprint is in flight, blockers.
+5. **`spec-driven-development/docs/Management/PI-N/INDEX.md`** (active PI) — PI-level navigation: sprint list, decisions, what-was-done.
+6. **`spec-driven-development/sessions/SESSION-MEMORY.md`** — checkpoint of the most recent working session. Always read the latest one for what shipped, what's open, and the recommended next moves.
+7. **`spec-driven-development/constitution/roadmap.md`** — current PI status and tech-debt backlog.
 
 If the user says "get up to speed" or "resume" or "continue", do exactly the above in order, then provide a 5-line status summary and the top 3 next moves drawn from the SESSION-MEMORY.md file.
 

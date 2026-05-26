@@ -16,10 +16,11 @@ you will be fully up to speed to start your first sprint.
 Read order:
 
 1. Sections 0-8 of this file (project framing, architecture, lifecycle, structure)
-2. [`RULES.md`](RULES.md) -- the 12 binding rules + HITL gates
+2. [`RULES.md`](RULES.md) -- the 13 binding rules + HITL gates
 3. [`HIGH_LEVEL_DEV_TRACKER.md`](HIGH_LEVEL_DEV_TRACKER.md) -- current PI/sprint state
-4. Your assigned [`Temp/SPRINT_#_DETAILED_*.md`](Temp/) -- the deep spec for your work
-5. Sections 13-16 of this file (codebase reading guide, getting started, what's next)
+4. Active PI's [`Management/PI-N/INDEX.md`](Management/) -- PI-level navigation
+5. Your sprint's [`Management/PI-N/Sprint-N-{title}/SPEC.md`](Management/) -- deep spec
+6. Sections 13-16 of this file (codebase reading guide, getting started, what's next)
 
 ---
 
@@ -45,17 +46,18 @@ Read order:
 
 ---
 
-## 0. Required Reading (4-pointer onboarding)
+## 0. Required Reading (5-pointer onboarding)
 
-Any agent picking up work in this project must read these four documents
+Any agent picking up work in this project must read these five documents
 before touching code. In order:
 
 | # | Path | Why |
 |---|------|-----|
 | 1 | [`ONBOARDING_KICK_OFF.md`](ONBOARDING_KICK_OFF.md) (this file) | Project framing, architecture, lifecycle |
-| 2 | [`RULES.md`](RULES.md) | 12 binding rules + 11 HITL gates |
+| 2 | [`RULES.md`](RULES.md) | 13 binding rules + 11 HITL gates |
 | 3 | [`HIGH_LEVEL_DEV_TRACKER.md`](HIGH_LEVEL_DEV_TRACKER.md) | Current PI/sprint state + dependency graph |
-| 4 | `Temp/SPRINT_#_DETAILED_<your-sprint>.md` | Your sprint's spec, tasks, validation |
+| 4 | Active PI's [`Management/PI-N/INDEX.md`](Management/) | PI-level decisions, sprint list, what-was-done |
+| 5 | Your sprint's [`Management/PI-N/Sprint-N-{title}/SPEC.md`](Management/) | Sprint spec, tasks, validation contract |
 
 If you are a Principal, also read:
 - `constitution/principles.md` -- the 10 binding articles

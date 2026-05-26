@@ -10,9 +10,10 @@ purpose: birds-eye operational view of all active sprints across the current PI
 # High-Level Dev Tracker
 
 The bird's-eye view of every sprint, every PI, every blocker. This file is
-**abstraction, not detail** -- each sprint entry links down to its
-[`Temp/SPRINT_#_DETAILED_*.md`](Temp/) deep spec. Never reproduce sprint
-detail here.
+**abstraction, not detail** -- each PI links to its
+[`Management/PI-N/INDEX.md`](Management/) and each sprint to its
+[`Management/PI-N/Sprint-N-{title}/SPEC.md`](Management/) deep spec. Never
+reproduce sprint detail here.
 
 Read [`ONBOARDING_KICK_OFF.md`](ONBOARDING_KICK_OFF.md) first if you are new.
 Read [`RULES.md`](RULES.md) for the binding rules.
@@ -25,28 +26,26 @@ Read [`RULES.md`](RULES.md) for the binding rules.
 |-------|-------|
 | **Current PI** | PI-3 (Portability Validation + Live UI v2 + Navigation Layer) |
 | **PI started** | 2026-05-25 (kickoff today; PI-2 closed 2026-05-16) |
-| **Current sprint** | Sprint 1 of 5 (Dashboard Freshness Unblock) |
+| **Current sprint** | Sprint 5 of 5 in-flight (Management Navigation Layer); S1 HITL-blocked |
 | **Cadence** | Symbolic; ~1 day per sprint, ~5 sprints per PI (ADR-0003) |
 | **Active worktrees** | 0 (S1 awaiting HITL provisioning) |
-| **Tests passing** | 70 across 5 CLI suites + ledger (last verified at HEAD `b2b5d59`) |
-| **Branch state** | `master` at `b2b5d59`, **37 commits ahead of origin** (HITL gate #10) |
+| **Tests passing** | 70 across 5 CLI suites + ledger (last verified at HEAD) |
+| **Branch state** | `master`, **47+ commits ahead of origin** (HITL gate #10) |
 | **Open lessons** | 5 (LESSON-006, 007, 008, 009, 010 -- see Sprint 3) |
 | **HITL pending** | 9 Azure provisioning steps for Sprint 1; ADR-0010 approval for S4 |
 | **External feedback in flight** | Parallel team reports visibility/transparency gap -- S5 plans the response |
-| **Navigation layer** | flat `docs/Temp/` (legacy); migrating to `docs/Management/PI-N/Sprint-N-{title}/` per S5 plan |
+| **Navigation layer** | `docs/Management/PI-N/Sprint-N-{title}/` (ADR-0011; S5 in-flight) |
 
 ---
 
 ## Top 3 Next Moves
 
-1. **Execute S5 (Navigation Layer Migration) -- IN FLIGHT.** ADR-0011 approved,
-   Rule 13 landed. T-001 and T-009 DONE. Next: dispatch T-002 (skeleton), then
-   parallel set T-003/T-004/T-005/T-010. SW Dev owns dispatch from here.
-   Plan: [Temp/SPRINT_5_DETAILED_MANAGEMENT_NAVIGATION_LAYER.md](Temp/SPRINT_5_DETAILED_MANAGEMENT_NAVIGATION_LAYER.md).
+1. **Complete S5 (Navigation Layer Migration).** T-001 through T-006 DONE.
+   Remaining: T-007 (this update), T-008, T-010-T-014. Phase 1 near-complete.
+   Plan: [Management/PI-3/Sprint-5-management-navigation-layer/SPEC.md](Management/PI-3/Sprint-5-management-navigation-layer/SPEC.md).
 2. **Human runs the 9 HITL Azure provisioning steps for Sprint 1.** Listed in
-   [`Temp/SPRINT_1_DETAILED_DASHBOARD_FRESHNESS_UNBLOCK.md`](Temp/SPRINT_1_DETAILED_DASHBOARD_FRESHNESS_UNBLOCK.md)
-   Section 8. ~5 min once `az login` is done. Unblocks the entire SDD-009/010
-   feature dispatch.
+   [Sprint-1 SPEC](Management/PI-3/Sprint-1-dashboard-freshness-unblock/SPEC.md)
+   Section 8. ~5 min once `az login` is done. Unblocks SDD-009/010 dispatch.
 3. **Approve ADR-0010 (UI Designer hire)** -- one-word approval flips the agent
    from draft to active and enables S4 to begin CLARIFY. Independent of #1 and
    #2; can resolve in any order.
@@ -57,11 +56,11 @@ Read [`RULES.md`](RULES.md) for the binding rules.
 
 | # | Title | Status | Owner | Worktree | Deps | Detail Doc |
 |---|-------|--------|-------|----------|------|------------|
-| **S1** | Dashboard About + Freshness Unblock | **BLOCKED on HITL** | SW Dev | `wt-pi3-s1-freshness-*` | None (Sprint 0 already shipped spec/plan/tasks/validation) | [SPRINT_1_DETAILED](Temp/SPRINT_1_DETAILED_DASHBOARD_FRESHNESS_UNBLOCK.md) |
-| **S2** | Day-to-Day Brownfield Bootstrap | **Proposed** | PM + Architect (spec), SW Dev (dispatch) | `wt-pi3-s2-brownfield` | Parallel-safe with S1, S3, S4, S5; will create artifacts in a SEPARATE repo, no master collision | [SPRINT_2_DETAILED](Temp/SPRINT_2_DETAILED_DAY_TO_DAY_BROWNFIELD_BOOTSTRAP.md) |
-| **S3** | PI-2 Lessons Curation via /evolve | **Proposed** | PM (lead), Architect (constitution impact) | `wt-pi3-s3-lessons` | Parallel-safe; touches only `sprints/PI-2/lessons.md` + possibly `.github/skills/` | [SPRINT_3_DETAILED](Temp/SPRINT_3_DETAILED_PI2_LESSONS_CURATION.md) |
-| **S4** | Live UI v2 Spec (Principal UI Designer kickoff) | **Proposed** (blocked on ADR-0010 approval) | UI Designer (lead, ADR-0010), Architect (review) | `wt-pi3-s4-ui-v2` | Parallel-safe for the SPEC phase; implementation deferred to PI-4 | [SPRINT_4_DETAILED](Temp/SPRINT_4_DETAILED_LIVE_UI_V2_SPEC.md) |
-| **S5** | Navigation Layer Migration -- Management/ Structure | **In-Flight** (ADR-0011 approved, T-002 ready for dispatch) | EM (lead), SW Dev (build-index), PM (Rule 13) | `wt-pi3-s5-management-layer` | Parallel-safe with S1; **strongly preferred to land BEFORE S2/S3/S4 dispatch** so those sprints adopt the new structure from day one | [SPRINT_5_DETAILED](Temp/SPRINT_5_DETAILED_MANAGEMENT_NAVIGATION_LAYER.md) |
+| **S1** | Dashboard About + Freshness Unblock | **BLOCKED on HITL** | SW Dev | `wt-pi3-s1-freshness-*` | None (Sprint 0 already shipped spec/plan/tasks/validation) | [SPEC](Management/PI-3/Sprint-1-dashboard-freshness-unblock/SPEC.md) |
+| **S2** | Day-to-Day Brownfield Bootstrap | **Proposed** | PM + Architect (spec), SW Dev (dispatch) | `wt-pi3-s2-brownfield` | Parallel-safe with S1, S3, S4, S5; artifacts in SEPARATE repo | [SPEC](Management/PI-3/Sprint-2-day-to-day-brownfield-bootstrap/SPEC.md) |
+| **S3** | PI-2 Lessons Curation via /evolve | **Proposed** | PM (lead), Architect (constitution impact) | `wt-pi3-s3-lessons` | Parallel-safe; touches only `sprints/PI-2/lessons.md` + possibly `.github/skills/` | [SPEC](Management/PI-3/Sprint-3-pi2-lessons-curation/SPEC.md) |
+| **S4** | Live UI v2 Spec (Principal UI Designer kickoff) | **Proposed** (blocked on ADR-0010 approval) | UI Designer (lead, ADR-0010), Architect (review) | `wt-pi3-s4-ui-v2` | Parallel-safe for the SPEC phase; implementation deferred to PI-4 | [SPEC](Management/PI-3/Sprint-4-live-ui-v2-spec/SPEC.md) |
+| **S5** | Navigation Layer Migration -- Management/ Structure | **In-Flight** (T-001-T-006 DONE, T-007+ in progress) | EM (lead), SW Dev (build-index), PM (Rule 13) | `wt-pi3-s5-management-layer` | Landed first; S2/S3/S4 adopt new structure from day one | [SPEC](Management/PI-3/Sprint-5-management-navigation-layer/SPEC.md) |
 
 ### Status legend
 - **Proposed** -- sprint scope drafted, awaiting Principal sign-off + dispatch
@@ -171,6 +170,6 @@ The roadmap is strategic, the backlog is prioritized; the tracker is operational
 
 | PI | Window | Outcome | Lessons | Retro doc |
 |----|--------|---------|---------|-----------|
-| **PI-1** | 2026-05-12 -> 2026-05-13 | Generalization + first pilot (fleet ledger) | 4 captured, 4 curated | `sprints/PI-1/lessons.md` |
-| **PI-2** | 2026-05-16 (3 sprints same day) | 5 CLIs shipped, live Azure deploy, first specialist promoted | 6 captured, 1 shipped in-PI (LESSON-005), 5 open | `sprints/PI-2/lessons.md` + `sprints/PI-2-retro.md` |
-| **PI-3** | 2026-05-25 -> active | _in flight_ | _open_ | _TBD_ |
+| **PI-1** | 2026-05-12 -> 2026-05-13 | Generalization + first pilot (fleet ledger) | 4 captured, 4 curated | [INDEX](Management/PI-1/INDEX.md) / `sprints/PI-1/lessons.md` |
+| **PI-2** | 2026-05-16 (3 sprints same day) | 5 CLIs shipped, live Azure deploy, first specialist promoted | 6 captured, 1 shipped in-PI (LESSON-005), 5 open | [INDEX](Management/PI-2/INDEX.md) / `sprints/PI-2/lessons.md` |
+| **PI-3** | 2026-05-25 -> active | _in flight_ | _open_ | [INDEX](Management/PI-3/INDEX.md) |

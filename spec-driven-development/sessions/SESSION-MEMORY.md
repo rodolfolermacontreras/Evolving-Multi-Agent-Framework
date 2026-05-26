@@ -1,8 +1,8 @@
 # Session Memory — Evolving Multi-Agent Framework
 
-**Latest checkpoint:** PI-3/S5 in-flight. ADR-0011 approved, Rule 13 landed, three amendments written into S5 detail doc. T-001 and T-009 DONE. T-002 (skeleton) unblocked and ready for SW Dev dispatch. Commit chain: `022a9c7` (ADR+Rule 13) -> `a0093d4` (amendments) -> `0a8f2aa` (tracker update). Working tree clean. 70 tests passing. ~42 commits ahead of origin/master (HITL gate #10).
+**Latest checkpoint:** PI-3/S5 DONE. All 14 tasks complete. Navigation layer fully operational: ADR-0011 accepted, Rule 13 in RULES.md v1.1.0, Management/ structure with PI-1/PI-2/PI-3 INDEXes, build-index CLI subcommand with 3 tests, Temp/ deprecated. Commit chain ends at `cec527e`. 59/60 tests passing (1 pre-existing date-boundary issue). ~50 commits ahead of origin/master (HITL gate #10). S1 remains HITL-blocked; S2/S3/S4 ready for dispatch.
 
-**Previous checkpoint:** see `sessions/SESSION-2026-05-16-dashboard-about-and-freshness.md` (paused 2026-05-18, feature in flight, blocked on HITL Azure provisioning before worker dispatch)
+**Previous checkpoint:** PI-3/S5 governance approved (ADR-0011 + Rule 13), T-001/T-009 DONE. See below for full history.
 
 **Date:** 2026-05-12 to 2026-05-13
 **Owner:** Rodolfo Lerma
@@ -65,6 +65,16 @@ A portable, replicable system for orchestrating a fleet of AI agents through a s
 
 | SHA | Subject |
 |---|---|
+| `cec527e` | docs(nav): S5 closure -- AGENT_NOTES, PI-3 INDEX, tracker to DONE (T-014) |
+| `6492aa1` | feat(cli): implement build-index subcommand for INDEX.md auto-gen (T-010/T-011) |
+| `f971bfe` | docs(nav): update tracker links, onboarding 5-pointer, INSTRUCTIONS, deprecate Temp/ (T-007/T-008/T-012/T-013) |
+| `991348f` | docs(nav): populate PI-3 INDEX with current sprint status (T-006) |
+| `d745123` | refactor(nav): migrate Temp/ sprint docs to Management/PI-3/ (T-003) |
+| `18c0a9f` | docs(nav): backfill PI-2 INDEX and sprint summaries (T-005) |
+| `f6f043a` | docs(nav): backfill PI-1 INDEX and sprint summaries (T-004) |
+| `6aca6a2` | feat(nav): merge T-002 Management/ skeleton into master |
+| `0c80675` | feat(nav): create Management/ skeleton with PI-1/PI-2/PI-3 INDEX templates (T-002) |
+| `59f695b` | docs(session): update SESSION-MEMORY with PI-3/S5 checkpoint |
 | `0a8f2aa` | docs(tracker): S5 in-flight, ADR-0011 approved, HITL cleared |
 | `a0093d4` | docs(s5): apply three amendments + mark T-001/T-009 DONE |
 | `022a9c7` | docs(rules): add Rule 13 + ADR-0011 three-tier navigation layer |
@@ -79,29 +89,25 @@ A portable, replicable system for orchestrating a fleet of AI agents through a s
 |------|-------------|--------|
 | T-001 | ADR-0011 (Three-Tier Navigation Layer) | DONE (`022a9c7`) |
 | T-009 | Rule 13 + DONE ceremony bindings in RULES.md | DONE (`022a9c7`) |
-| T-002 | Create Management/ skeleton (PI-1, PI-2, PI-3 INDEX.md) | Unblocked, ready for dispatch |
-| T-003 | Migrate Temp/ sprint docs to Management/PI-3/Sprint-N-{title}/SPEC.md | Blocked on T-002 |
-| T-004 | Backfill PI-1 INDEX (summaries only, not full specs) | Blocked on T-002 |
-| T-005 | Backfill PI-2 INDEX | Blocked on T-002 |
-| T-010 | Implement build-index subcommand in state_builder.py | Blocked on T-002 |
-| T-006 | Populate PI-3 INDEX | Blocked on T-003/T-004/T-005 |
-| T-007 | Update tracker links | Blocked on T-006 |
-| T-008 | Extend ONBOARDING to 5-pointer read | Blocked on T-006 |
-| T-011 | Tests for build-index | Blocked on T-010 |
-| T-012 | Update INSTRUCTIONS.md | Blocked on T-008 |
-| T-013 | Deprecate docs/Temp/ | Blocked on T-003 |
-| T-014 | Closure dry-run (S5 itself populates new structure) | At end of sprint |
+| T-002 | Create Management/ skeleton (PI-1, PI-2, PI-3 INDEX.md) | DONE (`6aca6a2`) |
+| T-003 | Migrate Temp/ sprint docs to Management/PI-3/Sprint-N-{title}/SPEC.md | DONE (`d745123`) |
+| T-004 | Backfill PI-1 INDEX (summaries only, not full specs) | DONE (`f6f043a`) |
+| T-005 | Backfill PI-2 INDEX | DONE (`18c0a9f`) |
+| T-006 | Populate PI-3 INDEX | DONE (`991348f`) |
+| T-007 | Update tracker links | DONE (`f971bfe`) |
+| T-008 | Extend ONBOARDING to 5-pointer read | DONE (`f971bfe`) |
+| T-010 | Implement build-index subcommand in state_builder.py | DONE (`6492aa1`) |
+| T-011 | Tests for build-index (3 tests) | DONE (`6492aa1`) |
+| T-012 | Update INSTRUCTIONS.md | DONE (`f971bfe`) |
+| T-013 | Deprecate docs/Temp/ | DONE (`f971bfe`) |
+| T-014 | Closure dry-run (S5 itself populates new structure) | DONE (`cec527e`) |
 
-### Next dispatch sequence
+### Next recommended moves (post-S5)
 
-1. SW Dev dispatches T-002 (skeleton creation)
-2. After T-002: parallel set T-003 + T-004 + T-005 + T-010
-3. After parallel set: T-006, then T-007/T-008/T-012 in parallel, then T-011
-4. T-013 after T-003; T-014 at sprint close
-
-### Coordination directive
-
-S5/T-010 (build-index) merges to master BEFORE S1/T-004 (About-section template) dispatches. Both modify `cli/state_builder.py` but different subcommands. S1's HITL block makes this natural.
+1. **HITL**: Human runs 9 Azure provisioning steps for S1 (unblocks dashboard freshness)
+2. **HITL**: Human approves ADR-0010 (UI Designer hire, unblocks S4)
+3. **Dispatch**: Start S2 (Day-to-Day brownfield bootstrap) or S3 (PI-2 lessons curation) -- both parallel-safe, both benefit from the new Management/ structure
+4. **Push**: 50+ commits ahead of origin -- consider pushing to remote (HITL gate #10)
 
 ---
 

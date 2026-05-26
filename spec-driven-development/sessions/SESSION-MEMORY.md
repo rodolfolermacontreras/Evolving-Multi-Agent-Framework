@@ -1,8 +1,16 @@
 # Session Memory — Evolving Multi-Agent Framework
 
-**Latest checkpoint:** PI-3/S5 DONE. All 14 tasks complete. Navigation layer fully operational: ADR-0011 accepted, Rule 13 in RULES.md v1.1.0, Management/ structure with PI-1/PI-2/PI-3 INDEXes, build-index CLI subcommand with 3 tests, Temp/ deprecated. Commit chain ends at `cec527e`. 59/60 tests passing (1 pre-existing date-boundary issue). ~50 commits ahead of origin/master (HITL gate #10). S1 remains HITL-blocked; S2/S3/S4 ready for dispatch.
+**Latest checkpoint:** PI-3: S5 DONE, S3 DONE. S2/S4 prepped with CLARIFY docs (both HITL-gated). ADR-0010 approved, UI Designer active. 60/60 tests passing. Commit `df96c82` on master. ~55 commits ahead of origin/master (HITL gate #10).
 
-**Previous checkpoint:** PI-3/S5 governance approved (ADR-0011 + Rule 13), T-001/T-009 DONE. See below for full history.
+**S3 results:** All 6 PI-2 lessons curated in a single 7-way parallel dispatch. 4 skills amended to v1.1 (constitution-sync, to-spec, testing-conventions, azure-deployment-architecture -- LESSON-006/008/009/010 SHIPPED). LESSON-007 DEFERRED to S4. LESSON-004 CLOSED retrospectively. Tech debt spec filed for PI-4 (agent hygiene cleanup). Schema lint clean.
+
+**S4 next step:** Human answers 6 design questions at `specs/2026-05-26-live-ui-v2/clarification.md` (visual style, info priority, nav depth, agent visibility, responsive targets, animation). Then UI Designer authors spec.
+
+**S2 next step:** Human picks dogfood feature at `specs/2026-05-26-day-to-day-brownfield-bootstrap/clarification.md`. Then `bootstrap.py brownfield --draft-only` runs against Day-to-Day repo.
+
+**S1 status:** Still HITL-blocked on 9 Azure provisioning steps. No change.
+
+**Previous checkpoint:** PI-3/S5 DONE (14/14 tasks). See below for full history.
 
 **Date:** 2026-05-12 to 2026-05-13
 **Owner:** Rodolfo Lerma

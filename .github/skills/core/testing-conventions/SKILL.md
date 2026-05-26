@@ -4,7 +4,7 @@ description: "Use when writing tests, debugging test failures, or setting up tes
 license: MIT
 metadata:
   author: rodolfolermacontreras
-  version: '1.0'
+  version: '1.1'
 ---
 
 # Testing Conventions
@@ -151,6 +151,44 @@ def test_prioritization(tmp_path, patched_settings):
     assert sorted_ideas[1]["title"] == "Low"
 ```
 
+## Windows Test Fixtures (LESSON-009)
+
+When tests open SQLite databases inside `tempfile.TemporaryDirectory()`, Windows
+will refuse to clean up the temp directory because `sqlite3.Connection` holds the
+file handle until garbage collection runs.
+
+### Required pattern for SQLite tests
+
+```python
+import gc
+import tempfile
+import unittest
+
+class TestWithSQLite(unittest.TestCase):
+    def setUp(self):
+        # ignore_cleanup_errors=True prevents WindowsError on teardown
+        self._tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
+        self.tmp_path = pathlib.Path(self._tmp.name)
+        self.db_path = self.tmp_path / "test.db"
+
+    def tearDown(self):
+        # Close any open connections first
+        if hasattr(self, 'conn'):
+            self.conn.close()
+        # Force GC to release SQLite file handles before cleanup
+        gc.collect()
+        self._tmp.cleanup()
+```
+
+### Key points
+
+- Always pass `ignore_cleanup_errors=True` to `TemporaryDirectory()`.
+- Always call `gc.collect()` in `tearDown` **before** `cleanup()`.
+- Close SQLite connections explicitly in `tearDown` -- do not rely on `__del__`.
+- This is a Python stdlib behavior on Windows, not a project bug.
+- pytest's `tmp_path` fixture handles this automatically; this pattern is for
+  `unittest.TestCase` with manual temp dirs.
+
 ## Common Mistakes
 
 - Not using `tmp_path` - tests pollute real filesystem
@@ -160,3 +198,4 @@ def test_prioritization(tmp_path, patched_settings):
 - Not checking MockLLMClient.call_log - misses verification of what was sent to LLM
 - Decreasing test count - adds to technical debt, violates baseline rule
 - Not running full suite before commit - breaks integration/improvements build
+- Not using `ignore_cleanup_errors=True` on Windows -- tearDown fails with PermissionError (LESSON-009)

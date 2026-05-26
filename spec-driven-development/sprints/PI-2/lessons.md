@@ -60,7 +60,7 @@ Format: ID, source, statement, candidate framework change (SHIP / DEFER / DISCAR
 
 **Statement:** When two parallel specs target the same implementation file, declare one as canonical for the file's primary contract and treat the other as additive scope. Cross-reference both validation contracts from the implementation file's header docstring.
 
-**Status:** OPEN -- triage at PI-2 retro.
+**Status:** SHIPPED in PI-3/S3. See `.github/skills/workflow/to-spec/SKILL.md` v1.1, "Canonical File Declaration" section.
 
 ---
 

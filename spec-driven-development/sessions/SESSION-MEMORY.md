@@ -1,33 +1,93 @@
 # Session Memory — Evolving Multi-Agent Framework
 
-**Latest checkpoint:** PI-3: S5 DONE, S3 DONE. S2/S4 prepped with CLARIFY docs (both HITL-gated). ADR-0010 approved, UI Designer active. 60/60 tests passing. Commit `df96c82` on master. ~55 commits ahead of origin/master (HITL gate #10).
+**Latest checkpoint:** PI-3: S5 DONE, S3 DONE. S2/S4 prepped with CLARIFY docs (both HITL-gated). ADR-0010 approved, UI Designer active. 60/60 tests passing. Commit `9c27f44` on master. ~57 commits ahead of origin/master (HITL gate #10 -- push still pending).
 
-**S3 results:** All 6 PI-2 lessons curated in a single 7-way parallel dispatch. 4 skills amended to v1.1 (constitution-sync, to-spec, testing-conventions, azure-deployment-architecture -- LESSON-006/008/009/010 SHIPPED). LESSON-007 DEFERRED to S4. LESSON-004 CLOSED retrospectively. Tech debt spec filed for PI-4 (agent hygiene cleanup). Schema lint clean.
-
-**S4 next step:** Human answers 6 design questions at `specs/2026-05-26-live-ui-v2/clarification.md` (visual style, info priority, nav depth, agent visibility, responsive targets, animation). Then UI Designer authors spec.
-
-**S2 next step:** Human picks dogfood feature at `specs/2026-05-26-day-to-day-brownfield-bootstrap/clarification.md`. Then `bootstrap.py brownfield --draft-only` runs against Day-to-Day repo.
-
-**S1 status:** Still HITL-blocked on 9 Azure provisioning steps. No change.
-
-**Previous checkpoint:** PI-3/S5 DONE (14/14 tasks). See below for full history.
-
-**Date:** 2026-05-12 to 2026-05-13
+**Date:** 2026-05-26
 **Owner:** Rodolfo Lerma
 **Repo:** https://github.com/rodolfolermacontreras/Evolving-Multi-Agent-Framework
 **Local path:** `C:\Training\Projects\Evolving-Multi-Agent-Framework`
-**Final state:** 29 commits on origin/master, 28/28 todos done, working tree clean
 
 ---
 
-## How to resume in a new session
+## PI-3 Sprint Status (as of 2026-05-26)
 
-1. Open `C:\Training\Projects\Evolving-Multi-Agent-Framework` in VS Code or your terminal.
-2. Read **`INSTRUCTIONS.md` at the repo root** first (entry point for any agent).
-3. It will direct you to read in this order:
-   - `.github/copilot-instructions.md` (session-start authority)
-   - `spec-driven-development/CONTEXT.md` (shared vocabulary)
-   - `spec-driven-development/sessions/SESSION-MEMORY.md` (this file — most recent checkpoint)
+| Sprint | Title | Status | Notes |
+|--------|-------|--------|-------|
+| S1 | Dashboard Freshness Unblock | **BLOCKED** | 9 HITL Azure provisioning steps. No change since PI-3 kickoff. |
+| S2 | Day-to-Day Brownfield Bootstrap | **HITL-gated** | CLARIFY doc at `specs/2026-05-26-day-to-day-brownfield-bootstrap/clarification.md`. Human picks dogfood feature. |
+| S3 | PI-2 Lessons Curation | **DONE** | 7-way parallel dispatch. 4 skills v1.0->1.1. Tech debt spec filed for PI-4. |
+| S4 | Live UI v2 Spec | **HITL-gated** | CLARIFY doc at `specs/2026-05-26-live-ui-v2/clarification.md`. 6 design questions for human. |
+| S5 | Management Navigation Layer | **DONE** | 14/14 tasks. ADR-0011, Rule 13, Management/ structure, build-index CLI. |
+
+## S3 Results (completed this session)
+
+All 6 PI-2 lessons curated in a single 7-way parallel dispatch:
+- **LESSON-004**: CLOSED retrospectively (already shipped PI-2 Sprint A)
+- **LESSON-006**: SHIPPED -- `constitution-sync` skill v1.0->1.1 (stale-marker detection)
+- **LESSON-007**: DEFERRED to S4 (UI Designer authors design-tokens skill)
+- **LESSON-008**: SHIPPED -- `to-spec` skill v1.0->1.1 (canonical-declaration prompt)
+- **LESSON-009**: SHIPPED -- `testing-conventions` skill v1.0->1.1 (Windows fixtures)
+- **LESSON-010**: SHIPPED retrospectively (fix already in azure-deployment-architecture skill)
+- **T-007**: Tech debt spec filed at `specs/2026-05-26-principal-agent-hygiene/spec.md` for PI-4
+- Schema lint clean. 60/60 tests passing.
+
+## What to do when resuming
+
+### Immediate next steps (pick any, all are independent):
+
+1. **Answer S4 CLARIFY questions** -- open `specs/2026-05-26-live-ui-v2/clarification.md`, answer Q1-Q6 (visual style, info priority, nav depth, agent visibility, responsive targets, animation). This unblocks the UI Designer to author the v2 spec.
+
+2. **Answer S2 CLARIFY question** -- open `specs/2026-05-26-day-to-day-brownfield-bootstrap/clarification.md`, pick which Day-to-Day feature to dogfood. Confirm Day-to-Day repo is at `../day-to-day-microsoft`. This unblocks `bootstrap.py brownfield --draft-only`.
+
+3. **Run S1 Azure provisioning** -- 9 `az` commands listed in `docs/Management/PI-3/Sprint-1-dashboard-freshness-unblock/SPEC.md` Section 8. Requires `az login`. ~5 min.
+
+4. **Push to origin** -- 57+ commits ahead (HITL gate #10). `git push origin master` when ready.
+
+### Session read order for a fresh agent:
+1. `INSTRUCTIONS.md` (repo root)
+2. `.github/copilot-instructions.md`
+3. `spec-driven-development/CONTEXT.md`
+4. This file (`sessions/SESSION-MEMORY.md`)
+5. `docs/HIGH_LEVEL_DEV_TRACKER.md` (Tier 1 navigation)
+6. `docs/Management/PI-3/INDEX.md` (active PI)
+7. `docs/RULES.md` (v1.1.0, 13 rules)
+8. The relevant sprint SPEC for whichever sprint you are working on
+
+## Commit chain (this session, S3 dispatch + closure)
+
+```
+ddfb99a  docs: approve ADR-0010 (principal-ui-designer hire), unblock S4
+54602f5  docs(lessons): close LESSON-010 retrospectively (T-006)
+3d19114  docs(lessons): close LESSON-004 retrospectively (T-001)
+f8f446e  docs(lessons): defer LESSON-007 to PI-3/S4 (T-003) + LESSON-006 constitution-sync (T-002)
+b33347b  feat(skills): add canonical-declaration prompt to to-spec (T-004, LESSON-008)
+0e1f7a5  docs(spec): file agent-hygiene tech debt spec for PI-4 (T-007)
+0c65468  feat(skills): add Windows test fixtures to testing-conventions (T-005, LESSON-009)
+3c03072  docs: S3 closure -- tracker/INDEX updated, S4 CLARIFY created (T-008)
+df96c82  docs: create S2 clarification doc (S2 prep)
+9c27f44  docs(session): update SESSION-MEMORY with S3 completion
+```
+
+## Key files changed this session
+
+| File | Change |
+|------|--------|
+| `.github/skills/core/constitution-sync/SKILL.md` | v1.0->1.1, stale-marker detection section |
+| `.github/skills/workflow/to-spec/SKILL.md` | v1.0->1.1, canonical-declaration prompt |
+| `.github/skills/core/testing-conventions/SKILL.md` | v1.0->1.1, Windows fixtures section |
+| `sprints/PI-2/lessons.md` | All 6 lesson statuses updated |
+| `docs/HIGH_LEVEL_DEV_TRACKER.md` | S3 DONE, Top 3 refreshed, open lessons = 0 |
+| `docs/Management/PI-3/INDEX.md` | S3 DONE, S4 Ready, S5 DONE, What Was Done updated |
+| `docs/Management/PI-3/Sprint-3-pi2-lessons-curation/AGENT_NOTES.md` | Full session log |
+| `specs/2026-05-26-live-ui-v2/clarification.md` | NEW: S4 CLARIFY doc (6 questions) |
+| `specs/2026-05-26-day-to-day-brownfield-bootstrap/clarification.md` | NEW: S2 CLARIFY doc |
+| `specs/2026-05-26-principal-agent-hygiene/spec.md` | NEW: PI-4 tech debt spec |
+| `ADR/010-hire-principal-ui-designer.md` | draft->accepted |
+| `roster/agents.json` | principal-ui-designer: draft->active |
+
+## Previous session history
+
+Previous work (PI-3/S5 Navigation Layer, PI-3 kickoff, PI-2 retro, PI-1 pilot) is documented in the commit history and in `docs/Management/PI-1/INDEX.md`, `docs/Management/PI-2/INDEX.md`.
    - `spec-driven-development/constitution/roadmap.md` (current PI status)
 4. Optional: open `spec-driven-development/docs/CHEAT-SHEET.html` in a browser for the visual workflow.
 

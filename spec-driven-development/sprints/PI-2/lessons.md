@@ -32,7 +32,7 @@ Format: ID, source, statement, candidate framework change (SHIP / DEFER / DISCAR
 
 **Candidate change:** Add a "closure checklist" to the `pi-planning` skill OR extend the `constitution-sync` propagation scan to flag stale `(current)` markers.
 
-**Status:** OPEN -- triage at PI-2 retro.
+**Status:** SHIPPED in PI-3/S3. See `.github/skills/core/constitution-sync/SKILL.md` v1.1.
 
 ---
 
@@ -44,13 +44,13 @@ Format: ID, source, statement, candidate framework change (SHIP / DEFER / DISCAR
 
 **Candidate change:** Document this pattern in the `gem-designer` skill / agent prompt -- "your DESIGN.md should produce reusable tokens, not just a finished implementation. Tokens survive scope cuts."
 
-**Status:** OPEN -- triage at PI-2 retro.
+**Status:** DEFERRED to PI-3/S4 (Live UI v2 Spec). UI Designer authors `design-tokens` skill in spec phase. Curated in PI-3/S3.
 
 ---
 
 ## Carry-over from PI-1
 
-- **LESSON-004 (ledger migration policy)** -- deferred at PI-1 close. Still open. Will need decision when ledger schema changes.
+- **LESSON-004 (ledger migration policy)** -- CLOSED. Shipped in PI-2 Sprint A via `ledger/MIGRATION-POLICY.md`. Retrospectively closed in PI-3/S3.
 
 ---
 
@@ -88,4 +88,4 @@ Format: ID, source, statement, candidate framework change (SHIP / DEFER / DISCAR
 
 **Candidate change:** Update `.github/skills/operational/azure-deployment-architecture/SKILL.md` runbook section to include the id_token issuance step explicitly. Update PROVISIONED.md template.
 
-**Status:** OPEN -- triage at PI-2 retro.
+**Status:** SHIPPED (already present in skill). See `.github/skills/operational/azure-deployment-architecture/SKILL.md` runbook step 4. Retrospectively closed in PI-3/S3.

@@ -1,6 +1,6 @@
-# ADR-0010: Hire principal-ui-designer (draft)
+# ADR-0010: Hire principal-ui-designer
 
-- Status: **draft** -- pending human Level-2 approval per ADR-0007
+- Status: **accepted** -- approved by human 2026-05-26
 - Date: 2026-05-25
 - Decider: Executive Manager (drafting) -> Human (approval)
 - Supersedes: none
@@ -130,4 +130,4 @@ Per ADR-0007 generic-mode hire:
 | Date | Event |
 |------|-------|
 | 2026-05-25 | Drafted at PI-3 kickoff |
-| _next_ | Human approval (or veto) |
+| 2026-05-26 | Human approved ("approve") -- status flipped to accepted, roster updated to active |

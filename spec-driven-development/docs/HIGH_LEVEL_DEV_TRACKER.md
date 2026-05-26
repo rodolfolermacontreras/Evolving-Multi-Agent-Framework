@@ -32,7 +32,7 @@ Read [`RULES.md`](RULES.md) for the binding rules.
 | **Tests passing** | 73+ across 5 CLI suites + ledger (3 new build-index tests from S5) |
 | **Branch state** | `master`, **50+ commits ahead of origin** (HITL gate #10) |
 | **Open lessons** | 5 (LESSON-006, 007, 008, 009, 010 -- see Sprint 3) |
-| **HITL pending** | 9 Azure provisioning steps for Sprint 1; ADR-0010 approval for S4 |
+| **HITL pending** | 9 Azure provisioning steps for Sprint 1 |
 | **External feedback in flight** | Addressed -- S5 delivered the navigation layer response |
 | **Navigation layer** | `docs/Management/PI-N/Sprint-N-{title}/` (ADR-0011; **S5 DONE**) |
 
@@ -43,8 +43,9 @@ Read [`RULES.md`](RULES.md) for the binding rules.
 1. **Human runs the 9 HITL Azure provisioning steps for Sprint 1.** Listed in
    [Sprint-1 SPEC](Management/PI-3/Sprint-1-dashboard-freshness-unblock/SPEC.md)
    Section 8. ~5 min once `az login` is done. Unblocks SDD-009/010 dispatch.
-2. **Approve ADR-0010 (UI Designer hire)** -- one-word approval flips the agent
-   from draft to active and enables S4 to begin CLARIFY. Independent of #1.
+2. **Start S4 (Live UI v2 Spec)** -- ADR-0010 approved 2026-05-26; Principal UI
+   Designer is now active. S4 can begin CLARIFY. Include the two new dashboard
+   ideas (navigation layer view + live agent visibility) as S4 requirements.
 3. **Start S2 (Day-to-Day Brownfield Bootstrap)** or **S3 (PI-2 Lessons Curation)**.
    Both are parallel-safe now that S5 has landed the Management/ structure.
    S2 targets a separate repo; S3 touches only skills + lessons files.
@@ -58,7 +59,7 @@ Read [`RULES.md`](RULES.md) for the binding rules.
 | **S1** | Dashboard About + Freshness Unblock | **BLOCKED on HITL** | SW Dev | `wt-pi3-s1-freshness-*` | None (Sprint 0 already shipped spec/plan/tasks/validation) | [SPEC](Management/PI-3/Sprint-1-dashboard-freshness-unblock/SPEC.md) |
 | **S2** | Day-to-Day Brownfield Bootstrap | **Proposed** | PM + Architect (spec), SW Dev (dispatch) | `wt-pi3-s2-brownfield` | Parallel-safe with S1, S3, S4, S5; artifacts in SEPARATE repo | [SPEC](Management/PI-3/Sprint-2-day-to-day-brownfield-bootstrap/SPEC.md) |
 | **S3** | PI-2 Lessons Curation via /evolve | **Proposed** | PM (lead), Architect (constitution impact) | `wt-pi3-s3-lessons` | Parallel-safe; touches only `sprints/PI-2/lessons.md` + possibly `.github/skills/` | [SPEC](Management/PI-3/Sprint-3-pi2-lessons-curation/SPEC.md) |
-| **S4** | Live UI v2 Spec (Principal UI Designer kickoff) | **Proposed** (blocked on ADR-0010 approval) | UI Designer (lead, ADR-0010), Architect (review) | `wt-pi3-s4-ui-v2` | Parallel-safe for the SPEC phase; implementation deferred to PI-4 | [SPEC](Management/PI-3/Sprint-4-live-ui-v2-spec/SPEC.md) |
+| **S4** | Live UI v2 Spec (Principal UI Designer kickoff) | **Ready** | UI Designer (lead, ADR-0010 approved), Architect (review) | `wt-pi3-s4-ui-v2` | Parallel-safe for the SPEC phase; implementation deferred to PI-4 | [SPEC](Management/PI-3/Sprint-4-live-ui-v2-spec/SPEC.md) |
 | **S5** | Navigation Layer Migration -- Management/ Structure | **DONE** | EM (lead), SW Dev (build-index), PM (Rule 13) | -- | Landed first; S2/S3/S4 adopt new structure from day one | [SPEC](Management/PI-3/Sprint-5-management-navigation-layer/SPEC.md) |
 
 ### Status legend

@@ -1,12 +1,12 @@
 ---
 sprint: PI-3 / S4
 title: Live UI v2 Spec (Principal UI Designer kickoff)
-status: Proposed (depends on ADR-0010 hire approval)
-owner: principal-ui-designer (lead, hired in this sprint per ADR-0010), principal-architect (review)
-worktree: wt-pi3-s4-ui-v2
+status: DONE
+owner: principal-ui-designer (lead), principal-architect (review)
+worktree: n/a (spec-only sprint, worked on master)
 deps: Soft dep on S1 (live dashboard must remain stable; S4 is SPEC ONLY, no impl in this PI)
 created: 2026-05-25
-canonical_spec_dir: spec-driven-development/specs/2026-05-25-live-ui-v2/ (to be created)
+canonical_spec_dir: spec-driven-development/specs/2026-05-26-live-ui-v2/
 backlog_ids: SDD-013 (UI v2 Spec), SDD-014 (design-tokens skill) -- to be assigned
 adr: ADR-0010 (hire principal-ui-designer) authored in parallel
 scope: SPEC ONLY -- implementation deferred to PI-4
@@ -99,8 +99,12 @@ in this PI. Implementation worktrees come in PI-4.
 
 | Dispatch ID | Task | Worker | Sent | Marked | Outcome |
 |-------------|------|--------|------|--------|---------|
-| (pending) | T-005 | ux-designer-general | -- | -- | -- |
-| (pending) | T-011 | (after Principal authors) | -- | -- | -- |
+| S4-D001 | T-004 (DESIGN_TOKENS.md) | principal-ui-designer | 2026-05-31 | 2026-05-31 | SUCCESS |
+| S4-D002 | T-005 (mockup.html) | ux-designer-general | 2026-05-31 | 2026-05-31 | SUCCESS |
+| S4-D003 | T-006 (spec.md) | principal-ui-designer | 2026-05-31 | 2026-05-31 | SUCCESS |
+| S4-D004 | T-007 (Architect review) | principal-architect | 2026-05-31 | 2026-05-31 | APPROVED WITH NOTES |
+| S4-D005 | T-008/T-009/T-010 (plan/tasks/validation) | principal-software-developer | 2026-05-31 | 2026-05-31 | SUCCESS |
+| S4-D006 | T-011 (design-tokens skill) | principal-ui-designer | 2026-05-31 | 2026-05-31 | SUCCESS |
 
 Most tasks in this sprint are Principal-authored, not worker-dispatched.
 
@@ -145,3 +149,12 @@ Most tasks in this sprint are Principal-authored, not worker-dispatched.
 | Date | Event |
 |------|-------|
 | 2026-05-25 | Sprint proposed at PI-3 kickoff; depends on ADR-0010 approval to begin |
+| 2026-05-26 | ADR-0010 approved; UI Designer active; CLARIFY doc created with 6 questions |
+| 2026-05-31 | Human approves all 6 CLARIFY questions (EM recommendations accepted) |
+| 2026-05-31 | T-004 DESIGN_TOKENS.md authored (59 CSS custom properties, 8 sections) |
+| 2026-05-31 | T-006 spec.md authored (37KB, 12 sections + 3 appendices) |
+| 2026-05-31 | T-005 mockup.html authored (34KB static prototype, all 6 sections) |
+| 2026-05-31 | T-007 Architect review: APPROVED WITH NOTES (3 open questions resolved) |
+| 2026-05-31 | T-008/T-009/T-010 plan, tasks, validation authored and LOCKED |
+| 2026-05-31 | T-011 design-tokens skill v1.0 authored (closes LESSON-007) |
+| 2026-05-31 | Sprint DONE -- all 12 tasks complete, 7 artifacts in spec dir |

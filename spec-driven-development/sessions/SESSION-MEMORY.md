@@ -1,47 +1,48 @@
 # Session Memory — Evolving Multi-Agent Framework
 
-**Latest checkpoint:** PI-3: S5 DONE, S3 DONE. S2/S4 prepped with CLARIFY docs (both HITL-gated). ADR-0010 approved, UI Designer active. 60/60 tests passing. Commit `9c27f44` on master. ~57 commits ahead of origin/master (HITL gate #10 -- push still pending).
+**Latest checkpoint:** PI-3: S3/S4/S5 DONE. S2 HITL-gated (pick dogfood feature). S1 HITL-blocked (Azure provisioning). 60/60 tests passing. Commit chain through `3026eec` on master. 60+ commits ahead of origin/master.
 
-**Date:** 2026-05-26
+**Date:** 2026-05-31
 **Owner:** Rodolfo Lerma
 **Repo:** https://github.com/rodolfolermacontreras/Evolving-Multi-Agent-Framework
 **Local path:** `C:\Training\Projects\Evolving-Multi-Agent-Framework`
 
 ---
 
-## PI-3 Sprint Status (as of 2026-05-26)
+## PI-3 Sprint Status (as of 2026-05-31)
 
 | Sprint | Title | Status | Notes |
 |--------|-------|--------|-------|
 | S1 | Dashboard Freshness Unblock | **BLOCKED** | 9 HITL Azure provisioning steps. No change since PI-3 kickoff. |
 | S2 | Day-to-Day Brownfield Bootstrap | **HITL-gated** | CLARIFY doc at `specs/2026-05-26-day-to-day-brownfield-bootstrap/clarification.md`. Human picks dogfood feature. |
 | S3 | PI-2 Lessons Curation | **DONE** | 7-way parallel dispatch. 4 skills v1.0->1.1. Tech debt spec filed for PI-4. |
-| S4 | Live UI v2 Spec | **HITL-gated** | CLARIFY doc at `specs/2026-05-26-live-ui-v2/clarification.md`. 6 design questions for human. |
+| S4 | Live UI v2 Spec | **DONE** | 6 dispatches. 7 artifacts: clarification, DESIGN_TOKENS, spec (37KB), mockup (34KB), plan, tasks, validation (LOCKED). design-tokens skill v1.0 shipped. |
 | S5 | Management Navigation Layer | **DONE** | 14/14 tasks. ADR-0011, Rule 13, Management/ structure, build-index CLI. |
 
-## S3 Results (completed this session)
+## S4 Results (completed this session)
 
-All 6 PI-2 lessons curated in a single 7-way parallel dispatch:
-- **LESSON-004**: CLOSED retrospectively (already shipped PI-2 Sprint A)
-- **LESSON-006**: SHIPPED -- `constitution-sync` skill v1.0->1.1 (stale-marker detection)
-- **LESSON-007**: DEFERRED to S4 (UI Designer authors design-tokens skill)
-- **LESSON-008**: SHIPPED -- `to-spec` skill v1.0->1.1 (canonical-declaration prompt)
-- **LESSON-009**: SHIPPED -- `testing-conventions` skill v1.0->1.1 (Windows fixtures)
-- **LESSON-010**: SHIPPED retrospectively (fix already in azure-deployment-architecture skill)
-- **T-007**: Tech debt spec filed at `specs/2026-05-26-principal-agent-hygiene/spec.md` for PI-4
-- Schema lint clean. 60/60 tests passing.
+All 12 tasks completed in a single session with 6 parallel dispatches:
+- **T-001/T-002**: ADR-0010 approved, UI Designer hired (prior session)
+- **T-003**: CLARIFY -- 6 design questions answered (EM recommended, human approved all)
+- **T-004**: DESIGN_TOKENS.md -- 59 CSS custom properties, 8 sections, v1 superset
+- **T-005**: mockup.html -- 34KB static prototype, 25 ARIA labels, responsive 768px+
+- **T-006**: spec.md -- 37KB, 12 sections, sprint-first IA, stdlib-only
+- **T-007**: Architect review -- APPROVED WITH NOTES, 3 open questions resolved
+- **T-008/T-009/T-010**: plan (4 phases), tasks (14 atomic), validation (LOCKED)
+- **T-011**: design-tokens skill v1.0 (closes LESSON-007)
+- 60/60 tests passing, no regressions.
 
 ## What to do when resuming
 
 ### Immediate next steps (pick any, all are independent):
 
-1. **Answer S4 CLARIFY questions** -- open `specs/2026-05-26-live-ui-v2/clarification.md`, answer Q1-Q6 (visual style, info priority, nav depth, agent visibility, responsive targets, animation). This unblocks the UI Designer to author the v2 spec.
+1. **Answer S2 CLARIFY question** -- open `specs/2026-05-26-day-to-day-brownfield-bootstrap/clarification.md`, pick which Day-to-Day feature to dogfood. Confirm Day-to-Day repo is at `../day-to-day-microsoft`. This unblocks `bootstrap.py brownfield --draft-only`.
 
-2. **Answer S2 CLARIFY question** -- open `specs/2026-05-26-day-to-day-brownfield-bootstrap/clarification.md`, pick which Day-to-Day feature to dogfood. Confirm Day-to-Day repo is at `../day-to-day-microsoft`. This unblocks `bootstrap.py brownfield --draft-only`.
+2. **Run S1 Azure provisioning** -- 9 `az` commands listed in `docs/Management/PI-3/Sprint-1-dashboard-freshness-unblock/SPEC.md` Section 8. Requires `az login`. ~5 min.
 
-3. **Run S1 Azure provisioning** -- 9 `az` commands listed in `docs/Management/PI-3/Sprint-1-dashboard-freshness-unblock/SPEC.md` Section 8. Requires `az login`. ~5 min.
+3. **Push to origin** -- 60+ commits ahead (HITL gate #10). `git push origin master` when ready.
 
-4. **Push to origin** -- 57+ commits ahead (HITL gate #10). `git push origin master` when ready.
+4. **Preview the mockup** -- open `specs/2026-05-26-live-ui-v2/mockup.html` in a browser to see the v2 dashboard design before PI-4 implementation.
 
 ### Session read order for a fresh agent:
 1. `INSTRUCTIONS.md` (repo root)
@@ -53,37 +54,35 @@ All 6 PI-2 lessons curated in a single 7-way parallel dispatch:
 7. `docs/RULES.md` (v1.1.0, 13 rules)
 8. The relevant sprint SPEC for whichever sprint you are working on
 
-## Commit chain (this session, S3 dispatch + closure)
+## Commit chain (this session, S4 completion)
 
 ```
-ddfb99a  docs: approve ADR-0010 (principal-ui-designer hire), unblock S4
-54602f5  docs(lessons): close LESSON-010 retrospectively (T-006)
-3d19114  docs(lessons): close LESSON-004 retrospectively (T-001)
-f8f446e  docs(lessons): defer LESSON-007 to PI-3/S4 (T-003) + LESSON-006 constitution-sync (T-002)
-b33347b  feat(skills): add canonical-declaration prompt to to-spec (T-004, LESSON-008)
-0e1f7a5  docs(spec): file agent-hygiene tech debt spec for PI-4 (T-007)
-0c65468  feat(skills): add Windows test fixtures to testing-conventions (T-005, LESSON-009)
-3c03072  docs: S3 closure -- tracker/INDEX updated, S4 CLARIFY created (T-008)
-df96c82  docs: create S2 clarification doc (S2 prep)
-9c27f44  docs(session): update SESSION-MEMORY with S3 completion
+aa8ba75  docs(s4): human approves all 6 Live UI v2 design decisions
+f74d20a  feat(s4): author Live UI v2 DESIGN_TOKENS.md and spec.md (T-004, T-006)
+e960ed8  feat(s4): add Live UI v2 static HTML mockup (T-005)
+c416ba0  feat(skills): add design-tokens skill v1.0 (T-011, closes LESSON-007)
+6361ef1  docs(s4): apply Architect review notes to spec.md (T-007)
+2bc6b44  docs(roster): register design-tokens skill in skills.json
+3026eec  feat(s4): author plan.md, tasks.md, validation.md (T-008, T-009, T-010)
 ```
 
 ## Key files changed this session
 
 | File | Change |
 |------|--------|
-| `.github/skills/core/constitution-sync/SKILL.md` | v1.0->1.1, stale-marker detection section |
-| `.github/skills/workflow/to-spec/SKILL.md` | v1.0->1.1, canonical-declaration prompt |
-| `.github/skills/core/testing-conventions/SKILL.md` | v1.0->1.1, Windows fixtures section |
-| `sprints/PI-2/lessons.md` | All 6 lesson statuses updated |
-| `docs/HIGH_LEVEL_DEV_TRACKER.md` | S3 DONE, Top 3 refreshed, open lessons = 0 |
-| `docs/Management/PI-3/INDEX.md` | S3 DONE, S4 Ready, S5 DONE, What Was Done updated |
-| `docs/Management/PI-3/Sprint-3-pi2-lessons-curation/AGENT_NOTES.md` | Full session log |
-| `specs/2026-05-26-live-ui-v2/clarification.md` | NEW: S4 CLARIFY doc (6 questions) |
-| `specs/2026-05-26-day-to-day-brownfield-bootstrap/clarification.md` | NEW: S2 CLARIFY doc |
-| `specs/2026-05-26-principal-agent-hygiene/spec.md` | NEW: PI-4 tech debt spec |
-| `ADR/010-hire-principal-ui-designer.md` | draft->accepted |
-| `roster/agents.json` | principal-ui-designer: draft->active |
+| `specs/2026-05-26-live-ui-v2/clarification.md` | EM recommendations prefilled, human approved all 6 |
+| `specs/2026-05-26-live-ui-v2/DESIGN_TOKENS.md` | NEW: 59 CSS custom properties, 8 sections |
+| `specs/2026-05-26-live-ui-v2/spec.md` | NEW: 37KB spec, 12 sections + 3 appendices |
+| `specs/2026-05-26-live-ui-v2/mockup.html` | NEW: 34KB static prototype |
+| `specs/2026-05-26-live-ui-v2/plan.md` | NEW: 4-phase PI-4 implementation plan |
+| `specs/2026-05-26-live-ui-v2/tasks.md` | NEW: 14 atomic tasks with TDD ordering |
+| `specs/2026-05-26-live-ui-v2/validation.md` | NEW: LOCKED, 15+21 acceptance criteria |
+| `.github/skills/operational/design-tokens/SKILL.md` | NEW: design-tokens skill v1.0 |
+| `roster/skills.json` | design-tokens skill registered |
+| `docs/Management/PI-3/Sprint-4-live-ui-v2-spec/SPEC.md` | Status -> DONE, dispatch tracker filled |
+| `docs/Management/PI-3/Sprint-4-live-ui-v2-spec/AGENT_NOTES.md` | Full session log populated |
+| `docs/Management/PI-3/INDEX.md` | S4 -> DONE, What Was Done updated |
+| `docs/HIGH_LEVEL_DEV_TRACKER.md` | S4 DONE, Top 3 refreshed, lessons all closed |
 
 ## Previous session history
 

@@ -70,13 +70,13 @@ in IDEAS.md 2026-05-25). For the v2 spec, should this be:
 
 ## Answers
 
-(To be filled by human)
+EM recommendations below (2026-05-31). Human: approve, override, or comment per question.
 
-| Q | Answer | Date |
-|---|--------|------|
-| Q1 | | |
-| Q2 | | |
-| Q3 | | |
-| Q4 | | |
-| Q5 | | |
-| Q6 | | |
+| Q | EM Recommendation | Rationale | Human Answer | Date |
+|---|-------------------|-----------|--------------|------|
+| Q1 | **(a) Evolve Bridge** | The dark aesthetic is already established and recognizable. Refinement > rebuild. | | |
+| Q2 | 1. Current sprint, 2. What comes next, 3. WIP summary, 4. Current PI, 5. Per-agent activity | Sprint + next-action are the "where are we" questions you ask most. Agent activity is cool but lower priority until the data pipeline exists. | | |
+| Q3 | **(b) PI list + sprint table** | Matches the 3-tier nav layer we just built. Full drill-down (c) is too much implementation for a v2 spec; tier-1-only (a) is too shallow. | | |
+| Q4 | **(b) Placeholder** | Reserve the UI region and define the data contract now; implement when infrastructure exists. Full spec (c) delays v2 significantly. | | |
+| Q5 | **(b) Desktop + tablet (768px+)** | You're literally on your phone right now asking about the dashboard -- tablet minimum makes sense. Full mobile (375px) is overkill for a dev tool. | | |
+| Q6 | **(b) Subtle transitions** | Fade-in + hover states are low cost and make the dashboard feel alive without accessibility concerns. | |

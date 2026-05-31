@@ -101,15 +101,18 @@ body {
 .dashboard {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto auto auto auto auto auto auto;
+  grid-template-rows: auto auto auto auto auto auto auto auto auto auto;
   grid-template-areas:
-    "topbar  topbar"
-    "sprint  sprint"
-    "next    wip"
-    "pi      pi"
-    "agents  agents"
-    "feed    feed"
-    "footer  footer";
+    "topbar   topbar"
+    "context  context"
+    "sprint   sprint"
+    "next     wip"
+    "pi       pi"
+    "backlog  backlog"
+    "agents   agents"
+    "feed     feed"
+    "timeline timeline"
+    "footer   footer";
   gap: 0;
   min-height: 100vh;
 }
@@ -119,12 +122,15 @@ body {
     grid-template-columns: 1fr;
     grid-template-areas:
       "topbar"
+      "context"
       "sprint"
       "next"
       "wip"
       "pi"
+      "backlog"
       "agents"
       "feed"
+      "timeline"
       "footer";
   }
 }
@@ -513,8 +519,70 @@ body {
 .stage-review     { background: var(--signal-amber-2);  color: var(--signal-amber-2); }
 .stage-done       { background: var(--signal-jade);     color: var(--signal-jade); }
 
+/* Placeholder notice (used for empty states) */
+.placeholder-notice {
+  font-size: var(--type-body);
+  font-style: italic;
+  color: var(--ink-paper-faint);
+  line-height: 22px;
+}
+
 /* ================================================================
-   SECTION 4 -- PI CONTEXT
+   PROJECT CONTEXT
+   ================================================================ */
+.context-section {
+  grid-area: context;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xl);
+  flex-wrap: wrap;
+  padding: var(--space-md) var(--space-xl);
+  background: var(--bg-graphite);
+  border-bottom: 1px solid var(--rule-line);
+  font-size: var(--type-label);
+  line-height: 20px;
+}
+
+.context-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  white-space: nowrap;
+}
+
+.context-label {
+  color: var(--ink-paper-dim);
+  font-size: var(--type-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+}
+
+.context-value {
+  color: var(--ink-paper);
+}
+
+.context-mission {
+  white-space: normal;
+  max-width: 560px;
+}
+
+.project-type-badge {
+  display: inline-block;
+  padding: var(--space-2xs) var(--space-sm);
+  font-size: var(--type-micro);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  line-height: 14px;
+  color: var(--signal-jade);
+  background: var(--bg-graphite-3);
+  border: 1px solid var(--signal-jade-dim);
+  border-radius: 2px;
+}
+
+/* ================================================================
+   SECTION 4 -- PI CONTEXT (expandable details)
    ================================================================ */
 .pi-section {
   grid-area: pi;
@@ -522,64 +590,95 @@ body {
   border-bottom: 1px solid var(--rule-line);
 }
 
-.pi-progress-bar-wrap {
-  margin-bottom: var(--space-lg);
+/* Shared details/summary for PI accordion */
+.pi-details {
+  border: 1px solid var(--rule-line);
+  margin-bottom: var(--space-sm);
+  background: var(--bg-graphite);
 }
 
-.pi-progress-label {
+.pi-details:last-of-type {
+  margin-bottom: 0;
+}
+
+/* Hide native disclosure triangle */
+.pi-details summary {
+  list-style: none;
+}
+
+.pi-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.pi-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--duration-fast) var(--easing-default);
+}
+
+.pi-summary:hover {
+  background: var(--bg-graphite-2);
+}
+
+/* Custom chevron */
+.pi-summary::before {
+  content: "\25B8";
+  display: inline-block;
+  font-size: var(--type-body);
+  color: var(--ink-paper-dim);
+  transition: transform var(--duration-fast) var(--easing-default);
+  flex-shrink: 0;
+  width: 14px;
+  text-align: center;
+}
+
+.pi-details[open] > .pi-summary::before {
+  transform: rotate(90deg);
+}
+
+.pi-summary-name {
+  font-size: var(--type-body);
+  font-weight: 600;
+  color: var(--ink-paper);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.pi-summary-pct {
   font-size: var(--type-micro);
   color: var(--ink-paper-dim);
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  margin-bottom: var(--space-xs);
+  flex-shrink: 0;
 }
 
-.pi-progress-bar {
-  width: 100%;
-  height: 8px;
+/* Inline progress bar in summary */
+.pi-inline-bar {
+  flex: 1;
+  height: 6px;
   background: var(--bg-graphite-3);
+  min-width: 60px;
+  max-width: 200px;
   position: relative;
 }
 
-.pi-progress-fill {
+.pi-inline-fill {
   height: 100%;
-  background: var(--signal-jade);
   position: absolute;
   left: 0;
   top: 0;
 }
 
-.pi-tabs {
-  display: flex;
-  gap: var(--space-xs);
-  list-style: none;
-  margin-bottom: var(--space-lg);
-  flex-wrap: wrap;
-}
+.pi-inline-fill--jade { background: var(--signal-jade); }
+.pi-inline-fill--oxblood { background: var(--accent-oxblood); }
 
-.pi-tab {
-  display: inline-block;
-  padding: var(--space-xs) var(--space-md);
-  font-size: var(--type-micro);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--ink-paper-dim);
-  background: var(--bg-graphite-2);
-  border: 1px solid var(--rule-line);
-  border-radius: 2px;
-  cursor: default;
-  transition: background var(--duration-fast) var(--easing-default);
-}
-
-.pi-tab:hover {
-  background: var(--bg-graphite-3);
-}
-
-.pi-tab[aria-selected="true"] {
-  background: var(--accent-oxblood);
-  color: var(--ink-paper);
-  border-color: var(--accent-oxblood);
+/* PI content area */
+.pi-content {
+  padding: 0 var(--space-lg) var(--space-lg) var(--space-lg);
 }
 
 .sprint-table-wrap {
@@ -622,27 +721,79 @@ body {
 .status-proposed { color: var(--ink-paper-faint); }
 
 /* ================================================================
-   SECTION 5 -- AGENT ACTIVITY PLACEHOLDER
+   BACKLOG SECTION
+   ================================================================ */
+.backlog-section {
+  grid-area: backlog;
+  padding: var(--space-xl);
+  border-bottom: 1px solid var(--rule-line);
+}
+
+.backlog-list {
+  list-style: none;
+}
+
+.backlog-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--rule-line);
+  font-size: var(--type-body);
+  color: var(--ink-paper-dim);
+  line-height: 22px;
+}
+
+.backlog-item:last-child {
+  border-bottom: none;
+}
+
+.backlog-badge {
+  display: inline-block;
+  padding: var(--space-2xs) var(--space-sm);
+  font-size: var(--type-micro);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  line-height: 14px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  min-width: 64px;
+  text-align: center;
+}
+
+.backlog-badge--new {
+  color: var(--signal-amber);
+  background: var(--bg-graphite-3);
+  border: 1px solid var(--signal-amber-3);
+}
+
+.backlog-badge--triaged {
+  color: var(--signal-amber-3);
+  background: var(--bg-graphite-3);
+  border: 1px solid var(--signal-amber-3);
+}
+
+.backlog-badge--specced {
+  color: var(--signal-jade-dim);
+  background: var(--bg-graphite-3);
+  border: 1px solid var(--signal-jade-dim);
+}
+
+/* ================================================================
+   SECTION 5 -- FLEET AGENT TRACEABILITY
    ================================================================ */
 .agents-section {
   grid-area: agents;
   padding: var(--space-xl);
   border-bottom: 1px solid var(--rule-line);
-  border-top: 1px solid var(--rule-line);
-}
-
-.placeholder-notice {
-  font-size: var(--type-body);
-  font-style: italic;
-  color: var(--ink-paper-faint);
-  line-height: 22px;
-  margin-bottom: var(--space-lg);
 }
 
 .fleet-stats {
   display: flex;
   gap: var(--space-xl);
   flex-wrap: wrap;
+  margin-bottom: var(--space-xl);
 }
 
 .fleet-stat {
@@ -667,11 +818,141 @@ body {
   line-height: 30px;
 }
 
-.data-contract-ref {
-  font-size: var(--type-caption);
+/* Agent hierarchy tree */
+.agent-tree {
+  font-size: var(--type-label);
+  line-height: 24px;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-graphite);
+  border: 1px solid var(--rule-line);
+  margin-bottom: var(--space-xl);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.agent-principal {
+  color: var(--accent-oxblood);
+  font-weight: 600;
+}
+
+.agent-worker {
+  color: var(--ink-paper-dim);
+}
+
+.agent-tree-chrome {
   color: var(--ink-paper-faint);
-  margin-top: var(--space-lg);
-  letter-spacing: 0.06em;
+}
+
+.agent-tree-action {
+  color: var(--ink-paper-faint);
+  font-weight: 400;
+}
+
+/* Recent dispatch chain table */
+.dispatch-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--type-label);
+}
+
+.dispatch-table th {
+  text-align: left;
+  font-size: var(--type-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-paper-dim);
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--rule-line);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.dispatch-table td {
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--rule-line);
+  color: var(--ink-paper-dim);
+  line-height: 22px;
+  white-space: nowrap;
+}
+
+.dispatch-table tbody tr:hover {
+  background: var(--bg-graphite-2);
+  transition: background var(--duration-fast) var(--easing-default);
+}
+
+.dispatch-chain {
+  color: var(--ink-paper-faint);
+}
+
+/* ================================================================
+   PROJECT TIMELINE
+   ================================================================ */
+.timeline-section {
+  grid-area: timeline;
+  padding: var(--space-xl);
+  border-bottom: 1px solid var(--rule-line);
+}
+
+.timeline {
+  list-style: none;
+  position: relative;
+  padding-left: 130px;
+}
+
+/* Vertical line */
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 119px;
+  top: 5px;
+  bottom: 5px;
+  width: 2px;
+  background: var(--rule-line);
+}
+
+.timeline-event {
+  position: relative;
+  padding: var(--space-xs) 0 var(--space-sm) var(--space-lg);
+  font-size: var(--type-label);
+  line-height: 20px;
+  color: var(--ink-paper-dim);
+}
+
+.timeline-date {
+  position: absolute;
+  left: -130px;
+  width: 110px;
+  text-align: right;
+  font-size: var(--type-label);
+  color: var(--ink-paper-faint);
+  letter-spacing: 0.04em;
+}
+
+/* Timeline dot */
+.timeline-event::before {
+  content: "";
+  position: absolute;
+  left: -5px;
+  top: 5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--signal-jade);
+}
+
+.timeline-event--current::before {
+  background: var(--accent-oxblood);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(206, 32, 41, 0.5); }
+  50%      { box-shadow: 0 0 0 6px rgba(206, 32, 41, 0); }
+}
+
+.timeline-event--current {
+  color: var(--ink-paper);
+  font-weight: 600;
 }
 
 /* ================================================================
@@ -836,6 +1117,32 @@ body {
   </header>
 
   <!-- ============================================================
+       PROJECT CONTEXT
+       ============================================================ -->
+  <section class="context-section" aria-label="Project context">
+    <div class="context-item">
+      <span class="context-label">Project</span>
+      <span class="context-value">Evolving Multi-Agent Framework</span>
+    </div>
+    <div class="context-item">
+      <span class="context-label">Type</span>
+      <span class="project-type-badge">STANDALONE FRAMEWORK</span>
+    </div>
+    <div class="context-item">
+      <span class="context-label">Owner</span>
+      <span class="context-value">Rodolfo Lerma</span>
+    </div>
+    <div class="context-item">
+      <span class="context-label">Stack</span>
+      <span class="context-value">Python stdlib | Plain HTML/CSS | SQLite | No runtime deps</span>
+    </div>
+    <div class="context-item">
+      <span class="context-label">Mission</span>
+      <span class="context-value context-mission">A portable, replicable multi-agent development system. One human developer orchestrates a team of AI agents through a structured spec-driven lifecycle.</span>
+    </div>
+  </section>
+
+  <!-- ============================================================
        SECTION 1 -- CURRENT SPRINT
        ============================================================ -->
   <section class="sprint-section" aria-labelledby="sprint-heading">
@@ -993,83 +1300,182 @@ body {
   </section>
 
   <!-- ============================================================
-       SECTION 4 -- PI CONTEXT
+       SECTION 4 -- PI CONTEXT (expandable)
        ============================================================ -->
   <section class="pi-section" aria-labelledby="pi-heading">
     <h2 class="section-heading" id="pi-heading">Program Increments</h2>
 
-    <!-- PI progress bar -->
-    <div class="pi-progress-bar-wrap">
-      <div class="pi-progress-label">PI-3 Progress: 40%</div>
-      <div class="pi-progress-bar" role="img" aria-label="PI-3 progress at 40 percent">
-        <div class="pi-progress-fill" style="width: 40%"></div>
+    <!-- PI-3 (current, expanded) -->
+    <details class="pi-details" open>
+      <summary class="pi-summary">
+        <span class="pi-summary-name">PI-3: Portability Validation + Live UI v2 + Navigation Layer</span>
+        <span class="pi-summary-pct">40%</span>
+        <div class="pi-inline-bar" role="img" aria-label="PI-3 progress at 40 percent">
+          <div class="pi-inline-fill pi-inline-fill--oxblood" style="width: 40%"></div>
+        </div>
+      </summary>
+      <div class="pi-content">
+        <div class="sprint-table-wrap">
+          <table class="sprint-table" aria-label="Sprints in PI-3">
+            <thead>
+              <tr>
+                <th scope="col">Sprint</th>
+                <th scope="col">Title</th>
+                <th scope="col">Status</th>
+                <th scope="col">Tasks</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>S1</td>
+                <td>Dashboard Freshness</td>
+                <td><span class="status-blocked"><span class="status-dot status-dot--amber" aria-hidden="true"></span>BLOCKED</span></td>
+                <td>5</td>
+              </tr>
+              <tr>
+                <td>S2</td>
+                <td>Brownfield Bootstrap</td>
+                <td><span class="status-proposed"><span class="status-dot status-dot--faint" aria-hidden="true"></span>PROPOSED</span></td>
+                <td>0</td>
+              </tr>
+              <tr>
+                <td>S3</td>
+                <td>PI-2 Lessons Curation</td>
+                <td><span class="status-done"><span class="status-dot status-dot--jade" aria-hidden="true"></span>DONE</span></td>
+                <td>12</td>
+              </tr>
+              <tr>
+                <td>S4</td>
+                <td>Live UI v2 Spec</td>
+                <td><span class="status-done"><span class="status-dot status-dot--jade" aria-hidden="true"></span>DONE</span></td>
+                <td>12</td>
+              </tr>
+              <tr>
+                <td>S5</td>
+                <td>Navigation Layer</td>
+                <td><span class="status-done"><span class="status-dot status-dot--jade" aria-hidden="true"></span>DONE</span></td>
+                <td>8</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </details>
 
-    <!-- PI tabs -->
-    <nav aria-label="PI selector">
-      <ul class="pi-tabs" role="tablist">
-        <li><span class="pi-tab" role="tab" aria-selected="false">PI-1</span></li>
-        <li><span class="pi-tab" role="tab" aria-selected="false">PI-2</span></li>
-        <li><span class="pi-tab" role="tab" aria-selected="true">PI-3</span></li>
-      </ul>
-    </nav>
+    <!-- PI-2 (collapsed) -->
+    <details class="pi-details">
+      <summary class="pi-summary">
+        <span class="pi-summary-name">PI-2: Fleet Maturity and CLI</span>
+        <span class="pi-summary-pct">100%</span>
+        <div class="pi-inline-bar" role="img" aria-label="PI-2 progress at 100 percent">
+          <div class="pi-inline-fill pi-inline-fill--jade" style="width: 100%"></div>
+        </div>
+      </summary>
+      <div class="pi-content">
+        <div class="sprint-table-wrap">
+          <table class="sprint-table" aria-label="Sprints in PI-2">
+            <thead>
+              <tr>
+                <th scope="col">Sprint</th>
+                <th scope="col">Title</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Sprint A</td>
+                <td>State Builder + Dashboard</td>
+                <td><span class="status-done"><span class="status-dot status-dot--jade" aria-hidden="true"></span>DONE</span></td>
+              </tr>
+              <tr>
+                <td>Sprint B</td>
+                <td>Fleet + QA + Retro CLI</td>
+                <td><span class="status-done"><span class="status-dot status-dot--jade" aria-hidden="true"></span>DONE</span></td>
+              </tr>
+              <tr>
+                <td>Sprint C</td>
+                <td>Schema Lint + Validation</td>
+                <td><span class="status-done"><span class="status-dot status-dot--jade" aria-hidden="true"></span>DONE</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
 
-    <!-- Sprint table for PI-3 -->
-    <div class="sprint-table-wrap" role="tabpanel" aria-label="Sprints in PI-3">
-      <table class="sprint-table" aria-label="Sprints in PI-3">
-        <thead>
-          <tr>
-            <th scope="col">Sprint</th>
-            <th scope="col">Title</th>
-            <th scope="col">Status</th>
-            <th scope="col">Tasks</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>S1</td>
-            <td>Foundation Sprint</td>
-            <td><span class="status-blocked"><span class="status-dot status-dot--amber" aria-hidden="true"></span>BLOCKED</span></td>
-            <td>5</td>
-          </tr>
-          <tr>
-            <td>S2</td>
-            <td>Brownfield Bootstrap</td>
-            <td><span class="status-proposed"><span class="status-dot status-dot--faint" aria-hidden="true"></span>PROPOSED</span></td>
-            <td>0</td>
-          </tr>
-          <tr>
-            <td>S3</td>
-            <td>Fleet CLI + Schema Lint</td>
-            <td><span class="status-done"><span class="status-dot status-dot--jade" aria-hidden="true"></span>DONE</span></td>
-            <td>12</td>
-          </tr>
-          <tr>
-            <td>S4</td>
-            <td>Live UI v2 Spec</td>
-            <td><span class="status-active"><span class="status-dot status-dot--oxblood" aria-hidden="true"></span>ACTIVE</span></td>
-            <td>12</td>
-          </tr>
-          <tr>
-            <td>S5</td>
-            <td>PI-3 Retro &amp; PI-4 Planning</td>
-            <td><span class="status-done"><span class="status-dot status-dot--jade" aria-hidden="true"></span>DONE</span></td>
-            <td>8</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <!-- PI-1 (collapsed) -->
+    <details class="pi-details">
+      <summary class="pi-summary">
+        <span class="pi-summary-name">PI-1: Generalization and First Pilot</span>
+        <span class="pi-summary-pct">100%</span>
+        <div class="pi-inline-bar" role="img" aria-label="PI-1 progress at 100 percent">
+          <div class="pi-inline-fill pi-inline-fill--jade" style="width: 100%"></div>
+        </div>
+      </summary>
+      <div class="pi-content">
+        <div class="sprint-table-wrap">
+          <table class="sprint-table" aria-label="Sprints in PI-1">
+            <thead>
+              <tr>
+                <th scope="col">Sprint</th>
+                <th scope="col">Title</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Sprint 1</td>
+                <td>Constitution Generalization</td>
+                <td><span class="status-done"><span class="status-dot status-dot--jade" aria-hidden="true"></span>DONE</span></td>
+              </tr>
+              <tr>
+                <td>Sprint 2</td>
+                <td>Fleet Ledger Pilot</td>
+                <td><span class="status-done"><span class="status-dot status-dot--jade" aria-hidden="true"></span>DONE</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
   </section>
 
   <!-- ============================================================
-       SECTION 5 -- AGENT ACTIVITY PLACEHOLDER
+       BACKLOG
+       ============================================================ -->
+  <section class="backlog-section" aria-labelledby="backlog-heading">
+    <h2 class="section-heading" id="backlog-heading">Backlog</h2>
+    <ul class="backlog-list">
+      <li class="backlog-item">
+        <span class="backlog-badge backlog-badge--triaged">TRIAGED</span>
+        <span>Bootstrap CLI automation</span>
+      </li>
+      <li class="backlog-item">
+        <span class="backlog-badge backlog-badge--new">NEW</span>
+        <span>Agent promotion tracking</span>
+      </li>
+      <li class="backlog-item">
+        <span class="backlog-badge backlog-badge--new">NEW</span>
+        <span>Graphical project timeline</span>
+      </li>
+      <li class="backlog-item">
+        <span class="backlog-badge backlog-badge--triaged">TRIAGED</span>
+        <span>GitHub template repo packaging</span>
+      </li>
+      <li class="backlog-item">
+        <span class="backlog-badge backlog-badge--specced">SPECCED</span>
+        <span>GENERALIZATION_SDD.md v1.0</span>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ============================================================
+       SECTION 5 -- FLEET AGENT TRACEABILITY
        ============================================================ -->
   <section class="agents-section" aria-labelledby="agents-heading">
-    <h2 class="section-heading" id="agents-heading">Fleet Activity</h2>
+    <h2 class="section-heading" id="agents-heading">Fleet -- Agent Traceability</h2>
 
-    <p class="placeholder-notice">Per-agent real-time visibility planned for PI-5. Data contract defined in spec section 5.6.1.</p>
-
+    <!-- Fleet summary stats -->
     <div role="group" aria-label="Fleet summary">
       <dl class="fleet-stats">
         <div class="fleet-stat">
@@ -1091,7 +1497,59 @@ body {
       </dl>
     </div>
 
-    <p class="data-contract-ref">Data contract: agent_id, agent_role, current_task, last_activity, status, dispatch_count</p>
+    <!-- Agent hierarchy tree -->
+    <h3 class="section-heading">Agent Hierarchy</h3>
+    <div class="agent-tree" role="img" aria-label="Agent hierarchy tree showing principals and their dispatched workers"><span class="agent-principal">EXECUTIVE MANAGER (EM)</span>  <span class="status-dot status-dot--jade" aria-label="idle"></span>
+<span class="agent-tree-chrome">&#9500;&#9472;&#9472; </span><span class="agent-principal">Product Manager (PM)</span>  <span class="status-dot status-dot--jade" aria-label="idle"></span>
+<span class="agent-tree-chrome">&#9474;   &#9492;&#9472;&#9472; </span><span class="agent-tree-action">dispatched: </span><span class="agent-worker">Data Scientist</span> <span class="agent-tree-chrome">&#8594;</span> <span class="agent-tree-action">SDD-013 spec</span>
+<span class="agent-tree-chrome">&#9500;&#9472;&#9472; </span><span class="agent-principal">Architect</span>  <span class="status-dot status-dot--jade" aria-label="idle"></span>
+<span class="agent-tree-chrome">&#9474;   &#9492;&#9472;&#9472; </span><span class="agent-tree-action">reviewed: </span><span class="agent-worker">Live UI v2 spec</span> <span class="agent-tree-chrome">(APPROVED WITH NOTES)</span>
+<span class="agent-tree-chrome">&#9500;&#9472;&#9472; </span><span class="agent-principal">Software Developer (SW Dev)</span>  <span class="status-dot status-dot--oxblood" aria-label="active"></span>
+<span class="agent-tree-chrome">&#9474;   &#9500;&#9472;&#9472; </span><span class="agent-tree-action">dispatched: </span><span class="agent-worker">developer-general</span> <span class="agent-tree-chrome">&#8594;</span> <span class="agent-tree-action">T-005 mockup</span>
+<span class="agent-tree-chrome">&#9474;   &#9492;&#9472;&#9472; </span><span class="agent-tree-action">dispatched: </span><span class="agent-worker">developer-cli-specialist-1</span> <span class="agent-tree-chrome">&#8594;</span> <span class="agent-tree-action">T-010 build-index</span>
+<span class="agent-tree-chrome">&#9492;&#9472;&#9472; </span><span class="agent-principal">UI Designer</span>  <span class="status-dot status-dot--oxblood" aria-label="active"></span>
+<span class="agent-tree-chrome">    &#9492;&#9472;&#9472; </span><span class="agent-tree-action">authored: </span><span class="agent-worker">DESIGN_TOKENS.md, spec.md</span></div>
+
+    <!-- Recent dispatch chain -->
+    <h3 class="section-heading">Recent Dispatches</h3>
+    <div class="sprint-table-wrap">
+      <table class="dispatch-table" aria-label="Recent agent dispatch chain">
+        <thead>
+          <tr>
+            <th scope="col">Task</th>
+            <th scope="col">Chain</th>
+            <th scope="col">Artifact</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>S4/T-006</td>
+            <td><span class="dispatch-chain">PM &#8594; SW Dev &#8594;</span> principal-ui-designer</td>
+            <td>spec.md authored</td>
+            <td><span class="status-done"><span class="status-dot status-dot--jade" aria-hidden="true"></span>DONE</span></td>
+          </tr>
+          <tr>
+            <td>S4/T-005</td>
+            <td><span class="dispatch-chain">SW Dev &#8594;</span> ux-designer-general</td>
+            <td>mockup.html built</td>
+            <td><span class="status-done"><span class="status-dot status-dot--jade" aria-hidden="true"></span>DONE</span></td>
+          </tr>
+          <tr>
+            <td>S4/T-007</td>
+            <td><span class="dispatch-chain">SW Dev &#8594;</span> principal-architect</td>
+            <td>spec review</td>
+            <td><span class="status-done"><span class="status-dot status-dot--jade" aria-hidden="true"></span>DONE</span></td>
+          </tr>
+          <tr>
+            <td>S4/T-011</td>
+            <td><span class="dispatch-chain">PM &#8594;</span> principal-ui-designer</td>
+            <td>design-tokens skill</td>
+            <td><span class="status-done"><span class="status-dot status-dot--jade" aria-hidden="true"></span>DONE</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <!-- ============================================================
@@ -1160,6 +1618,43 @@ body {
         </li>
       </ol>
     </div>
+  </section>
+
+  <!-- ============================================================
+       PROJECT TIMELINE
+       ============================================================ -->
+  <section class="timeline-section" aria-labelledby="timeline-heading">
+    <h2 class="section-heading" id="timeline-heading">Project Timeline</h2>
+    <ol class="timeline" aria-label="Project milestone timeline">
+      <li class="timeline-event">
+        <span class="timeline-date">2026-05-07</span>
+        Phase 1: Dual-LLM Planning (Claude Opus + GPT 5.5)
+      </li>
+      <li class="timeline-event">
+        <span class="timeline-date">2026-05-10</span>
+        Phase 3: Format Conversion (.chatmode to .agent)
+      </li>
+      <li class="timeline-event">
+        <span class="timeline-date">2026-05-12</span>
+        Phase 4: Extraction to standalone repo
+      </li>
+      <li class="timeline-event">
+        <span class="timeline-date">2026-05-13</span>
+        PI-1 CLOSED: Generalization + Fleet Ledger Pilot
+      </li>
+      <li class="timeline-event">
+        <span class="timeline-date">2026-05-16</span>
+        PI-2 CLOSED: Fleet Maturity + CLI (6 features shipped)
+      </li>
+      <li class="timeline-event">
+        <span class="timeline-date">2026-05-25</span>
+        PI-3 STARTED: Portability Validation
+      </li>
+      <li class="timeline-event timeline-event--current">
+        <span class="timeline-date">2026-05-31</span>
+        S4 DONE: Live UI v2 Spec (you are here)
+      </li>
+    </ol>
   </section>
 
   <!-- ============================================================

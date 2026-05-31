@@ -878,3 +878,100 @@ Follow the v1 pattern of graceful fallback messages.
 
 **S-2 (Version bump):** The footer should show "v3.0 (sprint-first)" to
 clearly distinguish v2 spec output from v1's "v2.1 (4-zone)".
+
+---
+
+## Appendix D: Human Feedback on Mockup (2026-05-31)
+
+**Verdict:** OVERALL GREAT WORK, with significant expansion requests.
+
+### D-1: All PIs must be expandable (REQUIRED)
+
+Show PI-1, PI-2, PI-3 (all of them), not just the current PI. Each PI is a
+collapsible `<details>` section. Current PI expanded by default, past PIs
+collapsed. This gives full visibility into completed work.
+
+### D-2: PI theme/goal header (REQUIRED)
+
+Each PI section must show its theme and goal summary at the top, before the
+sprint table. Example: "PI-3: Portability Validation + Live UI v2 + Navigation
+Layer."
+
+### D-3: Project-level context section (REQUIRED -- NEW SECTION)
+
+A new section near the top of the dashboard that answers "what is this project?"
+for any viewer, not just the current team. Must include:
+- Project name and one-sentence mission
+- Greenfield vs. brownfield classification
+- Tech stack summary
+- Owner / team
+
+This section is critical for portability -- when the framework is used on
+other projects, each dashboard must self-identify. Data source:
+`constitution/mission.md` and `constitution/tech-stack.md`.
+
+### D-4: Backlog visibility (REQUIRED -- NEW SECTION)
+
+Show tasks in backlog (IDEAS, TRIAGED, SPECCED, etc.) so viewers understand
+what work is queued, not just what is in-flight or done.
+
+### D-5: Full agent traceability per feature (REQUIRED -- MAJOR)
+
+For each feature, show the full agent chain:
+- Which Principal created the spec
+- Which Principal dispatched the worker(s)
+- Which worker agent(s) are implementing
+- Who is supervising / monitoring
+- Who reviewed
+
+Example: "Idea → EM → PM (spec) → SW Dev (dispatch) → Data Scientist (impl)
+→ Architect (review)."
+
+This requires the `dispatches` table in fleet.db (already has `from_agent`,
+`to_agent`, `task_summary`) plus the `decisions` table.
+
+### D-6: Agent promotion tracking (REQUIRED -- NEW)
+
+When an agent is promoted (e.g., generic data-scientist → forecast-data-scientist
+→ senior-data-scientist), the timeline must show the promotion event. This
+traces the agent's evolution and expanded scope.
+
+Data source: `roster/agents.json` (status field) + a new `agent_events` table
+or entries in the `decisions` table.
+
+### D-7: Dynamic graphical project timeline (REQUIRED -- MAJOR)
+
+A visual, graphical timeline showing the project's history:
+- PI boundaries
+- Sprint start/end markers
+- Feature lifecycle events
+- Agent promotions
+- Key decisions
+
+This is the "literal timeline" the human requested. Must be dynamic (generated
+from data), not static. CSS-only horizontal or vertical timeline with events
+plotted chronologically.
+
+### Impact Assessment
+
+| Feedback | Affects spec | Affects mockup | Affects plan/tasks | New data needed |
+|----------|-------------|---------------|-------------------|-----------------|
+| D-1 | Section 5.5 | Yes | Minimal | No |
+| D-2 | Section 5.5 | Yes | Minimal | PI theme from roadmap.md |
+| D-3 | NEW section | Yes | Add tasks | constitution files |
+| D-4 | NEW section | Yes | Add tasks | backlog/BACKLOG.md |
+| D-5 | Section 5.6 upgrade | Yes | Significant | dispatches + decisions tables |
+| D-6 | NEW requirement | Yes | Add tasks | New agent_events or decisions rows |
+| D-7 | NEW section | Yes | Significant | All ledger tables + git log |
+
+### Recommendation
+
+D-1 and D-2 are small amendments to the existing spec and mockup -- can be
+done immediately. D-3 and D-4 are moderate additions. D-5, D-6, and D-7 are
+major features that expand the v2 scope significantly -- the agent traceability
+(D-5) and timeline (D-7) especially require new data infrastructure.
+
+**Proposed phasing:**
+- **PI-4 v3.0**: D-1 + D-2 + D-3 + D-4 (expandable PIs, project context, backlog)
+- **PI-4 v3.1**: D-5 (agent traceability per feature -- uses existing ledger data)
+- **PI-5**: D-6 + D-7 (agent promotions + graphical timeline -- needs new data layer)

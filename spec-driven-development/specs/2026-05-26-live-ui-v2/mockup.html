@@ -885,7 +885,7 @@ body {
 }
 
 /* ================================================================
-   PROJECT TIMELINE
+   PROJECT TIMELINE -- v2 Command-Center Style
    ================================================================ */
 .timeline-section {
   grid-area: timeline;
@@ -893,66 +893,324 @@ body {
   border-bottom: 1px solid var(--rule-line);
 }
 
-.timeline {
+/* --- PI Boundary Markers --- */
+.tl-pi-boundary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin: var(--space-xl) 0 var(--space-lg) 0;
+}
+
+.tl-pi-boundary:first-child {
+  margin-top: var(--space-sm);
+}
+
+.tl-pi-boundary__rule {
+  flex: 1;
+  height: 1px;
+}
+
+.tl-pi-boundary--jade .tl-pi-boundary__rule  { background: var(--signal-jade-dim); }
+.tl-pi-boundary--amber .tl-pi-boundary__rule { background: var(--signal-amber-3); }
+.tl-pi-boundary--oxblood .tl-pi-boundary__rule { background: var(--accent-oxblood-2); }
+
+.tl-pi-boundary__label {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--type-caption);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: var(--space-2xs) var(--space-md);
+  border: 1px solid;
+  border-radius: 2px;
+}
+
+.tl-pi-boundary--jade .tl-pi-boundary__label {
+  color: var(--signal-jade);
+  border-color: var(--signal-jade-dim);
+}
+
+.tl-pi-boundary--amber .tl-pi-boundary__label {
+  color: var(--signal-amber);
+  border-color: var(--signal-amber-3);
+}
+
+.tl-pi-boundary--oxblood .tl-pi-boundary__label {
+  color: var(--accent-oxblood);
+  border-color: var(--accent-oxblood-2);
+}
+
+.tl-pi-boundary__status {
+  font-family: var(--font-mono);
+  font-size: var(--type-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-paper-faint);
+}
+
+/* --- Timeline Track --- */
+.tl-track {
   list-style: none;
   position: relative;
-  padding-left: 130px;
+  padding-left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
-/* Vertical line */
-.timeline::before {
+/* --- Event Cards --- */
+.tl-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 100px 28px 1fr;
+  gap: 0;
+  align-items: start;
+  padding: 0;
+}
+
+/* Date pill */
+.tl-date {
+  font-family: var(--font-mono);
+  font-size: var(--type-caption);
+  letter-spacing: 0.06em;
+  color: var(--bg-carbon);
+  background: var(--ink-paper-faint);
+  padding: var(--space-2xs) var(--space-sm);
+  border-radius: 2px;
+  text-align: center;
+  justify-self: end;
+  margin-top: var(--space-md);
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.tl-card--jade .tl-date  { background: var(--signal-jade); }
+.tl-card--amber .tl-date { background: var(--signal-amber); }
+.tl-card--oxblood .tl-date {
+  background: var(--accent-oxblood);
+  color: var(--ink-paper);
+}
+
+/* Conduit column: vertical cable + node */
+.tl-conduit {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: stretch;
+  min-height: 100%;
+}
+
+/* Cable segment -- thick dashed conduit */
+.tl-conduit::before {
   content: "";
   position: absolute;
-  left: 119px;
-  top: 5px;
-  bottom: 5px;
-  width: 2px;
-  background: var(--rule-line);
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--rule-line) 0px,
+    var(--rule-line) 6px,
+    transparent 6px,
+    transparent 10px
+  );
 }
 
-.timeline-event {
+/* Hide cable above first card */
+.tl-card:first-child .tl-conduit::before {
+  top: 14px;
+}
+
+/* Hide cable below last card */
+.tl-card:last-child .tl-conduit::before {
+  bottom: calc(100% - 24px);
+}
+
+/* Node / junction point */
+.tl-node {
   position: relative;
-  padding: var(--space-xs) 0 var(--space-sm) var(--space-lg);
+  z-index: 1;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  margin-top: 14px;
+  border: 2px solid var(--bg-carbon);
+  flex-shrink: 0;
+}
+
+.tl-card--jade .tl-node     { background: var(--signal-jade); }
+.tl-card--amber .tl-node    { background: var(--signal-amber); }
+.tl-card--oxblood .tl-node   { background: var(--accent-oxblood); }
+
+/* Current node: larger, pulsing, double-ring */
+.tl-card--current .tl-node {
+  width: 18px;
+  height: 18px;
+  margin-top: 12px;
+  background: var(--accent-oxblood);
+  border: 3px solid var(--bg-carbon);
+  box-shadow: 0 0 0 2px var(--accent-oxblood);
+  animation: tl-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes tl-pulse {
+  0%, 100% { box-shadow: 0 0 0 2px var(--accent-oxblood), 0 0 0 4px rgba(206, 32, 41, 0.4); }
+  50%      { box-shadow: 0 0 0 2px var(--accent-oxblood), 0 0 0 10px rgba(206, 32, 41, 0); }
+}
+
+/* --- Event Panel (the expandable card body) --- */
+.tl-panel {
+  margin: var(--space-xs) 0 var(--space-md) var(--space-md);
+  border: 1px solid var(--rule-line);
+  border-radius: 3px;
+  background: var(--bg-graphite);
+  overflow: hidden;
+  transition: border-color var(--duration-normal) var(--easing-default);
+}
+
+.tl-card--jade .tl-panel  { border-left: 3px solid var(--signal-jade-dim); }
+.tl-card--amber .tl-panel { border-left: 3px solid var(--signal-amber-3); }
+.tl-card--oxblood .tl-panel { border-left: 3px solid var(--accent-oxblood-2); }
+
+.tl-card--current .tl-panel {
+  border-color: var(--accent-oxblood-2);
+  background: var(--bg-graphite-2);
+  border-left: 3px solid var(--accent-oxblood);
+}
+
+.tl-panel:hover {
+  border-color: var(--ink-paper-faint);
+}
+
+/* Summary (the clickable header) */
+.tl-panel summary {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  cursor: pointer;
+  font-family: var(--font-mono);
   font-size: var(--type-label);
   line-height: 20px;
   color: var(--ink-paper-dim);
+  list-style: none; /* remove default marker */
+  user-select: none;
+  transition: background var(--duration-fast) var(--easing-default);
 }
 
-.timeline-date {
-  position: absolute;
-  left: -130px;
-  width: 110px;
-  text-align: right;
-  font-size: var(--type-label);
+.tl-panel summary::-webkit-details-marker { display: none; }
+
+.tl-panel summary:hover {
+  background: var(--bg-graphite-3);
+}
+
+.tl-panel summary:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+
+/* Chevron indicator */
+.tl-panel summary::before {
+  content: "\25B8"; /* right-pointing triangle */
+  flex-shrink: 0;
+  font-size: var(--type-caption);
   color: var(--ink-paper-faint);
-  letter-spacing: 0.04em;
+  transition: transform var(--duration-normal) var(--easing-default);
+  display: inline-block;
+  width: 12px;
+  text-align: center;
 }
 
-/* Timeline dot */
-.timeline-event::before {
-  content: "";
-  position: absolute;
-  left: -5px;
-  top: 5px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--signal-jade);
+.tl-panel[open] summary::before {
+  transform: rotate(90deg);
 }
 
-.timeline-event--current::before {
-  background: var(--accent-oxblood);
-  animation: pulse-dot 2s ease-in-out infinite;
+/* Event type tag inside summary */
+.tl-tag {
+  font-family: var(--font-mono);
+  font-size: var(--type-micro);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 1px var(--space-xs);
+  border-radius: 2px;
+  flex-shrink: 0;
 }
 
-@keyframes pulse-dot {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(206, 32, 41, 0.5); }
-  50%      { box-shadow: 0 0 0 6px rgba(206, 32, 41, 0); }
+.tl-tag--phase  { color: var(--signal-amber); background: rgba(210, 154, 59, 0.12); }
+.tl-tag--pi     { color: var(--signal-jade);  background: rgba(111, 163, 122, 0.12); }
+.tl-tag--sprint { color: var(--accent-oxblood); background: rgba(206, 32, 41, 0.12); }
+
+.tl-summary-text {
+  flex: 1;
 }
 
-.timeline-event--current {
+.tl-card--current .tl-summary-text {
   color: var(--ink-paper);
   font-weight: 600;
+}
+
+/* "You are here" badge */
+.tl-here-badge {
+  font-family: var(--font-mono);
+  font-size: var(--type-micro);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-paper);
+  background: var(--accent-oxblood);
+  padding: 1px var(--space-sm);
+  border-radius: 2px;
+  flex-shrink: 0;
+  animation: tl-badge-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes tl-badge-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.6; }
+}
+
+/* Expandable detail body */
+.tl-detail {
+  padding: 0 var(--space-lg) var(--space-lg) calc(var(--space-lg) + 12px);
+  font-family: var(--font-mono);
+  font-size: var(--type-label);
+  line-height: 20px;
+  color: var(--ink-paper-faint);
+  border-top: 1px solid var(--rule-line);
+}
+
+.tl-detail p {
+  margin-top: var(--space-sm);
+}
+
+/* Stat row inside detail */
+.tl-stats {
+  display: flex;
+  gap: var(--space-lg);
+  margin-top: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.tl-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.tl-stat__value {
+  font-size: var(--type-body);
+  font-weight: 700;
+  color: var(--ink-paper);
+}
+
+.tl-stat__label {
+  font-size: var(--type-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-paper-faint);
 }
 
 /* ================================================================
@@ -1383,17 +1641,17 @@ body {
             </thead>
             <tbody>
               <tr>
-                <td>Sprint A</td>
+                <td>S1</td>
                 <td>State Builder + Dashboard</td>
                 <td><span class="status-done"><span class="status-dot status-dot--jade" aria-hidden="true"></span>DONE</span></td>
               </tr>
               <tr>
-                <td>Sprint B</td>
+                <td>S2</td>
                 <td>Fleet + QA + Retro CLI</td>
                 <td><span class="status-done"><span class="status-dot status-dot--jade" aria-hidden="true"></span>DONE</span></td>
               </tr>
               <tr>
-                <td>Sprint C</td>
+                <td>S3</td>
                 <td>Schema Lint + Validation</td>
                 <td><span class="status-done"><span class="status-dot status-dot--jade" aria-hidden="true"></span>DONE</span></td>
               </tr>
@@ -1424,12 +1682,12 @@ body {
             </thead>
             <tbody>
               <tr>
-                <td>Sprint 1</td>
+                <td>S1</td>
                 <td>Constitution Generalization</td>
                 <td><span class="status-done"><span class="status-dot status-dot--jade" aria-hidden="true"></span>DONE</span></td>
               </tr>
               <tr>
-                <td>Sprint 2</td>
+                <td>S2</td>
                 <td>Fleet Ledger Pilot</td>
                 <td><span class="status-done"><span class="status-dot status-dot--jade" aria-hidden="true"></span>DONE</span></td>
               </tr>
@@ -1621,39 +1879,188 @@ body {
   </section>
 
   <!-- ============================================================
-       PROJECT TIMELINE
+       PROJECT TIMELINE -- v2 Command-Center Style
        ============================================================ -->
   <section class="timeline-section" aria-labelledby="timeline-heading">
     <h2 class="section-heading" id="timeline-heading">Project Timeline</h2>
-    <ol class="timeline" aria-label="Project milestone timeline">
-      <li class="timeline-event">
-        <span class="timeline-date">2026-05-07</span>
-        Phase 1: Dual-LLM Planning (Claude Opus + GPT 5.5)
+
+    <!-- ---- PI-0 / BOOTSTRAP ---- -->
+    <div class="tl-pi-boundary tl-pi-boundary--amber" role="separator" aria-label="Bootstrap Phase">
+      <span class="tl-pi-boundary__rule"></span>
+      <span class="tl-pi-boundary__label">Bootstrap</span>
+      <span class="tl-pi-boundary__status">Phases 1 -- 4</span>
+      <span class="tl-pi-boundary__rule"></span>
+    </div>
+
+    <ol class="tl-track" aria-label="Project milestone timeline">
+
+      <!-- Event 1 -->
+      <li class="tl-card tl-card--amber">
+        <span class="tl-date">2026-05-07</span>
+        <div class="tl-conduit"><span class="tl-node"></span></div>
+        <details class="tl-panel">
+          <summary>
+            <span class="tl-tag tl-tag--phase">Phase 1</span>
+            <span class="tl-summary-text">Dual-LLM Planning</span>
+          </summary>
+          <div class="tl-detail">
+            <p>Claude Opus 4.7 and GPT 5.5 independently generated comprehensive plans. Both were cross-reviewed and merged into FINAL_MERGED_PLAN.md. An independent reviewer provided feedback.</p>
+            <div class="tl-stats">
+              <div class="tl-stat"><span class="tl-stat__value">85 KB</span><span class="tl-stat__label">Merged plan</span></div>
+              <div class="tl-stat"><span class="tl-stat__value">15</span><span class="tl-stat__label">Sections</span></div>
+              <div class="tl-stat"><span class="tl-stat__value">2</span><span class="tl-stat__label">LLMs</span></div>
+            </div>
+          </div>
+        </details>
       </li>
-      <li class="timeline-event">
-        <span class="timeline-date">2026-05-10</span>
-        Phase 3: Format Conversion (.chatmode to .agent)
+
+      <!-- Event 2 -->
+      <li class="tl-card tl-card--amber">
+        <span class="tl-date">2026-05-10</span>
+        <div class="tl-conduit"><span class="tl-node"></span></div>
+        <details class="tl-panel">
+          <summary>
+            <span class="tl-tag tl-tag--phase">Phase 3</span>
+            <span class="tl-summary-text">Format Conversion</span>
+          </summary>
+          <div class="tl-detail">
+            <p>Converted 4 Principal agents from .chatmode.md to .agent.md format for VS Code auto-discovery. Updated all cross-references.</p>
+            <div class="tl-stats">
+              <div class="tl-stat"><span class="tl-stat__value">4</span><span class="tl-stat__label">Agents converted</span></div>
+              <div class="tl-stat"><span class="tl-stat__value">.agent.md</span><span class="tl-stat__label">New format</span></div>
+            </div>
+          </div>
+        </details>
       </li>
-      <li class="timeline-event">
-        <span class="timeline-date">2026-05-12</span>
-        Phase 4: Extraction to standalone repo
+
+      <!-- Event 3 -->
+      <li class="tl-card tl-card--amber">
+        <span class="tl-date">2026-05-12</span>
+        <div class="tl-conduit"><span class="tl-node"></span></div>
+        <details class="tl-panel">
+          <summary>
+            <span class="tl-tag tl-tag--phase">Phase 4</span>
+            <span class="tl-summary-text">Extraction to Standalone Repo</span>
+          </summary>
+          <div class="tl-detail">
+            <p>Migrated 82 SDD files from the Day-to-Day Agent repo to this standalone repository. Day-to-Day repo cleaned. New git history initialized.</p>
+            <div class="tl-stats">
+              <div class="tl-stat"><span class="tl-stat__value">82</span><span class="tl-stat__label">Files migrated</span></div>
+              <div class="tl-stat"><span class="tl-stat__value">1</span><span class="tl-stat__label">New repo</span></div>
+            </div>
+          </div>
+        </details>
       </li>
-      <li class="timeline-event">
-        <span class="timeline-date">2026-05-13</span>
-        PI-1 CLOSED: Generalization + Fleet Ledger Pilot
+
+    </ol>
+
+    <!-- ---- PI-1 ---- -->
+    <div class="tl-pi-boundary tl-pi-boundary--jade" role="separator" aria-label="PI-1 boundary">
+      <span class="tl-pi-boundary__rule"></span>
+      <span class="tl-pi-boundary__label">PI-1</span>
+      <span class="tl-pi-boundary__status">Closed</span>
+      <span class="tl-pi-boundary__rule"></span>
+    </div>
+
+    <ol class="tl-track" aria-label="PI-1 milestones">
+
+      <li class="tl-card tl-card--jade">
+        <span class="tl-date">2026-05-13</span>
+        <div class="tl-conduit"><span class="tl-node"></span></div>
+        <details class="tl-panel">
+          <summary>
+            <span class="tl-tag tl-tag--pi">PI-1</span>
+            <span class="tl-summary-text">Generalization + Fleet Ledger Pilot</span>
+          </summary>
+          <div class="tl-detail">
+            <p>Constitution generalized (removed Day-to-Day references). Fleet ledger pilot validated the lifecycle end-to-end. 2 sprints completed.</p>
+            <div class="tl-stats">
+              <div class="tl-stat"><span class="tl-stat__value">2</span><span class="tl-stat__label">Sprints</span></div>
+              <div class="tl-stat"><span class="tl-stat__value">Validated</span><span class="tl-stat__label">Fleet lifecycle</span></div>
+            </div>
+          </div>
+        </details>
       </li>
-      <li class="timeline-event">
-        <span class="timeline-date">2026-05-16</span>
-        PI-2 CLOSED: Fleet Maturity + CLI (6 features shipped)
+
+    </ol>
+
+    <!-- ---- PI-2 ---- -->
+    <div class="tl-pi-boundary tl-pi-boundary--jade" role="separator" aria-label="PI-2 boundary">
+      <span class="tl-pi-boundary__rule"></span>
+      <span class="tl-pi-boundary__label">PI-2</span>
+      <span class="tl-pi-boundary__status">Closed</span>
+      <span class="tl-pi-boundary__rule"></span>
+    </div>
+
+    <ol class="tl-track" aria-label="PI-2 milestones">
+
+      <li class="tl-card tl-card--jade">
+        <span class="tl-date">2026-05-16</span>
+        <div class="tl-conduit"><span class="tl-node"></span></div>
+        <details class="tl-panel">
+          <summary>
+            <span class="tl-tag tl-tag--pi">PI-2</span>
+            <span class="tl-summary-text">Fleet Maturity + CLI</span>
+          </summary>
+          <div class="tl-detail">
+            <p>6 features shipped: state_builder.py, fleet.py, qa.py, retro.py, schema_lint.py. 60/60 tests passing. CLI specialist earned permanent identity.</p>
+            <div class="tl-stats">
+              <div class="tl-stat"><span class="tl-stat__value">6</span><span class="tl-stat__label">Features shipped</span></div>
+              <div class="tl-stat"><span class="tl-stat__value">60/60</span><span class="tl-stat__label">Tests passing</span></div>
+              <div class="tl-stat"><span class="tl-stat__value">5</span><span class="tl-stat__label">CLI tools</span></div>
+            </div>
+          </div>
+        </details>
       </li>
-      <li class="timeline-event">
-        <span class="timeline-date">2026-05-25</span>
-        PI-3 STARTED: Portability Validation
+
+    </ol>
+
+    <!-- ---- PI-3 ---- -->
+    <div class="tl-pi-boundary tl-pi-boundary--oxblood" role="separator" aria-label="PI-3 boundary">
+      <span class="tl-pi-boundary__rule"></span>
+      <span class="tl-pi-boundary__label">PI-3</span>
+      <span class="tl-pi-boundary__status">Active</span>
+      <span class="tl-pi-boundary__rule"></span>
+    </div>
+
+    <ol class="tl-track" aria-label="PI-3 milestones">
+
+      <li class="tl-card tl-card--oxblood">
+        <span class="tl-date">2026-05-25</span>
+        <div class="tl-conduit"><span class="tl-node"></span></div>
+        <details class="tl-panel">
+          <summary>
+            <span class="tl-tag tl-tag--sprint">PI-3</span>
+            <span class="tl-summary-text">Portability Validation Started</span>
+          </summary>
+          <div class="tl-detail">
+            <p>5 sprints planned: Dashboard Freshness, Brownfield Bootstrap, PI-2 Lessons, Live UI v2, Navigation Layer.</p>
+            <div class="tl-stats">
+              <div class="tl-stat"><span class="tl-stat__value">5</span><span class="tl-stat__label">Sprints planned</span></div>
+            </div>
+          </div>
+        </details>
       </li>
-      <li class="timeline-event timeline-event--current">
-        <span class="timeline-date">2026-05-31</span>
-        S4 DONE: Live UI v2 Spec (you are here)
+
+      <li class="tl-card tl-card--oxblood tl-card--current">
+        <span class="tl-date">2026-05-31</span>
+        <div class="tl-conduit"><span class="tl-node"></span></div>
+        <details class="tl-panel" open>
+          <summary>
+            <span class="tl-tag tl-tag--sprint">S4</span>
+            <span class="tl-summary-text">Live UI v2 Spec</span>
+            <span class="tl-here-badge" aria-label="Current milestone">You are here</span>
+          </summary>
+          <div class="tl-detail">
+            <p>Spec authored (37 KB), mockup built, architect reviewed (APPROVED WITH NOTES), design-tokens skill shipped. Human feedback incorporated.</p>
+            <div class="tl-stats">
+              <div class="tl-stat"><span class="tl-stat__value">37 KB</span><span class="tl-stat__label">Spec size</span></div>
+              <div class="tl-stat"><span class="tl-stat__value">Approved</span><span class="tl-stat__label">Architect review</span></div>
+            </div>
+          </div>
+        </details>
       </li>
+
     </ol>
   </section>
 

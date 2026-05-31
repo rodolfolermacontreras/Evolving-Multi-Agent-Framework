@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRIDGE -- Live UI v2 Mockup</title>
+<style>
+/* ================================================================
+   DESIGN TOKENS
+   ================================================================ */
+:root {
+  /* Backgrounds */
+  --bg-carbon: #0a0a0a;
+  --bg-graphite: #141413;
+  --bg-graphite-2: #1c1b18;
+  --bg-graphite-3: #232220;
+
+  /* Ink */
+  --ink-paper: #e8e4d8;
+  --ink-paper-dim: #b8b4a8;
+  --ink-paper-faint: #8a8678;
+
+  /* Accent */
+  --accent-oxblood: #ce2029;
+  --accent-oxblood-2: #a01820;
+  --accent-oxblood-hover: #e02830;
+
+  /* Signals */
+  --signal-amber: #d29a3b;
+  --signal-amber-2: #e8b85a;
+  --signal-amber-3: #8a6a2a;
+  --signal-jade: #6fa37a;
+  --signal-jade-dim: #486a52;
+
+  /* Structure */
+  --rule-line: #2a2925;
+  --focus-ring: #e8e4d8;
+
+  /* Type sizes */
+  --type-micro: 10px;
+  --type-caption: 11px;
+  --type-label: 12px;
+  --type-body: 14px;
+  --type-h3: 18px;
+  --type-h2: 22px;
+  --type-h1: 28px;
+
+  /* Spacing */
+  --space-2xs: 2px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 48px;
+
+  /* Motion */
+  --duration-fast: 120ms;
+  --duration-normal: 220ms;
+  --duration-slow: 500ms;
+  --easing-default: ease-out;
+
+  /* Fonts */
+  --font-mono: ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+  --font-sans: -apple-system, "Segoe UI", Inter, system-ui, sans-serif;
+}
+
+/* ================================================================
+   RESET + BASE
+   ================================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: var(--type-body);
+  line-height: 22px;
+}
+
+body {
+  font-family: var(--font-mono);
+  background: var(--bg-carbon);
+  color: var(--ink-paper);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  min-width: 768px;
+}
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* ================================================================
+   DASHBOARD GRID
+   ================================================================ */
+.dashboard {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto auto auto auto auto auto;
+  grid-template-areas:
+    "topbar  topbar"
+    "sprint  sprint"
+    "next    wip"
+    "pi      pi"
+    "agents  agents"
+    "feed    feed"
+    "footer  footer";
+  gap: 0;
+  min-height: 100vh;
+}
+
+@media (max-width: 1279px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "topbar"
+      "sprint"
+      "next"
+      "wip"
+      "pi"
+      "agents"
+      "feed"
+      "footer";
+  }
+}
+
+/* ================================================================
+   SECTION HEADING CONVENTION
+   ================================================================ */
+.section-heading {
+  font-size: var(--type-label);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--ink-paper-dim);
+  margin-bottom: var(--space-md);
+  line-height: 16px;
+}
+
+/* ================================================================
+   TOP BAR
+   ================================================================ */
+.topbar {
+  grid-area: topbar;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xl);
+  height: 56px;
+  padding: 0 var(--space-xl);
+  background: var(--bg-graphite);
+  border-bottom: 1px solid var(--rule-line);
+}
+
+.topbar-title {
+  font-size: var(--type-h1);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--ink-paper);
+  flex-shrink: 0;
+}
+
+.topbar-mission {
+  font-family: var(--font-sans);
+  font-size: var(--type-body);
+  color: var(--ink-paper-dim);
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pi-pills {
+  display: flex;
+  gap: var(--space-xs);
+  list-style: none;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.pi-pill {
+  display: inline-block;
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--type-micro);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  line-height: 14px;
+  color: var(--ink-paper-dim);
+  background: var(--bg-graphite-3);
+  border: 1px solid var(--rule-line);
+  border-radius: 2px;
+  cursor: default;
+  transition: background var(--duration-fast) var(--easing-default);
+}
+
+.pi-pill:hover {
+  background: var(--bg-graphite-2);
+}
+
+.pi-pill[aria-current="true"] {
+  background: var(--accent-oxblood);
+  color: var(--ink-paper);
+  border-color: var(--accent-oxblood);
+}
+
+.topbar-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-shrink: 0;
+}
+
+.pulse-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--signal-jade);
+}
+
+.topbar-freshness {
+  font-size: var(--type-micro);
+  color: var(--ink-paper-dim);
+  letter-spacing: 0.14em;
+}
+
+/* ================================================================
+   SECTION 1 -- CURRENT SPRINT
+   ================================================================ */
+.sprint-section {
+  grid-area: sprint;
+  padding: var(--space-xl);
+  border-bottom: 1px solid var(--rule-line);
+}
+
+.sprint-header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xl);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-sm);
+}
+
+.sprint-name {
+  font-size: var(--type-h2);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 30px;
+  color: var(--ink-paper);
+}
+
+.sprint-goal {
+  font-size: var(--type-body);
+  color: var(--ink-paper-dim);
+  margin-bottom: var(--space-lg);
+  line-height: 22px;
+}
+
+.sprint-body {
+  display: flex;
+  gap: var(--space-xl);
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+/* Progress Ring */
+.progress-ring-wrap {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.progress-ring-wrap svg {
+  display: block;
+}
+
+.progress-ring-label {
+  font-size: var(--type-micro);
+  color: var(--ink-paper-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+/* Task counters */
+.task-grid {
+  display: flex;
+  gap: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+.task-counter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 72px;
+}
+
+.task-counter dt {
+  font-size: var(--type-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-paper-dim);
+  margin-bottom: var(--space-2xs);
+}
+
+.task-counter dd {
+  font-size: var(--type-h2);
+  font-weight: 700;
+  line-height: 30px;
+}
+
+.task-counter--done dd    { color: var(--signal-jade); }
+.task-counter--wip dd     { color: var(--accent-oxblood); }
+.task-counter--blocked dd { color: var(--signal-amber); }
+.task-counter--pending dd { color: var(--ink-paper-faint); }
+
+/* Segmented progress bar */
+.progress-bar-segmented {
+  display: flex;
+  height: 6px;
+  width: 100%;
+  margin-top: var(--space-lg);
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.progress-bar-segmented span {
+  height: 100%;
+}
+
+.seg-done    { background: var(--signal-jade); }
+.seg-wip     { background: var(--accent-oxblood); }
+.seg-blocked { background: var(--signal-amber); }
+.seg-pending { background: var(--bg-graphite-3); }
+
+/* Blockers */
+.blocker-section {
+  margin-top: var(--space-lg);
+}
+
+.blocker-list {
+  list-style: none;
+}
+
+.blocker-item {
+  padding: var(--space-sm) var(--space-md);
+  border-left: 3px solid var(--signal-amber);
+  margin-bottom: var(--space-sm);
+  background: var(--bg-graphite);
+  font-size: var(--type-body);
+  color: var(--ink-paper);
+  line-height: 22px;
+}
+
+.blocker-item strong {
+  color: var(--signal-amber);
+  font-weight: 600;
+}
+
+/* ================================================================
+   SECTION 2 -- WHAT COMES NEXT
+   ================================================================ */
+.next-section {
+  grid-area: next;
+  padding: var(--space-xl);
+  background: var(--bg-graphite);
+  border-bottom: 1px solid var(--rule-line);
+  border-right: 1px solid var(--rule-line);
+}
+
+@media (max-width: 1279px) {
+  .next-section {
+    border-right: none;
+  }
+}
+
+.next-action-card {
+  border-left: 3px solid var(--accent-oxblood);
+  padding: var(--space-md);
+  margin-bottom: var(--space-lg);
+  background: var(--bg-graphite-2);
+  border-top: 1px solid var(--rule-line);
+  border-right: 1px solid var(--rule-line);
+  border-bottom: 1px solid var(--rule-line);
+}
+
+.next-action-card h3 {
+  font-size: var(--type-h3);
+  font-weight: 600;
+  color: var(--ink-paper);
+  letter-spacing: 0.04em;
+  line-height: 26px;
+  margin-bottom: var(--space-sm);
+}
+
+.next-action-card p {
+  font-size: var(--type-body);
+  color: var(--ink-paper-dim);
+  line-height: 22px;
+}
+
+.next-meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-xs) var(--space-lg);
+  font-size: var(--type-body);
+}
+
+.next-meta dt {
+  color: var(--ink-paper-faint);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: var(--type-micro);
+  letter-spacing: 0.14em;
+  line-height: 22px;
+}
+
+.next-meta dd {
+  color: var(--ink-paper-dim);
+  line-height: 22px;
+}
+
+/* ================================================================
+   SECTION 3 -- WIP SUMMARY
+   ================================================================ */
+.wip-section {
+  grid-area: wip;
+  padding: var(--space-xl);
+  background: var(--bg-graphite);
+  border-bottom: 1px solid var(--rule-line);
+}
+
+.wip-summary-text {
+  font-size: var(--type-h3);
+  color: var(--ink-paper);
+  margin-bottom: var(--space-lg);
+  line-height: 26px;
+}
+
+.wip-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--type-body);
+}
+
+.wip-table th {
+  text-align: left;
+  font-size: var(--type-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-paper-dim);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--rule-line);
+  font-weight: 600;
+}
+
+.wip-table td {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--rule-line);
+  vertical-align: middle;
+}
+
+.wip-table tr:hover {
+  background: var(--bg-graphite-2);
+  transition: background var(--duration-fast) var(--easing-default);
+}
+
+.wip-feature-name {
+  color: var(--ink-paper-dim);
+  font-size: var(--type-label);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wip-stage-label {
+  font-size: var(--type-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding-right: var(--space-sm);
+  white-space: nowrap;
+}
+
+.wip-bar-track {
+  width: 100%;
+  height: 8px;
+  background: var(--bg-graphite-3);
+  position: relative;
+}
+
+.wip-bar-fill {
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+/* Stage colors for bar fills and labels */
+.stage-idea       { background: var(--ink-paper-faint); color: var(--ink-paper-faint); }
+.stage-spec       { background: var(--signal-amber-3);  color: var(--signal-amber-3); }
+.stage-plan       { background: var(--signal-amber);    color: var(--signal-amber); }
+.stage-implement  { background: var(--accent-oxblood);  color: var(--accent-oxblood); }
+.stage-review     { background: var(--signal-amber-2);  color: var(--signal-amber-2); }
+.stage-done       { background: var(--signal-jade);     color: var(--signal-jade); }
+
+/* ================================================================
+   SECTION 4 -- PI CONTEXT
+   ================================================================ */
+.pi-section {
+  grid-area: pi;
+  padding: var(--space-xl);
+  border-bottom: 1px solid var(--rule-line);
+}
+
+.pi-progress-bar-wrap {
+  margin-bottom: var(--space-lg);
+}
+
+.pi-progress-label {
+  font-size: var(--type-micro);
+  color: var(--ink-paper-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-bottom: var(--space-xs);
+}
+
+.pi-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--bg-graphite-3);
+  position: relative;
+}
+
+.pi-progress-fill {
+  height: 100%;
+  background: var(--signal-jade);
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.pi-tabs {
+  display: flex;
+  gap: var(--space-xs);
+  list-style: none;
+  margin-bottom: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.pi-tab {
+  display: inline-block;
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--type-micro);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-paper-dim);
+  background: var(--bg-graphite-2);
+  border: 1px solid var(--rule-line);
+  border-radius: 2px;
+  cursor: default;
+  transition: background var(--duration-fast) var(--easing-default);
+}
+
+.pi-tab:hover {
+  background: var(--bg-graphite-3);
+}
+
+.pi-tab[aria-selected="true"] {
+  background: var(--accent-oxblood);
+  color: var(--ink-paper);
+  border-color: var(--accent-oxblood);
+}
+
+.sprint-table-wrap {
+  overflow-x: auto;
+}
+
+.sprint-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--type-body);
+}
+
+.sprint-table th {
+  text-align: left;
+  font-size: var(--type-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-paper-dim);
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--rule-line);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sprint-table td {
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--rule-line);
+  color: var(--ink-paper-dim);
+  line-height: 22px;
+}
+
+.sprint-table tbody tr:hover {
+  background: var(--bg-graphite-2);
+  transition: background var(--duration-fast) var(--easing-default);
+}
+
+.status-done     { color: var(--signal-jade); }
+.status-active   { color: var(--accent-oxblood); }
+.status-blocked  { color: var(--signal-amber); }
+.status-proposed { color: var(--ink-paper-faint); }
+
+/* ================================================================
+   SECTION 5 -- AGENT ACTIVITY PLACEHOLDER
+   ================================================================ */
+.agents-section {
+  grid-area: agents;
+  padding: var(--space-xl);
+  border-bottom: 1px solid var(--rule-line);
+  border-top: 1px solid var(--rule-line);
+}
+
+.placeholder-notice {
+  font-size: var(--type-body);
+  font-style: italic;
+  color: var(--ink-paper-faint);
+  line-height: 22px;
+  margin-bottom: var(--space-lg);
+}
+
+.fleet-stats {
+  display: flex;
+  gap: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+.fleet-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 100px;
+}
+
+.fleet-stat dt {
+  font-size: var(--type-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-paper-dim);
+  margin-bottom: var(--space-2xs);
+}
+
+.fleet-stat dd {
+  font-size: var(--type-h2);
+  font-weight: 700;
+  color: var(--ink-paper);
+  line-height: 30px;
+}
+
+.data-contract-ref {
+  font-size: var(--type-caption);
+  color: var(--ink-paper-faint);
+  margin-top: var(--space-lg);
+  letter-spacing: 0.06em;
+}
+
+/* ================================================================
+   SECTION 6 -- ACTIVITY FEED
+   ================================================================ */
+.feed-section {
+  grid-area: feed;
+  padding: var(--space-xl);
+  border-bottom: 1px solid var(--rule-line);
+}
+
+.feed-scroll {
+  max-height: 480px;
+  overflow-y: auto;
+  border: 1px solid var(--rule-line);
+}
+
+.feed-scroll:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.feed-list {
+  list-style: none;
+}
+
+.feed-item {
+  display: grid;
+  grid-template-columns: 120px 80px 120px 1fr 20px;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--rule-line);
+  align-items: center;
+  font-size: var(--type-body);
+  transition: background var(--duration-fast) var(--easing-default);
+}
+
+.feed-item:last-child {
+  border-bottom: none;
+}
+
+.feed-item:hover {
+  background: var(--bg-graphite-2);
+}
+
+.feed-timestamp {
+  font-size: var(--type-micro);
+  color: var(--ink-paper-dim);
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+}
+
+.feed-type {
+  font-size: var(--type-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-paper-faint);
+  font-weight: 600;
+}
+
+.feed-agent {
+  font-size: var(--type-label);
+  color: var(--ink-paper-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feed-desc {
+  color: var(--ink-paper);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feed-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  justify-self: center;
+}
+
+.dot-jade    { background: var(--signal-jade); }
+.dot-oxblood { background: var(--accent-oxblood); }
+.dot-amber   { background: var(--signal-amber); }
+.dot-faint   { background: var(--ink-paper-faint); }
+
+/* Feed responsive */
+@media (max-width: 1279px) {
+  .feed-item {
+    grid-template-columns: 100px 70px 100px 1fr 16px;
+    font-size: var(--type-label);
+  }
+}
+
+/* ================================================================
+   FOOTER
+   ================================================================ */
+.dashboard-footer {
+  grid-area: footer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  padding: 0 var(--space-xl);
+  font-size: var(--type-micro);
+  color: var(--ink-paper-faint);
+  border-top: 1px solid var(--rule-line);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* ================================================================
+   STATUS DOTS (shared)
+   ================================================================ */
+.status-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  vertical-align: middle;
+  margin-right: var(--space-xs);
+}
+
+.status-dot--jade    { background: var(--signal-jade); }
+.status-dot--amber   { background: var(--signal-amber); }
+.status-dot--oxblood { background: var(--accent-oxblood); }
+.status-dot--faint   { background: var(--ink-paper-faint); }
+
+/* ================================================================
+   REDUCED MOTION
+   ================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="dashboard">
+
+  <!-- ============================================================
+       TOP BAR
+       ============================================================ -->
+  <header class="topbar" role="banner">
+    <h1 class="topbar-title">BRIDGE</h1>
+    <span class="topbar-mission">Evolving Multi-Agent Framework</span>
+    <nav aria-label="Program Increment selector">
+      <ol class="pi-pills">
+        <li><span class="pi-pill">PI-1</span></li>
+        <li><span class="pi-pill">PI-2</span></li>
+        <li><span class="pi-pill" aria-current="true">PI-3</span></li>
+      </ol>
+    </nav>
+    <div class="topbar-status" aria-live="polite">
+      <span class="pulse-dot" aria-hidden="true"></span>
+      <span class="topbar-freshness">Generated 2 min ago</span>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       SECTION 1 -- CURRENT SPRINT
+       ============================================================ -->
+  <section class="sprint-section" aria-labelledby="sprint-heading">
+    <h2 class="section-heading" id="sprint-heading">Current Sprint</h2>
+    <div class="sprint-header">
+      <span class="sprint-name">S4: Live UI v2 Spec</span>
+    </div>
+    <p class="sprint-goal">Author the v2 dashboard specification and produce a static visual mockup for design validation.</p>
+
+    <div class="sprint-body">
+      <!-- Progress Ring -->
+      <div class="progress-ring-wrap" aria-label="Sprint progress: 42 percent">
+        <svg width="96" height="96" viewBox="0 0 96 96" aria-hidden="true">
+          <circle cx="48" cy="48" r="40" fill="none" stroke="var(--bg-graphite-3)" stroke-width="6"/>
+          <circle cx="48" cy="48" r="40" fill="none" stroke="var(--signal-jade)" stroke-width="6"
+                  stroke-dasharray="251.3" stroke-dashoffset="145.8"
+                  transform="rotate(-90 48 48)" stroke-linecap="butt"/>
+          <text x="48" y="48" text-anchor="middle" dominant-baseline="central"
+                fill="var(--ink-paper)" font-family="var(--font-mono)" font-size="22" font-weight="700">42%</text>
+        </svg>
+        <span class="progress-ring-label">Complete</span>
+      </div>
+
+      <!-- Task Counters -->
+      <div role="group" aria-label="Task status">
+        <dl class="task-grid">
+          <div class="task-counter task-counter--done">
+            <dt>Done</dt>
+            <dd>3</dd>
+          </div>
+          <div class="task-counter task-counter--wip">
+            <dt>In Progress</dt>
+            <dd>2</dd>
+          </div>
+          <div class="task-counter task-counter--blocked">
+            <dt>Blocked</dt>
+            <dd>0</dd>
+          </div>
+          <div class="task-counter task-counter--pending">
+            <dt>Pending</dt>
+            <dd>7</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+
+    <!-- Segmented progress bar -->
+    <div class="progress-bar-segmented" role="img" aria-label="Task progress: 3 done, 2 in progress, 0 blocked, 7 pending">
+      <span class="seg-done" style="width: 25%"></span>
+      <span class="seg-wip" style="width: 16.7%"></span>
+      <span class="seg-blocked" style="width: 0%"></span>
+      <span class="seg-pending" style="width: 58.3%"></span>
+    </div>
+
+    <!-- Blockers -->
+    <div class="blocker-section" aria-label="Active blockers">
+      <h3 class="section-heading">Blockers</h3>
+      <p class="placeholder-notice">No active blockers in this sprint.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SECTION 2 -- WHAT COMES NEXT
+       ============================================================ -->
+  <section class="next-section" aria-labelledby="next-heading">
+    <h2 class="section-heading" id="next-heading">What Comes Next</h2>
+
+    <article class="next-action-card">
+      <h3>Answer S2 brownfield bootstrap question</h3>
+      <p>Pick a Day-to-Day feature to dogfood through the SDD lifecycle. This unblocks the S2 sprint goal and validates the framework end-to-end.</p>
+    </article>
+
+    <dl class="next-meta">
+      <dt>Next Gate</dt>
+      <dd><span class="status-dot status-dot--oxblood" aria-hidden="true"></span>IMPLEMENT &rarr; REVIEW for fleet-cli</dd>
+      <dt>Next Sprint</dt>
+      <dd>S5: PI-3 Retro &amp; PI-4 Planning</dd>
+    </dl>
+  </section>
+
+  <!-- ============================================================
+       SECTION 3 -- WIP SUMMARY
+       ============================================================ -->
+  <section class="wip-section" aria-labelledby="wip-heading">
+    <h2 class="section-heading" id="wip-heading">Work in Progress</h2>
+    <p class="wip-summary-text">3 of 8 features complete (38%)</p>
+
+    <table class="wip-table" aria-label="Feature lifecycle status">
+      <thead>
+        <tr>
+          <th scope="col">Feature</th>
+          <th scope="col">Stage</th>
+          <th scope="col">Progress</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="wip-feature-name">Live UI v2 Spec</td>
+          <td><span class="wip-stage-label stage-spec">SPEC</span></td>
+          <td>
+            <div class="wip-bar-track"><div class="wip-bar-fill stage-spec" style="width: 22%"></div></div>
+          </td>
+        </tr>
+        <tr>
+          <td class="wip-feature-name">Fleet CLI Commands</td>
+          <td><span class="wip-stage-label stage-implement">IMPLEMENT</span></td>
+          <td>
+            <div class="wip-bar-track"><div class="wip-bar-fill stage-implement" style="width: 67%"></div></div>
+          </td>
+        </tr>
+        <tr>
+          <td class="wip-feature-name">Schema Linter</td>
+          <td><span class="wip-stage-label stage-review">REVIEW</span></td>
+          <td>
+            <div class="wip-bar-track"><div class="wip-bar-fill stage-review" style="width: 89%"></div></div>
+          </td>
+        </tr>
+        <tr>
+          <td class="wip-feature-name">Brownfield Bootstrap</td>
+          <td><span class="wip-stage-label stage-idea">IDEA</span></td>
+          <td>
+            <div class="wip-bar-track"><div class="wip-bar-fill stage-idea" style="width: 11%"></div></div>
+          </td>
+        </tr>
+        <tr>
+          <td class="wip-feature-name">State Builder v1</td>
+          <td><span class="wip-stage-label stage-done">DONE</span></td>
+          <td>
+            <div class="wip-bar-track"><div class="wip-bar-fill stage-done" style="width: 100%"></div></div>
+          </td>
+        </tr>
+        <tr>
+          <td class="wip-feature-name">ADR System</td>
+          <td><span class="wip-stage-label stage-done">DONE</span></td>
+          <td>
+            <div class="wip-bar-track"><div class="wip-bar-fill stage-done" style="width: 100%"></div></div>
+          </td>
+        </tr>
+        <tr>
+          <td class="wip-feature-name">Skill Framework</td>
+          <td><span class="wip-stage-label stage-done">DONE</span></td>
+          <td>
+            <div class="wip-bar-track"><div class="wip-bar-fill stage-done" style="width: 100%"></div></div>
+          </td>
+        </tr>
+        <tr>
+          <td class="wip-feature-name">Azure Deployment Arch</td>
+          <td><span class="wip-stage-label stage-plan">PLAN</span></td>
+          <td>
+            <div class="wip-bar-track"><div class="wip-bar-fill stage-plan" style="width: 44%"></div></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============================================================
+       SECTION 4 -- PI CONTEXT
+       ============================================================ -->
+  <section class="pi-section" aria-labelledby="pi-heading">
+    <h2 class="section-heading" id="pi-heading">Program Increments</h2>
+
+    <!-- PI progress bar -->
+    <div class="pi-progress-bar-wrap">
+      <div class="pi-progress-label">PI-3 Progress: 40%</div>
+      <div class="pi-progress-bar" role="img" aria-label="PI-3 progress at 40 percent">
+        <div class="pi-progress-fill" style="width: 40%"></div>
+      </div>
+    </div>
+
+    <!-- PI tabs -->
+    <nav aria-label="PI selector">
+      <ul class="pi-tabs" role="tablist">
+        <li><span class="pi-tab" role="tab" aria-selected="false">PI-1</span></li>
+        <li><span class="pi-tab" role="tab" aria-selected="false">PI-2</span></li>
+        <li><span class="pi-tab" role="tab" aria-selected="true">PI-3</span></li>
+      </ul>
+    </nav>
+
+    <!-- Sprint table for PI-3 -->
+    <div class="sprint-table-wrap" role="tabpanel" aria-label="Sprints in PI-3">
+      <table class="sprint-table" aria-label="Sprints in PI-3">
+        <thead>
+          <tr>
+            <th scope="col">Sprint</th>
+            <th scope="col">Title</th>
+            <th scope="col">Status</th>
+            <th scope="col">Tasks</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>S1</td>
+            <td>Foundation Sprint</td>
+            <td><span class="status-blocked"><span class="status-dot status-dot--amber" aria-hidden="true"></span>BLOCKED</span></td>
+            <td>5</td>
+          </tr>
+          <tr>
+            <td>S2</td>
+            <td>Brownfield Bootstrap</td>
+            <td><span class="status-proposed"><span class="status-dot status-dot--faint" aria-hidden="true"></span>PROPOSED</span></td>
+            <td>0</td>
+          </tr>
+          <tr>
+            <td>S3</td>
+            <td>Fleet CLI + Schema Lint</td>
+            <td><span class="status-done"><span class="status-dot status-dot--jade" aria-hidden="true"></span>DONE</span></td>
+            <td>12</td>
+          </tr>
+          <tr>
+            <td>S4</td>
+            <td>Live UI v2 Spec</td>
+            <td><span class="status-active"><span class="status-dot status-dot--oxblood" aria-hidden="true"></span>ACTIVE</span></td>
+            <td>12</td>
+          </tr>
+          <tr>
+            <td>S5</td>
+            <td>PI-3 Retro &amp; PI-4 Planning</td>
+            <td><span class="status-done"><span class="status-dot status-dot--jade" aria-hidden="true"></span>DONE</span></td>
+            <td>8</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SECTION 5 -- AGENT ACTIVITY PLACEHOLDER
+       ============================================================ -->
+  <section class="agents-section" aria-labelledby="agents-heading">
+    <h2 class="section-heading" id="agents-heading">Fleet Activity</h2>
+
+    <p class="placeholder-notice">Per-agent real-time visibility planned for PI-5. Data contract defined in spec section 5.6.1.</p>
+
+    <div role="group" aria-label="Fleet summary">
+      <dl class="fleet-stats">
+        <div class="fleet-stat">
+          <dt>Principals</dt>
+          <dd>6</dd>
+        </div>
+        <div class="fleet-stat">
+          <dt>Workers</dt>
+          <dd>8</dd>
+        </div>
+        <div class="fleet-stat">
+          <dt>Active</dt>
+          <dd>3</dd>
+        </div>
+        <div class="fleet-stat">
+          <dt>Total Dispatches</dt>
+          <dd>147</dd>
+        </div>
+      </dl>
+    </div>
+
+    <p class="data-contract-ref">Data contract: agent_id, agent_role, current_task, last_activity, status, dispatch_count</p>
+  </section>
+
+  <!-- ============================================================
+       SECTION 6 -- ACTIVITY FEED
+       ============================================================ -->
+  <section class="feed-section" aria-labelledby="feed-heading">
+    <h2 class="section-heading" id="feed-heading">Activity Feed</h2>
+
+    <div class="feed-scroll" role="log" aria-live="off" tabindex="0">
+      <ol class="feed-list" reversed>
+        <li class="feed-item">
+          <span class="feed-timestamp">2026-05-31 14:32</span>
+          <span class="feed-type">Dispatch</span>
+          <span class="feed-agent">principal-sw-dev</span>
+          <span class="feed-desc">Dispatch UX designer for T-005 static mockup</span>
+          <span class="feed-dot dot-oxblood" aria-label="In progress"></span>
+        </li>
+        <li class="feed-item">
+          <span class="feed-timestamp">2026-05-31 13:58</span>
+          <span class="feed-type">Decision</span>
+          <span class="feed-agent">principal-ui</span>
+          <span class="feed-desc">Locked design tokens -- DESIGN_TOKENS.md finalized</span>
+          <span class="feed-dot dot-jade" aria-label="Complete"></span>
+        </li>
+        <li class="feed-item">
+          <span class="feed-timestamp">2026-05-31 12:15</span>
+          <span class="feed-type">Dispatch</span>
+          <span class="feed-agent">principal-arch</span>
+          <span class="feed-desc">Clarification review for spec.md sections 3-5</span>
+          <span class="feed-dot dot-jade" aria-label="Complete"></span>
+        </li>
+        <li class="feed-item">
+          <span class="feed-timestamp">2026-05-31 10:44</span>
+          <span class="feed-type">Commit</span>
+          <span class="feed-agent">principal-sw-dev</span>
+          <span class="feed-desc">feat(spec): add PI context navigation mapping</span>
+          <span class="feed-dot dot-jade" aria-label="Complete"></span>
+        </li>
+        <li class="feed-item">
+          <span class="feed-timestamp">2026-05-30 17:20</span>
+          <span class="feed-type">Dispatch</span>
+          <span class="feed-agent">principal-pm</span>
+          <span class="feed-desc">Triage backlog item SDD-014 Azure deployment arch</span>
+          <span class="feed-dot dot-jade" aria-label="Complete"></span>
+        </li>
+        <li class="feed-item">
+          <span class="feed-timestamp">2026-05-30 16:05</span>
+          <span class="feed-type">Decision</span>
+          <span class="feed-agent">principal-em</span>
+          <span class="feed-desc">Approved PI-3 S4 sprint plan with 12 tasks</span>
+          <span class="feed-dot dot-jade" aria-label="Complete"></span>
+        </li>
+        <li class="feed-item">
+          <span class="feed-timestamp">2026-05-30 14:30</span>
+          <span class="feed-type">Dispatch</span>
+          <span class="feed-agent">dev-cli-spec</span>
+          <span class="feed-desc">Fleet CLI qa subcommand -- 18 tests passing</span>
+          <span class="feed-dot dot-jade" aria-label="Complete"></span>
+        </li>
+        <li class="feed-item">
+          <span class="feed-timestamp">2026-05-30 11:12</span>
+          <span class="feed-type">Dispatch</span>
+          <span class="feed-agent">qa-engineer</span>
+          <span class="feed-desc">Schema lint validation -- 4 violations found, fixed</span>
+          <span class="feed-dot dot-amber" aria-label="Needs attention"></span>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="dashboard-footer">
+    <span>Generated 2026-05-31T14:35:00Z</span>
+    <span>stdlib only -- zero external dependencies</span>
+  </footer>
+
+</div>
+
+</body>
+</html>

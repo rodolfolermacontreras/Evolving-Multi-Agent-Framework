@@ -178,5 +178,11 @@
     "path": ".github/skills/operational/weekly-status-report/SKILL.md",
     "category": "operational",
     "description": "Generates or updates the weekly 1:1 status report by scanning git commits, code changes, tests, specs, sessions, and sprints. Appends a new week section to docs/1_1_STATUS_REPORT_SDD.md."
+  },
+  {
+    "id": "design-tokens",
+    "path": ".github/skills/operational/design-tokens/SKILL.md",
+    "category": "operational",
+    "description": "Enforces the framework's visual token structure: semantic color palette, modular type scale, spacing scale, motion principles, accessibility contract. Ensures tokens are implementable as CSS custom properties and maintain WCAG 2.1 AA compliance."
   }
 ]

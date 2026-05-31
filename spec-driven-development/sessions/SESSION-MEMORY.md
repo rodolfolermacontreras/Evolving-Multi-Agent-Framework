@@ -1,6 +1,6 @@
 # Session Memory — Evolving Multi-Agent Framework
 
-**Latest checkpoint:** PI-3: S3/S4/S5 DONE. S2 HITL-gated (pick dogfood feature). S1 HITL-blocked (Azure provisioning). 60/60 tests passing. Human feedback on mockup captured as Appendix D (7 items). Mockup v2 rebuilt with project context, expandable PIs, backlog, agent traceability, timeline. Commit chain through `8450eb2` on master. 60+ commits ahead of origin/master.
+**Latest checkpoint:** PI-3: S3/S4/S5 DONE. S2 HITL-gated (pick dogfood feature). S1 HITL-blocked (Azure provisioning). 60/60 tests passing. Human feedback on mockup captured as Appendix D (7 items). Mockup v3 rebuilt: project context, expandable PIs (S1/S2/S3 naming standardized), backlog, agent traceability tree + dispatch chain, graphical timeline (PI boundary markers, expandable event cards with stat blocks, "you are here" pulse). Commit chain through `f8679dd` on master. 60+ commits ahead of origin/master.
 
 **Date:** 2026-05-31
 **Owner:** Rodolfo Lerma
@@ -65,6 +65,8 @@ c416ba0  feat(skills): add design-tokens skill v1.0 (T-011, closes LESSON-007)
 2bc6b44  docs(roster): register design-tokens skill in skills.json
 3026eec  feat(s4): author plan.md, tasks.md, validation.md (T-008, T-009, T-010)
 8450eb2  feat: incorporate human feedback into Live UI v2 spec and mockup
+8f1d0ff  docs: update SESSION-MEMORY and AGENT_NOTES with mockup feedback session
+f8679dd  feat: redesign timeline + fix sprint naming consistency
 ```
 
 ## Key files changed this session

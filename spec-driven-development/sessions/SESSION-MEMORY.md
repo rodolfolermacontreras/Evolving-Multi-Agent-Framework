@@ -1,6 +1,6 @@
 # Session Memory — Evolving Multi-Agent Framework
 
-**Latest checkpoint:** PI-3: S3/S4/S5 DONE. S2 HITL-gated (pick dogfood feature). S1 HITL-blocked (Azure provisioning). 60/60 tests passing. Commit chain through `3026eec` on master. 60+ commits ahead of origin/master.
+**Latest checkpoint:** PI-3: S3/S4/S5 DONE. S2 HITL-gated (pick dogfood feature). S1 HITL-blocked (Azure provisioning). 60/60 tests passing. Human feedback on mockup captured as Appendix D (7 items). Mockup v2 rebuilt with project context, expandable PIs, backlog, agent traceability, timeline. Commit chain through `8450eb2` on master. 60+ commits ahead of origin/master.
 
 **Date:** 2026-05-31
 **Owner:** Rodolfo Lerma
@@ -16,7 +16,7 @@
 | S1 | Dashboard Freshness Unblock | **BLOCKED** | 9 HITL Azure provisioning steps. No change since PI-3 kickoff. |
 | S2 | Day-to-Day Brownfield Bootstrap | **HITL-gated** | CLARIFY doc at `specs/2026-05-26-day-to-day-brownfield-bootstrap/clarification.md`. Human picks dogfood feature. |
 | S3 | PI-2 Lessons Curation | **DONE** | 7-way parallel dispatch. 4 skills v1.0->1.1. Tech debt spec filed for PI-4. |
-| S4 | Live UI v2 Spec | **DONE** | 6 dispatches. 7 artifacts: clarification, DESIGN_TOKENS, spec (37KB), mockup (34KB), plan, tasks, validation (LOCKED). design-tokens skill v1.0 shipped. |
+| S4 | Live UI v2 Spec | **DONE** | 6 dispatches. 7 artifacts: clarification, DESIGN_TOKENS, spec (37KB), mockup (34KB), plan, tasks, validation (LOCKED). design-tokens skill v1.0 shipped. Human feedback captured as Appendix D (7 items D-1..D-7). Mockup rebuilt with project context, expandable PIs, backlog, agent traceability tree, timeline. |
 | S5 | Management Navigation Layer | **DONE** | 14/14 tasks. ADR-0011, Rule 13, Management/ structure, build-index CLI. |
 
 ## S4 Results (completed this session)
@@ -64,6 +64,7 @@ c416ba0  feat(skills): add design-tokens skill v1.0 (T-011, closes LESSON-007)
 6361ef1  docs(s4): apply Architect review notes to spec.md (T-007)
 2bc6b44  docs(roster): register design-tokens skill in skills.json
 3026eec  feat(s4): author plan.md, tasks.md, validation.md (T-008, T-009, T-010)
+8450eb2  feat: incorporate human feedback into Live UI v2 spec and mockup
 ```
 
 ## Key files changed this session

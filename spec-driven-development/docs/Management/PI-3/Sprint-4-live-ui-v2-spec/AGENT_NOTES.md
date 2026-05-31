@@ -20,6 +20,7 @@ Not a status report; a working journal.
 - **2026-05-31** by `principal-architect` (T-007): Reviewed spec. APPROVED WITH NOTES. Resolved 3 open questions (filesystem parsing, details/summary, 50-event feed cap). Flagged render_html rewrite as M effort.
 - **2026-05-31** by `principal-software-developer` (T-008/T-009/T-010): Authored plan (4 phases), tasks (14 atomic), validation (LOCKED, 15+21 criteria).
 - **2026-05-31** by `principal-ui-designer` (T-011): Authored design-tokens skill v1.0. Closes LESSON-007 (deferred from S3).
+- **2026-05-31** by `human` (mockup review): OVERALL GREAT WORK. 7 feedback items captured as Appendix D in spec.md. Key requests: all PIs expandable with themes, project context section, backlog visibility, full agent traceability per feature, agent promotion tracking, dynamic graphical timeline. Mockup rebuilt by `ux-designer-general` with D-1 through D-5 incorporated. D-6/D-7 deferred to PI-5.
 
 ## Surprises
 - The v1 DESIGN.md claimed `--accent-oxblood` has 5.1:1 contrast on carbon. Actual computed ratio is 3.6:1. The design tokens now document this accurately and constrain oxblood to large text / UI elements only.

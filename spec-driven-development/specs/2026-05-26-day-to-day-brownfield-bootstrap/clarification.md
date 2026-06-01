@@ -3,7 +3,7 @@
 **Sprint:** PI-3/S2
 **Owner:** principal-product-manager (lead), principal-architect (spec)
 **Date:** 2026-05-26
-**Status:** WAITING ON HUMAN
+**Status:** ANSWERED -- ready for SPEC
 
 ---
 
@@ -37,9 +37,7 @@ The bootstrap script needs `../day-to-day-microsoft` to exist. Confirm:
 
 ## Answers
 
-(To be filled by human)
-
 | Q | Answer | Date |
 |---|--------|------|
-| Q1 | | |
-| Q2 | | |
+| Q1 | **(b) New API endpoint: "Export report as Markdown download" (backlog item F8).** Small scope (2-3 files: one route, one test, optionally a download button in a template). Pure stdlib, no new dependencies. Clear AC: `GET /api/reports/{date}/export.md` returns 200 with `Content-Type: text/markdown` and `Content-Disposition: attachment`. Exercises the full SDD loop end-to-end. | 2026-06-01 |
+| Q2 | Repo is **not** at `C:\Training\Projects\day-to-day-microsoft` -- actual path is `C:\Training\Microsoft\Day_to_Day`. Repo is clean: branch `integration/improvements`, synced with origin, master merged at `4be0e56`. Bootstrap tooling should target the actual path. | 2026-06-01 |

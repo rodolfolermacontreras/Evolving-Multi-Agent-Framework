@@ -1,6 +1,6 @@
 # Session Memory — Evolving Multi-Agent Framework
 
-**Latest checkpoint:** PI-3: S3/S4/S5 DONE. S1 Azure provisioning COMPLETE (T-001/T-002 done 2026-06-01) -- ready for T-003/T-004 worker dispatch. S2 HITL-gated (pick dogfood feature). 60/60 tests passing. All pushed to origin (`e893f78`). Mockup v3 finalized with graphical timeline, expandable PIs, agent traceability, project context.
+**Latest checkpoint:** PI-3: S3/S4/S5 DONE. S1 Azure provisioned (T-001/T-002 done) -- T-003/T-004 ready for dispatch. S2 CLARIFY answered -- ready for SPEC. 60/60 tests passing. Committed at `4bf7a82`.
 
 **Date:** 2026-06-01
 **Owner:** Rodolfo Lerma
@@ -22,11 +22,12 @@ All 9 HITL steps executed successfully. Key outputs:
 
 **Next:** SW Dev dispatches T-003 (deploy workflow YAML) and T-004 (About section) in parallel worktrees.
 
-### S2 — Brownfield Bootstrap (2 decisions still needed)
+### S2 — Brownfield Bootstrap CLARIFY ANSWERED (2026-06-01)
 
-Open `specs/2026-05-26-day-to-day-brownfield-bootstrap/clarification.md` and answer:
-- **Q1:** Which Day-to-Day feature to dogfood? (PM suggests: UI widget, API endpoint, test coverage, or docs improvement — pick one small feature, 1-3 files)
-- **Q2:** Is the Day-to-Day repo at `C:\Training\Projects\day-to-day-microsoft` on a clean branch?
+- **Q1:** Dogfood feature = (b) "Export report as Markdown download" API endpoint (backlog F8). 2-3 files, pure stdlib, clear AC.
+- **Q2:** Repo is at `C:\Training\Microsoft\Day_to_Day` (not `day-to-day-microsoft`). Clean, merged, ready.
+
+**Next:** PM and Architect author the spec for the brownfield bootstrap + dogfood feature.
 
 ---
 
@@ -35,7 +36,7 @@ Open `specs/2026-05-26-day-to-day-brownfield-bootstrap/clarification.md` and ans
 | Sprint | Title | Status | Notes |
 |--------|-------|--------|-------|
 | S1 | Dashboard Freshness Unblock | **IN PROGRESS** | T-001/T-002 DONE (Azure provisioned 2026-06-01). T-003/T-004 ready for worker dispatch. |
-| S2 | Day-to-Day Brownfield Bootstrap | **HITL-gated** | CLARIFY doc at `specs/2026-05-26-day-to-day-brownfield-bootstrap/clarification.md`. Human picks dogfood feature. |
+| S2 | Day-to-Day Brownfield Bootstrap | **CLARIFY DONE** | Q1: dogfood = Markdown export endpoint (F8). Q2: repo at `C:\Training\Microsoft\Day_to_Day`, clean. Ready for SPEC. |
 | S3 | PI-2 Lessons Curation | **DONE** | 7-way parallel dispatch. 4 skills v1.0->1.1. Tech debt spec filed for PI-4. |
 | S4 | Live UI v2 Spec | **DONE** | 6 dispatches. 7 artifacts: clarification, DESIGN_TOKENS, spec (37KB), mockup (34KB), plan, tasks, validation (LOCKED). design-tokens skill v1.0 shipped. Human feedback captured as Appendix D (7 items D-1..D-7). Mockup rebuilt with project context, expandable PIs, backlog, agent traceability tree, timeline. |
 | S5 | Management Navigation Layer | **DONE** | 14/14 tasks. ADR-0011, Rule 13, Management/ structure, build-index CLI. |

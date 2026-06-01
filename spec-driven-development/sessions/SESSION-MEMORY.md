@@ -1,11 +1,40 @@
 # Session Memory — Evolving Multi-Agent Framework
 
-**Latest checkpoint:** PI-3: S3/S4/S5 DONE. S2 HITL-gated (pick dogfood feature). S1 HITL-blocked (Azure provisioning). 60/60 tests passing. Human feedback on mockup captured as Appendix D (7 items). Mockup v3 rebuilt: project context, expandable PIs (S1/S2/S3 naming standardized), backlog, agent traceability tree + dispatch chain, graphical timeline (PI boundary markers, expandable event cards with stat blocks, "you are here" pulse). Commit chain through `f8679dd` on master. 60+ commits ahead of origin/master.
+**Latest checkpoint:** PI-3: S3/S4/S5 DONE. S2 HITL-gated (pick dogfood feature). S1 HITL-blocked (Azure provisioning -- port exhaustion on dev machine, restart needed). 60/60 tests passing. All pushed to origin (`38bbd41`). Mockup v3 finalized with graphical timeline, expandable PIs, agent traceability, project context.
 
-**Date:** 2026-05-31
+**Date:** 2026-06-01
 **Owner:** Rodolfo Lerma
 **Repo:** https://github.com/rodolfolermacontreras/Evolving-Multi-Agent-Framework
 **Local path:** `C:\Training\Projects\Evolving-Multi-Agent-Framework`
+
+---
+
+## Resume Instructions (after machine restart)
+
+### S1 — Azure Provisioning (run these in order)
+
+You are already logged in (`az account show` confirmed subscription `05e7b074-305c-48d8-9bd0-ce5305cd027c`). After restart you may need to re-authenticate:
+
+```powershell
+az login
+az account set --subscription "05e7b074-305c-48d8-9bd0-ce5305cd027c"
+```
+
+Then the agent can run Steps 2-8 autonomously. The full 9-step script is in:
+`docs/Management/PI-3/Sprint-1-dashboard-freshness-unblock/SPEC.md` Section 8.
+
+### S2 — Brownfield Bootstrap (2 decisions needed)
+
+Open `specs/2026-05-26-day-to-day-brownfield-bootstrap/clarification.md` and answer:
+- **Q1:** Which Day-to-Day feature to dogfood? (PM suggests: UI widget, API endpoint, test coverage, or docs improvement — pick one small feature, 1-3 files)
+- **Q2:** Is the Day-to-Day repo at `C:\Training\Projects\day-to-day-microsoft` on a clean branch?
+
+### Port Exhaustion Note
+
+Machine had 18,162 ESTABLISHED connections vs 16,384 available ports. Restart will clear this. If it recurs, expand the port range (admin PowerShell):
+```powershell
+netsh int ipv4 set dynamicport tcp start=1024 num=64511
+```
 
 ---
 

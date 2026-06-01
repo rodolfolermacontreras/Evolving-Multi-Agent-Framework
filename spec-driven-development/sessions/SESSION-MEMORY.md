@@ -1,6 +1,6 @@
 # Session Memory — Evolving Multi-Agent Framework
 
-**Latest checkpoint:** PI-3: S3/S4/S5 DONE. S1 Azure provisioned (T-001/T-002 done) -- T-003/T-004 ready for dispatch. S2 CLARIFY answered -- ready for SPEC. 60/60 tests passing. Committed at `4bf7a82`.
+**Latest checkpoint:** PI-3: S3/S4/S5 DONE. S1 T-001 through T-004 DONE — merged to master, 68/68 tests, worktrees torn down. T-005 (latency probe) next after push to origin. S2 CLARIFY answered — ready for SPEC. AcrPush role granted on ACR.
 
 **Date:** 2026-06-01
 **Owner:** Rodolfo Lerma
@@ -35,7 +35,7 @@ All 9 HITL steps executed successfully. Key outputs:
 
 | Sprint | Title | Status | Notes |
 |--------|-------|--------|-------|
-| S1 | Dashboard Freshness Unblock | **IN PROGRESS** | T-001/T-002 DONE (Azure provisioned 2026-06-01). T-003/T-004 ready for worker dispatch. |
+| S1 | Dashboard Freshness Unblock | **REVIEW** | T-001 through T-004 DONE. Merged to master. 68 tests. AcrPush granted. T-005 (latency probe) after push to origin. |
 | S2 | Day-to-Day Brownfield Bootstrap | **CLARIFY DONE** | Q1: dogfood = Markdown export endpoint (F8). Q2: repo at `C:\Training\Microsoft\Day_to_Day`, clean. Ready for SPEC. |
 | S3 | PI-2 Lessons Curation | **DONE** | 7-way parallel dispatch. 4 skills v1.0->1.1. Tech debt spec filed for PI-4. |
 | S4 | Live UI v2 Spec | **DONE** | 6 dispatches. 7 artifacts: clarification, DESIGN_TOKENS, spec (37KB), mockup (34KB), plan, tasks, validation (LOCKED). design-tokens skill v1.0 shipped. Human feedback captured as Appendix D (7 items D-1..D-7). Mockup rebuilt with project context, expandable PIs, backlog, agent traceability tree, timeline. |

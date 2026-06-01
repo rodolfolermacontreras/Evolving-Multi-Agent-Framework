@@ -68,8 +68,8 @@ Full validation contract: see locked [`validation.md`](../../specs/2026-05-16-da
 |----|-------------|-------|-----|--------|----------|
 | T-001 | Provision deploy app reg + federated credential (Azure) | Human | [HITL] | **DONE** | n/a |
 | T-002 | Verify preconditions (cred, vars, role, GH notifications) | Human | [HITL] | **DONE** | n/a |
-| T-003 | Author `.github/workflows/deploy-dashboard.yml` TDD-first | developer-general | [P][AFK] | Blocked on T-002 | `wt-pi3-s1-freshness-workflow` |
-| T-004 | About-section template block + unit tests in `state_builder.py` | developer-general | [P][AFK] | Blocked on T-002 (parallel-safe with T-003) | `wt-pi3-s1-freshness-about` |
+| T-003 | Author `.github/workflows/deploy-dashboard.yml` TDD-first | developer-general | [P][AFK] | **DONE** | `wt-pi3-s1-freshness-workflow` |
+| T-004 | About-section template block + unit tests in `state_builder.py` | developer-general | [P][AFK] | **DONE** | `wt-pi3-s1-freshness-about` |
 | T-005 | Live latency probe after first auto-deploy on master | Human | [HITL] | Blocked on T-003/T-004 merge | n/a |
 
 Tags: `[P]` parallelizable, `[S]` sequential, `[AFK]` autonomous-safe, `[HITL]` human-in-the-loop.
@@ -212,4 +212,5 @@ Per [`RULES.md`](../RULES.md) Section 4, AND:
 | 2026-05-18 | Checkpoint paused -- waiting on HITL Azure provisioning |
 | 2026-05-25 | PI-3 kickoff -- revived as Sprint 1; this detail doc authored |
 | 2026-06-01 | T-001/T-002 COMPLETE. Azure provisioning done: app reg, SP, federated cred, role, GH variables. Blocker cleared. |
-| _next_ | SW Dev dispatches T-003 + T-004 in parallel worktrees |
+| 2026-06-01 | T-003/T-004 COMPLETE. Both implemented, tested, merged to master. 68 tests passing. Worktrees torn down. AcrPush role granted on ACR. |
+| _next_ | T-005: Human runs live latency probe after first push to origin triggers workflow |

@@ -66,8 +66,8 @@ Full validation contract: see locked [`validation.md`](../../specs/2026-05-16-da
 
 | ID | Description | Owner | Tag | Status | Worktree |
 |----|-------------|-------|-----|--------|----------|
-| T-001 | Provision deploy app reg + federated credential (Azure) | Human | [HITL] | **PENDING** | n/a |
-| T-002 | Verify preconditions (cred, vars, role, GH notifications) | Human | [HITL] | **PENDING** | n/a |
+| T-001 | Provision deploy app reg + federated credential (Azure) | Human | [HITL] | **DONE** | n/a |
+| T-002 | Verify preconditions (cred, vars, role, GH notifications) | Human | [HITL] | **DONE** | n/a |
 | T-003 | Author `.github/workflows/deploy-dashboard.yml` TDD-first | developer-general | [P][AFK] | Blocked on T-002 | `wt-pi3-s1-freshness-workflow` |
 | T-004 | About-section template block + unit tests in `state_builder.py` | developer-general | [P][AFK] | Blocked on T-002 (parallel-safe with T-003) | `wt-pi3-s1-freshness-about` |
 | T-005 | Live latency probe after first auto-deploy on master | Human | [HITL] | Blocked on T-003/T-004 merge | n/a |
@@ -211,4 +211,5 @@ Per [`RULES.md`](../RULES.md) Section 4, AND:
 | 2026-05-16 | Spec, plan, tasks, validation, clarification, ADR-009 all approved |
 | 2026-05-18 | Checkpoint paused -- waiting on HITL Azure provisioning |
 | 2026-05-25 | PI-3 kickoff -- revived as Sprint 1; this detail doc authored |
-| _next_ | Human runs 9 HITL steps and reports "done" |
+| 2026-06-01 | T-001/T-002 COMPLETE. Azure provisioning done: app reg, SP, federated cred, role, GH variables. Blocker cleared. |
+| _next_ | SW Dev dispatches T-003 + T-004 in parallel worktrees |

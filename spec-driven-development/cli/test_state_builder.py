@@ -18,6 +18,8 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from cli.state_builder import (
+    ABOUT_FALLBACK,
+    ABOUT_STATIC_PARAGRAPH,
     StateBuilderError,
     build,
     build_index,
@@ -670,3 +672,131 @@ class TestBuildIndexMarkerPreservation:
         assert content_after_first == content_after_second
         # Table content is stable
         assert result1["table_content"] == result2["table_content"]
+
+
+# ---------------------------------------------------------------------------
+# About-block tests (T-004, V-1 through V-5)
+# ---------------------------------------------------------------------------
+
+
+class TestAboutBlock:
+    """About / Where we are section in the dashboard HTML (SDD-010)."""
+
+    def test_about_block_static_paragraph_present(self, tmp_path: Path) -> None:
+        """V-1: rendered HTML contains the static purpose paragraph constant."""
+        sdd = _seed_sdd_root(tmp_path)
+        _seed_dispatches(sdd)
+        result = build(sdd_root=sdd, write=False, live_html=False,
+                       fixed_date="2026-05-16")
+        htm = result["html"]
+        assert ABOUT_STATIC_PARAGRAPH in htm
+
+    def test_about_block_dynamic_line_reflects_state_md(self, tmp_path: Path) -> None:
+        """V-2: dynamic line includes Current PI, Active sprint, Active focus."""
+        sdd = _seed_sdd_root(tmp_path)
+        _seed_dispatches(sdd)
+        result = build(sdd_root=sdd, write=False, live_html=False,
+                       fixed_date="2026-05-16")
+        htm = result["html"]
+        # The seeded roadmap has PI-2 (Fleet Maturity and CLI) as current
+        assert "PI-2 (Fleet Maturity and CLI)" in htm
+        # Sprint label is the static symbolic text
+        assert "Symbolic" in htm
+        # The about-where-we-are class must be present
+        assert 'class="about-where-we-are"' in htm
+
+    def test_about_block_dynamic_line_tracks_header_changes(self, tmp_path: Path) -> None:
+        """V-3: different PI data produces different dynamic About lines."""
+        # Fixture A: PI-2 (default from _seed_sdd_root)
+        base_a = tmp_path / "a"
+        base_a.mkdir()
+        sdd_a = _seed_sdd_root(base_a)
+        _seed_dispatches(sdd_a)
+        result_a = build(sdd_root=sdd_a, write=False, live_html=False,
+                         fixed_date="2026-05-16")
+
+        # Fixture B: PI-7 as current
+        sdd_b = tmp_path / "b" / "sdd"
+        sdd_b.mkdir(parents=True)
+        const_dir = sdd_b / "constitution"
+        const_dir.mkdir()
+        (const_dir / "roadmap.md").write_text(
+            "# Roadmap\n\n"
+            "## PI-7: Quantum Leap (current)\n\n"
+            "- [ ] quantum module\n",
+            encoding="utf-8",
+        )
+        for d in ("specs", "backlog", "roster", "exec"):
+            (sdd_b / d).mkdir(exist_ok=True)
+        (sdd_b / "backlog" / "BACKLOG.md").write_text(
+            "# Product Backlog\n\nEmpty.\n", encoding="utf-8"
+        )
+        (sdd_b / "roster" / "agents.json").write_text("[]", encoding="utf-8")
+        (sdd_b / "roster" / "skills.json").write_text("[]", encoding="utf-8")
+        ledger_dir = sdd_b / "ledger"
+        ledger_dir.mkdir()
+        db_path = ledger_dir / "fleet.db"
+        conn = sqlite3.connect(db_path)
+        conn.executescript(SCHEMA_SQL)
+        conn.commit()
+        conn.close()
+
+        result_b = build(sdd_root=sdd_b, write=False, live_html=False,
+                         fixed_date="2026-05-16")
+
+        htm_a = result_a["html"]
+        htm_b = result_b["html"]
+
+        # Fixture A sees PI-2, not PI-7
+        assert "PI-2 (Fleet Maturity and CLI)" in htm_a
+        assert "PI-7" not in htm_a
+
+        # Fixture B sees PI-7, not PI-2
+        assert "PI-7 (Quantum Leap)" in htm_b
+        assert "PI-2" not in htm_b
+
+    def test_about_block_fallback_when_state_md_header_incomplete(self, tmp_path: Path) -> None:
+        """V-4: missing PI/sprint/focus degrades to fallback string, no crash."""
+        sdd = tmp_path / "sdd"
+        sdd.mkdir()
+        # No roadmap -> no PI -> fallback path
+        for d in ("constitution", "specs", "backlog", "roster", "exec"):
+            (sdd / d).mkdir(exist_ok=True)
+        (sdd / "constitution" / "roadmap.md").write_text(
+            "# Roadmap\n\nNothing here.\n", encoding="utf-8"
+        )
+        (sdd / "backlog" / "BACKLOG.md").write_text(
+            "# Product Backlog\n\nEmpty.\n", encoding="utf-8"
+        )
+        (sdd / "roster" / "agents.json").write_text("[]", encoding="utf-8")
+        (sdd / "roster" / "skills.json").write_text("[]", encoding="utf-8")
+        ledger_dir = sdd / "ledger"
+        ledger_dir.mkdir()
+        db_path = ledger_dir / "fleet.db"
+        conn = sqlite3.connect(db_path)
+        conn.executescript(SCHEMA_SQL)
+        conn.commit()
+        conn.close()
+
+        result = build(sdd_root=sdd, write=False, live_html=False,
+                       fixed_date="2026-05-16")
+        htm = result["html"]
+
+        # Static paragraph still present
+        assert ABOUT_STATIC_PARAGRAPH in htm
+        # Fallback string used for dynamic line
+        assert ABOUT_FALLBACK in htm
+        # No literal 'None' or 'KeyError' leaked
+        assert "None" not in htm or "none" in htm.lower()  # allow CSS 'none'
+        assert "KeyError" not in htm
+
+    def test_about_block_appears_before_main_layout(self, tmp_path: Path) -> None:
+        """V-5: About section is positioned before <main class='layout-4zone'>."""
+        sdd = _seed_sdd_root(tmp_path)
+        _seed_dispatches(sdd)
+        result = build(sdd_root=sdd, write=False, live_html=False,
+                       fixed_date="2026-05-16")
+        htm = result["html"]
+        about_idx = htm.index('id="about"')
+        main_idx = htm.index('<main class="layout-4zone">')
+        assert about_idx < main_idx

@@ -54,6 +54,20 @@ def repo_root_for(sdd_root: Path) -> Path:
 
 
 # ---------------------------------------------------------------------------- #
+# About-section constants (SDD-010)
+# ---------------------------------------------------------------------------- #
+
+ABOUT_STATIC_PARAGRAPH = (
+    "The Evolving Multi-Agent Framework is an AI-powered software development "
+    "system that uses coordinated specialist agents to deliver working code "
+    "through a structured lifecycle. This dashboard is built by the framework "
+    "whose progress it tracks."
+)
+
+ABOUT_FALLBACK = "Current focus information is unavailable."
+
+
+# ---------------------------------------------------------------------------- #
 # Stage detection (used by HTML dashboard + as a fallback in MD pipeline)
 # ---------------------------------------------------------------------------- #
 
@@ -967,7 +981,9 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
                 roster: dict, ledger: LedgerView, commits: list[tuple[str, str, str]],
                 next_action: tuple[str, str, str | None],
                 live: bool = False, port: int | None = None,
-                all_pis: list[PIBlock] | None = None) -> str:
+                all_pis: list[PIBlock] | None = None,
+                about_pi: str = "", about_sprint: str = "",
+                about_focus: str = "") -> str:
     """Render the 4-zone v3 Bridge dashboard."""
 
     # ---- TOP BAR ---------------------------------------------------------
@@ -1193,6 +1209,20 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
     </section>
     """
 
+    # ---- ABOUT SECTION (SDD-010) ----------------------------------------
+    if about_pi and about_sprint and about_focus:
+        about_dynamic = (
+            f'{h(about_pi)} | {h(about_sprint)} | {h(about_focus)}'
+        )
+    else:
+        about_dynamic = h(ABOUT_FALLBACK)
+    about_section_html = (
+        f'<section id="about">'
+        f'<p>{h(ABOUT_STATIC_PARAGRAPH)}</p>'
+        f'<p class="about-where-we-are">{about_dynamic}</p>'
+        f'</section>'
+    )
+
     return f"""<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8">
@@ -1214,6 +1244,7 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
     {refresh_btn}
   </div>
 </header>
+{about_section_html}
 <main class="layout-4zone">
   {zone_a_html}
   {zone_b_html}
@@ -1247,6 +1278,11 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
     generated_date = fixed_date or dt.date.today().isoformat()        # MD: day precision = deterministic
     generated_at = fixed_date or dt.datetime.now().strftime("%Y-%m-%d %H:%M")  # HTML: more precise
 
+    # About-section values (SDD-010): reuse the same header values as state.md
+    about_pi = f"{pi.name} ({pi.title})" if pi else ""
+    about_sprint = "Symbolic -- AI fleet compresses wall-clock time"
+    about_focus = next_action[0] if next_action else ""
+
     md = render_markdown(
         generated_date=generated_date, pi=pi, features=features, backlog=backlog,
         roster=roster, ledger=ledger, next_action=next_action,
@@ -1255,6 +1291,7 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
         generated_at=generated_at, pi=pi, features=features, roster=roster,
         ledger=ledger, commits=commits, next_action=next_action,
         live=live_html, port=port, all_pis=pis,
+        about_pi=about_pi, about_sprint=about_sprint, about_focus=about_focus,
     )
 
     result = {

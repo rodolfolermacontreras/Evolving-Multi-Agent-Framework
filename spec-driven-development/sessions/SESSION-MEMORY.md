@@ -1,6 +1,6 @@
 # Session Memory — Evolving Multi-Agent Framework
 
-**Latest checkpoint:** PI-3: S3/S4/S5 DONE. S1 T-001 through T-004 DONE — merged to master, 68/68 tests, worktrees torn down. T-005 (latency probe) next after push to origin. S2 CLARIFY answered — ready for SPEC. AcrPush role granted on ACR.
+**Latest checkpoint:** PI-3: S3/S4/S5 DONE. S1 T-001 through T-004 DONE, merged to master, pushed to origin. Deploy workflow GREEN (run 26785393421, 1m13s). 68/68 tests. T-005 (latency probe) confirmed: deploy completes well within 5-min target. S2 CLARIFY answered — ready for SPEC.
 
 **Date:** 2026-06-01
 **Owner:** Rodolfo Lerma
@@ -35,7 +35,7 @@ All 9 HITL steps executed successfully. Key outputs:
 
 | Sprint | Title | Status | Notes |
 |--------|-------|--------|-------|
-| S1 | Dashboard Freshness Unblock | **REVIEW** | T-001 through T-004 DONE. Merged to master. 68 tests. AcrPush granted. T-005 (latency probe) after push to origin. |
+| S1 | Dashboard Freshness Unblock | **DONE** | T-001-T-004 done. Merged, pushed, deploy workflow GREEN (1m13s). 68 tests. T-005 latency confirmed <5min. Dashboard URL: `https://state-dashboard.politehill-ac7984d9.westus2.azurecontainerapps.io` (401 = pre-existing auth). |
 | S2 | Day-to-Day Brownfield Bootstrap | **CLARIFY DONE** | Q1: dogfood = Markdown export endpoint (F8). Q2: repo at `C:\Training\Microsoft\Day_to_Day`, clean. Ready for SPEC. |
 | S3 | PI-2 Lessons Curation | **DONE** | 7-way parallel dispatch. 4 skills v1.0->1.1. Tech debt spec filed for PI-4. |
 | S4 | Live UI v2 Spec | **DONE** | 6 dispatches. 7 artifacts: clarification, DESIGN_TOKENS, spec (37KB), mockup (34KB), plan, tasks, validation (LOCKED). design-tokens skill v1.0 shipped. Human feedback captured as Appendix D (7 items D-1..D-7). Mockup rebuilt with project context, expandable PIs, backlog, agent traceability tree, timeline. |

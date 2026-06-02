@@ -1,6 +1,6 @@
 # Session Memory — Evolving Multi-Agent Framework
 
-**Latest checkpoint:** PI-4: ALL SPRINTS DONE. Live UI v2 shipped (90 tests). Root README created. Roadmap updated. Alpha release ready.
+**Latest checkpoint:** PI-4: S1+S2 DONE. Agent lineage shipped (94 tests). Spec retroactively amended. LESSON-014 captured. Dashboard deployed to Azure.
 
 **Date:** 2026-06-02
 **Owner:** Rodolfo Lerma
@@ -13,8 +13,9 @@
 
 ### PI-4 Summary
 
-- **S1 (Live UI v2)**: DONE. state_builder.py rewritten to v3.0 sprint-first layout. 90 tests. HTML renderer, data-layer functions, accessibility audit, security tests, integration tests. Code review fix (try/finally for sqlite).
-- **S2 (Alpha Release Housekeeping)**: DONE. Root README.md rewritten with quickstart, key concepts, origin story. Roadmap updated (PI-1 through PI-4). Domain skills already annotated as examples. GitHub Actions versions verified (Node 20+). SESSION-MEMORY updated.
+- **S1 (Live UI v2)**: DONE. state_builder.py rewritten to v3.0 sprint-first layout. Agent lineage section added (roster table + promotion timeline). 94 tests. HTML renderer, data-layer functions, accessibility audit, security tests, integration tests. Code review fix (try/finally for sqlite).
+- **S2 (Alpha Release Housekeeping)**: DONE. Root README.md rewritten with quickstart, key concepts, origin story. Roadmap updated (PI-1 through PI-4). Domain skills already annotated as examples. GitHub Actions versions verified (Node 20+).
+- **Post-S2 fixes**: Dashboard bugs fixed (PI detection, feature stages, 404 links, PI_MISSION dict, missing RETROs). ARCHITECTURE.md created (530 lines). Live dashboard URL documented. Auto-launch idea captured. Agent lineage section added to Section 5. Spec amended retroactively with LESSON-014.
 
 **Next:** PI-5 planning, team onboarding, second-project bootstrap.
 
@@ -24,12 +25,19 @@
 
 | Sprint | Title | Status | Notes |
 |--------|-------|--------|-------|
-| S1 | Live UI v2 | **DONE** | v3.0 sprint-first layout. 90 tests. 4 commits (data-layer, renderer rewrite, a11y/security/integration, code review fix). |
-| S2 | Alpha Release Housekeeping | **DONE** | README rewritten. Roadmap updated PI-1 through PI-4. Domain skills verified (already annotated). Session memory updated. |
+| S1 | Live UI v2 | **DONE** | v3.0 sprint-first layout. 94 tests. Agent lineage (roster + timeline). |
+| S2 | Alpha Release Housekeeping | **DONE** | README rewritten. Roadmap updated PI-1 through PI-4. |
 
 ## Commit chain (PI-4)
 
 ```
+216eb8d  docs: amend live-ui-v2 spec Section 5.6 to match shipped agent lineage feature
+cb117d8  feat: replace agent activity placeholder with full agent lineage section
+59900a0  docs: capture auto-launch dashboard idea in IDEAS.md
+6bb06e6  fix: dashboard shows PI-4, correct feature stages, no 404 links
+7116713  docs: add live dashboard URL to README and ARCHITECTURE
+dc84f32  docs: add comprehensive ARCHITECTURE.md with code and framework diagrams
+707fdc1  feat: alpha release housekeeping -- README, roadmap, domain skill annotations (PI-4 S2)
 86748f3  fix: use try/finally for sqlite connection in load_decisions() (code review)
 7abb353  feat: add accessibility audit, security tests, and integration tests (T-012..T-014)
 a16819a  feat: rewrite HTML renderer to v3.0 sprint-first layout (T-005..T-011)
@@ -37,14 +45,17 @@ b7ce642  feat: add data-layer functions for Live UI v2 (T-001..T-004)
 a702c23  docs: kick off PI-4 -- Alpha Release
 ```
 
+## Lessons captured
+
+- **LESSON-014**: Implementation preceded spec amendment. Agent lineage was built before the spec was updated. Root cause: EM routed human request directly to implementation instead of checking spec alignment via Architect first. Action: add spec alignment check to implement skill.
+
 ## What to do when resuming
 
 ### Immediate next steps:
 
-1. **PI-5 Planning** -- run `/replan` to define PI-5 objectives. Candidates: team onboarding guide, second-project bootstrap (non-Day-to-Day), GENERALIZATION_SDD.md v1.0, template repo packaging.
+1. **PI-5 Planning** -- run `/replan` to define PI-5 objectives. Candidates: real-time agent dispatch status (Section 5.6.1 data contract), team onboarding guide, second-project bootstrap (non-Day-to-Day), GENERALIZATION_SDD.md v1.0, template repo packaging, auto-launch dashboard on session start.
 2. **Team onboarding** -- share the repo with teammates. The new README provides the entry point. Point them to the 3-Hour Bootstrap in GENERALIZATION_SDD.md Section 3.
 3. **Second-project bootstrap** -- pick a new project (different tech stack from Day-to-Day) and run the full greenfield bootstrap to validate portability.
-4. **Push to origin** -- `git push origin master` after S2 commit.
 
 ### Session read order for a fresh agent:
 1. `INSTRUCTIONS.md` (repo root)

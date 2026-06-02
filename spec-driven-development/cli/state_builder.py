@@ -1106,64 +1106,52 @@ table.sprint-table tbody tr:hover {
   font-size: var(--fs-sm); color: var(--color-text-tertiary);
   font-style: italic; padding: var(--sp-2) 0;
 }
-.agent-table {
-  width: 100%; border-collapse: collapse;
-  margin-bottom: var(--sp-3);
+/* Agent hierarchy tree */
+.agent-tree {
+  font-size: var(--type-label, var(--fs-sm));
+  line-height: 24px;
+  padding: var(--space-md, var(--sp-2)) var(--space-lg, var(--sp-3));
+  background: var(--bg-graphite);
+  border: 1px solid var(--rule-line);
+  margin-bottom: var(--space-xl, var(--sp-3));
+  overflow-x: auto;
+  white-space: pre;
+  font-family: var(--type-mono);
 }
-.agent-table th,
-.agent-table td {
-  padding: var(--sp-1) var(--sp-2);
-  text-align: left; border-bottom: 1px solid var(--rule-line);
-  font-size: var(--fs-sm);
+.agent-principal { color: var(--accent-oxblood); font-weight: 600; }
+.agent-worker { color: var(--ink-paper-dim); }
+.agent-tree-chrome { color: var(--ink-paper-faint); }
+.agent-tree-action { color: var(--ink-paper-faint); font-weight: 400; }
+
+/* Recent dispatch chain table */
+.dispatch-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--type-label, var(--fs-sm));
 }
-.agent-table th {
-  color: var(--ink-paper-faint); text-transform: uppercase;
-  letter-spacing: 0.08em; font-size: var(--fs-xs);
-}
-.agent-table td.agent-id {
-  font-family: var(--type-mono); font-size: var(--fs-xs);
-}
-.kind-badge {
-  display: inline-block; padding: 2px 8px;
-  border-radius: 3px; font-size: var(--fs-xs);
-  font-weight: 600; letter-spacing: 0.05em;
+.dispatch-table th {
+  text-align: left;
+  font-size: var(--type-micro, var(--fs-xs));
   text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-paper-dim);
+  padding: var(--space-sm, var(--sp-1)) var(--space-md, var(--sp-2));
+  border-bottom: 1px solid var(--rule-line);
+  font-weight: 600;
+  white-space: nowrap;
 }
-.kind-principal { background: var(--accent-oxblood); color: var(--ink-paper); }
-.kind-specialist { background: var(--signal-jade); color: var(--bg-carbon); }
-.kind-generic { background: var(--signal-amber); color: var(--bg-carbon); }
-.provenance-text {
-  max-width: 280px; overflow: hidden;
-  text-overflow: ellipsis; white-space: nowrap;
-  color: var(--ink-paper-dim); font-size: var(--fs-xs);
+.dispatch-table td {
+  padding: var(--space-sm, var(--sp-1)) var(--space-md, var(--sp-2));
+  border-bottom: 1px solid var(--rule-line);
+  color: var(--ink-paper-dim);
+  line-height: 22px;
+  white-space: nowrap;
 }
-.timeline-section {
-  margin-top: var(--sp-3);
-  border-top: 1px solid var(--rule-line);
-  padding-top: var(--sp-2);
+.dispatch-table tbody tr:hover {
+  background: var(--bg-graphite-2);
+  transition: background var(--duration-fast, 150ms) var(--easing-default, ease);
 }
-.timeline-section h3 {
-  font-size: var(--fs-sm); color: var(--ink-paper-dim);
-  margin-bottom: var(--sp-2); text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-.timeline-event {
-  display: flex; gap: var(--sp-2); align-items: baseline;
-  padding: var(--sp-1) 0;
-  border-left: 2px solid var(--accent-oxblood);
-  padding-left: var(--sp-2); margin-bottom: var(--sp-1);
-}
-.timeline-event .tl-date {
-  font-family: var(--type-mono); font-size: var(--fs-xs);
-  color: var(--ink-paper-faint); white-space: nowrap;
-}
-.timeline-event .tl-agent {
-  font-family: var(--type-mono); font-size: var(--fs-xs);
-  color: var(--ink-paper); font-weight: 600;
-}
-.timeline-event .tl-desc {
-  font-size: var(--fs-xs); color: var(--ink-paper-dim);
-}
+.dispatch-chain { color: var(--ink-paper-faint); }
 
 /* SECTION 6: Activity Feed ------------------------------------- */
 .feed-container {
@@ -1337,7 +1325,7 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
     """Render the v3.0 sprint-first dashboard.
 
     The page has a fixed 7-section grid: top bar + Current Sprint, What
-    Comes Next, WIP Summary, PI Context, Agent Lineage,
+    Comes Next, WIP Summary, PI Context, Fleet -- Agent Traceability,
     Activity Feed, and a footer.  Each section degrades to an explicit
     empty-state message when its data is missing.
     """
@@ -1581,7 +1569,7 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
         f'</section>'
     )
 
-    # ---- SECTION 5: Agent Lineage -------------------------------------------
+    # ---- SECTION 5: Fleet -- Agent Traceability ------------------------------
     def _stat(n: int, label: str) -> str:
         return (
             f'<div class="fleet-stat">'
@@ -1589,89 +1577,172 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
             f'</div>'
         )
 
+    # Workers = generic + specialist
+    worker_count = roster.get("generic", 0) + roster.get("specialist", 0)
+    # Active = dispatches with outcome IS NULL
+    active_count = sum(
+        1 for d in (ledger.recent or []) if d.get("outcome") is None
+    )
+    # Total dispatches
+    total_dispatches = len(ledger.recent or [])
+
     fleet_stats_html = (
         f'<div class="fleet-summary">'
         f'{_stat(roster.get("principals", 0), "Principals")}'
-        f'{_stat(roster.get("generic", 0), "Generic")}'
-        f'{_stat(roster.get("specialist", 0), "Specialist")}'
-        f'{_stat(roster.get("total_skills", 0), "Skills")}'
+        f'{_stat(worker_count, "Workers")}'
+        f'{_stat(active_count, "Active")}'
+        f'{_stat(total_dispatches, "Total Dispatches")}'
         f'</div>'
     )
 
-    # -- Agent roster table --
+    # -- Agent hierarchy tree --
     agents_list = roster.get("agents") or []
-    agent_rows = ""
-    for ag in agents_list:
-        aid = h(ag.get("id", ""))
-        role = h(ag.get("role", ""))
-        kind = ag.get("kind", "generic")
-        kind_cls = f"kind-{kind}" if kind in ("principal", "specialist", "generic") else "kind-generic"
-        kind_label = h(kind)
-        spec = h(ag.get("specialization") or "--")
-        created = h(ag.get("created_at") or "--")
-        prov_raw = ag.get("provenance") or ""
-        prov_short = h(prov_raw[:80]) if prov_raw else "--"
-        prov_full = h(prov_raw) if prov_raw else ""
-        prov_cell = (
-            f'<span class="provenance-text" title="{prov_full}">{prov_short}</span>'
-            if prov_raw else '<span class="provenance-text">--</span>'
+
+    # Build dispatch map: agent_id -> list of dispatches
+    _dispatch_map: dict[str, list[dict]] = {}
+    for d in (ledger.recent or []):
+        aid = d.get("agent_id", "")
+        _dispatch_map.setdefault(aid, []).append(d)
+
+    # Separate principals and workers
+    principals = [a for a in agents_list if a.get("kind") == "principal"]
+    workers = [a for a in agents_list if a.get("kind") != "principal"]
+
+    # Build worker -> principal mapping based on dispatches
+    # Workers are shown under the principal that dispatched them (heuristic:
+    # if the worker has dispatches, show under SW Dev; otherwise under EM)
+    worker_by_principal: dict[str, list[dict]] = {}
+    for p in principals:
+        worker_by_principal[p["id"]] = []
+
+    # Assign workers with dispatches under SW Dev-like principals, others under EM
+    sw_dev_id = ""
+    em_id = ""
+    for p in principals:
+        role_lower = (p.get("role") or "").lower()
+        if "sw" in role_lower or "software" in role_lower or "dev" in role_lower:
+            sw_dev_id = p["id"]
+        if "exec" in role_lower or "em" in role_lower or "manager" in role_lower:
+            em_id = p["id"]
+    # Fallback: use first principal as EM, second with dev role as SW Dev
+    if not em_id and principals:
+        em_id = principals[0]["id"]
+    if not sw_dev_id and len(principals) > 1:
+        sw_dev_id = principals[1]["id"]
+    elif not sw_dev_id and principals:
+        sw_dev_id = principals[0]["id"]
+
+    for w in workers:
+        wid = w.get("id", "")
+        if wid in _dispatch_map:
+            worker_by_principal.setdefault(sw_dev_id, []).append(w)
+        else:
+            worker_by_principal.setdefault(em_id, []).append(w)
+
+    def _status_dot(agent_id: str) -> str:
+        """Return jade dot if idle, oxblood if has active dispatch."""
+        has_active = any(
+            d.get("outcome") is None
+            for d in _dispatch_map.get(agent_id, [])
         )
-        agent_rows += (
-            f'<tr>'
-            f'<td class="agent-id">{aid}</td>'
-            f'<td>{role}</td>'
-            f'<td><span class="kind-badge {kind_cls}">{kind_label}</span></td>'
-            f'<td>{spec}</td>'
-            f'<td>{created}</td>'
-            f'<td>{prov_cell}</td>'
-            f'</tr>'
+        if has_active:
+            return '<span class="status-dot dot-oxblood" aria-label="active"></span>'
+        return '<span class="status-dot dot-jade" aria-label="idle"></span>'
+
+    tree_lines: list[str] = []
+    for pi_idx, p in enumerate(principals):
+        is_last_principal = (pi_idx == len(principals) - 1)
+        branch = "\u2514\u2500\u2500 " if is_last_principal else "\u251c\u2500\u2500 "
+        continuation = "    " if is_last_principal else "\u2502   "
+        p_role = h(p.get("role", p.get("id", "")))
+        p_id = h(p.get("id", ""))
+        dot = _status_dot(p.get("id", ""))
+        tree_lines.append(
+            f'<span class="agent-tree-chrome">{branch}</span>'
+            f'<span class="agent-principal">{p_role} ({p_id})</span>  {dot}'
         )
-    agent_table_html = (
-        f'<table class="agent-table">'
-        f'<thead><tr>'
-        f'<th>Agent ID</th><th>Role</th><th>Kind</th>'
-        f'<th>Specialization</th><th>Created</th><th>Provenance</th>'
-        f'</tr></thead>'
-        f'<tbody>{agent_rows}</tbody>'
-        f'</table>'
+        # Show workers assigned to this principal
+        assigned_workers = worker_by_principal.get(p["id"], [])
+        # Also show dispatches for this principal's workers
+        for wi, w in enumerate(assigned_workers):
+            is_last_worker = (wi == len(assigned_workers) - 1)
+            w_branch = "\u2514\u2500\u2500 " if is_last_worker else "\u251c\u2500\u2500 "
+            wid = w.get("id", "")
+            dispatches = _dispatch_map.get(wid, [])
+            if dispatches:
+                for di, d in enumerate(dispatches):
+                    is_last_d = (di == len(dispatches) - 1) and is_last_worker
+                    d_branch = "\u2514\u2500\u2500 " if is_last_d else "\u251c\u2500\u2500 "
+                    task_ref = h(d.get("task_id", ""))
+                    task_title = h(d.get("task_title", ""))
+                    tree_lines.append(
+                        f'<span class="agent-tree-chrome">{continuation}{d_branch}</span>'
+                        f'<span class="agent-tree-action">dispatched: </span>'
+                        f'<span class="agent-worker">{h(wid)}</span>'
+                        f'<span class="agent-tree-action"> &rarr; {task_ref} {task_title}</span>'
+                    )
+            else:
+                tree_lines.append(
+                    f'<span class="agent-tree-chrome">{continuation}{w_branch}</span>'
+                    f'<span class="agent-worker">{h(wid)}</span>'
+                    f'<span class="agent-tree-action"> (idle)</span>'
+                )
+
+    # Build the EM root line
+    em_agent = next((a for a in principals if a.get("id") == em_id), None)
+    em_label = ""
+    if em_agent:
+        em_role = h(em_agent.get("role", "EM"))
+        em_label = f'<span class="agent-principal">{em_role} ({h(em_id)})</span>  {_status_dot(em_id)}'
+    elif principals:
+        em_label = f'<span class="agent-principal">{h(principals[0].get("role", "EM"))}</span>'
+
+    agent_tree_html = (
+        f'<div class="agent-tree" role="img" aria-label="Agent hierarchy tree">'
+        f'{em_label}\n'
+        + "\n".join(tree_lines)
+        + f'</div>'
     ) if agents_list else ""
 
-    # -- Promotion timeline --
-    timeline_events = []
-    for ag in agents_list:
-        prov = ag.get("provenance") or ""
-        prov_lower = prov.lower()
-        if "promoted" in prov_lower or "hired" in prov_lower:
-            timeline_events.append({
-                "date": ag.get("created_at", ""),
-                "agent": ag.get("id", ""),
-                "desc": prov,
-            })
-    timeline_events.sort(key=lambda e: e["date"])
-    timeline_html = ""
-    if timeline_events:
-        evts = ""
-        for ev in timeline_events:
-            evts += (
-                f'<div class="timeline-event">'
-                f'<span class="tl-date">{h(ev["date"])}</span>'
-                f'<span class="tl-agent">{h(ev["agent"])}</span>'
-                f'<span class="tl-desc">{h(ev["desc"][:120])}</span>'
-                f'</div>'
-            )
-        timeline_html = (
-            f'<div class="timeline-section">'
-            f'<h3>Promotion Timeline</h3>'
-            f'{evts}'
-            f'</div>'
+    # -- Recent dispatches table --
+    dispatch_rows = ""
+    for d in (ledger.recent or []):
+        task_id = h(d.get("task_id", ""))
+        agent_id = h(d.get("agent_id", ""))
+        task_title = h(d.get("task_title", ""))
+        outcome = d.get("outcome") or "pending"
+        outcome_label = h(outcome.upper() if outcome else "PENDING")
+        dot_cls = "dot-jade" if outcome == "success" else (
+            "dot-oxblood" if outcome == "failed" else "dot-amber"
+        )
+        # Chain: SW Dev -> worker (simplified; real chain from ledger)
+        chain = f'SW Dev &rarr; {agent_id}'
+        dispatch_rows += (
+            f'<tr>'
+            f'<td>{task_id}</td>'
+            f'<td><span class="dispatch-chain">{chain}</span></td>'
+            f'<td>{task_title}</td>'
+            f'<td><span class="status-dot {dot_cls}" aria-hidden="true"></span> {outcome_label}</td>'
+            f'</tr>'
+        )
+
+    dispatch_table_html = ""
+    if dispatch_rows:
+        dispatch_table_html = (
+            f'<table class="dispatch-table">'
+            f'<thead><tr>'
+            f'<th>Task</th><th>Chain</th><th>Artifact</th><th>Status</th>'
+            f'</tr></thead>'
+            f'<tbody>{dispatch_rows}</tbody>'
+            f'</table>'
         )
 
     agents_section = (
         f'<section class="zone-agents" aria-labelledby="agents-heading">'
-        f'<h2 id="agents-heading">Agent Lineage</h2>'
+        f'<h2 id="agents-heading">Fleet -- Agent Traceability</h2>'
         f'{fleet_stats_html}'
-        f'{agent_table_html}'
-        f'{timeline_html}'
+        f'{agent_tree_html}'
+        f'{dispatch_table_html}'
         f'</section>'
     )
 

@@ -19,7 +19,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from cli.state_builder import (
     ABOUT_FALLBACK,
-    ABOUT_STATIC_PARAGRAPH,
+    PROJECT_MISSION,
+    PROJECT_SUBTITLE,
+    PROJECT_TYPE,
+    PROJECT_OWNER,
+    PROJECT_STACK,
     BacklogItem,
     Feature,
     LedgerView,
@@ -966,19 +970,23 @@ class TestLoadDecisions:
 
 
 class TestAboutBlock:
-    """About / Where we are section in the dashboard HTML (SDD-010)."""
+    """Context bar section in the dashboard HTML (mockup lines 1380-1401)."""
 
-    def test_about_block_static_paragraph_present(self, tmp_path: Path) -> None:
-        """V-1: rendered HTML contains the static purpose paragraph constant."""
+    def test_context_bar_project_identity_present(self, tmp_path: Path) -> None:
+        """V-1: rendered HTML contains project identity fields from the mockup."""
         sdd = _seed_sdd_root(tmp_path)
         _seed_dispatches(sdd)
         result = build(sdd_root=sdd, write=False, live_html=False,
                        fixed_date="2026-05-16")
         htm = result["html"]
-        assert ABOUT_STATIC_PARAGRAPH in htm
+        assert PROJECT_SUBTITLE in htm
+        assert PROJECT_TYPE in htm
+        assert PROJECT_OWNER in htm
+        assert PROJECT_STACK in htm
+        assert PROJECT_MISSION in htm
 
-    def test_about_block_dynamic_line_reflects_state_md(self, tmp_path: Path) -> None:
-        """V-2: dynamic line includes Current PI, Active sprint, Active focus."""
+    def test_context_bar_dynamic_focus_reflects_state(self, tmp_path: Path) -> None:
+        """V-2: dynamic Focus field includes Current PI."""
         sdd = _seed_sdd_root(tmp_path)
         _seed_dispatches(sdd)
         result = build(sdd_root=sdd, write=False, live_html=False,
@@ -988,11 +996,9 @@ class TestAboutBlock:
         assert "PI-2 (Fleet Maturity and CLI)" in htm
         # Sprint label is the static symbolic text
         assert "Symbolic" in htm
-        # The about-where-we-are class must be present
-        assert 'class="about-where-we-are"' in htm
 
-    def test_about_block_dynamic_line_tracks_header_changes(self, tmp_path: Path) -> None:
-        """V-3: different PI data produces different dynamic About lines."""
+    def test_context_bar_dynamic_focus_tracks_header_changes(self, tmp_path: Path) -> None:
+        """V-3: different PI data produces different dynamic Focus lines."""
         # Fixture A: PI-2 (default from _seed_sdd_root)
         base_a = tmp_path / "a"
         base_a.mkdir()
@@ -1041,11 +1047,10 @@ class TestAboutBlock:
         assert "PI-7 (Quantum Leap)" in htm_b
         assert "PI-2" not in htm_b
 
-    def test_about_block_fallback_when_state_md_header_incomplete(self, tmp_path: Path) -> None:
+    def test_context_bar_fallback_when_no_pi(self, tmp_path: Path) -> None:
         """V-4: missing PI/sprint/focus degrades to fallback string, no crash."""
         sdd = tmp_path / "sdd"
         sdd.mkdir()
-        # No roadmap -> no PI -> fallback path
         for d in ("constitution", "specs", "backlog", "roster", "exec"):
             (sdd / d).mkdir(exist_ok=True)
         (sdd / "constitution" / "roadmap.md").write_text(
@@ -1068,24 +1073,36 @@ class TestAboutBlock:
                        fixed_date="2026-05-16")
         htm = result["html"]
 
-        # Static paragraph still present
-        assert ABOUT_STATIC_PARAGRAPH in htm
-        # Fallback string used for dynamic line
+        # Project identity still present
+        assert PROJECT_SUBTITLE in htm
+        # Fallback string used for dynamic focus
         assert ABOUT_FALLBACK in htm
         # No literal 'None' or 'KeyError' leaked
         assert "None" not in htm or "none" in htm.lower()  # allow CSS 'none'
         assert "KeyError" not in htm
 
-    def test_about_block_appears_before_main_layout(self, tmp_path: Path) -> None:
-        """V-5: About section is positioned before the main grid container."""
+    def test_context_bar_appears_before_main_layout(self, tmp_path: Path) -> None:
+        """V-5: Context bar is positioned before the main grid container."""
         sdd = _seed_sdd_root(tmp_path)
         _seed_dispatches(sdd)
         result = build(sdd_root=sdd, write=False, live_html=False,
                        fixed_date="2026-05-16")
         htm = result["html"]
-        about_idx = htm.index('id="about"')
+        ctx_idx = htm.index("context-section")
         main_idx = htm.index('class="grid-v3"')
-        assert about_idx < main_idx
+        assert ctx_idx < main_idx
+
+    def test_topbar_has_title_and_subtitle(self, tmp_path: Path) -> None:
+        """V-6: header has project title and subtitle matching mockup."""
+        sdd = _seed_sdd_root(tmp_path)
+        _seed_dispatches(sdd)
+        result = build(sdd_root=sdd, write=False, live_html=False,
+                       fixed_date="2026-05-16")
+        htm = result["html"]
+        assert 'class="topbar-title"' in htm
+        assert "BRIDGE" in htm
+        assert 'class="topbar-mission"' in htm
+        assert PROJECT_SUBTITLE in htm
 
 
 # ---------------------------------------------------------------------------
@@ -1339,8 +1356,8 @@ class TestAccessibility:
         sections = _re.findall(r"<section\b[^>]*>", htm)
         assert len(sections) >= 6, f"Expected >= 6 sections, found {len(sections)}"
         for tag in sections:
-            assert "aria-labelledby=" in tag, (
-                f"Section missing aria-labelledby: {tag}"
+            assert "aria-labelledby=" in tag or "aria-label=" in tag, (
+                f"Section missing aria-labelledby or aria-label: {tag}"
             )
 
     def test_heading_hierarchy_no_skipped_levels(self) -> None:

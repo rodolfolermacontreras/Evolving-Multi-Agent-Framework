@@ -54,14 +54,17 @@ def repo_root_for(sdd_root: Path) -> Path:
 
 
 # ---------------------------------------------------------------------------- #
-# About-section constants (SDD-010)
+# Project identity constants (header + context bar, from mockup)
 # ---------------------------------------------------------------------------- #
 
-ABOUT_STATIC_PARAGRAPH = (
-    "The Evolving Multi-Agent Framework is an AI-powered software development "
-    "system that uses coordinated specialist agents to deliver working code "
-    "through a structured lifecycle. This dashboard is built by the framework "
-    "whose progress it tracks."
+PROJECT_TITLE = "BRIDGE"
+PROJECT_SUBTITLE = "Evolving Multi-Agent Framework"
+PROJECT_TYPE = "STANDALONE FRAMEWORK"
+PROJECT_OWNER = "Rodolfo Lerma"
+PROJECT_STACK = "Python stdlib | Plain HTML/CSS | SQLite | No runtime deps"
+PROJECT_MISSION = (
+    "A portable, replicable multi-agent development system. One human developer "
+    "orchestrates a team of AI agents through a structured spec-driven lifecycle."
 )
 
 ABOUT_FALLBACK = "Current focus information is unavailable."
@@ -798,29 +801,36 @@ a:hover { text-decoration: underline; }
 
 /* TOP BAR ------------------------------------------------------- */
 header.topbar {
-  display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto;
-  gap: var(--sp-5); align-items: center;
-  padding: var(--sp-3) var(--sp-5);
-  border-bottom: 2px solid var(--color-interactive);
+  display: flex; align-items: center;
+  gap: var(--sp-5); height: 56px;
+  padding: 0 var(--sp-5);
+  border-bottom: 1px solid var(--color-border-default);
   background: var(--color-surface-raised);
+  position: sticky; top: 0; z-index: 100;
 }
-.brand {
-  font-size: var(--fs-md); letter-spacing: 0.18em;
-  text-transform: uppercase; font-weight: 700; color: var(--color-text-primary);
-  margin: 0;
+.topbar-title {
+  font-size: var(--fs-lg); letter-spacing: 0.06em;
+  font-weight: 700; color: var(--color-text-primary);
+  margin: 0; flex-shrink: 0;
+}
+.topbar-mission {
+  font-family: inherit;
+  font-size: var(--fs-sm); color: var(--color-text-secondary);
+  flex-shrink: 1; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
 }
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0,0,0,0); border: 0;
 }
-.pi-pills { display: flex; gap: var(--sp-1); flex-wrap: wrap; }
+.pi-pills { display: flex; gap: var(--sp-1); flex-wrap: wrap; margin-left: auto; flex-shrink: 0; }
 .pi-pills .pill {
   padding: var(--sp-1) var(--sp-3);
   border: 1px solid var(--color-border-default);
   background: var(--color-surface-raised);
   color: var(--color-text-secondary);
   font-size: var(--fs-xs); letter-spacing: 0.14em;
-  text-transform: uppercase;
+  text-transform: uppercase; border-radius: 2px;
 }
 .pi-pills .pill.current,
 .pi-pills .pill.active {
@@ -829,6 +839,29 @@ header.topbar {
   color: var(--ink-paper); font-weight: 700;
 }
 .pi-pills .pill.future { opacity: 0.45; }
+
+/* PROJECT CONTEXT BAR ------------------------------------------- */
+.context-section {
+  display: flex; align-items: baseline; gap: var(--sp-5); flex-wrap: wrap;
+  padding: var(--sp-2) var(--sp-5);
+  background: var(--color-surface-raised);
+  border-bottom: 1px solid var(--color-border-default);
+  font-size: var(--fs-sm); line-height: 20px;
+}
+.context-item { display: inline-flex; align-items: baseline; gap: var(--sp-1); white-space: nowrap; }
+.context-label {
+  color: var(--color-text-secondary); font-size: var(--fs-xs);
+  text-transform: uppercase; letter-spacing: 0.14em; font-weight: 600;
+}
+.context-value { color: var(--color-text-primary); }
+.context-mission { white-space: normal; max-width: 560px; }
+.project-type-badge {
+  display: inline-block; padding: 2px var(--sp-2);
+  font-size: var(--fs-xs); font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.14em; line-height: 14px;
+  color: var(--signal-jade); background: var(--color-surface-raised);
+  border: 1px solid var(--signal-jade); border-radius: 2px;
+}
 
 .live-pulse {
   display: flex; align-items: center; gap: var(--sp-2);
@@ -852,16 +885,7 @@ header.topbar {
   letter-spacing: 0.06em;
 }
 
-/* ABOUT SECTION ------------------------------------------------- */
-section#about {
-  padding: var(--sp-3) var(--sp-5);
-  border-bottom: 1px solid var(--color-border-default);
-  background: var(--color-surface-raised);
-}
-section#about p { margin: 0 0 var(--sp-1) 0; color: var(--color-text-secondary); }
-section#about p.about-where-we-are { color: var(--color-text-tertiary); font-size: var(--fs-sm); }
-
-/* MAIN GRID (v3 sprint-first) ---------------------------------- */
+/* LIVE PULSE + FRESHNESS ---------------------------------------- */
 main.grid-v3 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1812,16 +1836,38 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
         f'</section>'
     )
 
-    # ---- ABOUT SECTION (SDD-010, retained) -------------------------------
+    # ---- CONTEXT BAR (mockup lines 1380-1401) ----------------------------
     if about_pi and about_sprint and about_focus:
         about_dynamic = f'{h(about_pi)} | {h(about_sprint)} | {h(about_focus)}'
     else:
         about_dynamic = h(ABOUT_FALLBACK)
-    about_section_html = (
-        f'<section id="about" aria-labelledby="about-heading">'
-        f'<h2 id="about-heading" class="sr-only">About this dashboard</h2>'
-        f'<p>{h(ABOUT_STATIC_PARAGRAPH)}</p>'
-        f'<p class="about-where-we-are">{about_dynamic}</p>'
+
+    context_section_html = (
+        f'<section class="context-section" aria-label="Project context">'
+        f'<div class="context-item">'
+        f'<span class="context-label">Project</span>'
+        f'<span class="context-value">{h(PROJECT_SUBTITLE)}</span>'
+        f'</div>'
+        f'<div class="context-item">'
+        f'<span class="context-label">Type</span>'
+        f'<span class="project-type-badge">{h(PROJECT_TYPE)}</span>'
+        f'</div>'
+        f'<div class="context-item">'
+        f'<span class="context-label">Owner</span>'
+        f'<span class="context-value">{h(PROJECT_OWNER)}</span>'
+        f'</div>'
+        f'<div class="context-item">'
+        f'<span class="context-label">Stack</span>'
+        f'<span class="context-value">{h(PROJECT_STACK)}</span>'
+        f'</div>'
+        f'<div class="context-item">'
+        f'<span class="context-label">Mission</span>'
+        f'<span class="context-value context-mission">{h(PROJECT_MISSION)}</span>'
+        f'</div>'
+        f'<div class="context-item">'
+        f'<span class="context-label">Focus</span>'
+        f'<span class="context-value">{about_dynamic}</span>'
+        f'</div>'
         f'</section>'
     )
 
@@ -1848,7 +1894,8 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
 </head><body>
 <a href="#main" class="skip-link">Skip to main content</a>
 <header role="banner" class="topbar">
-  <h1 class="brand">BRIDGE</h1>
+  <h1 class="topbar-title">{h(PROJECT_TITLE)}</h1>
+  <span class="topbar-mission">{h(PROJECT_SUBTITLE)}</span>
   <nav class="pi-pills" aria-label="Program Increments">{pi_pills_html}</nav>
   <div class="live-pulse">
     <span class="dot {pulse_class}" aria-hidden="true"></span>
@@ -1856,7 +1903,7 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
   </div>
   <div class="freshness" aria-live="polite">{h(generated_at)}</div>
 </header>
-{about_section_html}
+{context_section_html}
 <main id="main" role="main" class="grid-v3">
   {sprint_section}
   {next_section}

@@ -507,14 +507,16 @@ def load_decisions(sdd_root: Path, limit: int = 50) -> list[dict]:
         return []
     try:
         conn = sqlite3.connect(db_path)
-        conn.row_factory = sqlite3.Row
-        rows = conn.execute(
-            "SELECT decided_at, decider, level, description "
-            "FROM decisions ORDER BY decided_at DESC LIMIT ?",
-            (limit,),
-        ).fetchall()
-        conn.close()
-    except sqlite3.OperationalError:
+        try:
+            conn.row_factory = sqlite3.Row
+            rows = conn.execute(
+                "SELECT decided_at, decider, level, description "
+                "FROM decisions ORDER BY decided_at DESC LIMIT ?",
+                (limit,),
+            ).fetchall()
+        finally:
+            conn.close()
+    except sqlite3.Error:
         return []
     return [
         {

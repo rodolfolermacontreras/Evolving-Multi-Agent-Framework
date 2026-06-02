@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'">
 
-<title>Bridge -- PI-4 -- 2026-06-02 13:27</title>
+<title>Bridge -- PI-4 -- 2026-06-02 13:35</title>
 <style>
 :root {
   /* Backgrounds */
@@ -50,6 +50,8 @@
   --fs-md: 14px;
   --fs-lg: 16px;
   --fs-xl: 20px;
+  --fs-2xl: 24px;
+  --fs-3xl: 32px;
   /* Spacing */
   --sp-1: 4px;
   --sp-2: 8px;
@@ -93,22 +95,25 @@ a:hover { text-decoration: underline; }
 /* TOP BAR ------------------------------------------------------- */
 header.topbar {
   display: flex; align-items: center;
-  gap: var(--sp-5); height: 56px;
-  padding: 0 var(--sp-5);
-  border-bottom: 1px solid var(--color-border-default);
+  gap: var(--sp-5); min-height: 72px;
+  padding: var(--sp-3) var(--sp-5);
+  border-bottom: 2px solid var(--color-interactive);
   background: var(--color-surface-raised);
   position: sticky; top: 0; z-index: 100;
 }
 .topbar-title {
-  font-size: var(--fs-lg); letter-spacing: 0.06em;
-  font-weight: 700; color: var(--color-text-primary);
-  margin: 0; flex-shrink: 0;
+  font-size: var(--fs-3xl); letter-spacing: 0.12em;
+  font-weight: 900; color: var(--color-text-primary);
+  margin: 0; padding: 0; line-height: 1; flex-shrink: 0;
+  text-transform: uppercase;
 }
 .topbar-mission {
   font-family: inherit;
-  font-size: var(--fs-sm); color: var(--color-text-secondary);
+  font-size: var(--fs-md); color: var(--color-text-secondary);
   flex-shrink: 1; overflow: hidden;
   text-overflow: ellipsis; white-space: nowrap;
+  padding-left: var(--sp-3);
+  border-left: 1px solid var(--color-border-default);
 }
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -139,7 +144,7 @@ header.topbar {
   border-bottom: 1px solid var(--color-border-default);
   font-size: var(--fs-sm); line-height: 20px;
 }
-.context-item { display: inline-flex; align-items: baseline; gap: var(--sp-1); white-space: nowrap; }
+.context-item { display: inline-flex; align-items: baseline; gap: var(--sp-2); white-space: nowrap; }
 .context-label {
   color: var(--color-text-secondary); font-size: var(--fs-xs);
   text-transform: uppercase; letter-spacing: 0.14em; font-weight: 600;
@@ -546,7 +551,7 @@ footer[role="contentinfo"] {
     <span class="dot dot-amber" aria-hidden="true"></span>
     <span>1 feature implementing, no dispatch in flight</span>
   </div>
-  <div class="freshness" aria-live="polite">2026-06-02 13:27</div>
+  <div class="freshness" aria-live="polite">2026-06-02 13:35</div>
 </header>
 <section class="context-section" aria-label="Project context"><div class="context-item"><span class="context-label">Project</span><span class="context-value">Evolving Multi-Agent Framework</span></div><div class="context-item"><span class="context-label">Type</span><span class="project-type-badge">STANDALONE FRAMEWORK</span></div><div class="context-item"><span class="context-label">Owner</span><span class="context-value">Rodolfo Lerma</span></div><div class="context-item"><span class="context-label">Stack</span><span class="context-value">Python stdlib | Plain HTML/CSS | SQLite | No runtime deps</span></div><div class="context-item"><span class="context-label">Mission</span><span class="context-value context-mission">A portable, replicable multi-agent development system. One human developer orchestrates a team of AI agents through a structured spec-driven lifecycle.</span></div><div class="context-item"><span class="context-label">Focus</span><span class="context-value">PI-4 (Alpha Release) | Symbolic -- AI fleet compresses wall-clock time | Start: &#x27;Domain skills marked as reference examples&#x27;</span></div></section>
 <main id="main" role="main" class="grid-v3">
@@ -569,7 +574,7 @@ footer[role="contentinfo"] {
 <span class="agent-tree-chrome">│   └── </span><span class="agent-tree-action">dispatched: </span><span class="agent-worker">developer-general</span><span class="agent-tree-action"> &rarr; T-001 Ship fleet.py v0.1 (SDD-003)</span>
 <span class="agent-tree-chrome">├── </span><span class="agent-principal">cloud-security-architect (principal-cloud-security-architect)</span>  <span class="status-dot dot-jade" aria-label="idle"></span>
 <span class="agent-tree-chrome">└── </span><span class="agent-principal">ui-designer (principal-ui-designer)</span>  <span class="status-dot dot-jade" aria-label="idle"></span></div><table class="dispatch-table"><thead><tr><th>Task</th><th>Chain</th><th>Artifact</th><th>Status</th></tr></thead><tbody><tr><td>T-001</td><td><span class="dispatch-chain">SW Dev &rarr; developer-general</span></td><td>Write RETRO.md for fleet-cli feature (SDD-003).</td><td><span class="status-dot dot-jade" aria-hidden="true"></span> SUCCESS</td></tr><tr><td>T-002</td><td><span class="dispatch-chain">SW Dev &rarr; developer-general</span></td><td>Write RETRO.md for qa-cli feature (SDD-004).</td><td><span class="status-dot dot-jade" aria-hidden="true"></span> SUCCESS</td></tr><tr><td>T-003</td><td><span class="dispatch-chain">SW Dev &rarr; developer-general</span></td><td>Write RETRO.md for retro-cli feature (SDD-005).</td><td><span class="status-dot dot-jade" aria-hidden="true"></span> SUCCESS</td></tr><tr><td>T-001</td><td><span class="dispatch-chain">SW Dev &rarr; developer-general</span></td><td>Ship fleet.py v0.1 (SDD-003)</td><td><span class="status-dot dot-jade" aria-hidden="true"></span> SUCCESS</td></tr></tbody></table></section>
-  <section class="zone-feed" aria-labelledby="feed-heading"><h2 id="feed-heading">Activity Feed</h2><div class="feed-container" role="log" aria-live="off" tabindex="0"><div class="feed-event"><span class="when">58 minutes ago</span><span class="badge b-commit">COMMIT</span><span class="desc"><strong>cb117d8</strong> feat: replace agent activity placeholder with full agent lineage section</span></div><div class="feed-event"><span class="when">52 minutes ago</span><span class="badge b-commit">COMMIT</span><span class="desc"><strong>216eb8d</strong> docs: amend live-ui-v2 spec Section 5.6 to match shipped agent lineage feature</span></div><div class="feed-event"><span class="when">51 minutes ago</span><span class="badge b-commit">COMMIT</span><span class="desc"><strong>feb8c6f</strong> docs: update SESSION-MEMORY with agent lineage and LESSON-014</span></div><div class="feed-event"><span class="when">47 minutes ago</span><span class="badge b-commit">COMMIT</span><span class="desc"><strong>601adb4</strong> docs: update LESSON-014 with DESIGN.md Section 4.2 as canonical source</span></div><div class="feed-event"><span class="when">4 hours ago</span><span class="badge b-commit">COMMIT</span><span class="desc"><strong>7116713</strong> docs: add live dashboard URL to README and ARCHITECTURE</span></div><div class="feed-event"><span class="when">4 hours ago</span><span class="badge b-commit">COMMIT</span><span class="desc"><strong>dc84f32</strong> docs: add comprehensive ARCHITECTURE.md with code and framework diagrams</span></div><div class="feed-event"><span class="when">2 hours ago</span><span class="badge b-commit">COMMIT</span><span class="desc"><strong>59900a0</strong> docs: capture auto-launch dashboard idea in IDEAS.md</span></div><div class="feed-event"><span class="when">2 hours ago</span><span class="badge b-commit">COMMIT</span><span class="desc"><strong>6bb06e6</strong> fix: dashboard shows PI-4, correct feature stages, no 404 links</span></div><div class="feed-event"><span class="when">16 minutes ago</span><span class="badge b-commit">COMMIT</span><span class="desc"><strong>f723e96</strong> feat: replace agent lineage with approved Fleet Agent Traceability design</span></div><div class="feed-event"><span class="when">15 minutes ago</span><span class="badge b-commit">COMMIT</span><span class="desc"><strong>238ec08</strong> docs: amend live-ui-v2 spec Section 5.6 to match shipped Agent Traceability design</span></div><div class="feed-event"><span class="when">2026-05-16T20:44:19Z</span><span class="badge b-decision">DECISION</span><span class="desc"><strong>human (Rodolfo)</strong> L2: Promoted developer-general to developer-cli-specialist-1 via /hire specialist. Evidence: 5 CLI features, 70 tests, dispatch IDs 2-4. ADR-0007.</span></div><div class="feed-event"><span class="when">2026-05-16T20:33:48Z</span><span class="badge b-dispatch">DISPATCH</span><span class="desc"><strong>developer-general</strong> T-001 Write RETRO.md for fleet-cli feature (SDD-003). [success]</span></div><div class="feed-event"><span class="when">2026-05-16T20:33:48Z</span><span class="badge b-dispatch">DISPATCH</span><span class="desc"><strong>developer-general</strong> T-002 Write RETRO.md for qa-cli feature (SDD-004). [success]</span></div><div class="feed-event"><span class="when">2026-05-16T20:33:48Z</span><span class="badge b-dispatch">DISPATCH</span><span class="desc"><strong>developer-general</strong> T-003 Write RETRO.md for retro-cli feature (SDD-005). [success]</span></div><div class="feed-event"><span class="when">2026-05-16T19:15:36Z</span><span class="badge b-dispatch">DISPATCH</span><span class="desc"><strong>developer-general</strong> T-001 Ship fleet.py v0.1 (SDD-003) [success]</span></div></div></section>
+  <section class="zone-feed" aria-labelledby="feed-heading"><h2 id="feed-heading">Activity Feed</h2><div class="feed-container" role="log" aria-live="off" tabindex="0"><div class="feed-event"><span class="when">8 minutes ago</span><span class="badge b-commit">COMMIT</span><span class="desc"><strong>94b0639</strong> feat: redesign dashboard header with project title and context bar</span></div><div class="feed-event"><span class="when">66 minutes ago</span><span class="badge b-commit">COMMIT</span><span class="desc"><strong>cb117d8</strong> feat: replace agent activity placeholder with full agent lineage section</span></div><div class="feed-event"><span class="when">60 minutes ago</span><span class="badge b-commit">COMMIT</span><span class="desc"><strong>216eb8d</strong> docs: amend live-ui-v2 spec Section 5.6 to match shipped agent lineage feature</span></div><div class="feed-event"><span class="when">59 minutes ago</span><span class="badge b-commit">COMMIT</span><span class="desc"><strong>feb8c6f</strong> docs: update SESSION-MEMORY with agent lineage and LESSON-014</span></div><div class="feed-event"><span class="when">55 minutes ago</span><span class="badge b-commit">COMMIT</span><span class="desc"><strong>601adb4</strong> docs: update LESSON-014 with DESIGN.md Section 4.2 as canonical source</span></div><div class="feed-event"><span class="when">4 hours ago</span><span class="badge b-commit">COMMIT</span><span class="desc"><strong>7116713</strong> docs: add live dashboard URL to README and ARCHITECTURE</span></div><div class="feed-event"><span class="when">24 minutes ago</span><span class="badge b-commit">COMMIT</span><span class="desc"><strong>f723e96</strong> feat: replace agent lineage with approved Fleet Agent Traceability design</span></div><div class="feed-event"><span class="when">23 minutes ago</span><span class="badge b-commit">COMMIT</span><span class="desc"><strong>238ec08</strong> docs: amend live-ui-v2 spec Section 5.6 to match shipped Agent Traceability design</span></div><div class="feed-event"><span class="when">2 hours ago</span><span class="badge b-commit">COMMIT</span><span class="desc"><strong>59900a0</strong> docs: capture auto-launch dashboard idea in IDEAS.md</span></div><div class="feed-event"><span class="when">2 hours ago</span><span class="badge b-commit">COMMIT</span><span class="desc"><strong>6bb06e6</strong> fix: dashboard shows PI-4, correct feature stages, no 404 links</span></div><div class="feed-event"><span class="when">2026-05-16T20:44:19Z</span><span class="badge b-decision">DECISION</span><span class="desc"><strong>human (Rodolfo)</strong> L2: Promoted developer-general to developer-cli-specialist-1 via /hire specialist. Evidence: 5 CLI features, 70 tests, dispatch IDs 2-4. ADR-0007.</span></div><div class="feed-event"><span class="when">2026-05-16T20:33:48Z</span><span class="badge b-dispatch">DISPATCH</span><span class="desc"><strong>developer-general</strong> T-001 Write RETRO.md for fleet-cli feature (SDD-003). [success]</span></div><div class="feed-event"><span class="when">2026-05-16T20:33:48Z</span><span class="badge b-dispatch">DISPATCH</span><span class="desc"><strong>developer-general</strong> T-002 Write RETRO.md for qa-cli feature (SDD-004). [success]</span></div><div class="feed-event"><span class="when">2026-05-16T20:33:48Z</span><span class="badge b-dispatch">DISPATCH</span><span class="desc"><strong>developer-general</strong> T-003 Write RETRO.md for retro-cli feature (SDD-005). [success]</span></div><div class="feed-event"><span class="when">2026-05-16T19:15:36Z</span><span class="badge b-dispatch">DISPATCH</span><span class="desc"><strong>developer-general</strong> T-001 Ship fleet.py v0.1 (SDD-003) [success]</span></div></div></section>
 </main>
-<footer role="contentinfo"><span>2026-06-02 13:27</span> &middot; <span>v3.0 (sprint-first)</span> &middot; <span>stdlib only</span> &middot; <span>file mode</span> &middot; <span>static</span></footer>
+<footer role="contentinfo"><span>2026-06-02 13:35</span> &middot; <span>v3.0 (sprint-first)</span> &middot; <span>stdlib only</span> &middot; <span>file mode</span> &middot; <span>static</span></footer>
 </body></html>

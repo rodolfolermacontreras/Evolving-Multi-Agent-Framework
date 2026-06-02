@@ -759,6 +759,8 @@ HTML_CSS = """
   --fs-md: 14px;
   --fs-lg: 16px;
   --fs-xl: 20px;
+  --fs-2xl: 24px;
+  --fs-3xl: 32px;
   /* Spacing */
   --sp-1: 4px;
   --sp-2: 8px;
@@ -802,22 +804,25 @@ a:hover { text-decoration: underline; }
 /* TOP BAR ------------------------------------------------------- */
 header.topbar {
   display: flex; align-items: center;
-  gap: var(--sp-5); height: 56px;
-  padding: 0 var(--sp-5);
-  border-bottom: 1px solid var(--color-border-default);
+  gap: var(--sp-5); min-height: 72px;
+  padding: var(--sp-3) var(--sp-5);
+  border-bottom: 2px solid var(--color-interactive);
   background: var(--color-surface-raised);
   position: sticky; top: 0; z-index: 100;
 }
 .topbar-title {
-  font-size: var(--fs-lg); letter-spacing: 0.06em;
-  font-weight: 700; color: var(--color-text-primary);
-  margin: 0; flex-shrink: 0;
+  font-size: var(--fs-3xl); letter-spacing: 0.12em;
+  font-weight: 900; color: var(--color-text-primary);
+  margin: 0; padding: 0; line-height: 1; flex-shrink: 0;
+  text-transform: uppercase;
 }
 .topbar-mission {
   font-family: inherit;
-  font-size: var(--fs-sm); color: var(--color-text-secondary);
+  font-size: var(--fs-md); color: var(--color-text-secondary);
   flex-shrink: 1; overflow: hidden;
   text-overflow: ellipsis; white-space: nowrap;
+  padding-left: var(--sp-3);
+  border-left: 1px solid var(--color-border-default);
 }
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -848,7 +853,7 @@ header.topbar {
   border-bottom: 1px solid var(--color-border-default);
   font-size: var(--fs-sm); line-height: 20px;
 }
-.context-item { display: inline-flex; align-items: baseline; gap: var(--sp-1); white-space: nowrap; }
+.context-item { display: inline-flex; align-items: baseline; gap: var(--sp-2); white-space: nowrap; }
 .context-label {
   color: var(--color-text-secondary); font-size: var(--fs-xs);
   text-transform: uppercase; letter-spacing: 0.14em; font-weight: 600;

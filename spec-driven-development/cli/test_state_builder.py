@@ -1071,12 +1071,190 @@ class TestAboutBlock:
         assert "KeyError" not in htm
 
     def test_about_block_appears_before_main_layout(self, tmp_path: Path) -> None:
-        """V-5: About section is positioned before <main class='layout-4zone'>."""
+        """V-5: About section is positioned before the main grid container."""
         sdd = _seed_sdd_root(tmp_path)
         _seed_dispatches(sdd)
         result = build(sdd_root=sdd, write=False, live_html=False,
                        fixed_date="2026-05-16")
         htm = result["html"]
         about_idx = htm.index('id="about"')
-        main_idx = htm.index('<main class="layout-4zone">')
+        main_idx = htm.index('class="grid-v3"')
         assert about_idx < main_idx
+
+
+# ---------------------------------------------------------------------------
+# v3 sprint-first layout tests (T-005..T-011)
+# ---------------------------------------------------------------------------
+
+
+class TestV3Layout:
+    """Structural assertions for the v3.0 sprint-first dashboard."""
+
+    def _build(self, tmp_path: Path) -> str:
+        sdd = _seed_sdd_root(tmp_path)
+        _seed_dispatches(sdd)
+        result = build(sdd_root=sdd, write=False, live_html=False,
+                       fixed_date="2026-05-16")
+        return result["html"]
+
+    def test_skip_link_present(self, tmp_path: Path) -> None:
+        htm = self._build(tmp_path)
+        assert 'href="#main"' in htm
+        assert 'class="skip-link"' in htm
+
+    def test_top_bar_role_banner_with_brand(self, tmp_path: Path) -> None:
+        htm = self._build(tmp_path)
+        assert 'role="banner"' in htm
+        assert "BRIDGE" in htm
+
+    def test_main_has_grid_v3_class(self, tmp_path: Path) -> None:
+        htm = self._build(tmp_path)
+        assert '<main id="main" role="main" class="grid-v3">' in htm
+
+    def test_sprint_section_renders_with_heading(self, tmp_path: Path) -> None:
+        htm = self._build(tmp_path)
+        assert 'id="sprint-heading"' in htm
+        assert "class=\"zone-sprint\"" in htm
+
+    def test_next_section_renders_with_heading(self, tmp_path: Path) -> None:
+        htm = self._build(tmp_path)
+        assert 'id="next-heading"' in htm
+        assert "What Comes Next" in htm
+
+    def test_wip_section_uses_9_stage_bars_with_aria(self, tmp_path: Path) -> None:
+        htm = self._build(tmp_path)
+        assert 'id="wip-heading"' in htm
+        # Each stage bar must carry an aria-label for screen readers
+        assert 'class="stage-bar"' in htm
+        assert 'aria-label=' in htm
+
+    def test_pi_context_uses_details_summary(self, tmp_path: Path) -> None:
+        htm = self._build(tmp_path)
+        assert 'id="pi-heading"' in htm
+        assert "<details" in htm
+        assert "<summary>" in htm
+
+    def test_agents_placeholder_message(self, tmp_path: Path) -> None:
+        htm = self._build(tmp_path)
+        assert 'id="agents-heading"' in htm
+        assert "Per-agent real-time visibility planned for PI-5" in htm
+
+    def test_activity_feed_role_log(self, tmp_path: Path) -> None:
+        htm = self._build(tmp_path)
+        assert 'id="feed-heading"' in htm
+        assert 'role="log"' in htm
+        assert 'aria-live="off"' in htm
+        assert 'tabindex="0"' in htm
+
+    def test_footer_contains_version_and_stdlib(self, tmp_path: Path) -> None:
+        htm = self._build(tmp_path)
+        assert 'role="contentinfo"' in htm
+        assert "v3.0 (sprint-first)" in htm
+        assert "stdlib only" in htm
+
+
+class TestV3CSS:
+    """CSS-level assertions: tokens, breakpoints, motion, accessibility."""
+
+    def _build(self, tmp_path: Path) -> str:
+        sdd = _seed_sdd_root(tmp_path)
+        _seed_dispatches(sdd)
+        result = build(sdd_root=sdd, write=False, live_html=False,
+                       fixed_date="2026-05-16")
+        return result["html"]
+
+    def test_css_includes_design_tokens(self, tmp_path: Path) -> None:
+        htm = self._build(tmp_path)
+        # Spot-check a representative token from each tier
+        assert "--bg-carbon: " in htm or "--bg-carbon:" in htm
+        assert "--accent-oxblood:" in htm
+        assert "--ink-paper:" in htm
+        assert "--color-interactive:" in htm
+        assert "--focus-ring:" in htm
+
+    def test_css_grid_areas_define_v3_layout(self, tmp_path: Path) -> None:
+        htm = self._build(tmp_path)
+        # Desktop grid-template-areas must include "next   wip" together
+        # (i.e. the desktop two-column row).  The exact whitespace may vary.
+        assert '"next' in htm and 'wip"' in htm
+        # Stacked tablet layout has next and wip on separate rows
+        assert '"next"' in htm
+        assert '"wip"' in htm
+
+    def test_tablet_breakpoint_present(self, tmp_path: Path) -> None:
+        htm = self._build(tmp_path)
+        assert "max-width: 1279px" in htm
+
+    def test_prefers_reduced_motion_block_present(self, tmp_path: Path) -> None:
+        htm = self._build(tmp_path)
+        assert "prefers-reduced-motion: reduce" in htm
+        assert "transition-duration: 0s" in htm
+
+    def test_feed_max_height_constraint(self, tmp_path: Path) -> None:
+        htm = self._build(tmp_path)
+        assert "max-height: 480px" in htm
+
+    def test_no_outline_none_in_css(self, tmp_path: Path) -> None:
+        htm = self._build(tmp_path)
+        assert "outline: none" not in htm
+        assert "outline:none" not in htm
+
+    def test_focus_ring_outline_present(self, tmp_path: Path) -> None:
+        htm = self._build(tmp_path)
+        assert "outline: 2px solid var(--focus-ring)" in htm
+
+    def test_fade_in_animation_on_main(self, tmp_path: Path) -> None:
+        htm = self._build(tmp_path)
+        assert "@keyframes fade-in" in htm
+        assert "animation: fade-in 300ms" in htm
+
+
+class TestV3EmptyStates:
+    """Each v3 section degrades gracefully when its data is missing."""
+
+    def _empty_sdd(self, tmp_path: Path) -> Path:
+        sdd = tmp_path / "sdd"
+        sdd.mkdir()
+        for d in ("constitution", "specs", "backlog", "roster", "exec"):
+            (sdd / d).mkdir(exist_ok=True)
+        # Empty roadmap -> no PIs at all
+        (sdd / "constitution" / "roadmap.md").write_text(
+            "# Roadmap\n\nNothing here.\n", encoding="utf-8"
+        )
+        (sdd / "backlog" / "BACKLOG.md").write_text(
+            "# Product Backlog\n\nEmpty.\n", encoding="utf-8"
+        )
+        (sdd / "roster" / "agents.json").write_text("[]", encoding="utf-8")
+        (sdd / "roster" / "skills.json").write_text("[]", encoding="utf-8")
+        ledger_dir = sdd / "ledger"
+        ledger_dir.mkdir()
+        db_path = ledger_dir / "fleet.db"
+        conn = sqlite3.connect(db_path)
+        conn.executescript(SCHEMA_SQL)
+        conn.commit()
+        conn.close()
+        return sdd
+
+    def test_empty_sprint_renders_empty_state(self, tmp_path: Path) -> None:
+        sdd = self._empty_sdd(tmp_path)
+        result = build(sdd_root=sdd, write=False, live_html=False,
+                       fixed_date="2026-05-16")
+        assert "No active sprint found" in result["html"]
+
+    def test_empty_features_render_wip_empty_state(self, tmp_path: Path) -> None:
+        sdd = self._empty_sdd(tmp_path)
+        result = build(sdd_root=sdd, write=False, live_html=False,
+                       fixed_date="2026-05-16")
+        assert "No features registered yet" in result["html"]
+
+    def test_empty_pis_render_pi_empty_state(self, tmp_path: Path) -> None:
+        sdd = self._empty_sdd(tmp_path)
+        result = build(sdd_root=sdd, write=False, live_html=False,
+                       fixed_date="2026-05-16")
+        assert "No Program Increments found in roadmap" in result["html"]
+
+    def test_empty_feed_renders_feed_empty_state(self, tmp_path: Path) -> None:
+        sdd = self._empty_sdd(tmp_path)
+        result = build(sdd_root=sdd, write=False, live_html=False,
+                       fixed_date="2026-05-16")
+        assert "No activity recorded yet" in result["html"]

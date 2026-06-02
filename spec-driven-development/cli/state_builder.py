@@ -708,319 +708,463 @@ PI_MISSION = {
 
 HTML_CSS = """
 :root {
+  /* Backgrounds */
   --bg-carbon:        #0a0a0a;
   --bg-graphite:      #141413;
   --bg-graphite-2:    #1c1b18;
   --bg-graphite-3:    #232220;
+  /* Ink */
   --ink-paper:        #e8e4d8;
   --ink-paper-dim:    #b8b4a8;
   --ink-paper-faint:  #8a8678;
-  --accent-oxblood:   #ce2029;
-  --accent-oxblood-2: #a01820;
+  /* Accent */
+  --accent-oxblood:       #ce2029;
+  --accent-oxblood-2:     #a01820;
+  --accent-oxblood-hover: #e02830;
+  /* Signals */
   --signal-amber:     #d29a3b;
   --signal-amber-2:   #e8b85a;
   --signal-amber-3:   #8a6a2a;
   --signal-jade:      #6fa37a;
   --signal-jade-dim:  #486a52;
+  /* Structure */
   --rule-line:        #2a2925;
+  --focus-ring:       #e8e4d8;
+  /* Semantic aliases */
+  --color-text-primary:      var(--ink-paper);
+  --color-text-secondary:    var(--ink-paper-dim);
+  --color-text-tertiary:     var(--ink-paper-faint);
+  --color-surface-base:      var(--bg-carbon);
+  --color-surface-raised:    var(--bg-graphite);
+  --color-surface-overlay:   var(--bg-graphite-2);
+  --color-border-default:    var(--rule-line);
+  --color-interactive:       var(--accent-oxblood);
+  --color-interactive-hover: var(--accent-oxblood-hover);
+  --color-status-success:    var(--signal-jade);
+  --color-status-warning:    var(--signal-amber);
+  --color-status-error:      var(--accent-oxblood);
+
+  /* Type scale */
+  --fs-xs: 10px;
+  --fs-sm: 11px;
+  --fs-base: 13px;
+  --fs-md: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 20px;
+  /* Spacing */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
 }
+
 * { box-sizing: border-box; }
 html, body {
   margin: 0; padding: 0;
-  background: var(--bg-carbon); color: var(--ink-paper);
-  font-family: ui-monospace, "Berkeley Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  font-size: 13px; line-height: 1.45;
+  background: var(--color-surface-base); color: var(--color-text-primary);
+  font-family: ui-monospace, "Berkeley Mono", "JetBrains Mono", Menlo, Consolas, "Courier New", monospace;
+  font-size: var(--fs-base); line-height: 1.45;
 }
-.body-sans { font-family: -apple-system, "Segoe UI", Inter, system-ui, sans-serif; }
+.body-sans {
+  font-family: -apple-system, "Segoe UI", Inter, system-ui, sans-serif;
+}
 a { color: var(--signal-amber-2); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-/* TOP BAR --------------------------------------------------------------- */
+/* Focus indicators (WCAG AA) ------------------------------------ */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Skip link ----------------------------------------------------- */
+.skip-link {
+  position: absolute; left: -9999px; top: auto;
+  width: 1px; height: 1px; overflow: hidden;
+}
+.skip-link:focus {
+  position: fixed; left: var(--sp-3); top: var(--sp-3);
+  width: auto; height: auto; padding: var(--sp-2) var(--sp-3);
+  background: var(--color-interactive); color: var(--ink-paper);
+  z-index: 1000;
+}
+
+/* TOP BAR ------------------------------------------------------- */
 header.topbar {
-  display: grid; grid-template-columns: minmax(0, 1fr) auto auto;
-  gap: 24px; align-items: center;
-  padding: 14px 22px; border-bottom: 2px solid var(--accent-oxblood);
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto;
+  gap: var(--sp-5); align-items: center;
+  padding: var(--sp-3) var(--sp-5);
+  border-bottom: 2px solid var(--color-interactive);
+  background: var(--color-surface-raised);
 }
-.mission { display: flex; align-items: baseline; gap: 14px; min-width: 0; }
-.mission .h-bridge {
-  font-size: 14px; letter-spacing: 0.18em;
-  text-transform: uppercase; font-weight: 700; color: var(--ink-paper);
-  flex-shrink: 0;
+.brand {
+  font-size: var(--fs-md); letter-spacing: 0.18em;
+  text-transform: uppercase; font-weight: 700; color: var(--color-text-primary);
 }
-.mission .mission-text {
-  font-family: -apple-system, "Segoe UI", Inter, system-ui, sans-serif;
-  font-size: 13px; color: var(--ink-paper-dim);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+.pi-pills { display: flex; gap: var(--sp-1); flex-wrap: wrap; }
+.pi-pills .pill {
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--color-border-default);
+  background: var(--color-surface-raised);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs); letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
-.sprint-pills { display: flex; gap: 4px; }
-.sprint-pills .pill {
-  padding: 4px 12px; border: 1px solid var(--rule-line);
-  background: var(--bg-graphite); color: var(--ink-paper-dim);
-  font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
-  cursor: default;
-}
-.sprint-pills .pill.active {
-  background: var(--accent-oxblood); border-color: var(--accent-oxblood);
+.pi-pills .pill.current,
+.pi-pills .pill.active {
+  background: var(--color-interactive);
+  border-color: var(--color-interactive);
   color: var(--ink-paper); font-weight: 700;
 }
-.sprint-pills .pill.future { opacity: 0.45; }
+.pi-pills .pill.future { opacity: 0.45; }
+
 .live-pulse {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 11px; color: var(--ink-paper-dim); letter-spacing: 0.06em;
+  display: flex; align-items: center; gap: var(--sp-2);
+  font-size: var(--fs-sm); color: var(--color-text-secondary);
+  letter-spacing: 0.06em;
 }
 .live-pulse .dot {
   width: 10px; height: 10px; border-radius: 50%;
   display: inline-block; flex-shrink: 0;
 }
-.dot.dot-green { background: var(--signal-jade); animation: pulse-green 1.6s ease-in-out infinite; }
-.dot.dot-amber { background: var(--signal-amber); animation: pulse-amber 2.2s ease-in-out infinite; }
-.dot.dot-red   { background: var(--accent-oxblood); animation: pulse-red 1.0s ease-in-out infinite; }
+.dot.dot-green { background: var(--signal-jade);    animation: pulse-green 1.6s ease-in-out infinite; }
+.dot.dot-amber { background: var(--signal-amber);   animation: pulse-amber 2.2s ease-in-out infinite; }
+.dot.dot-red   { background: var(--accent-oxblood); animation: pulse-red   1.0s ease-in-out infinite; }
 .dot.dot-gray  { background: var(--ink-paper-faint); }
 @keyframes pulse-green { 0%,100% { box-shadow: 0 0 0 0 rgba(111,163,122,0.55); } 50% { box-shadow: 0 0 0 8px rgba(111,163,122,0); } }
 @keyframes pulse-amber { 0%,100% { box-shadow: 0 0 0 0 rgba(210,154,59,0.55); } 50% { box-shadow: 0 0 0 8px rgba(210,154,59,0); } }
 @keyframes pulse-red   { 0%,100% { box-shadow: 0 0 0 0 rgba(206,32,41,0.55); } 50% { box-shadow: 0 0 0 8px rgba(206,32,41,0); } }
-.live-pulse .meta { color: var(--ink-paper-faint); margin-left: 8px; }
-.btn-refresh {
-  border: 1px solid var(--rule-line); padding: 5px 12px;
-  color: var(--ink-paper); background: var(--bg-graphite);
-  font-family: inherit; font-size: 11px;
-  letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
-  margin-left: 12px;
-}
-.btn-refresh:hover { border-color: var(--signal-amber-2); color: var(--signal-amber-2); }
 
-/* 4-ZONE LAYOUT --------------------------------------------------------- */
-main.layout-4zone {
+.freshness {
+  font-size: var(--fs-sm); color: var(--color-text-tertiary);
+  letter-spacing: 0.06em;
+}
+
+/* ABOUT SECTION ------------------------------------------------- */
+section#about {
+  padding: var(--sp-3) var(--sp-5);
+  border-bottom: 1px solid var(--color-border-default);
+  background: var(--color-surface-raised);
+}
+section#about p { margin: 0 0 var(--sp-1) 0; color: var(--color-text-secondary); }
+section#about p.about-where-we-are { color: var(--color-text-tertiary); font-size: var(--fs-sm); }
+
+/* MAIN GRID (v3 sprint-first) ---------------------------------- */
+main.grid-v3 {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  grid-template-rows: auto auto;
+  grid-template-columns: 1fr 1fr;
   grid-template-areas:
-    "a b"
-    "c c"
-    "d d";
-  gap: 14px;
-  padding: 18px 22px;
+    "sprint sprint"
+    "next   wip"
+    "pi     pi"
+    "agents agents"
+    "feed   feed";
+  gap: var(--sp-4);
+  padding: var(--sp-5);
+  opacity: 0;
+  animation: fade-in 300ms ease forwards;
 }
-.zone { background: var(--bg-graphite); border: 1px solid var(--rule-line); padding: 16px 18px; min-width: 0; }
-.zone-a { grid-area: a; }
-.zone-b { grid-area: b; }
-.zone-c { grid-area: c; }
-.zone-d { grid-area: d; }
-.zone h2 {
-  margin: 0 0 12px; font-size: 10px;
-  letter-spacing: 0.22em; text-transform: uppercase;
-  color: var(--ink-paper-dim);
-  border-bottom: 1px solid var(--rule-line); padding-bottom: 6px;
-}
-.zone h2 .sub { color: var(--ink-paper-faint); letter-spacing: 0.06em; margin-left: 8px; font-weight: normal; }
-.zone .defer-note {
-  margin: 12px 0 0; padding: 8px 10px;
-  border-left: 2px solid var(--signal-amber-3);
-  background: var(--bg-graphite-2);
-  font-size: 10px; color: var(--ink-paper-faint);
-  letter-spacing: 0.06em;
-}
-.zone .defer-note code { color: var(--signal-amber-2); }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 
-/* ZONE A: Big picture ---------------------------------------------------- */
-.big-picture { display: grid; grid-template-columns: 140px 1fr; gap: 18px; align-items: start; }
-.progress-ring { position: relative; width: 140px; height: 140px; }
-.progress-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-.progress-ring .ring-bg { fill: none; stroke: var(--bg-graphite-3); stroke-width: 12; }
-.progress-ring .ring-fg {
-  fill: none; stroke: var(--signal-jade); stroke-width: 12; stroke-linecap: round;
-  transition: stroke-dashoffset 700ms ease;
-}
-.progress-ring .ring-center {
-  position: absolute; inset: 0; display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-}
-.progress-ring .pct-big { font-size: 28px; font-weight: 700; color: var(--ink-paper); line-height: 1; }
-.progress-ring .pct-sub { font-size: 9px; color: var(--ink-paper-dim); letter-spacing: 0.14em; margin-top: 4px; text-transform: uppercase; }
-.feature-stack { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.feature-stack .row {
-  display: grid; grid-template-columns: 14px minmax(0, 1fr) auto;
-  gap: 10px; align-items: center;
-  padding: 6px 0; border-bottom: 1px dashed var(--rule-line);
-  font-size: 11px; color: var(--ink-paper-dim);
-}
-.feature-stack .row:last-child { border-bottom: none; }
-.feature-stack .dot {
-  width: 10px; height: 10px; border-radius: 50%; display: inline-block;
-}
-.feature-stack .dot.tone-faint        { background: var(--ink-paper-faint); }
-.feature-stack .dot.tone-amber-soft   { background: var(--signal-amber-3); }
-.feature-stack .dot.tone-amber        { background: var(--signal-amber); }
-.feature-stack .dot.tone-amber-bright { background: var(--signal-amber-2); }
-.feature-stack .dot.tone-oxblood      { background: var(--accent-oxblood); }
-.feature-stack .dot.tone-jade         { background: var(--signal-jade); }
-.feature-stack .name { color: var(--ink-paper); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.feature-stack .meta { color: var(--ink-paper-faint); font-size: 10px; text-align: right; letter-spacing: 0.04em; }
+.zone-sprint { grid-area: sprint; }
+.zone-next   { grid-area: next; }
+.zone-wip    { grid-area: wip; }
+.zone-pi     { grid-area: pi; }
+.zone-agents { grid-area: agents; }
+.zone-feed   { grid-area: feed; }
 
-.next-card {
-  margin-top: 14px; padding: 12px 14px;
-  background: var(--bg-graphite-2); border-left: 3px solid var(--accent-oxblood);
+main.grid-v3 > section {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-default);
+  padding: var(--sp-4);
 }
-.next-card .label { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent-oxblood); margin-bottom: 4px; }
-.next-card .title { font-size: 14px; font-weight: 700; color: var(--ink-paper); margin-bottom: 4px; }
-.next-card .why   { font-size: 11px; color: var(--ink-paper-dim); margin-bottom: 8px; }
-.next-card .cta {
-  display: inline-block; border: 1px solid var(--accent-oxblood);
-  color: var(--ink-paper); background: rgba(206, 32, 41, 0.08);
-  padding: 4px 12px; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+main.grid-v3 > section h2 {
+  margin: 0 0 var(--sp-3) 0;
+  font-size: var(--fs-md); letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--color-text-primary);
+  font-weight: 700;
+  border-bottom: 1px solid var(--color-border-default);
+  padding-bottom: var(--sp-2);
 }
-.next-card .cta:hover { background: rgba(206, 32, 41, 0.2); text-decoration: none; }
+.empty-state {
+  color: var(--color-text-tertiary);
+  font-style: italic; padding: var(--sp-3) 0;
+}
 
-/* ZONE B: Agent activity (text-mode v2.1; D3 graph deferred to SDD-008) -- */
-.feature-cluster {
-  margin-bottom: 12px; padding: 10px 12px;
-  background: var(--bg-graphite-2); border-left: 3px solid var(--ink-paper-faint);
+/* SECTION 1: Sprint --------------------------------------------- */
+.sprint-goal {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-md); margin: 0 0 var(--sp-3) 0;
 }
-.feature-cluster.tone-faint        { border-left-color: var(--ink-paper-faint); }
-.feature-cluster.tone-amber-soft   { border-left-color: var(--signal-amber-3); }
-.feature-cluster.tone-amber        { border-left-color: var(--signal-amber); }
-.feature-cluster.tone-amber-bright { border-left-color: var(--signal-amber-2); }
-.feature-cluster.tone-oxblood      { border-left-color: var(--accent-oxblood); }
-.feature-cluster.tone-jade         { border-left-color: var(--signal-jade); }
-.feature-cluster .feat-title { font-size: 11px; color: var(--ink-paper); font-weight: 700; margin-bottom: 6px; }
-.feature-cluster .feat-title .stage-tag {
-  font-size: 9px; letter-spacing: 0.14em; color: var(--ink-paper-faint); font-weight: normal;
-  margin-left: 8px; text-transform: uppercase;
+dl.task-counters {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-3); margin: 0 0 var(--sp-3) 0;
 }
-.feature-cluster .agents { display: flex; flex-wrap: wrap; gap: 6px; }
-.agent-chip {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 4px 9px; background: var(--bg-graphite-3); border: 1px solid var(--rule-line);
-  font-size: 10px; color: var(--ink-paper-dim);
+dl.task-counters > div {
+  background: var(--color-surface-overlay);
+  padding: var(--sp-2);
+  border-left: 3px solid var(--color-border-default);
 }
-.agent-chip .avatar {
-  width: 18px; height: 18px; border-radius: 50%;
-  background: var(--signal-jade-dim); color: var(--ink-paper);
-  display: inline-flex; align-items: center; justify-content: center;
-  font-size: 9px; font-weight: 700;
+dl.task-counters dt {
+  font-size: var(--fs-xs); color: var(--color-text-tertiary);
+  letter-spacing: 0.1em; text-transform: uppercase;
 }
-.agent-chip.principal .avatar { background: var(--accent-oxblood-2); }
-.agent-chip.active .avatar  { background: var(--signal-jade); }
-.agent-chip.idle .avatar    { background: var(--ink-paper-faint); }
+dl.task-counters dd {
+  margin: var(--sp-1) 0 0 0;
+  font-size: var(--fs-xl); color: var(--color-text-primary);
+  font-weight: 700;
+}
+dl.task-counters .c-todo  { border-left-color: var(--color-text-tertiary); }
+dl.task-counters .c-doing { border-left-color: var(--signal-amber); }
+dl.task-counters .c-done  { border-left-color: var(--signal-jade); }
+dl.task-counters .c-block { border-left-color: var(--accent-oxblood); }
 
-.fleet-summary {
-  margin-top: 12px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+.progress-bar {
+  height: 12px; background: var(--bg-graphite-3);
+  border: 1px solid var(--color-border-default);
+  display: flex; overflow: hidden;
 }
-.fleet-summary .stat { background: var(--bg-graphite-3); padding: 8px 10px; border: 1px solid var(--rule-line); }
-.fleet-summary .stat.zero { opacity: 0.55; }
-.fleet-summary .stat .n { font-size: 18px; font-weight: 700; color: var(--ink-paper); line-height: 1; }
-.fleet-summary .stat .l { font-size: 8px; letter-spacing: 0.18em; color: var(--ink-paper-dim); text-transform: uppercase; margin-top: 4px; }
+.progress-bar .seg-done  { background: var(--signal-jade); }
+.progress-bar .seg-doing { background: var(--signal-amber); }
+.progress-bar .seg-block { background: var(--accent-oxblood); }
+.progress-bar .seg-todo  { background: transparent; }
 
-/* ZONE C: Feature swim lanes -------------------------------------------- */
-.swim-lanes { display: flex; flex-direction: column; gap: 8px; }
-.swim-row {
-  display: grid; grid-template-columns: 200px minmax(0, 1fr) 100px;
-  gap: 12px; align-items: center;
+.blockers { margin: var(--sp-3) 0 0 0; padding: 0; list-style: none; }
+.blockers li {
+  padding: var(--sp-2);
+  border-left: 3px solid var(--accent-oxblood);
+  background: var(--color-surface-overlay);
+  margin-bottom: var(--sp-1);
+  color: var(--color-text-secondary);
 }
-.swim-row .label { font-size: 11px; color: var(--ink-paper); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.swim-track {
-  position: relative; height: 18px;
-  background: var(--bg-graphite-3); border: 1px solid var(--rule-line); overflow: hidden;
+
+/* SECTION 2: Next ----------------------------------------------- */
+.next-action-card {
+  background: var(--color-surface-overlay);
+  border-left: 3px solid var(--color-interactive);
+  padding: var(--sp-3); margin-bottom: var(--sp-3);
 }
-.swim-fill {
-  position: absolute; left: 0; top: 0; bottom: 0;
-  background: var(--signal-amber-3);
-  transition: width 700ms ease;
+.next-action-card .label {
+  font-size: var(--fs-xs); color: var(--color-text-tertiary);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: var(--sp-1);
 }
-.swim-fill.tone-faint        { background: var(--ink-paper-faint); }
-.swim-fill.tone-amber-soft   { background: var(--signal-amber-3); }
-.swim-fill.tone-amber        { background: var(--signal-amber); }
-.swim-fill.tone-amber-bright { background: var(--signal-amber-2); }
-.swim-fill.tone-oxblood      { background: var(--accent-oxblood); }
-.swim-fill.tone-jade         { background: var(--signal-jade); }
-.swim-marker {
-  position: absolute; top: 50%; transform: translate(-50%, -50%);
-  width: 10px; height: 10px; border-radius: 50%;
-  background: var(--ink-paper); border: 2px solid var(--bg-carbon);
-  z-index: 2;
+.next-action-card .title {
+  font-size: var(--fs-md); color: var(--color-text-primary);
+  font-weight: 700; margin-bottom: var(--sp-1);
 }
-.swim-stages {
-  position: absolute; left: 0; right: 0; top: 0; bottom: 0;
-  display: flex; pointer-events: none;
+.next-action-card .why {
+  font-size: var(--fs-sm); color: var(--color-text-secondary);
 }
-.swim-stages .tick {
-  flex: 1; border-right: 1px dashed rgba(138,134,120,0.18);
+.next-action-card .cta {
+  display: inline-block; margin-top: var(--sp-2);
+  padding: var(--sp-1) var(--sp-3);
+  background: var(--color-interactive); color: var(--ink-paper);
+  border: 1px solid var(--color-interactive);
+  font-size: var(--fs-sm); letter-spacing: 0.1em;
+  text-transform: uppercase; transition: background-color 150ms ease;
 }
-.swim-stages .tick:last-child { border-right: none; }
-.swim-row .stage-text {
-  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--ink-paper-dim); text-align: right;
+.next-action-card .cta:hover {
+  background: var(--color-interactive-hover);
+  text-decoration: none;
 }
-.swim-axis {
-  margin-top: 4px;
-  display: grid; grid-template-columns: 200px minmax(0, 1fr) 100px; gap: 12px;
+.next-gate, .next-sprint {
+  font-size: var(--fs-sm); color: var(--color-text-secondary);
+  padding: var(--sp-2) 0;
+  border-top: 1px solid var(--color-border-default);
 }
-.swim-axis .stages {
+.next-gate .label, .next-sprint .label {
+  color: var(--color-text-tertiary); letter-spacing: 0.1em;
+  text-transform: uppercase; font-size: var(--fs-xs);
+  margin-right: var(--sp-2);
+}
+
+/* SECTION 3: WIP ------------------------------------------------ */
+.swim-lane {
+  display: grid;
+  grid-template-columns: 200px 1fr 100px;
+  gap: var(--sp-3); align-items: center;
+  padding: var(--sp-2) 0;
+  border-bottom: 1px solid var(--color-border-default);
+  transition: background-color 150ms ease;
+}
+.swim-lane:hover { background: var(--color-surface-overlay); }
+.swim-lane:last-child { border-bottom: none; }
+.swim-lane .feature-name {
+  font-size: var(--fs-sm); color: var(--color-text-primary);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.stage-bar {
   display: grid; grid-template-columns: repeat(9, 1fr);
-  font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--ink-paper-faint);
+  gap: 2px; height: 14px;
 }
-.swim-axis .stages span { text-align: center; }
-.swim-axis .stages span.active { color: var(--ink-paper); font-weight: 700; }
-
-/* ZONE D: Unified activity feed ----------------------------------------- */
-.activity-controls { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; }
-.activity-controls .toggle {
-  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--ink-paper-faint);
+.stage-cell {
+  background: var(--bg-graphite-3);
+  border: 1px solid var(--color-border-default);
 }
-.activity-list { display: flex; flex-direction: column; }
-.activity-row {
-  display: grid; grid-template-columns: 70px 18px 60px minmax(0, 1fr) auto;
-  gap: 10px; align-items: baseline;
-  padding: 7px 0; border-bottom: 1px dashed var(--rule-line);
-  font-size: 11px;
-}
-.activity-row:last-child { border-bottom: none; }
-.activity-row .when { color: var(--ink-paper-faint); font-size: 10px; }
-.activity-row .avatar {
-  width: 18px; height: 18px; border-radius: 50%;
-  background: var(--bg-graphite-3); color: var(--ink-paper-dim);
-  display: inline-flex; align-items: center; justify-content: center;
-  font-size: 8px; font-weight: 700; border: 1px solid var(--rule-line);
-}
-.activity-row .badge {
-  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
-  padding: 1px 6px; border: 1px solid currentColor;
-  display: inline-block; text-align: center;
-}
-.badge.t-jade         { color: var(--signal-jade); }
-.badge.t-amber        { color: var(--signal-amber); }
-.badge.t-amber-soft   { color: var(--signal-amber-3); }
-.badge.t-amber-bright { color: var(--signal-amber-2); }
-.badge.t-oxblood      { color: var(--accent-oxblood); }
-.badge.t-faint        { color: var(--ink-paper-faint); }
-.activity-row .desc { color: var(--ink-paper-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.activity-row .feat-tag {
-  font-size: 9px; color: var(--ink-paper-faint);
-  border: 1px solid var(--rule-line); padding: 1px 6px;
-  letter-spacing: 0.06em;
-}
-
-/* footer ---------------------------------------------------------------- */
-footer {
-  padding: 14px 22px; border-top: 1px solid var(--rule-line);
-  color: var(--ink-paper-faint); font-size: 10px;
+.stage-cell.active     { background: var(--signal-amber); }
+.stage-cell.complete   { background: var(--signal-jade); }
+.stage-cell.tone-faint        { background: var(--ink-paper-faint); }
+.stage-cell.tone-amber-soft   { background: var(--signal-amber-3); }
+.stage-cell.tone-amber        { background: var(--signal-amber); }
+.stage-cell.tone-amber-bright { background: var(--signal-amber-2); }
+.stage-cell.tone-oxblood      { background: var(--accent-oxblood); }
+.stage-cell.tone-jade         { background: var(--signal-jade); }
+.swim-lane .stage-text {
+  font-size: var(--fs-xs); color: var(--color-text-tertiary);
   letter-spacing: 0.08em; text-transform: uppercase;
 }
+.overall-completion {
+  margin-top: var(--sp-3); padding-top: var(--sp-2);
+  border-top: 1px solid var(--color-border-default);
+  font-size: var(--fs-sm); color: var(--color-text-secondary);
+}
+.overall-completion strong {
+  color: var(--color-text-primary); font-size: var(--fs-md);
+}
 
-@media (max-width: 1100px) {
-  main.layout-4zone {
+/* SECTION 4: PI Context (details/summary) ---------------------- */
+.zone-pi details {
+  margin-bottom: var(--sp-2);
+  border: 1px solid var(--color-border-default);
+  background: var(--color-surface-overlay);
+}
+.zone-pi summary {
+  list-style: none;
+  padding: var(--sp-2) var(--sp-3);
+  cursor: pointer;
+  font-size: var(--fs-sm); letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--color-text-primary);
+  position: relative;
+  transition: background-color 150ms ease;
+}
+.zone-pi summary::-webkit-details-marker { display: none; }
+.zone-pi summary::marker { content: ""; }
+.zone-pi summary::before {
+  content: "\25B6";
+  display: inline-block;
+  margin-right: var(--sp-2);
+  font-size: var(--fs-xs);
+  color: var(--color-text-tertiary);
+  transition: transform 150ms ease;
+}
+.zone-pi details[open] > summary::before { transform: rotate(90deg); }
+.zone-pi summary:hover { background: var(--bg-graphite-3); }
+.zone-pi .pi-body { padding: var(--sp-3); }
+table.sprint-table {
+  width: 100%; border-collapse: collapse;
+  font-size: var(--fs-sm);
+}
+table.sprint-table th, table.sprint-table td {
+  padding: var(--sp-1) var(--sp-2);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border-default);
+  color: var(--color-text-secondary);
+}
+table.sprint-table th {
+  font-size: var(--fs-xs); letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--color-text-tertiary);
+  font-weight: 400;
+}
+table.sprint-table tr {
+  transition: background-color 150ms ease;
+}
+table.sprint-table tbody tr:hover {
+  background: var(--bg-graphite-3);
+}
+
+/* SECTION 5: Agents -------------------------------------------- */
+.fleet-summary {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-3); margin-bottom: var(--sp-3);
+}
+.fleet-stat {
+  background: var(--color-surface-overlay);
+  padding: var(--sp-2); text-align: center;
+}
+.fleet-stat .n {
+  font-size: var(--fs-xl); color: var(--color-text-primary);
+  font-weight: 700;
+}
+.fleet-stat .l {
+  font-size: var(--fs-xs); color: var(--color-text-tertiary);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.defer-notice {
+  font-size: var(--fs-sm); color: var(--color-text-tertiary);
+  font-style: italic; padding: var(--sp-2) 0;
+}
+
+/* SECTION 6: Activity Feed ------------------------------------- */
+.feed-container {
+  max-height: 480px; overflow-y: auto;
+  border: 1px solid var(--color-border-default);
+  background: var(--bg-graphite-3);
+}
+.feed-event {
+  display: grid;
+  grid-template-columns: 90px 90px 1fr;
+  gap: var(--sp-3); align-items: baseline;
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--color-border-default);
+  font-size: var(--fs-sm);
+  transition: background-color 150ms ease;
+}
+.feed-event:hover { background: var(--color-surface-overlay); }
+.feed-event:last-child { border-bottom: none; }
+.feed-event .when {
+  font-size: var(--fs-xs); color: var(--color-text-tertiary);
+}
+.feed-event .badge {
+  font-size: var(--fs-xs); letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 2px var(--sp-2);
+  border: 1px solid var(--color-border-default);
+  text-align: center;
+}
+.feed-event .badge.b-dispatch { color: var(--signal-amber-2); border-color: var(--signal-amber-3); }
+.feed-event .badge.b-decision { color: var(--ink-paper); border-color: var(--color-text-secondary); }
+.feed-event .badge.b-commit   { color: var(--signal-jade);   border-color: var(--signal-jade-dim); }
+.feed-event .desc { color: var(--color-text-secondary); }
+
+/* FOOTER -------------------------------------------------------- */
+footer[role="contentinfo"] {
+  height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  gap: var(--sp-3);
+  border-top: 1px solid var(--color-border-default);
+  background: var(--color-surface-raised);
+  font-size: var(--fs-xs); color: var(--color-text-tertiary);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+
+/* RESPONSIVE: Tablet single-column ----------------------------- */
+@media (max-width: 1279px) {
+  main.grid-v3 {
     grid-template-columns: 1fr;
-    grid-template-areas: "a" "b" "c" "d";
+    grid-template-areas:
+      "sprint"
+      "next"
+      "wip"
+      "pi"
+      "agents"
+      "feed";
   }
-  .big-picture { grid-template-columns: 100px 1fr; }
-  .progress-ring { width: 100px; height: 100px; }
-  .swim-row, .swim-axis { grid-template-columns: 120px minmax(0, 1fr) 80px; }
+  dl.task-counters { grid-template-columns: repeat(2, 1fr); }
+  .fleet-summary { grid-template-columns: repeat(2, 1fr); }
+  .swim-lane { grid-template-columns: 140px 1fr 80px; }
+}
+
+/* MOTION REDUCTION --------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0s !important;
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+  }
 }
 """
-
-
 COMMIT_TYPE_TONE = {
     "feat":     "jade",  "fix":      "oxblood", "docs":    "amber-soft",
     "chore":    "faint", "design":   "amber-bright", "plan":   "amber",
@@ -1117,237 +1261,353 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
                 live: bool = False, port: int | None = None,
                 all_pis: list[PIBlock] | None = None,
                 about_pi: str = "", about_sprint: str = "",
-                about_focus: str = "") -> str:
-    """Render the 4-zone v3 Bridge dashboard."""
+                about_focus: str = "",
+                sprint_table: list[dict] | None = None,
+                current_sprint: dict | None = None,
+                sprint_goal: str | None = None,
+                decisions: list[dict] | None = None) -> str:
+    """Render the v3.0 sprint-first dashboard.
 
-    # ---- TOP BAR ---------------------------------------------------------
+    The page has a fixed 7-section grid: top bar + Current Sprint, What
+    Comes Next, WIP Summary, PI Context, Agent Activity placeholder,
+    Activity Feed, and a footer.  Each section degrades to an explicit
+    empty-state message when its data is missing.
+    """
+
     pi_name = pi.name if pi else "no PI"
-    mission_text = PI_MISSION.get(pi_name, pi.title if pi else "")
     pulse_class, pulse_text = _pulse(roster, ledger, features)
 
-    sprint_pills_html = ""
+    # ---- TOP BAR pills ---------------------------------------------------
+    pi_pills_html = ""
     if all_pis:
         for p in all_pis:
             cls = "pill"
             if p.is_current or (pi and p.name == pi.name):
-                cls += " active"
+                cls += " current"
             elif p.pct < 100 and not p.is_current:
                 cls += " future"
-            sprint_pills_html += f'<span class="{cls}">{h(p.name)}</span>'
+            pi_pills_html += f'<span class="{cls}">{h(p.name)}</span>'
 
-    refresh_meta = '<meta http-equiv="refresh" content="20">' if live else ''
-    live_badge = ('live' if live else 'static')
-    refresh_btn = (
-        '<a class="btn-refresh" href="/" title="Reload now">&#x21bb; refresh</a>' if live else
-        '<a class="btn-refresh" href="state.html" title="Reload the static file">&#x21bb; reload</a>'
-    )
+    refresh_meta = '<meta http-equiv="refresh" content="20">' if live else ""
+    live_badge = "live" if live else "static"
 
-    # ---- ZONE A: Big Picture --------------------------------------------
-    pct = _weighted_progress(features)
-    circumference = 2 * 3.14159 * 60
-    dash_offset = circumference * (1 - pct / 100)
+    # ---- SECTION 1: Current Sprint --------------------------------------
+    if current_sprint:
+        sprint_label = f"Sprint {current_sprint.get('num', '?')}: {current_sprint.get('title', '')}"
+        status_text = current_sprint.get("status", "Unknown")
+        dispatch_count = current_sprint.get("dispatch_count", 0)
+        last_outcome = current_sprint.get("last_outcome", "--")
 
-    feature_stack_html = ""
-    if features:
-        # Order: in-flight first, then by stage descending, then alphabetical
-        order_key = lambda f: (-STAGE_WEIGHT.get(f.stage, 0), f.name)
-        for f in sorted(features, key=order_key):
-            tone = STAGE_TONE[f.stage]
-            nxt = _next_for(f)
-            meta = f"next: {nxt}" if f.stage != "DONE" else "shipped"
-            feature_stack_html += (
-                f'<div class="row">'
-                f'<span class="dot {tone}"></span>'
-                f'<span class="name" title="{h(f.notes)}">{h(f.name)}</span>'
-                f'<span class="meta">{h(_stage_short(f.stage))} -&gt; {h(meta)}</span>'
-                f'</div>'
-            )
-    else:
-        feature_stack_html = '<div class="row"><span class="meta">no features yet</span></div>'
+        # Best-effort task-status counters: use feature stages as a proxy
+        c_done = sum(1 for f in features if f.stage == "DONE")
+        c_doing = sum(1 for f in features if f.stage in ("IMPLEMENT", "REVIEW", "TASKS"))
+        c_block = len(ledger.blockers or [])
+        c_todo = sum(1 for f in features
+                     if f.stage in ("IDEA", "BACKLOG", "CLARIFY", "SPEC", "PLAN"))
+        total = max(1, c_done + c_doing + c_block + c_todo)
+        seg_done_pct = 100 * c_done / total
+        seg_doing_pct = 100 * c_doing / total
+        seg_block_pct = 100 * c_block / total
+        seg_todo_pct = 100 * c_todo / total
 
-    action_title, why, link = next_action
-    nxt_summary = _next_what(features)
-    cta_html = f'<a class="cta" href="{h(link)}" target="_blank">Open &rarr; {h(link)}</a>' if link else ''
-
-    zone_a_html = f"""
-    <section class="zone zone-a">
-      <h2>Mission Progress <span class="sub">(weighted by stage)</span></h2>
-      <div class="big-picture">
-        <div class="progress-ring">
-          <svg viewBox="0 0 140 140">
-            <circle class="ring-bg" cx="70" cy="70" r="60"></circle>
-            <circle class="ring-fg" cx="70" cy="70" r="60"
-                    stroke-dasharray="{circumference:.2f}"
-                    stroke-dashoffset="{dash_offset:.2f}"></circle>
-          </svg>
-          <div class="ring-center">
-            <div class="pct-big">{pct}%</div>
-            <div class="pct-sub">{len(features)} feat</div>
-          </div>
-        </div>
-        <div class="feature-stack">{feature_stack_html}</div>
-      </div>
-      <div class="next-card">
-        <div class="label">Recommended next action</div>
-        <div class="title">{h(action_title)}</div>
-        <div class="why">{h(why)} &middot; Trajectory: {h(nxt_summary)}.</div>
-        {cta_html}
-      </div>
-    </section>
-    """
-
-    # ---- ZONE B: Agent activity (text-mode v2.1; D3 graph -> SDD-008) ----
-    cluster_html = ""
-    active_features = [f for f in features if f.stage not in ("DONE", "BACKLOG", "IDEA")]
-    if not active_features:
-        cluster_html = '<div class="defer-note">No active features. Fleet is idle.</div>'
-    for f in active_features:
-        agents = _agents_for_feature(roster, f, ledger)
-        tone = STAGE_TONE[f.stage]
-        chips_html = ""
-        if agents:
-            for a in agents:
-                initials = "".join(p[0].upper() for p in a["id"].split("-")[:2])
-                role_short = a["role"].split("-")[0]
-                kind_cls = "active" if a["status"] == "active" else "idle"
-                chips_html += (
-                    f'<span class="agent-chip {kind_cls}" title="{h(a["id"])} - {h(a["role"])}">'
-                    f'<span class="avatar">{h(initials)}</span>{h(role_short)}'
-                    f'</span>'
-                )
-        else:
-            chips_html = '<span class="agent-chip"><span class="avatar">??</span>no dispatch yet</span>'
-        cluster_html += (
-            f'<div class="feature-cluster {tone}">'
-            f'<div class="feat-title">{h(f.name)}<span class="stage-tag">{h(_stage_short(f.stage))}</span></div>'
-            f'<div class="agents">{chips_html}</div>'
+        counters_html = (
+            f'<dl class="task-counters" aria-label="Task status counters">'
+            f'<div class="c-todo"><dt>To do</dt><dd>{c_todo}</dd></div>'
+            f'<div class="c-doing"><dt>Doing</dt><dd>{c_doing}</dd></div>'
+            f'<div class="c-done"><dt>Done</dt><dd>{c_done}</dd></div>'
+            f'<div class="c-block"><dt>Blocked</dt><dd>{c_block}</dd></div>'
+            f'</dl>'
+        )
+        progress_html = (
+            f'<div class="progress-bar" role="img" '
+            f'aria-label="Sprint progress: {c_done} done, {c_doing} in progress, '
+            f'{c_block} blocked, {c_todo} remaining">'
+            f'<div class="seg-done"  style="width:{seg_done_pct:.1f}%"></div>'
+            f'<div class="seg-doing" style="width:{seg_doing_pct:.1f}%"></div>'
+            f'<div class="seg-block" style="width:{seg_block_pct:.1f}%"></div>'
+            f'<div class="seg-todo"  style="width:{seg_todo_pct:.1f}%"></div>'
             f'</div>'
         )
 
-    fleet_summary_html = ""
-    def _stat(n, label):
-        cls = "stat zero" if n == 0 else "stat"
-        return f'<div class="{cls}"><div class="n">{n}</div><div class="l">{label}</div></div>'
-    fleet_summary_html = (
-        f'<div class="fleet-summary">'
-        f'{_stat(roster["principals"], "Principals")}'
-        f'{_stat(roster["generic"], "Generic")}'
-        f'{_stat(roster["specialist"], "Specialist")}'
-        f'{_stat(roster["total_skills"], "Skills")}'
-        f'</div>'
+        blockers_html = ""
+        if ledger.blockers:
+            items = "".join(
+                f'<li>{h(b.get("agent_id", "?"))} -- '
+                f'{h(b.get("task_title") or b.get("task_id") or "blocked dispatch")}</li>'
+                for b in ledger.blockers
+            )
+            blockers_html = f'<ul class="blockers" aria-label="Active blockers">{items}</ul>'
+
+        goal_text = sprint_goal if sprint_goal else "No sprint goal defined"
+        sprint_meta = (
+            f'<p class="sprint-meta">'
+            f'<span class="status">Status: {h(status_text)}</span> &middot; '
+            f'<span>{dispatch_count} dispatches</span> &middot; '
+            f'<span>last outcome: {h(last_outcome)}</span>'
+            f'</p>'
+        )
+        sprint_body = (
+            f'<p class="sprint-goal">{h(goal_text)}</p>'
+            f'{sprint_meta}'
+            f'{counters_html}'
+            f'{progress_html}'
+            f'{blockers_html}'
+        )
+    else:
+        sprint_label = "Current Sprint"
+        sprint_body = '<p class="empty-state">No active sprint found.</p>'
+
+    sprint_section = (
+        f'<section class="zone-sprint" aria-labelledby="sprint-heading">'
+        f'<h2 id="sprint-heading">{h(sprint_label)}</h2>'
+        f'{sprint_body}'
+        f'</section>'
     )
 
-    zone_b_html = f"""
-    <section class="zone zone-b">
-      <h2>Agent Activity <span class="sub">(by feature)</span></h2>
-      {cluster_html}
-      {fleet_summary_html}
-      <div class="defer-note">Live force-directed network graph -&gt; <code>SDD-008</code> (deferred: requires JS deps + WebSocket).</div>
-    </section>
-    """
+    # ---- SECTION 2: What Comes Next -------------------------------------
+    if next_action and (next_action[0] or next_action[1]):
+        action_title, why, link = next_action
+        nxt_summary = _next_what(features)
+        cta_html = (
+            f'<a class="cta" href="{h(link)}" target="_blank" rel="noopener">'
+            f'Open &rarr; {h(link)}</a>'
+            if link else ""
+        )
+        next_card_html = (
+            f'<div class="next-action-card">'
+            f'<div class="label">Recommended next action</div>'
+            f'<div class="title">{h(action_title)}</div>'
+            f'<div class="why">{h(why)} &middot; Trajectory: {h(nxt_summary)}.</div>'
+            f'{cta_html}'
+            f'</div>'
+        )
+        # Best-effort next gate / next sprint: use trajectory + sprint table
+        next_gate_html = (
+            f'<div class="next-gate"><span class="label">Next gate</span>'
+            f'{h(_next_what(features))}</div>'
+        )
+        next_sprint_text = "--"
+        if sprint_table and current_sprint:
+            cur_num = current_sprint.get("num")
+            for s in sprint_table:
+                if s.get("num", 0) > (cur_num or 0):
+                    next_sprint_text = f"Sprint {s['num']}: {s.get('title', '')}"
+                    break
+        next_sprint_html = (
+            f'<div class="next-sprint"><span class="label">Next sprint</span>'
+            f'{h(next_sprint_text)}</div>'
+        )
+        next_body = next_card_html + next_gate_html + next_sprint_html
+    else:
+        next_body = '<p class="empty-state">No recommended action available.</p>'
 
-    # ---- ZONE C: Swim lanes ----------------------------------------------
-    lanes_html = ""
+    next_section = (
+        f'<section class="zone-next" aria-labelledby="next-heading">'
+        f'<h2 id="next-heading">What Comes Next</h2>'
+        f'{next_body}'
+        f'</section>'
+    )
+
+    # ---- SECTION 3: WIP Summary -----------------------------------------
     if features:
-        # Active features first (descending by stage), DONE last (alphabetical)
         active = sorted([f for f in features if f.stage != "DONE"],
                         key=lambda f: (-STAGE_WEIGHT.get(f.stage, 0), f.name))
         done = sorted([f for f in features if f.stage == "DONE"], key=lambda f: f.name)
         ordered = active + done
+
+        lanes_html_parts: list[str] = []
         for f in ordered:
-            tone = STAGE_TONE[f.stage]
-            fill_pct = STAGE_WEIGHT.get(f.stage, 0)
-            ticks = "".join('<div class="tick"></div>' for _ in STAGES)
-            lanes_html += (
-                f'<div class="swim-row">'
-                f'<span class="label" title="{h(f.notes)}">{h(f.name)}</span>'
-                f'<div class="swim-track">'
-                f'<div class="swim-stages">{ticks}</div>'
-                f'<div class="swim-fill {tone}" style="width:{fill_pct}%"></div>'
-                f'<div class="swim-marker" style="left:{fill_pct}%"></div>'
-                f'</div>'
+            tone = STAGE_TONE.get(f.stage, "tone-faint")
+            try:
+                cur_idx = STAGES.index(f.stage)
+            except ValueError:
+                cur_idx = 0
+            cells = []
+            for i, stage in enumerate(STAGES):
+                if i < cur_idx:
+                    cls = "stage-cell complete"
+                elif i == cur_idx:
+                    cls = f"stage-cell active {tone}"
+                else:
+                    cls = "stage-cell"
+                cells.append(f'<div class="{cls}" aria-hidden="true"></div>')
+            cells_html = "".join(cells)
+            aria = (
+                f"{f.name}: stage {h(_stage_short(f.stage))} "
+                f"({cur_idx + 1} of {len(STAGES)})"
+            )
+            lanes_html_parts.append(
+                f'<div class="swim-lane">'
+                f'<span class="feature-name" title="{h(f.notes)}">{h(f.name)}</span>'
+                f'<div class="stage-bar" role="img" aria-label="{h(aria)}">{cells_html}</div>'
                 f'<span class="stage-text">{h(_stage_short(f.stage))}</span>'
                 f'</div>'
             )
+        lanes_html = "".join(lanes_html_parts)
+        pct = _weighted_progress(features)
+        wip_body = (
+            f'{lanes_html}'
+            f'<div class="overall-completion">'
+            f'Overall completion: <strong>{pct}%</strong> '
+            f'across {len(features)} feature{"s" if len(features) != 1 else ""}'
+            f'</div>'
+        )
     else:
-        lanes_html = '<div class="defer-note">No features registered yet.</div>'
+        wip_body = '<p class="empty-state">No features registered yet.</p>'
 
-    axis_html = (
-        '<div class="swim-axis">'
-        '<span></span>'
-        '<div class="stages">'
-        + "".join(f'<span>{s.title()}</span>' for s in STAGES) +
-        '</div><span></span></div>'
+    wip_section = (
+        f'<section class="zone-wip" aria-labelledby="wip-heading">'
+        f'<h2 id="wip-heading">WIP Summary</h2>'
+        f'{wip_body}'
+        f'</section>'
     )
 
-    zone_c_html = f"""
-    <section class="zone zone-c">
-      <h2>Feature Pipeline <span class="sub">(stage-weighted; bigger fill = closer to done)</span></h2>
-      <div class="swim-lanes">{lanes_html}</div>
-      {axis_html}
-    </section>
-    """
+    # ---- SECTION 4: PI Context ------------------------------------------
+    if all_pis:
+        details_parts: list[str] = []
+        for p in all_pis:
+            is_open = p.is_current or (pi and p.name == pi.name)
+            open_attr = " open" if is_open else ""
+            # Sprint table: only render rich table for the current PI
+            table_html = ""
+            if is_open and sprint_table:
+                rows = "".join(
+                    f"<tr>"
+                    f"<td>{s.get('num', '?')}</td>"
+                    f"<td>{h(s.get('title', ''))}</td>"
+                    f"<td>{h(s.get('status', ''))}</td>"
+                    f"<td>{s.get('dispatch_count', 0)}</td>"
+                    f"<td>{h(s.get('last_outcome', '--'))}</td>"
+                    f"</tr>"
+                    for s in sprint_table
+                )
+                table_html = (
+                    f'<table class="sprint-table">'
+                    f'<thead><tr>'
+                    f'<th>Sprint</th><th>Title</th><th>Status</th>'
+                    f'<th>Dispatches</th><th>Last Outcome</th>'
+                    f'</tr></thead>'
+                    f'<tbody>{rows}</tbody>'
+                    f'</table>'
+                )
+            else:
+                table_html = (
+                    f'<p class="empty-state">'
+                    f'{h(p.title)} &middot; {p.pct}% complete'
+                    f'</p>'
+                )
+            details_parts.append(
+                f'<details{open_attr}>'
+                f'<summary>{h(p.name)} -- {h(p.title)}</summary>'
+                f'<div class="pi-body">{table_html}</div>'
+                f'</details>'
+            )
+        pi_body = "".join(details_parts)
+    else:
+        pi_body = '<p class="empty-state">No Program Increments found in roadmap.</p>'
 
-    # ---- ZONE D: Unified activity feed -----------------------------------
-    # Merge commits and dispatches into one chronological feed.
-    feed: list[tuple[str, dict]] = []
-    for sha, subj, rel in commits:
-        ctype, rest = split_commit_type(subj)
-        feed.append((rel, {
-            "kind": "commit", "when": rel, "actor": sha,
-            "actor_short": sha[:5], "badge_type": ctype or "chore",
-            "badge_tone": COMMIT_TYPE_TONE.get(ctype or "chore", "faint"),
-            "desc": rest, "feat": "",
-        }))
+    pi_section = (
+        f'<section class="zone-pi" aria-labelledby="pi-heading">'
+        f'<h2 id="pi-heading">PI Context</h2>'
+        f'{pi_body}'
+        f'</section>'
+    )
+
+    # ---- SECTION 5: Agent Activity placeholder --------------------------
+    def _stat(n: int, label: str) -> str:
+        return (
+            f'<div class="fleet-stat">'
+            f'<div class="n">{n}</div><div class="l">{h(label)}</div>'
+            f'</div>'
+        )
+
+    fleet_stats_html = (
+        f'<div class="fleet-summary">'
+        f'{_stat(roster.get("principals", 0), "Principals")}'
+        f'{_stat(roster.get("generic", 0), "Generic")}'
+        f'{_stat(roster.get("specialist", 0), "Specialist")}'
+        f'{_stat(roster.get("total_skills", 0), "Skills")}'
+        f'</div>'
+    )
+    agents_section = (
+        f'<section class="zone-agents" aria-labelledby="agents-heading">'
+        f'<h2 id="agents-heading">Agent Activity</h2>'
+        f'{fleet_stats_html}'
+        f'<p class="defer-notice">'
+        f'Per-agent real-time visibility planned for PI-5.'
+        f'</p>'
+        f'</section>'
+    )
+
+    # ---- SECTION 6: Activity Feed ---------------------------------------
+    feed: list[dict] = []
     if ledger.recent:
         for d in ledger.recent:
             actor = d.get("agent_id", "?")
-            initials = "".join(p[0].upper() for p in actor.split("-")[:2]) or "??"
             outcome = d.get("outcome") or "pending"
-            tone = {"success": "jade", "failed": "oxblood",
-                    "blocked": "oxblood", "pending": "amber"}.get(outcome, "amber")
-            feat = (d.get("feature_dir") or "").rsplit("/", 1)[-1] or ""
-            feed.append((d.get("dispatched_at", ""), {
-                "kind": "dispatch", "when": "ledger",
-                "actor_short": initials,
-                "badge_type": f"dispatch:{outcome}",
-                "badge_tone": tone,
-                "desc": f"{d.get('task_id','')} {d.get('task_title','')}",
-                "feat": feat,
-            }))
-    # Sort: dispatches have ISO timestamps that sort lexicographically; commits use relative dates.
-    # Show all dispatches first (most authoritative), then commits in repo order.
-    dispatch_items = [item for ts, item in feed if item["kind"] == "dispatch"]
-    commit_items = [item for ts, item in feed if item["kind"] == "commit"]
-    feed_ordered = dispatch_items + commit_items
+            feed.append({
+                "ts": d.get("dispatched_at", ""),
+                "kind": "DISPATCH",
+                "actor": actor,
+                "desc": (
+                    f"{d.get('task_id', '')} {d.get('task_title', '')}"
+                    f" [{outcome}]"
+                ),
+            })
+    if decisions:
+        for dec in decisions:
+            feed.append({
+                "ts": dec.get("timestamp", ""),
+                "kind": "DECISION",
+                "actor": dec.get("decider", "?"),
+                "desc": (
+                    f"L{dec.get('level', '?')}: "
+                    f"{dec.get('description', '')}"
+                ),
+            })
+    for sha, subj, rel in commits:
+        feed.append({
+            "ts": rel,
+            "kind": "COMMIT",
+            "actor": sha[:7],
+            "desc": subj,
+        })
 
-    feed_rows_html = ""
-    for item in feed_ordered[:20]:
-        feat_tag = f'<span class="feat-tag">{h(item["feat"])}</span>' if item["feat"] else '<span></span>'
-        feed_rows_html += (
-            f'<div class="activity-row">'
-            f'<span class="when">{h(item["when"])}</span>'
-            f'<span class="avatar" title="{h(item.get("actor", item["actor_short"]))}">{h(item["actor_short"])}</span>'
-            f'<span class="badge t-{item["badge_tone"]}">{h(item["badge_type"])}</span>'
-            f'<span class="desc">{h(item["desc"])}</span>'
-            f'{feat_tag}'
-            f'</div>'
-        )
-    if not feed_rows_html:
-        feed_rows_html = '<div class="defer-note">No activity yet. Dispatches and commits will appear here.</div>'
+    if feed:
+        # Sort heuristically: dispatches/decisions have ISO timestamps, commits
+        # use relative date strings.  Prefer ISO timestamps first.
+        def _key(e: dict) -> tuple[int, str]:
+            ts = e["ts"] or ""
+            return (0 if "T" in ts or "-" in ts else 1, ts)
+        feed.sort(key=_key, reverse=True)
+        rows = []
+        for ev in feed[:50]:
+            tone = ev["kind"].lower()
+            rows.append(
+                f'<div class="feed-event">'
+                f'<span class="when">{h(ev["ts"]) or "--"}</span>'
+                f'<span class="badge b-{tone}">{ev["kind"]}</span>'
+                f'<span class="desc">'
+                f'<strong>{h(ev["actor"])}</strong> {h(ev["desc"])}'
+                f'</span>'
+                f'</div>'
+            )
+        feed_html = "".join(rows)
+    else:
+        feed_html = '<div class="empty-state">No activity recorded yet.</div>'
 
-    zone_d_html = f"""
-    <section class="zone zone-d">
-      <h2>Activity Feed <span class="sub">(dispatches + commits, newest first, top 20)</span></h2>
-      <div class="activity-list">{feed_rows_html}</div>
-    </section>
-    """
+    feed_section = (
+        f'<section class="zone-feed" aria-labelledby="feed-heading">'
+        f'<h2 id="feed-heading">Activity Feed</h2>'
+        f'<div class="feed-container" role="log" aria-live="off" tabindex="0">'
+        f'{feed_html}'
+        f'</div>'
+        f'</section>'
+    )
 
-    # ---- ABOUT SECTION (SDD-010) ----------------------------------------
+    # ---- ABOUT SECTION (SDD-010, retained) -------------------------------
     if about_pi and about_sprint and about_focus:
-        about_dynamic = (
-            f'{h(about_pi)} | {h(about_sprint)} | {h(about_focus)}'
-        )
+        about_dynamic = f'{h(about_pi)} | {h(about_sprint)} | {h(about_focus)}'
     else:
         about_dynamic = h(ABOUT_FALLBACK)
     about_section_html = (
@@ -1355,6 +1615,18 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
         f'<p>{h(ABOUT_STATIC_PARAGRAPH)}</p>'
         f'<p class="about-where-we-are">{about_dynamic}</p>'
         f'</section>'
+    )
+
+    # ---- FOOTER ----------------------------------------------------------
+    mode_text = f"live mode @ :{port}" if (live and port) else "file mode"
+    footer_html = (
+        f'<footer role="contentinfo">'
+        f'<span>{h(generated_at)}</span> &middot; '
+        f'<span>v3.0 (sprint-first)</span> &middot; '
+        f'<span>stdlib only</span> &middot; '
+        f'<span>{h(mode_text)}</span> &middot; '
+        f'<span>{h(live_badge)}</span>'
+        f'</footer>'
     )
 
     return f"""<!doctype html>
@@ -1365,31 +1637,28 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
 <title>Bridge -- {h(pi_name)} -- {h(generated_at)}</title>
 <style>{HTML_CSS}</style>
 </head><body>
-<header class="topbar">
-  <div class="mission">
-    <span class="h-bridge">Bridge</span>
-    <span class="mission-text">{h(mission_text)}</span>
-  </div>
-  <div class="sprint-pills">{sprint_pills_html}</div>
+<a href="#main" class="skip-link">Skip to main content</a>
+<header role="banner" class="topbar">
+  <div class="brand">BRIDGE</div>
+  <nav class="pi-pills" aria-label="Program Increments">{pi_pills_html}</nav>
   <div class="live-pulse">
-    <span class="dot {pulse_class}"></span>
+    <span class="dot {pulse_class}" aria-hidden="true"></span>
     <span>{h(pulse_text)}</span>
-    <span class="meta">| {live_badge}</span>
-    {refresh_btn}
   </div>
+  <div class="freshness" aria-live="polite">{h(generated_at)}</div>
 </header>
 {about_section_html}
-<main class="layout-4zone">
-  {zone_a_html}
-  {zone_b_html}
-  {zone_c_html}
-  {zone_d_html}
+<main id="main" role="main" class="grid-v3">
+  {sprint_section}
+  {next_section}
+  {wip_section}
+  {pi_section}
+  {agents_section}
+  {feed_section}
 </main>
-<footer>Auto-generated by cli/state_builder.py &middot; {("live mode @ :" + str(port)) if (live and port) else "file mode"} &middot; v2.1 (4-zone) &middot; v3 (D3 + WebSocket) tracked as SDD-008</footer>
+{footer_html}
 </body></html>
 """
-
-
 # ---------------------------------------------------------------------------- #
 # Build orchestration
 # ---------------------------------------------------------------------------- #
@@ -1409,6 +1678,17 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
     commits = load_recent_commits(sdd_root)
     next_action = derive_next_action(sdd_root, pi, features)
 
+    # v3 data-layer additions (Phase 1 functions)
+    pi_name_val = pi.name if pi else ""
+    sprint_table = load_sprint_table(sdd_root, pi_name_val) if pi_name_val else []
+    current_sprint = detect_current_sprint(sprint_table)
+    sprint_num = current_sprint["num"] if current_sprint else 1
+    sprint_goal = (
+        load_sprint_goal(sdd_root, pi_name_val, sprint_num)
+        if pi_name_val else "No sprint goal defined"
+    )
+    decisions = load_decisions(sdd_root)
+
     generated_date = fixed_date or dt.date.today().isoformat()        # MD: day precision = deterministic
     generated_at = fixed_date or dt.datetime.now().strftime("%Y-%m-%d %H:%M")  # HTML: more precise
 
@@ -1426,6 +1706,8 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
         ledger=ledger, commits=commits, next_action=next_action,
         live=live_html, port=port, all_pis=pis,
         about_pi=about_pi, about_sprint=about_sprint, about_focus=about_focus,
+        sprint_table=sprint_table, current_sprint=current_sprint,
+        sprint_goal=sprint_goal, decisions=decisions,
     )
 
     result = {

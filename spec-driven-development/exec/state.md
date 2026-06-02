@@ -1,6 +1,6 @@
 # Executive State
 
-Generated date: 2026-05-19
+Generated date: 2026-06-02
 Current PI: PI-2 (Fleet Maturity and CLI)
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
 Active focus: Start: 'CLI Phase 2: `fleet.py`, `qa.py`, `retro.py`, `state_builder.py` operational (ALL SHIPPED 2026-05-16)'
@@ -24,6 +24,9 @@ PI progress: 0/6 commitments complete (0%)
 | sprint-c-validation | BACKLOG | - | directory exists, no artifacts yet |
 | state-builder | DONE | Done | validation 100%, RETRO present |
 | state-dashboard | DONE | done | validation 100%, RETRO present |
+| day-to-day-brownfield-bootstrap | SPEC | DRAFT | Status: DRAFT |
+| live-ui-v2 | SPEC | draft | Status: draft |
+| principal-agent-hygiene | SPEC | - | spec.md present |
 
 ## Sprint Plan
 
@@ -83,11 +86,11 @@ PI progress: 0/6 commitments complete (0%)
 
 ## Fleet
 
-- Principals: 5
+- Principals: 6
 - Generic workers: 4
 - Specialists: 1
-- Total agents: 10
-- Skills: 29 across 5 categories
+- Total agents: 11
+- Skills: 31 across 5 categories
 
 ## Recently Completed
 

@@ -1,9 +1,9 @@
 ---
 pi: PI-3
-status: Active
+status: Done
 theme: Portability Validation + Live UI v2 + Navigation Layer
 started: 2026-05-25
-closed: in flight
+closed: 2026-06-02
 owner: principal-executive-manager
 last_updated: 2026-05-26
 ---

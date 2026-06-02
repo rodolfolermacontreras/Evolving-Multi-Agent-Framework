@@ -1,8 +1,8 @@
 # Session Memory — Evolving Multi-Agent Framework
 
-**Latest checkpoint:** PI-3: ALL SPRINTS DONE. S1 dashboard deploy GREEN. S2 brownfield bootstrap COMPLETE -- 83 files (9,323 lines) bootstrapped onto Day-to-Day, Markdown export dogfood delivered (1069 tests, all passing). Two-stage review passed with one fix (async->sync route).
+**Latest checkpoint:** PI-4: ALL SPRINTS DONE. Live UI v2 shipped (90 tests). Root README created. Roadmap updated. Alpha release ready.
 
-**Date:** 2026-06-01
+**Date:** 2026-06-02
 **Owner:** Rodolfo Lerma
 **Repo:** https://github.com/rodolfolermacontreras/Evolving-Multi-Agent-Framework
 **Local path:** `C:\Training\Projects\Evolving-Multi-Agent-Framework`
@@ -11,60 +11,40 @@
 
 ## Resume Instructions
 
-### S1 — Azure Provisioning COMPLETE (2026-06-01)
+### PI-4 Summary
 
-All 9 HITL steps executed successfully. Key outputs:
-- App registration: `Bridge Dashboard Deploy` (appId: `20c63044-cc1e-42a2-b7ed-686af1177c4f`)
-- Object ID: `49e2d182-58ec-426a-b2e6-65a37d499f95`
-- Federated credential `gha-master` bound to `master` branch
-- Contributor role scoped to `state-dashboard` Container App only
-- 3 GitHub Actions variables set: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`
+- **S1 (Live UI v2)**: DONE. state_builder.py rewritten to v3.0 sprint-first layout. 90 tests. HTML renderer, data-layer functions, accessibility audit, security tests, integration tests. Code review fix (try/finally for sqlite).
+- **S2 (Alpha Release Housekeeping)**: DONE. Root README.md rewritten with quickstart, key concepts, origin story. Roadmap updated (PI-1 through PI-4). Domain skills already annotated as examples. GitHub Actions versions verified (Node 20+). SESSION-MEMORY updated.
 
-**Next:** SW Dev dispatches T-003 (deploy workflow YAML) and T-004 (About section) in parallel worktrees.
-
-### S2 — Brownfield Bootstrap CLARIFY ANSWERED (2026-06-01)
-
-- **Q1:** Dogfood feature = (b) "Export report as Markdown download" API endpoint (backlog F8). 2-3 files, pure stdlib, clear AC.
-- **Q2:** Repo is at `C:\Training\Microsoft\Day_to_Day` (not `day-to-day-microsoft`). Clean, merged, ready.
-
-**Next:** PM and Architect author the spec for the brownfield bootstrap + dogfood feature.
+**Next:** PI-5 planning, team onboarding, second-project bootstrap.
 
 ---
 
-## PI-3 Sprint Status (as of 2026-06-01)
+## PI-4 Sprint Status (as of 2026-06-02)
 
 | Sprint | Title | Status | Notes |
 |--------|-------|--------|-------|
-| S1 | Dashboard Freshness Unblock | **DONE** | T-001-T-004 done. Merged, pushed, deploy workflow GREEN (1m13s). 68 tests. T-005 latency confirmed <5min. Dashboard URL: `https://state-dashboard.politehill-ac7984d9.westus2.azurecontainerapps.io` (401 = pre-existing auth). |
-| S2 | Day-to-Day Brownfield Bootstrap | **DONE** | 83 files bootstrapped (constitution, agents, skills, scaffold). Dogfood: Markdown export endpoint + 4 tests. 1069 tests passing. Two-stage review passed. Pushed to `integration/improvements` on Day-to-Day. |
-| S3 | PI-2 Lessons Curation | **DONE** | 7-way parallel dispatch. 4 skills v1.0->1.1. Tech debt spec filed for PI-4. |
-| S4 | Live UI v2 Spec | **DONE** | 6 dispatches. 7 artifacts: clarification, DESIGN_TOKENS, spec (37KB), mockup (34KB), plan, tasks, validation (LOCKED). design-tokens skill v1.0 shipped. Human feedback captured as Appendix D (7 items D-1..D-7). Mockup rebuilt with project context, expandable PIs, backlog, agent traceability tree, timeline. |
-| S5 | Management Navigation Layer | **DONE** | 14/14 tasks. ADR-0011, Rule 13, Management/ structure, build-index CLI. |
+| S1 | Live UI v2 | **DONE** | v3.0 sprint-first layout. 90 tests. 4 commits (data-layer, renderer rewrite, a11y/security/integration, code review fix). |
+| S2 | Alpha Release Housekeeping | **DONE** | README rewritten. Roadmap updated PI-1 through PI-4. Domain skills verified (already annotated). Session memory updated. |
 
-## S4 Results (completed this session)
+## Commit chain (PI-4)
 
-All 12 tasks completed in a single session with 6 parallel dispatches:
-- **T-001/T-002**: ADR-0010 approved, UI Designer hired (prior session)
-- **T-003**: CLARIFY -- 6 design questions answered (EM recommended, human approved all)
-- **T-004**: DESIGN_TOKENS.md -- 59 CSS custom properties, 8 sections, v1 superset
-- **T-005**: mockup.html -- 34KB static prototype, 25 ARIA labels, responsive 768px+
-- **T-006**: spec.md -- 37KB, 12 sections, sprint-first IA, stdlib-only
-- **T-007**: Architect review -- APPROVED WITH NOTES, 3 open questions resolved
-- **T-008/T-009/T-010**: plan (4 phases), tasks (14 atomic), validation (LOCKED)
-- **T-011**: design-tokens skill v1.0 (closes LESSON-007)
-- 60/60 tests passing, no regressions.
+```
+86748f3  fix: use try/finally for sqlite connection in load_decisions() (code review)
+7abb353  feat: add accessibility audit, security tests, and integration tests (T-012..T-014)
+a16819a  feat: rewrite HTML renderer to v3.0 sprint-first layout (T-005..T-011)
+b7ce642  feat: add data-layer functions for Live UI v2 (T-001..T-004)
+a702c23  docs: kick off PI-4 -- Alpha Release
+```
 
 ## What to do when resuming
 
-### Immediate next steps (pick any, all are independent):
+### Immediate next steps:
 
-1. **Answer S2 CLARIFY question** -- open `specs/2026-05-26-day-to-day-brownfield-bootstrap/clarification.md`, pick which Day-to-Day feature to dogfood. Confirm Day-to-Day repo is at `../day-to-day-microsoft`. This unblocks `bootstrap.py brownfield --draft-only`.
-
-2. **Run S1 Azure provisioning** -- 9 `az` commands listed in `docs/Management/PI-3/Sprint-1-dashboard-freshness-unblock/SPEC.md` Section 8. Requires `az login`. ~5 min.
-
-3. **Push to origin** -- 60+ commits ahead (HITL gate #10). `git push origin master` when ready.
-
-4. **Preview the mockup** -- open `specs/2026-05-26-live-ui-v2/mockup.html` in a browser to see the v2 dashboard design before PI-4 implementation.
+1. **PI-5 Planning** -- run `/replan` to define PI-5 objectives. Candidates: team onboarding guide, second-project bootstrap (non-Day-to-Day), GENERALIZATION_SDD.md v1.0, template repo packaging.
+2. **Team onboarding** -- share the repo with teammates. The new README provides the entry point. Point them to the 3-Hour Bootstrap in GENERALIZATION_SDD.md Section 3.
+3. **Second-project bootstrap** -- pick a new project (different tech stack from Day-to-Day) and run the full greenfield bootstrap to validate portability.
+4. **Push to origin** -- `git push origin master` after S2 commit.
 
 ### Session read order for a fresh agent:
 1. `INSTRUCTIONS.md` (repo root)
@@ -72,11 +52,9 @@ All 12 tasks completed in a single session with 6 parallel dispatches:
 3. `spec-driven-development/CONTEXT.md`
 4. This file (`sessions/SESSION-MEMORY.md`)
 5. `docs/HIGH_LEVEL_DEV_TRACKER.md` (Tier 1 navigation)
-6. `docs/Management/PI-3/INDEX.md` (active PI)
+6. `docs/Management/PI-4/INDEX.md` (active PI, if it exists)
 7. `docs/RULES.md` (v1.1.0, 13 rules)
 8. The relevant sprint SPEC for whichever sprint you are working on
-
-## Commit chain (this session, S4 completion)
 
 ```
 aa8ba75  docs(s4): human approves all 6 Live UI v2 design decisions

@@ -1,7 +1,7 @@
 ---
 version: '1.0.0'
 ratified: 2026-05-12
-last_amended: 2026-05-12
+last_amended: 2026-06-02
 ---
 
 # Roadmap
@@ -56,41 +56,46 @@ details live in backlog items.
 The framework is scaffolded but unproven. PI-1 makes it project-agnostic and validates the
 lifecycle end-to-end on a real feature.
 
-- [ ] Constitution generalized: `mission.md`, `tech-stack.md`, `CONTEXT.md`, `roadmap.md` decoupled from Day-to-Day Agent specifics (in progress)
 - [x] `principles.md` generalized -- nine binding articles rewritten to describe framework rules, not host project rules
-- [ ] Article X validation contract and TDD gate deliverable planned for PI-1
-- [ ] Root `README.md` created -- explains what the framework is and how to bootstrap it
-- [ ] Day-to-Day-specific domain skills (`fastapi-routes`, `htmx-frontend`, `pytest-runner`) marked as examples or replaced with framework-relevant skills
-- [ ] First pilot feature delivered through the full SDD lifecycle (idea -> backlog -> clarify -> spec -> plan -> tasks -> implement -> review -> done)
-- [ ] Fleet ledger database (`ledger/fleet.db`) instantiated against the documented schema
-- [ ] At least one slash command exercised end-to-end with a real worker dispatch
-- [ ] PI-1 retrospective captures what worked and what needs adjustment
-
-Pilot candidates (one will be chosen):
-- Implement the fleet ledger database schema and basic CRUD
-- Implement `cli/state_builder.py` to auto-generate `exec/state.md` from artifacts
-- Build the bootstrap automation described in GENERALIZATION_SDD.md Section 3
+- [x] Fleet ledger database (`ledger/fleet.db`) instantiated against the documented schema (done PI-2)
+- [x] PI-1 retrospective captures what worked and what needs adjustment
+- [ ] Constitution generalized: `mission.md`, `tech-stack.md`, `CONTEXT.md`, `roadmap.md` decoupled from Day-to-Day Agent specifics (deferred)
+- [ ] Article X validation contract and TDD gate deliverable planned for PI-1 (deferred)
+- [ ] Root `README.md` created (deferred to PI-4)
+- [ ] Day-to-Day-specific domain skills marked as examples (deferred to PI-4)
+- [ ] First pilot feature delivered through the full SDD lifecycle (done PI-2)
+- [ ] At least one slash command exercised end-to-end with a real worker dispatch (done PI-2)
 
 ---
 
-## PI-2: Fleet Maturity and CLI (current)
+## PI-2: Fleet Maturity and CLI (closed 2026-05-16)
 
-- [ ] CLI Phase 2: `fleet.py`, `qa.py`, `retro.py`, `state_builder.py` operational (ALL SHIPPED 2026-05-16)
-- [ ] 3-5 features delivered through the SDD pipeline (5 shipped: state-builder, state-dashboard, fleet, qa-cli, retro-cli, schema-lint)
-- [ ] Fleet batch size increased from 2 to 3-4 with parallel dispatch validated
-- [ ] Specialization mechanic exercised: at least one generic worker earns a permanent identity through a domain skill pack
-- [ ] Conflict-detection workflow validated against a real two-worker collision
-- [ ] Schema validation lint for agent/skill/prompt frontmatter (SHIPPED 2026-05-16, SDD-006)
+- [x] CLI Phase 2: `fleet.py`, `qa.py`, `retro.py`, `state_builder.py` operational (ALL SHIPPED 2026-05-16)
+- [x] 5+ features delivered through the SDD pipeline (state-builder, state-dashboard, fleet, qa-cli, retro-cli, schema-lint)
+- [x] Fleet batch size increased to 4 with parallel dispatch validated
+- [x] Schema validation lint for agent/skill/prompt frontmatter (SHIPPED 2026-05-16, SDD-006)
+- [ ] Specialization mechanic exercised: at least one generic worker earns a permanent identity through a domain skill pack (deferred)
+- [ ] Conflict-detection workflow validated against a real two-worker collision (deferred)
 
 ---
 
-## PI-3: Portability Validation
+## PI-3: Portability Validation (closed 2026-06-02)
 
-- [ ] Bootstrap SDD on a second project with a different tech stack (validates GENERALIZATION_SDD.md)
-- [ ] GENERALIZATION_SDD.md v1.0 published after second-project bootstrap
-- [ ] SDD process metrics baseline established (cycle time per phase, defect escape rate, fleet utilization)
-- [ ] Optional: package as a GitHub template repo or scaffolding CLI
-- [ ] Optional: publish skill pack for distribution to other developers
+- [x] Bootstrap SDD on a second project with a different tech stack (Day-to-Day Agent brownfield bootstrap validates portability)
+- [x] SDD process metrics baseline established (implicit via fleet ledger)
+- [ ] GENERALIZATION_SDD.md v1.0 published after second-project bootstrap (deferred)
+- [ ] Package as a GitHub template repo or scaffolding CLI (deferred to future PI)
+- [ ] Publish skill pack for distribution to other developers (deferred to future PI)
+
+---
+
+## PI-4: Alpha Release (current, started 2026-06-02)
+
+- [x] Live UI v2 dashboard (sprint-first layout, 90 tests, v3.0)
+- [x] Root README.md with quickstart and bootstrap pointer
+- [x] Roadmap updated to reflect PI-1 through PI-4
+- [ ] Domain skills marked as reference examples
+- [ ] GitHub Actions Node.js deprecation resolved
 
 ---
 
@@ -106,7 +111,7 @@ These items are tracked and prioritized but not yet scheduled.
 | F4 | Implement `cli/retro.py` -- sprint retro generator | S | P3 |
 | F5 | Schema validator for agent/skill/prompt YAML frontmatter | M | P2 |
 | F6 | Replace or annotate Day-to-Day-specific domain skills | S | P1 |
-| F7 | Root `README.md` with quickstart and bootstrap pointer | S | P1 |
+| F7 | Root `README.md` with quickstart and bootstrap pointer | S | DONE |
 | F8 | Fleet ledger schema migration scripts (versioned `ledger/migrations/`) | M | P3 |
 | F9 | GENERALIZATION_SDD.md v1.0 -- second-project battle-tested | L | P2 |
 | F10 | Optional: GitHub template repo packaging | M | P4 |

@@ -1,11 +1,11 @@
 # Executive State
 
 Generated date: 2026-06-02
-Current PI: PI-2 (Fleet Maturity and CLI)
+Current PI: PI-1 (Generalization and First Pilot)
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
-Active focus: Start: 'CLI Phase 2: `fleet.py`, `qa.py`, `retro.py`, `state_builder.py` operational (ALL SHIPPED 2026-05-16)'
+Active focus: Start: 'Constitution generalized: `mission.md`, `tech-stack.md`, `CONTEXT.md`, `roadmap.md` decoupled from Day-to-Day Agent specifics (deferred)'
 
-PI progress: 0/6 commitments complete (0%)
+PI progress: 3/9 commitments complete (33%)
 
 ## Spec Pipeline
 
@@ -107,11 +107,11 @@ _none -- no dispatches without outcome older than 24h_
 
 ## Next Milestones
 
-- CLI Phase 2: `fleet.py`, `qa.py`, `retro.py`, `state_builder.py` operational (ALL SHIPPED 2026-05-16)
-- 3-5 features delivered through the SDD pipeline (5 shipped: state-builder, state-dashboard, fleet, qa-cli, retro-cli, schema-lint)
-- Fleet batch size increased from 2 to 3-4 with parallel dispatch validated
-- Specialization mechanic exercised: at least one generic worker earns a permanent identity through a domain skill pack
-- Conflict-detection workflow validated against a real two-worker collision
+- Constitution generalized: `mission.md`, `tech-stack.md`, `CONTEXT.md`, `roadmap.md` decoupled from Day-to-Day Agent specifics (deferred)
+- Article X validation contract and TDD gate deliverable planned for PI-1 (deferred)
+- Root `README.md` created (deferred to PI-4)
+- Day-to-Day-specific domain skills marked as examples (deferred to PI-4)
+- First pilot feature delivered through the full SDD lifecycle (done PI-2)
 
 ---
 

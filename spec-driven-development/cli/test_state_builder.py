@@ -1140,10 +1140,12 @@ class TestV3Layout:
         assert "<details" in htm
         assert "<summary>" in htm
 
-    def test_agents_placeholder_message(self, tmp_path: Path) -> None:
+    def test_agents_heading_present(self, tmp_path: Path) -> None:
         htm = self._build(tmp_path)
         assert 'id="agents-heading"' in htm
-        assert "Per-agent real-time visibility planned for PI-5" in htm
+        assert "Agent Lineage" in htm
+        # Placeholder text must be gone
+        assert "Per-agent real-time visibility planned for PI-5" not in htm
 
     def test_activity_feed_role_log(self, tmp_path: Path) -> None:
         htm = self._build(tmp_path)
@@ -1283,7 +1285,21 @@ def _render_html_with_features(**overrides) -> str:
                     stage="DONE", created="2026-05-01", notes="shipped"),
         ],
         roster={"principals": 4, "generic": 4, "specialist": 1,
-                "total_agents": 9, "total_skills": 28, "skill_categories": 5},
+                "total_agents": 9, "total_skills": 28, "skill_categories": 5,
+                "agents": [
+                    {"id": "principal-exec", "kind": "principal", "role": "exec",
+                     "specialization": None, "created_at": "2026-05-07",
+                     "provenance": None},
+                    {"id": "principal-arch", "kind": "principal", "role": "arch",
+                     "specialization": None, "created_at": "2026-05-07",
+                     "provenance": None},
+                    {"id": "dev-general", "kind": "generic", "role": "dev",
+                     "specialization": None, "created_at": "2026-05-07",
+                     "provenance": None},
+                    {"id": "dev-cli-1", "kind": "specialist", "role": "dev",
+                     "specialization": "cli", "created_at": "2026-05-16",
+                     "provenance": "Promoted from dev-general via /hire specialist."},
+                ]},
         ledger=LedgerView(available=True, recent=[
             {"agent_id": "dev-1", "outcome": "success",
              "dispatched_at": "2026-06-01T10:00:00Z",
@@ -1549,7 +1565,7 @@ class TestIntegration:
         assert "What Comes Next" in htm
         assert "WIP Summary" in htm
         assert "PI Context" in htm
-        assert "Agent Activity" in htm
+        assert "Agent Lineage" in htm
         assert "Activity Feed" in htm
         assert "v3.0 (sprint-first)" in htm
 
@@ -1577,7 +1593,76 @@ class TestIntegration:
         text = src.read_text(encoding="utf-8")
         import re as _re
         test_funcs = _re.findall(r"^\s+def (test_\w+)", text, _re.MULTILINE)
-        # 69 original + new tests from T-012, T-013, T-014
-        assert len(test_funcs) >= 85, (
-            f"Expected >= 85 test functions, found {len(test_funcs)}"
+        # 69 original + new tests from T-012, T-013, T-014, T-015
+        assert len(test_funcs) >= 89, (
+            f"Expected >= 89 test functions, found {len(test_funcs)}"
         )
+
+
+# ---------------------------------------------------------------------------
+# T-015: Agent Lineage Section
+# ---------------------------------------------------------------------------
+
+class TestAgentLineage:
+    """T-015: Agent lineage section renders roster, kind badges, and timeline."""
+
+    def test_load_roster_returns_agents_list(self, tmp_path: Path) -> None:
+        """load_roster returns dict with agents key containing list of dicts."""
+        sdd = _seed_sdd_root(tmp_path)
+        roster = load_roster(sdd)
+        assert "agents" in roster
+        assert isinstance(roster["agents"], list)
+        assert len(roster["agents"]) == 5
+        for agent in roster["agents"]:
+            assert "id" in agent
+            assert "kind" in agent
+
+    def test_agent_lineage_section_rendered(self, tmp_path: Path) -> None:
+        """HTML output contains agent-table with all agents from roster."""
+        sdd = _seed_sdd_root(tmp_path)
+        _seed_dispatches(sdd)
+        result = build(sdd_root=sdd, write=False, live_html=False,
+                       fixed_date="2026-05-16")
+        htm = result["html"]
+        assert "agent-table" in htm
+        # All 5 seed agents should appear
+        assert "principal-exec" in htm
+        assert "principal-arch" in htm
+        assert "dev-general" in htm
+        assert "qa-general" in htm
+        assert "dev-fastapi" in htm
+
+    def test_agent_kind_badges(self) -> None:
+        """Principal/specialist/generic badges rendered with correct classes."""
+        htm = _render_html_with_features()
+        assert "kind-badge" in htm
+        assert "kind-principal" in htm
+        assert "kind-specialist" in htm
+        assert "kind-generic" in htm
+
+    def test_promotion_timeline(self) -> None:
+        """Promotion events appear in timeline when provenance mentions Promoted or Hired."""
+        agents = [
+            {"id": "dev-cli-1", "kind": "specialist", "role": "dev",
+             "specialization": "cli", "created_at": "2026-05-16",
+             "provenance": "Promoted from dev-general via /hire specialist."},
+            {"id": "cloud-sec", "kind": "principal", "role": "cloud-security",
+             "specialization": "azure", "created_at": "2026-05-16",
+             "provenance": "Hired via /hire 2026-05-16 for Azure deployment."},
+            {"id": "dev-general", "kind": "generic", "role": "dev",
+             "specialization": None, "created_at": "2026-05-07",
+             "provenance": None},
+        ]
+        htm = _render_html_with_features(
+            roster={"principals": 1, "generic": 1, "specialist": 1,
+                    "total_agents": 3, "total_skills": 4, "skill_categories": 2,
+                    "agents": agents}
+        )
+        assert "timeline-event" in htm
+        # Both Promoted and Hired events should appear
+        assert "dev-cli-1" in htm
+        assert "cloud-sec" in htm
+        # The generic agent without provenance should NOT appear in timeline
+        # (only in the table)
+        timeline_section = htm.split("Promotion Timeline")
+        assert len(timeline_section) >= 2, "Promotion Timeline heading expected"

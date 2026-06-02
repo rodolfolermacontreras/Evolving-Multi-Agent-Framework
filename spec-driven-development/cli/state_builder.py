@@ -1106,6 +1106,64 @@ table.sprint-table tbody tr:hover {
   font-size: var(--fs-sm); color: var(--color-text-tertiary);
   font-style: italic; padding: var(--sp-2) 0;
 }
+.agent-table {
+  width: 100%; border-collapse: collapse;
+  margin-bottom: var(--sp-3);
+}
+.agent-table th,
+.agent-table td {
+  padding: var(--sp-1) var(--sp-2);
+  text-align: left; border-bottom: 1px solid var(--rule-line);
+  font-size: var(--fs-sm);
+}
+.agent-table th {
+  color: var(--ink-paper-faint); text-transform: uppercase;
+  letter-spacing: 0.08em; font-size: var(--fs-xs);
+}
+.agent-table td.agent-id {
+  font-family: var(--type-mono); font-size: var(--fs-xs);
+}
+.kind-badge {
+  display: inline-block; padding: 2px 8px;
+  border-radius: 3px; font-size: var(--fs-xs);
+  font-weight: 600; letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.kind-principal { background: var(--accent-oxblood); color: var(--ink-paper); }
+.kind-specialist { background: var(--signal-jade); color: var(--bg-carbon); }
+.kind-generic { background: var(--signal-amber); color: var(--bg-carbon); }
+.provenance-text {
+  max-width: 280px; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+  color: var(--ink-paper-dim); font-size: var(--fs-xs);
+}
+.timeline-section {
+  margin-top: var(--sp-3);
+  border-top: 1px solid var(--rule-line);
+  padding-top: var(--sp-2);
+}
+.timeline-section h3 {
+  font-size: var(--fs-sm); color: var(--ink-paper-dim);
+  margin-bottom: var(--sp-2); text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.timeline-event {
+  display: flex; gap: var(--sp-2); align-items: baseline;
+  padding: var(--sp-1) 0;
+  border-left: 2px solid var(--accent-oxblood);
+  padding-left: var(--sp-2); margin-bottom: var(--sp-1);
+}
+.timeline-event .tl-date {
+  font-family: var(--type-mono); font-size: var(--fs-xs);
+  color: var(--ink-paper-faint); white-space: nowrap;
+}
+.timeline-event .tl-agent {
+  font-family: var(--type-mono); font-size: var(--fs-xs);
+  color: var(--ink-paper); font-weight: 600;
+}
+.timeline-event .tl-desc {
+  font-size: var(--fs-xs); color: var(--ink-paper-dim);
+}
 
 /* SECTION 6: Activity Feed ------------------------------------- */
 .feed-container {
@@ -1279,7 +1337,7 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
     """Render the v3.0 sprint-first dashboard.
 
     The page has a fixed 7-section grid: top bar + Current Sprint, What
-    Comes Next, WIP Summary, PI Context, Agent Activity placeholder,
+    Comes Next, WIP Summary, PI Context, Agent Lineage,
     Activity Feed, and a footer.  Each section degrades to an explicit
     empty-state message when its data is missing.
     """
@@ -1523,7 +1581,7 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
         f'</section>'
     )
 
-    # ---- SECTION 5: Agent Activity placeholder --------------------------
+    # ---- SECTION 5: Agent Lineage -------------------------------------------
     def _stat(n: int, label: str) -> str:
         return (
             f'<div class="fleet-stat">'
@@ -1539,13 +1597,81 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
         f'{_stat(roster.get("total_skills", 0), "Skills")}'
         f'</div>'
     )
+
+    # -- Agent roster table --
+    agents_list = roster.get("agents") or []
+    agent_rows = ""
+    for ag in agents_list:
+        aid = h(ag.get("id", ""))
+        role = h(ag.get("role", ""))
+        kind = ag.get("kind", "generic")
+        kind_cls = f"kind-{kind}" if kind in ("principal", "specialist", "generic") else "kind-generic"
+        kind_label = h(kind)
+        spec = h(ag.get("specialization") or "--")
+        created = h(ag.get("created_at") or "--")
+        prov_raw = ag.get("provenance") or ""
+        prov_short = h(prov_raw[:80]) if prov_raw else "--"
+        prov_full = h(prov_raw) if prov_raw else ""
+        prov_cell = (
+            f'<span class="provenance-text" title="{prov_full}">{prov_short}</span>'
+            if prov_raw else '<span class="provenance-text">--</span>'
+        )
+        agent_rows += (
+            f'<tr>'
+            f'<td class="agent-id">{aid}</td>'
+            f'<td>{role}</td>'
+            f'<td><span class="kind-badge {kind_cls}">{kind_label}</span></td>'
+            f'<td>{spec}</td>'
+            f'<td>{created}</td>'
+            f'<td>{prov_cell}</td>'
+            f'</tr>'
+        )
+    agent_table_html = (
+        f'<table class="agent-table">'
+        f'<thead><tr>'
+        f'<th>Agent ID</th><th>Role</th><th>Kind</th>'
+        f'<th>Specialization</th><th>Created</th><th>Provenance</th>'
+        f'</tr></thead>'
+        f'<tbody>{agent_rows}</tbody>'
+        f'</table>'
+    ) if agents_list else ""
+
+    # -- Promotion timeline --
+    timeline_events = []
+    for ag in agents_list:
+        prov = ag.get("provenance") or ""
+        prov_lower = prov.lower()
+        if "promoted" in prov_lower or "hired" in prov_lower:
+            timeline_events.append({
+                "date": ag.get("created_at", ""),
+                "agent": ag.get("id", ""),
+                "desc": prov,
+            })
+    timeline_events.sort(key=lambda e: e["date"])
+    timeline_html = ""
+    if timeline_events:
+        evts = ""
+        for ev in timeline_events:
+            evts += (
+                f'<div class="timeline-event">'
+                f'<span class="tl-date">{h(ev["date"])}</span>'
+                f'<span class="tl-agent">{h(ev["agent"])}</span>'
+                f'<span class="tl-desc">{h(ev["desc"][:120])}</span>'
+                f'</div>'
+            )
+        timeline_html = (
+            f'<div class="timeline-section">'
+            f'<h3>Promotion Timeline</h3>'
+            f'{evts}'
+            f'</div>'
+        )
+
     agents_section = (
         f'<section class="zone-agents" aria-labelledby="agents-heading">'
-        f'<h2 id="agents-heading">Agent Activity</h2>'
+        f'<h2 id="agents-heading">Agent Lineage</h2>'
         f'{fleet_stats_html}'
-        f'<p class="defer-notice">'
-        f'Per-agent real-time visibility planned for PI-5.'
-        f'</p>'
+        f'{agent_table_html}'
+        f'{timeline_html}'
         f'</section>'
     )
 

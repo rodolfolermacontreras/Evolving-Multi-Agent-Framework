@@ -1,6 +1,6 @@
 # Session Memory — Evolving Multi-Agent Framework
 
-**Latest checkpoint:** PI-3: S3/S4/S5 DONE. S1 T-001 through T-004 DONE, merged to master, pushed to origin. Deploy workflow GREEN (run 26785393421, 1m13s). 68/68 tests. T-005 (latency probe) confirmed: deploy completes well within 5-min target. S2 CLARIFY answered — ready for SPEC.
+**Latest checkpoint:** PI-3: ALL SPRINTS DONE. S1 dashboard deploy GREEN. S2 brownfield bootstrap COMPLETE -- 83 files (9,323 lines) bootstrapped onto Day-to-Day, Markdown export dogfood delivered (1069 tests, all passing). Two-stage review passed with one fix (async->sync route).
 
 **Date:** 2026-06-01
 **Owner:** Rodolfo Lerma
@@ -36,7 +36,7 @@ All 9 HITL steps executed successfully. Key outputs:
 | Sprint | Title | Status | Notes |
 |--------|-------|--------|-------|
 | S1 | Dashboard Freshness Unblock | **DONE** | T-001-T-004 done. Merged, pushed, deploy workflow GREEN (1m13s). 68 tests. T-005 latency confirmed <5min. Dashboard URL: `https://state-dashboard.politehill-ac7984d9.westus2.azurecontainerapps.io` (401 = pre-existing auth). |
-| S2 | Day-to-Day Brownfield Bootstrap | **CLARIFY DONE** | Q1: dogfood = Markdown export endpoint (F8). Q2: repo at `C:\Training\Microsoft\Day_to_Day`, clean. Ready for SPEC. |
+| S2 | Day-to-Day Brownfield Bootstrap | **DONE** | 83 files bootstrapped (constitution, agents, skills, scaffold). Dogfood: Markdown export endpoint + 4 tests. 1069 tests passing. Two-stage review passed. Pushed to `integration/improvements` on Day-to-Day. |
 | S3 | PI-2 Lessons Curation | **DONE** | 7-way parallel dispatch. 4 skills v1.0->1.1. Tech debt spec filed for PI-4. |
 | S4 | Live UI v2 Spec | **DONE** | 6 dispatches. 7 artifacts: clarification, DESIGN_TOKENS, spec (37KB), mockup (34KB), plan, tasks, validation (LOCKED). design-tokens skill v1.0 shipped. Human feedback captured as Appendix D (7 items D-1..D-7). Mockup rebuilt with project context, expandable PIs, backlog, agent traceability tree, timeline. |
 | S5 | Management Navigation Layer | **DONE** | 14/14 tasks. ADR-0011, Rule 13, Management/ structure, build-index CLI. |

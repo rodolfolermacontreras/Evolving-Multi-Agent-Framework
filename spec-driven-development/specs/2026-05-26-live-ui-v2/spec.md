@@ -142,7 +142,7 @@ CSS Grid with named areas:
 | `next` | left column | auto | What Comes Next |
 | `wip` | right column | auto | WIP Summary (swim lanes) |
 | `pi` | full width | auto (collapsible) | PI Context navigator |
-| `agents` | full width | auto (placeholder) | Agent Activity placeholder |
+| `agents` | full width | auto | Agent Lineage (roster table + promotion timeline) |
 | `feed` | full width | max-height 480px, scrollable | Activity Feed |
 | `footer` | full width | 32px fixed | Footer |
 
@@ -422,56 +422,74 @@ on the wrapper). PI tabs wrap to second line.
 
 ---
 
-### 5.6 Agent Activity Placeholder (Priority 5)
+### 5.6 Agent Lineage (Priority 5)
 
-Per Q4 (approved: placeholder), this section reserves a UI region and defines the
-data contract for future per-agent visibility. Implementation is deferred to PI-5.
+> **Amendment (2026-06-02, PI-4 S1):** This section was originally a placeholder
+> deferring per-agent visibility to PI-5. The human requested agent lineage
+> visualization during PI-4 implementation. The placeholder was replaced with a
+> static agent roster and promotion timeline. The real-time per-agent activity
+> data contract (Section 5.6.1) remains the PI-5 target.
+>
+> Process note: This amendment was applied retroactively. The implementation
+> preceded the spec update. See `sprints/PI-4/lessons.md` LESSON-014.
 
-**Data shown (v2, placeholder):**
-- Section header: "Fleet Activity"
-- Placeholder message: "Per-agent real-time visibility is planned for PI-5. The data
-  contract is defined below."
-- Fleet summary stats (carried from v1 Zone B): principal count, worker count, active
-  dispatches count, total dispatches
-- Data contract reference: link to the contract definition in this spec (section 5.6.1)
+**Data shown (v2, implemented in PI-4):**
 
-**Data source (v2, placeholder):**
-- Fleet stats: `state_builder.load_roster()` + `dispatches` table counts
+Layer 1 -- Fleet summary stats (carried from v1):
+- Principal count, generic count, specialist count, total skills count
+
+Layer 2 -- Agent roster table:
+- All agents from `roster/agents.json`, one row per agent
+- Columns: Agent ID (monospace), Role, Kind (badge: principal=oxblood,
+  specialist=jade, generic=amber), Specialization (or "--"), Created date,
+  Provenance (truncated to 80 chars, full text on hover via `title` attribute)
+
+Layer 3 -- Promotion timeline:
+- Events extracted from agents whose `provenance` field contains "Promoted" or
+  "Hired" (case-insensitive)
+- Sorted by `created_at` date ascending
+- Each event: date + agent ID + provenance summary
+
+**Data source:**
+- `state_builder.load_roster()` returns dict with `agents` list (full agent
+  entries from `roster/agents.json`) plus aggregate counts
 
 **Semantic HTML:**
 ```html
-<section aria-labelledby="agents-heading">
-  <h2 id="agents-heading">Fleet Activity</h2>
-  <p class="placeholder-notice">
-    Per-agent real-time visibility planned for PI-5.
-  </p>
-  <div role="group" aria-label="Fleet summary">
-    <dl> <!-- principal/worker/active/total counts --> </dl>
+<section class="zone-agents" aria-labelledby="agents-heading">
+  <h2 id="agents-heading">Agent Lineage</h2>
+  <div class="fleet-summary"> <!-- 4 stat cards --> </div>
+  <table class="agent-table"> <!-- full roster --> </table>
+  <div class="timeline-section">
+    <h3>Fleet Timeline</h3>
+    <!-- promotion/hire events -->
   </div>
 </section>
 ```
 
 **Visual treatment:**
 - Background: `--bg-carbon`
-- Placeholder text: `--ink-paper-faint`, italic, 14px
-- Fleet stats: same treatment as v1 Zone B (4-column `<dl>`, `--ink-paper` values,
-  `--ink-paper-dim` labels)
+- Kind badges: `.kind-principal` uses `--accent-oxblood`, `.kind-specialist` uses
+  `--signal-jade`, `.kind-generic` uses `--signal-amber`
+- Agent IDs: `var(--type-mono)`, monospace
+- Provenance: `--ink-paper-dim`, truncated with `text-overflow: ellipsis`,
+  full text on hover
+- Timeline events: left-border accent with `--accent-oxblood`
 - Border: 1px `--rule-line` top and bottom
 
 #### 5.6.1 Agent Activity Data Contract (for PI-5 implementation)
 
-When the full agent activity feature is implemented, the UI region will display:
+The PI-5 upgrade will add real-time dispatch status to the existing roster table.
+Per agent:
 
 ```
-Per agent:
-  - agent_id: TEXT (from roster/agents.json)
-  - agent_role: TEXT (principal | generic | specialist)
+Per agent (adds to existing roster row):
   - current_task: TEXT | null (from dispatches WHERE outcome IS NULL)
   - last_activity: TIMESTAMP (MAX(dispatched_at, outcome_at) from dispatches)
   - status: ENUM (working | idle | blocked | unused)
   - dispatch_count: INTEGER (COUNT from dispatches)
 
-Aggregate:
+Aggregate (adds to fleet summary):
   - agents_working: INTEGER
   - agents_idle: INTEGER
   - agents_blocked: INTEGER
@@ -578,15 +596,18 @@ The dashboard integrates the three-tier Management navigation layer as follows:
 
 ---
 
-## 7. Agent Activity Placeholder (Q4)
+## 7. Agent Lineage (Q4 -- amended)
 
-See Section 5.6 for the full specification. Summary:
+> **Amendment (2026-06-02):** Q4 originally approved "placeholder". The human
+> requested full agent lineage during PI-4 implementation. The scope was expanded
+> from placeholder to static roster + promotion timeline. See Section 5.6.
 
-- The UI reserves a full-width section between PI Context and Activity Feed
-- In v2, it shows fleet summary stats (from v1) and a "planned for PI-5" notice
-- The data contract (Section 5.6.1) is locked now so PI-5 implementation has a target
-- No new database tables are required for the v2 placeholder; PI-5 may add an `agents`
-  table to fleet.db
+Summary of what shipped in PI-4:
+- Full agent roster table with kind badges, specialization, provenance
+- Promotion/hire timeline extracted from `roster/agents.json` provenance fields
+- Fleet summary stats retained from v1
+- The PI-5 data contract (Section 5.6.1) remains: real-time dispatch status will
+  be layered on top of the existing roster table
 
 ---
 
@@ -776,7 +797,7 @@ Mapped to the 10 ACs from the sprint SPEC (PI-3/S4):
 | IAC-02 | "What Comes Next" card shows recommended action from `derive_next_action()` | Compare HTML output to state_builder computation |
 | IAC-03 | WIP summary shows feature swim lanes with 9-stage lifecycle bars | Visual inspection; count features matches `load_features()` |
 | IAC-04 | PI Context shows PI list with completion % and sprint table for selected PI | Click each PI tab; verify sprint table matches INDEX.md |
-| IAC-05 | Agent Activity placeholder renders with fleet stats and "PI-5" notice | Visual inspection |
+| IAC-05 | Agent Lineage renders roster table with kind badges, provenance, and promotion timeline | Visual inspection |
 | IAC-06 | Activity Feed shows dispatches, decisions, and commits | Compare feed entries to fleet.db + git log |
 | IAC-07 | Layout is two-column at 1280px+, single-column at 768px-1279px | Resize browser window; verify breakpoint behavior |
 | IAC-08 | All text meets AA contrast ratio (4.5:1 normal, 3:1 large/UI) | Automated contrast checker or manual verification against Section 8.1 table |
@@ -799,7 +820,7 @@ Mapped to the 10 ACs from the sprint SPEC (PI-3/S4):
 | Q1: Visual style | (a) Evolve Bridge | Section 2 (UX Summary), Section 5 (all visual treatments reference Bridge tokens) |
 | Q2: Info priority | 1. Sprint, 2. Next, 3. WIP, 4. PI, 5. Agents | Section 3 (IA), Section 4 (layout order), Sections 5.2-5.6 (section order) |
 | Q3: Navigation depth | (b) PI list + sprint table | Section 5.5 (PI Context), Section 6 (Navigation Integration) |
-| Q4: Agent visibility | (b) Placeholder | Section 5.6 (Agent Activity Placeholder), Section 7 |
+| Q4: Agent visibility | (b) Placeholder -> (c) Agent Lineage (amended PI-4) | Section 5.6 (Agent Lineage), Section 7 |
 | Q5: Responsive | (b) Desktop + tablet (768px+) | Section 4.2 (tablet layout), all section responsive notes |
 | Q6: Animation | (b) Subtle transitions | Section 8.7 (Motion and animation) |
 
@@ -807,7 +828,7 @@ Mapped to the 10 ACs from the sprint SPEC (PI-3/S4):
 
 | Kickoff requirement | UI section | Priority rank |
 |--------------------|-----------|---------------|
-| Per-agent activity | Section 5.6 (Fleet Activity placeholder) | 5 |
+| Per-agent activity | Section 5.6 (Agent Lineage -- roster + timeline) | 5 |
 | Current sprint | Section 5.2 (Current Sprint) | 1 |
 | Work-in-progress summary | Section 5.4 (WIP Summary) | 3 |
 | Current PI | Section 5.5 (PI Context) + Top Bar PI pills | 4 |

@@ -4,4 +4,27 @@ Capture lessons during PI-4 execution. Format: one lesson per section, tagged by
 
 ---
 
-(No lessons captured yet -- PI-4 just started.)
+## LESSON-014: Implementation preceded spec amendment
+
+- **Phase:** IMPLEMENT
+- **Tag:** `process-violation`
+- **Date:** 2026-06-02
+- **Feature:** live-ui-v2 (Section 5.6 Agent Activity)
+- **What happened:** The human requested agent lineage visualization during PI-4
+  implementation. The team implemented the feature directly (roster table + promotion
+  timeline) without first amending the spec, which originally called for a placeholder
+  only (deferred to PI-5). The spec was amended retroactively after the code shipped.
+- **Root cause:** The Executive Manager routed the human's verbal request directly to
+  implementation instead of routing to the Architect to check spec alignment first.
+  The SDD lifecycle was bypassed: the correct path was
+  IDEA -> check spec -> amend spec -> implement.
+- **Impact:** Low (the feature works and tests pass), but the process violation
+  undermines the traceability chain that SDD exists to protect.
+- **Action items:**
+  1. When the human requests a change to an already-spec'd feature, the EM must route
+     to the Architect first to determine if a spec amendment is needed -- even if the
+     change seems small.
+  2. Add a "spec alignment check" step to the `implement` skill: before coding,
+     verify that the task matches the current spec. If not, flag for amendment.
+- **Disposition:** SHIP -- this lesson should become a guardrail in the `implement`
+  skill and/or a constitution amendment candidate.

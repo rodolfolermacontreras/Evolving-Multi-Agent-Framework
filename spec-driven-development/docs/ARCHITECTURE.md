@@ -455,6 +455,8 @@ state_builder.py build()
 
 ### 7.1 Dashboard Deployment (deploy-dashboard.yml)
 
+**Live site**: [https://state-dashboard.politehill-ac7984d9.westus2.azurecontainerapps.io](https://state-dashboard.politehill-ac7984d9.westus2.azurecontainerapps.io)
+
 ```
 Trigger: push to master (when state_builder.py, state.md, Dockerfile, or workflow changes)
          OR manual workflow_dispatch
@@ -466,9 +468,11 @@ Steps:
   4. az containerapp update (deploy to Azure Container Apps)
 
 Infrastructure:
-  - Azure Container Registry: sddframework.azurecr.io
-  - Azure Container App: sdd-dashboard (resource group: sdd-framework-rg)
-  - Authentication: GitHub OIDC -> Entra ID federated credential
+  - Azure Container Registry: ca24921a026cacr.azurecr.io
+  - Azure Container App: state-dashboard (resource group: rg-bridge-dashboard)
+  - Region: West US 2
+  - Authentication: GitHub OIDC -> Entra ID federated credential (no stored secrets)
+  - Auto-deploy: every qualifying push to master triggers build + deploy
 ```
 
 ---

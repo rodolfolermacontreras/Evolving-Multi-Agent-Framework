@@ -61,7 +61,11 @@ spec-driven-development/          -- process state (the "SDD folder")
 
 ## Live dashboard
 
-The Bridge dashboard (`cli/state_builder.py`) generates `exec/state.md` (Markdown executive summary) and `exec/state.html` (self-contained HTML dashboard) from live framework artifacts. The v3.0 sprint-first layout shows active sprint status, PI progress, fleet dispatch history, and agent roster at a glance. The entire CLI is stdlib-only Python (no external dependencies). The dashboard is deployed to Azure Container Apps and auto-refreshes on push to master.
+The Bridge dashboard (`cli/state_builder.py`) generates `exec/state.md` (Markdown executive summary) and `exec/state.html` (self-contained HTML dashboard) from live framework artifacts. The v3.0 sprint-first layout shows active sprint status, PI progress, fleet dispatch history, and agent roster at a glance. The entire CLI is stdlib-only Python (no external dependencies).
+
+**Live site**: [https://state-dashboard.politehill-ac7984d9.westus2.azurecontainerapps.io](https://state-dashboard.politehill-ac7984d9.westus2.azurecontainerapps.io)
+
+The dashboard is deployed to Azure Container Apps via GitHub Actions (OIDC authentication, no stored secrets). Every push to `master` that touches `state_builder.py`, `state.md`, the workflow file, or the `Dockerfile` triggers an automatic build and deploy.
 
 ## Origin story
 

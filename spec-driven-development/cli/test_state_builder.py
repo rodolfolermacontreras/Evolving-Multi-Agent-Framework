@@ -20,6 +20,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from cli.state_builder import (
     ABOUT_FALLBACK,
     ABOUT_STATIC_PARAGRAPH,
+    BacklogItem,
+    Feature,
+    LedgerView,
+    PIBlock,
     StateBuilderError,
     build,
     build_index,
@@ -33,6 +37,8 @@ from cli.state_builder import (
     load_sprint_table,
     main,
     parse_args,
+    render_html,
+    render_markdown,
 )
 
 SCHEMA_SQL = (Path(__file__).resolve().parent.parent / "ledger" / "schema.sql").read_text(
@@ -1258,3 +1264,320 @@ class TestV3EmptyStates:
         result = build(sdd_root=sdd, write=False, live_html=False,
                        fixed_date="2026-05-16")
         assert "No activity recorded yet" in result["html"]
+
+
+# ---------------------------------------------------------------------------
+# T-012: Accessibility Audit
+# ---------------------------------------------------------------------------
+
+def _render_html_with_features(**overrides) -> str:
+    """Render HTML with realistic defaults; override any kwarg."""
+    defaults = dict(
+        generated_at="2026-06-02",
+        pi=PIBlock(name="PI-4", title="Alpha Release",
+                   checkboxes=[(True, "A"), (False, "B")], is_current=True),
+        features=[
+            Feature(feature_dir=Path("specs/feat-a"), name="feat-a",
+                    stage="IMPLEMENT", created="2026-06-01", notes="wip"),
+            Feature(feature_dir=Path("specs/feat-b"), name="feat-b",
+                    stage="DONE", created="2026-05-01", notes="shipped"),
+        ],
+        roster={"principals": 4, "generic": 4, "specialist": 1,
+                "total_agents": 9, "total_skills": 28, "skill_categories": 5},
+        ledger=LedgerView(available=True, recent=[
+            {"agent_id": "dev-1", "outcome": "success",
+             "dispatched_at": "2026-06-01T10:00:00Z",
+             "task_id": "T-001", "task_title": "Build widget"}
+        ], recent_success=[
+            {"agent_id": "dev-1", "outcome": "success",
+             "dispatched_at": "2026-06-01T10:00:00Z"}
+        ], blockers=None),
+        commits=[("abc1234", "feat: add widget", "2 hours ago")],
+        next_action=("Write tests", "Coverage gap", None),
+        all_pis=[
+            PIBlock(name="PI-4", title="Alpha Release",
+                    checkboxes=[(True, "A"), (False, "B")], is_current=True),
+        ],
+        sprint_table=[{"num": 1, "title": "Test Sprint", "status": "Active",
+                       "dispatch_count": 3, "last_outcome": "success"}],
+        current_sprint={"num": 1, "title": "Test Sprint", "status": "Active",
+                        "dispatch_count": 3, "last_outcome": "success"},
+        sprint_goal="Deliver the widget feature",
+    )
+    defaults.update(overrides)
+    return render_html(**defaults)
+
+
+class TestAccessibility:
+    """T-012: Accessibility audit -- WCAG structural requirements."""
+
+    def test_single_h1(self) -> None:
+        htm = _render_html_with_features()
+        import re as _re
+        matches = _re.findall(r"<h1[\s>]", htm, _re.IGNORECASE)
+        assert len(matches) == 1, f"Expected exactly 1 <h1>, found {len(matches)}"
+
+    def test_section_aria_labelledby(self) -> None:
+        htm = _render_html_with_features()
+        import re as _re
+        sections = _re.findall(r"<section\b[^>]*>", htm)
+        assert len(sections) >= 6, f"Expected >= 6 sections, found {len(sections)}"
+        for tag in sections:
+            assert "aria-labelledby=" in tag, (
+                f"Section missing aria-labelledby: {tag}"
+            )
+
+    def test_heading_hierarchy_no_skipped_levels(self) -> None:
+        htm = _render_html_with_features()
+        import re as _re
+        headings = _re.findall(r"<(h[1-6])[\s>]", htm, _re.IGNORECASE)
+        levels = [int(h[1]) for h in headings]
+        assert levels[0] == 1, "First heading must be h1"
+        for i in range(1, len(levels)):
+            # Each heading level can be same, lower (back up), or +1 deeper
+            assert levels[i] <= levels[i - 1] + 1, (
+                f"Skipped heading level: h{levels[i-1]} -> h{levels[i]} "
+                f"at position {i}"
+            )
+
+    def test_landmark_roles_present(self) -> None:
+        htm = _render_html_with_features()
+        assert 'role="banner"' in htm, "Missing role=banner on header"
+        assert 'role="main"' in htm, "Missing role=main on main"
+        assert 'role="contentinfo"' in htm, "Missing role=contentinfo on footer"
+
+    def test_activity_feed_role_log(self) -> None:
+        htm = _render_html_with_features()
+        assert 'role="log"' in htm, "Activity feed must have role=log"
+
+    def test_skip_to_main_link(self) -> None:
+        htm = _render_html_with_features()
+        assert 'href="#main"' in htm, "Skip-to-main link missing"
+        assert "Skip to main content" in htm
+
+    def test_no_outline_none_in_css(self) -> None:
+        htm = _render_html_with_features()
+        assert "outline: none" not in htm
+        assert "outline:none" not in htm
+
+    def test_swim_lane_aria_label(self) -> None:
+        htm = _render_html_with_features()
+        import re as _re
+        bars = _re.findall(r'class="stage-bar"[^>]*aria-label="([^"]*)"', htm)
+        assert len(bars) >= 1, "Expected at least one stage-bar with aria-label"
+        for label in bars:
+            assert "stage" in label.lower(), (
+                f"Swim lane aria-label should describe the stage: {label}"
+            )
+
+    def test_freshness_aria_live_polite(self) -> None:
+        htm = _render_html_with_features()
+        assert 'aria-live="polite"' in htm, (
+            "Freshness timestamp must have aria-live=polite"
+        )
+
+
+# ---------------------------------------------------------------------------
+# T-013: No-JavaScript and Security Audit
+# ---------------------------------------------------------------------------
+
+class TestSecurityAudit:
+    """T-013: Security audit -- CSP, no scripts, no external deps."""
+
+    def test_no_script_tags(self) -> None:
+        htm = _render_html_with_features()
+        assert "<script" not in htm.lower(), "HTML must contain zero <script> tags"
+
+    def test_no_import_in_css(self) -> None:
+        htm = _render_html_with_features()
+        import re as _re
+        style_match = _re.search(r"<style>(.*?)</style>", htm, _re.DOTALL)
+        assert style_match, "No <style> block found"
+        css = style_match.group(1)
+        assert "@import" not in css, "CSS must not contain @import"
+
+    def test_no_external_urls_in_css(self) -> None:
+        htm = _render_html_with_features()
+        import re as _re
+        style_match = _re.search(r"<style>(.*?)</style>", htm, _re.DOTALL)
+        assert style_match
+        css = style_match.group(1)
+        assert "http://" not in css, "CSS must not reference http:// URLs"
+        assert "https://" not in css, "CSS must not reference https:// URLs"
+
+    def test_no_link_stylesheet_tags(self) -> None:
+        htm = _render_html_with_features()
+        assert '<link rel="stylesheet"' not in htm.lower(), (
+            "HTML must not contain external stylesheet links"
+        )
+
+    def test_csp_meta_tag_present(self) -> None:
+        htm = _render_html_with_features()
+        assert 'http-equiv="Content-Security-Policy"' in htm, (
+            "CSP meta tag missing"
+        )
+        assert "default-src 'none'" in htm
+        assert "style-src 'unsafe-inline'" in htm
+
+    def test_stdlib_only_imports(self) -> None:
+        src = Path(__file__).resolve().parent / "state_builder.py"
+        text = src.read_text(encoding="utf-8")
+        import re as _re
+        approved = {
+            "argparse", "datetime", "html", "json", "re", "socket",
+            "sqlite3", "subprocess", "sys", "webbrowser", "dataclasses",
+            "http.server", "http", "pathlib",
+            "__future__",
+        }
+        for line in text.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("import ") or stripped.startswith("from "):
+                parts = stripped.split()
+                mod = parts[1].split(".")[0]
+                assert mod in approved, (
+                    f"Non-stdlib import detected: {stripped}"
+                )
+
+    def test_footer_stdlib_badge(self) -> None:
+        htm = _render_html_with_features()
+        assert "stdlib only" in htm, "Footer must contain 'stdlib only' text"
+
+
+# ---------------------------------------------------------------------------
+# T-014: Final Integration
+# ---------------------------------------------------------------------------
+
+class TestIntegration:
+    """T-014: End-to-end integration tests."""
+
+    def _make_sdd(self, tmp_path: Path) -> Path:
+        """Build a complete sdd-root for integration testing."""
+        sdd = tmp_path / "sdd"
+        sdd.mkdir()
+
+        # constitution/roadmap.md with PI checkboxes
+        const_dir = sdd / "constitution"
+        const_dir.mkdir()
+        (const_dir / "roadmap.md").write_text(
+            "# Roadmap\n\n"
+            "## PI-3: Live Visualization (current)\n\n"
+            "- [x] Build renderer\n"
+            "- [ ] Accessibility audit\n"
+            "- [ ] Security hardening\n",
+            encoding="utf-8",
+        )
+
+        # docs/Management/PI-3/Sprint-1-test-sprint/SPEC.md
+        sprint_dir = sdd / "docs" / "Management" / "PI-3" / "Sprint-1-test-sprint"
+        sprint_dir.mkdir(parents=True)
+        (sprint_dir / "SPEC.md").write_text(
+            "# Sprint 1: Test Sprint\n\n## Goal\n\nDeliver accessibility audit.\n",
+            encoding="utf-8",
+        )
+
+        # specs/ with a feature
+        spec_dir = sdd / "specs" / "2026-06-01-accessibility"
+        spec_dir.mkdir(parents=True)
+        (spec_dir / "spec.md").write_text(
+            "# Feature Spec: Accessibility\n\n- Date: 2026-06-01\n- Status: Implement\n",
+            encoding="utf-8",
+        )
+
+        # backlog
+        backlog_dir = sdd / "backlog"
+        backlog_dir.mkdir()
+        (backlog_dir / "BACKLOG.md").write_text(
+            "# Product Backlog\n\nEmpty.\n", encoding="utf-8"
+        )
+
+        # roster
+        roster_dir = sdd / "roster"
+        roster_dir.mkdir()
+        agents = [
+            {"id": "principal-exec", "kind": "principal", "role": "exec",
+             "specialization": None},
+            {"id": "dev-general", "kind": "generic", "role": "dev",
+             "specialization": None},
+        ]
+        (roster_dir / "agents.json").write_text(
+            json.dumps(agents), encoding="utf-8"
+        )
+        (roster_dir / "skills.json").write_text(
+            json.dumps([{"id": "s1", "category": "core", "description": "skill 1"}]),
+            encoding="utf-8",
+        )
+
+        # exec
+        (sdd / "exec").mkdir()
+
+        # ledger/fleet.db
+        ledger_dir = sdd / "ledger"
+        ledger_dir.mkdir()
+        db_path = ledger_dir / "fleet.db"
+        conn = sqlite3.connect(db_path)
+        conn.executescript(SCHEMA_SQL)
+        conn.execute(
+            "INSERT INTO dispatches (dispatched_at, pi, sprint, feature_dir, "
+            "task_id, task_title, agent_id, agent_role, outcome, outcome_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                "2026-06-01T10:00:00Z", "PI-3", "Sprint 1",
+                "2026-06-01-accessibility", "T-012", "Accessibility audit",
+                "dev-general", "developer", "success", "2026-06-01T12:00:00Z",
+            ),
+        )
+        conn.commit()
+        conn.close()
+        return sdd
+
+    def test_full_build_succeeds(self, tmp_path: Path) -> None:
+        sdd = self._make_sdd(tmp_path)
+        result = build(sdd_root=sdd, write=True, live_html=False,
+                       fixed_date="2026-06-02")
+        assert isinstance(result, dict)
+        assert "html" in result
+        assert "markdown" in result
+        assert len(result["html"]) > 0
+        assert len(result["markdown"]) > 0
+
+    def test_html_has_all_seven_sections(self, tmp_path: Path) -> None:
+        sdd = self._make_sdd(tmp_path)
+        result = build(sdd_root=sdd, write=False, live_html=False,
+                       fixed_date="2026-06-02")
+        htm = result["html"]
+        assert "Current Sprint" in htm or 'id="sprint-heading"' in htm
+        assert "What Comes Next" in htm
+        assert "WIP Summary" in htm
+        assert "PI Context" in htm
+        assert "Agent Activity" in htm
+        assert "Activity Feed" in htm
+        assert "v3.0 (sprint-first)" in htm
+
+    def test_markdown_seven_section_format(self, tmp_path: Path) -> None:
+        sdd = self._make_sdd(tmp_path)
+        result = build(sdd_root=sdd, write=False, live_html=False,
+                       fixed_date="2026-06-02")
+        md = result["markdown"]
+        assert "# Executive State" in md
+        assert "## Spec Pipeline" in md
+        assert "## Sprint Plan" in md
+        assert "## Fleet" in md
+        assert "## Recently Completed" in md
+        assert "## Blockers" in md
+        assert "## Next Milestones" in md
+
+    def test_no_script_tags_in_full_build(self, tmp_path: Path) -> None:
+        sdd = self._make_sdd(tmp_path)
+        result = build(sdd_root=sdd, write=False, live_html=False,
+                       fixed_date="2026-06-02")
+        assert "<script" not in result["html"].lower()
+
+    def test_test_count_verification(self) -> None:
+        src = Path(__file__).resolve()
+        text = src.read_text(encoding="utf-8")
+        import re as _re
+        test_funcs = _re.findall(r"^\s+def (test_\w+)", text, _re.MULTILINE)
+        # 69 original + new tests from T-012, T-013, T-014
+        assert len(test_funcs) >= 85, (
+            f"Expected >= 85 test functions, found {len(test_funcs)}"
+        )

@@ -802,6 +802,11 @@ header.topbar {
 .brand {
   font-size: var(--fs-md); letter-spacing: 0.18em;
   text-transform: uppercase; font-weight: 700; color: var(--color-text-primary);
+  margin: 0;
+}
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); border: 0;
 }
 .pi-pills { display: flex; gap: var(--sp-1); flex-wrap: wrap; }
 .pi-pills .pill {
@@ -1611,7 +1616,8 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
     else:
         about_dynamic = h(ABOUT_FALLBACK)
     about_section_html = (
-        f'<section id="about">'
+        f'<section id="about" aria-labelledby="about-heading">'
+        f'<h2 id="about-heading" class="sr-only">About this dashboard</h2>'
         f'<p>{h(ABOUT_STATIC_PARAGRAPH)}</p>'
         f'<p class="about-where-we-are">{about_dynamic}</p>'
         f'</section>'
@@ -1633,13 +1639,14 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'">
 {refresh_meta}
 <title>Bridge -- {h(pi_name)} -- {h(generated_at)}</title>
 <style>{HTML_CSS}</style>
 </head><body>
 <a href="#main" class="skip-link">Skip to main content</a>
 <header role="banner" class="topbar">
-  <div class="brand">BRIDGE</div>
+  <h1 class="brand">BRIDGE</h1>
   <nav class="pi-pills" aria-label="Program Increments">{pi_pills_html}</nav>
   <div class="live-pulse">
     <span class="dot {pulse_class}" aria-hidden="true"></span>

@@ -65,6 +65,6 @@ Each lesson is one entry:
 - Evidence: Human noticed the gap during PI-3 closeout. PI-1 and PI-2 both had `sprints/PI-N/lessons.md` but PI-3 did not.
 - Affects: `.github/skills/operational/pi-planning/SKILL.md`, `spec-driven-development/sprints/README.md`
 - Estimated effort: S
-- Status: open
-- Curator decision:
+- Status: shipped
+- Curator decision: SHIP. pi-planning skill v1.1 adds mandatory PI kickoff checklist requiring both sprints/PI-N/ and docs/Management/PI-N/ in a single commit.
 - PR / commit:

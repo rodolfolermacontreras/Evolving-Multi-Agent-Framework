@@ -5,7 +5,7 @@ argument-hint: "What backlog, objective, or PI planning input should I use?"
 license: MIT
 metadata:
   author: rodolfolermacontreras
-  version: '1.0'
+  version: '1.1'
 ---
 
 # PI Planning
@@ -117,9 +117,24 @@ Total capacity = (# developers) × (days per sprint) × (velocity factor)
                 = 24 ideal days per PI
 ```
 
-### 6. Produce CURRENT_PI.md
+### 6. Create PI Directory and Artifacts (Atomic Commit)
 
-Write to `spec-driven-development/sprints/PI-{N}/CURRENT_PI.md`:
+All PI artifacts must be created in a **single commit** to prevent partial state.
+Create both the sprint-ceremony directory and the Management navigation entry together.
+
+**PI kickoff checklist** (all items in one commit):
+
+- [ ] `spec-driven-development/sprints/PI-{N}/CURRENT_PI.md` -- ceremony artifact (template below)
+- [ ] `spec-driven-development/sprints/PI-{N}/lessons.md` -- copy from `lessons-template.md`, replace PI-{N}
+- [ ] `spec-driven-development/docs/Management/PI-{N}/INDEX.md` -- navigation entry with sprint table
+
+Do NOT create one without the others. The `sprints/` directory holds ceremony
+artifacts (CURRENT_PI, lessons, retros). The `docs/Management/` directory holds
+the navigation index. Both are required for a PI to be fully tracked.
+
+**Commit message**: `docs: kick off PI-{N} -- {theme}`
+
+Write `CURRENT_PI.md` to `spec-driven-development/sprints/PI-{N}/CURRENT_PI.md`:
 
 ```markdown
 # PI-{N}: {Theme}
@@ -280,3 +295,4 @@ Write to `spec-driven-development/sprints/PI-{N}/CURRENT_PI.md`:
 - No ROAM risk assessment - surprises cascade
 - Sprint overload (> 10 SP per sprint) - burnout risk
 - Forgetting to commit CURRENT_PI.md - team misaligned
+- Creating `sprints/PI-N/` without `docs/Management/PI-N/INDEX.md` (or vice versa) - navigation gap, stale references. LESSON-013 from PI-3: always create both in one commit.

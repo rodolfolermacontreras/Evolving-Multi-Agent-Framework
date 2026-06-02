@@ -1,11 +1,11 @@
 # Executive State
 
 Generated date: 2026-06-02
-Current PI: PI-1 (Generalization and First Pilot)
+Current PI: PI-4 (Alpha Release)
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
-Active focus: Start: 'Constitution generalized: `mission.md`, `tech-stack.md`, `CONTEXT.md`, `roadmap.md` decoupled from Day-to-Day Agent specifics (deferred)'
+Active focus: Start: 'Domain skills marked as reference examples'
 
-PI progress: 3/9 commitments complete (33%)
+PI progress: 3/5 commitments complete (60%)
 
 ## Spec Pipeline
 
@@ -14,7 +14,7 @@ PI progress: 3/9 commitments complete (33%)
 | fleet-ledger | DONE | Done | validation 100%, RETRO present |
 | fleet-bridge-dashboard | CLARIFY | - | DESIGN.md only (pre-spec design exploration) |
 | cloud-dashboard | CLARIFY | - | DESIGN.md only (pre-spec design exploration) |
-| dashboard-about-and-freshness | SPEC | Draft -- pending PM + human approval | Status: Draft -- pending PM + human approval |
+| dashboard-about-and-freshness | DONE | Done | Status: done, RETRO present |
 | fleet | DONE | done | validation 100%, RETRO present |
 | fleet-cli | DONE | Done | validation 100%, RETRO present |
 | qa-cli | DONE | Done | validation 100%, RETRO present |
@@ -24,8 +24,8 @@ PI progress: 3/9 commitments complete (33%)
 | sprint-c-validation | BACKLOG | - | directory exists, no artifacts yet |
 | state-builder | DONE | Done | validation 100%, RETRO present |
 | state-dashboard | DONE | done | validation 100%, RETRO present |
-| day-to-day-brownfield-bootstrap | SPEC | DRAFT | Status: DRAFT |
-| live-ui-v2 | SPEC | draft | Status: draft |
+| day-to-day-brownfield-bootstrap | DONE | Done | Status: done, RETRO present |
+| live-ui-v2 | DONE | done | validation 100%, RETRO present |
 | principal-agent-hygiene | SPEC | - | spec.md present |
 
 ## Sprint Plan
@@ -107,11 +107,8 @@ _none -- no dispatches without outcome older than 24h_
 
 ## Next Milestones
 
-- Constitution generalized: `mission.md`, `tech-stack.md`, `CONTEXT.md`, `roadmap.md` decoupled from Day-to-Day Agent specifics (deferred)
-- Article X validation contract and TDD gate deliverable planned for PI-1 (deferred)
-- Root `README.md` created (deferred to PI-4)
-- Day-to-Day-specific domain skills marked as examples (deferred to PI-4)
-- First pilot feature delivered through the full SDD lifecycle (done PI-2)
+- Domain skills marked as reference examples
+- GitHub Actions Node.js deprecation resolved
 
 ---
 

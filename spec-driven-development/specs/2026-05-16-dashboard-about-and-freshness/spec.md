@@ -2,7 +2,7 @@
 
 - Date: 2026-05-16
 - Author: Principal Architect (co-author: Principal Software Developer)
-- Status: Draft -- pending PM + human approval
+- Status: Done
 - Priority: P2
 - Sprint: PI-3 Sprint A (proposed)
 - Spec ID: 2026-05-16-dashboard-about-and-freshness

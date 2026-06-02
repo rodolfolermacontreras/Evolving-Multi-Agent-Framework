@@ -2,7 +2,7 @@
 
 - Date: 2026-06-01
 - Author: principal-architect
-- Status: DRAFT
+- Status: Done
 - Priority: P1
 - Sprint: PI-3/S2
 - Spec ID: SDD-S2-001

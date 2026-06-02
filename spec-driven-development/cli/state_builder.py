@@ -157,8 +157,10 @@ def detect_stage(feature_dir: Path) -> tuple[str, str, str]:
     explicit = _normalize_status_to_stage(status_line)
     if explicit:
         if explicit == "DONE":
-            # Status says done but evidence missing -> fall back to REVIEW
-            return "REVIEW", status_line, "Status: done but RETRO or validation incomplete"
+            if has_retro:
+                return "DONE", status_line, "Status: done, RETRO present"
+            # Status says done but no RETRO -> fall back to REVIEW
+            return "REVIEW", status_line, "Status: done but RETRO missing"
         # For all other explicit stages, trust the spec line
         return explicit, status_line, f"Status: {status_line}"
 
@@ -233,7 +235,7 @@ def load_pis(sdd_root: Path) -> list[PIBlock]:
     for i, m in enumerate(matches):
         name = m.group(1)
         title = m.group(2).strip()
-        is_current = "(current)" in title.lower()
+        is_current = "(current" in title.lower()
         title_clean = re.sub(r"\s*\([^)]*\)\s*$", "", title).strip()
         start = m.end()
         end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
@@ -705,6 +707,7 @@ PI_MISSION = {
     "PI-1": "Generalize the framework off the original host project and ship the first dogfood feature end-to-end.",
     "PI-2": "Build the CLI tools that let the fleet self-manage: dispatch, QA, retrospectives, and live state tracking.",
     "PI-3": "Validate portability by bootstrapping the framework onto a completely different second project.",
+    "PI-4": "Ship the alpha release: Live UI v2 dashboard, root README, roadmap cleanup, team-ready packaging.",
 }
 
 
@@ -1376,8 +1379,8 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
         action_title, why, link = next_action
         nxt_summary = _next_what(features)
         cta_html = (
-            f'<a class="cta" href="{h(link)}" target="_blank" rel="noopener">'
-            f'Open &rarr; {h(link)}</a>'
+            f'<span class="cta">'
+            f'Open &rarr; {h(link)}</span>'
             if link else ""
         )
         next_card_html = (

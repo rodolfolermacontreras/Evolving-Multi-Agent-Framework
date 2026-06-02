@@ -1,6 +1,6 @@
 ---
 feature: live-ui-v2
-status: draft
+status: done
 created: 2026-05-31
 owner: principal-ui-designer
 reviewed_by: principal-architect (technical feasibility), principal-product-manager (acceptance criteria)

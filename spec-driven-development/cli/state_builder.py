@@ -394,6 +394,140 @@ def load_recent_commits(sdd_root: Path, limit: int = 10) -> list[tuple[str, str,
 
 
 # ---------------------------------------------------------------------------- #
+# Live UI v2 data-layer functions (T-001 .. T-004)
+# ---------------------------------------------------------------------------- #
+
+def load_sprint_table(sdd_root: Path, pi_name: str) -> list[dict]:
+    """Return enriched sprint dicts for *pi_name*, merged with ledger data.
+
+    Each dict contains the keys produced by ``_discover_sprints`` plus
+    ``dispatch_count`` (int) and ``last_outcome`` (str) from the fleet ledger.
+    Returns ``[]`` if the PI directory doesn't exist or has no sprints.
+    """
+    pi_dir = sdd_root / "docs" / "Management" / pi_name
+    if not pi_dir.is_dir():
+        return []
+    sprints = _discover_sprints(pi_dir)
+    if not sprints:
+        return []
+    ledger_data = _query_ledger_for_pi(sdd_root, pi_name)
+    for s in sprints:
+        ld = ledger_data.get(s["num"], {"count": 0, "last_outcome": "--"})
+        s["dispatch_count"] = ld["count"]
+        s["last_outcome"] = ld["last_outcome"]
+    return sprints
+
+
+def load_sprint_goal(sdd_root: Path, pi_name: str, sprint_num: int) -> str:
+    """Extract the sprint goal from SPEC.md for the given sprint number.
+
+    Looks for a ``## 1. Sprint Goal`` heading first; falls back to the first
+    ``##`` heading.  Returns the first non-empty paragraph under that heading.
+    Returns ``"No sprint goal defined"`` when nothing can be extracted.
+    """
+    fallback = "No sprint goal defined"
+    pi_dir = sdd_root / "docs" / "Management" / pi_name
+    if not pi_dir.is_dir():
+        return fallback
+
+    # Find the sprint directory matching sprint_num
+    target_dir: Path | None = None
+    for child in pi_dir.iterdir():
+        if not child.is_dir():
+            continue
+        m = _SPRINT_DIR_RE.match(child.name)
+        if m and int(m.group(1)) == sprint_num:
+            target_dir = child
+            break
+    if target_dir is None:
+        return fallback
+
+    spec_path = target_dir / "SPEC.md"
+    if not spec_path.is_file():
+        return fallback
+
+    try:
+        text = spec_path.read_text(encoding="utf-8")
+    except OSError:
+        return fallback
+
+    lines = text.splitlines()
+
+    # Try to find '## 1. Sprint Goal' heading first
+    goal_idx: int | None = None
+    first_h2_idx: int | None = None
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if stripped.startswith("## "):
+            if first_h2_idx is None:
+                first_h2_idx = i
+            if "1. Sprint Goal" in stripped:
+                goal_idx = i
+                break
+
+    heading_idx = goal_idx if goal_idx is not None else first_h2_idx
+    if heading_idx is None:
+        return fallback
+
+    # Extract first non-empty paragraph after the heading
+    for line in lines[heading_idx + 1:]:
+        stripped = line.strip()
+        if stripped.startswith("## "):
+            break  # hit next heading
+        if stripped:
+            return stripped
+
+    return fallback
+
+
+def detect_current_sprint(sprints: list[dict]) -> dict | None:
+    """Return the current sprint from a list of sprint dicts.
+
+    Returns the first sprint whose status is NOT ``"DONE"`` and NOT
+    ``"Proposed"``.  Falls back to the first sprint if all are DONE or
+    Proposed.  Returns ``None`` for an empty list.
+    """
+    if not sprints:
+        return None
+    for s in sprints:
+        if s.get("status") not in ("DONE", "Proposed"):
+            return s
+    return sprints[0]
+
+
+def load_decisions(sdd_root: Path, limit: int = 50) -> list[dict]:
+    """Load recent decision records from fleet.db.
+
+    Returns a list of dicts with keys ``timestamp``, ``decider``, ``level``,
+    ``description``, ordered by timestamp descending.  Returns ``[]`` if the
+    database or ``decisions`` table does not exist.
+    """
+    db_path = sdd_root / "ledger" / "fleet.db"
+    if not db_path.is_file():
+        return []
+    try:
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute(
+            "SELECT decided_at, decider, level, description "
+            "FROM decisions ORDER BY decided_at DESC LIMIT ?",
+            (limit,),
+        ).fetchall()
+        conn.close()
+    except sqlite3.OperationalError:
+        return []
+    return [
+        {
+            "timestamp": row["decided_at"],
+            "decider": row["decider"],
+            "level": row["level"],
+            "description": row["description"],
+        }
+        for row in rows
+    ]
+
+
+# ---------------------------------------------------------------------------- #
 # Next-action heuristic (state-dashboard feature)
 # ---------------------------------------------------------------------------- #
 

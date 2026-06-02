@@ -23,10 +23,14 @@ from cli.state_builder import (
     StateBuilderError,
     build,
     build_index,
+    detect_current_sprint,
     load_backlog,
+    load_decisions,
     load_features,
     load_ledger,
     load_roster,
+    load_sprint_goal,
+    load_sprint_table,
     main,
     parse_args,
 )
@@ -672,6 +676,282 @@ class TestBuildIndexMarkerPreservation:
         assert content_after_first == content_after_second
         # Table content is stable
         assert result1["table_content"] == result2["table_content"]
+
+
+# ---------------------------------------------------------------------------
+# T-001: load_sprint_table
+# ---------------------------------------------------------------------------
+
+class TestLoadSprintTable:
+    """Tests for load_sprint_table(sdd_root, pi_name)."""
+
+    def test_returns_empty_list_when_pi_dir_missing(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "sdd"
+        sdd.mkdir()
+        result = load_sprint_table(sdd, "PI-99")
+        assert result == []
+
+    def test_returns_sprints_with_ledger_data(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "sdd"
+        pi_dir = sdd / "docs" / "Management" / "PI-3"
+        pi_dir.mkdir(parents=True)
+        s1 = pi_dir / "Sprint-1-foundation"
+        s1.mkdir()
+        (s1 / "SPEC.md").write_text(
+            "---\nstatus: DONE\n---\n# Sprint 1\n", encoding="utf-8"
+        )
+        # Create fleet.db with a dispatch for Sprint 1
+        ledger_dir = sdd / "ledger"
+        ledger_dir.mkdir(parents=True)
+        db_path = ledger_dir / "fleet.db"
+        conn = sqlite3.connect(db_path)
+        conn.executescript(SCHEMA_SQL)
+        conn.execute(
+            "INSERT INTO dispatches (dispatched_at, pi, sprint, feature_dir, task_id, "
+            "task_title, agent_id, agent_role, outcome, outcome_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            ("2026-06-01T00:00:00Z", "PI-3", "Sprint 1", "feat-dir",
+             "T-001", "Task one", "dev-1", "dev", "success", "2026-06-01T01:00:00Z"),
+        )
+        conn.commit()
+        conn.close()
+
+        result = load_sprint_table(sdd, "PI-3")
+        assert len(result) == 1
+        assert result[0]["dispatch_count"] == 1
+        assert result[0]["last_outcome"] == "success"
+
+    def test_returns_sprints_with_no_ledger_data(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "sdd"
+        pi_dir = sdd / "docs" / "Management" / "PI-3"
+        pi_dir.mkdir(parents=True)
+        s1 = pi_dir / "Sprint-1-alpha"
+        s1.mkdir()
+        (s1 / "SPEC.md").write_text(
+            "---\nstatus: In-Flight\n---\n# Sprint 1\n", encoding="utf-8"
+        )
+        result = load_sprint_table(sdd, "PI-3")
+        assert len(result) == 1
+        assert result[0]["dispatch_count"] == 0
+        assert result[0]["last_outcome"] == "--"
+
+    def test_sprints_sorted_by_num_ascending(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "sdd"
+        pi_dir = sdd / "docs" / "Management" / "PI-3"
+        pi_dir.mkdir(parents=True)
+        for n, name in [(3, "gamma"), (1, "alpha"), (2, "beta")]:
+            s = pi_dir / f"Sprint-{n}-{name}"
+            s.mkdir()
+            (s / "SPEC.md").write_text(
+                f"---\nstatus: Proposed\n---\n# Sprint {n}\n", encoding="utf-8"
+            )
+        result = load_sprint_table(sdd, "PI-3")
+        nums = [s["num"] for s in result]
+        assert nums == [1, 2, 3]
+
+
+# ---------------------------------------------------------------------------
+# T-002: load_sprint_goal
+# ---------------------------------------------------------------------------
+
+class TestLoadSprintGoal:
+    """Tests for load_sprint_goal(sdd_root, pi_name, sprint_num)."""
+
+    def test_returns_fallback_when_spec_missing(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "sdd"
+        sdd.mkdir()
+        result = load_sprint_goal(sdd, "PI-3", 1)
+        assert result == "No sprint goal defined"
+
+    def test_extracts_goal_from_sprint_goal_heading(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "sdd"
+        pi_dir = sdd / "docs" / "Management" / "PI-3"
+        pi_dir.mkdir(parents=True)
+        s1 = pi_dir / "Sprint-1-foundation"
+        s1.mkdir()
+        (s1 / "SPEC.md").write_text(
+            "# Sprint 1\n\n"
+            "## 1. Sprint Goal\n\n"
+            "Deliver the data layer for the Live UI.\n\n"
+            "## 2. Scope\n\nSome scope text.\n",
+            encoding="utf-8",
+        )
+        result = load_sprint_goal(sdd, "PI-3", 1)
+        assert result == "Deliver the data layer for the Live UI."
+
+    def test_falls_back_to_first_heading_paragraph(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "sdd"
+        pi_dir = sdd / "docs" / "Management" / "PI-3"
+        pi_dir.mkdir(parents=True)
+        s1 = pi_dir / "Sprint-1-foundation"
+        s1.mkdir()
+        (s1 / "SPEC.md").write_text(
+            "# Sprint 1\n\n"
+            "## Overview\n\n"
+            "This sprint focuses on infrastructure.\n\n"
+            "## Details\n\nMore info.\n",
+            encoding="utf-8",
+        )
+        result = load_sprint_goal(sdd, "PI-3", 1)
+        assert result == "This sprint focuses on infrastructure."
+
+    def test_returns_fallback_when_no_headings(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "sdd"
+        pi_dir = sdd / "docs" / "Management" / "PI-3"
+        pi_dir.mkdir(parents=True)
+        s1 = pi_dir / "Sprint-1-foundation"
+        s1.mkdir()
+        (s1 / "SPEC.md").write_text(
+            "Just some text without any headings.\n",
+            encoding="utf-8",
+        )
+        result = load_sprint_goal(sdd, "PI-3", 1)
+        assert result == "No sprint goal defined"
+
+
+# ---------------------------------------------------------------------------
+# T-003: detect_current_sprint
+# ---------------------------------------------------------------------------
+
+class TestDetectCurrentSprint:
+    """Tests for detect_current_sprint(sprints)."""
+
+    def test_returns_none_for_empty_list(self) -> None:
+        assert detect_current_sprint([]) is None
+
+    def test_returns_first_non_done_non_proposed(self) -> None:
+        sprints = [
+            {"num": 1, "status": "DONE"},
+            {"num": 2, "status": "In-Flight"},
+            {"num": 3, "status": "Proposed"},
+        ]
+        result = detect_current_sprint(sprints)
+        assert result["num"] == 2
+
+    def test_returns_first_when_all_done(self) -> None:
+        sprints = [
+            {"num": 1, "status": "DONE"},
+            {"num": 2, "status": "DONE"},
+        ]
+        result = detect_current_sprint(sprints)
+        assert result["num"] == 1
+
+    def test_returns_first_when_all_proposed(self) -> None:
+        sprints = [
+            {"num": 1, "status": "Proposed"},
+            {"num": 2, "status": "Proposed"},
+        ]
+        result = detect_current_sprint(sprints)
+        assert result["num"] == 1
+
+    def test_skips_done_returns_in_flight(self) -> None:
+        sprints = [
+            {"num": 1, "status": "DONE"},
+            {"num": 2, "status": "DONE"},
+            {"num": 3, "status": "In-Flight"},
+            {"num": 4, "status": "Proposed"},
+        ]
+        result = detect_current_sprint(sprints)
+        assert result["num"] == 3
+
+
+# ---------------------------------------------------------------------------
+# T-004: load_decisions
+# ---------------------------------------------------------------------------
+
+class TestLoadDecisions:
+    """Tests for load_decisions(sdd_root, limit)."""
+
+    def test_returns_empty_when_db_missing(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "sdd"
+        sdd.mkdir()
+        assert load_decisions(sdd) == []
+
+    def test_returns_empty_when_table_missing(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "sdd"
+        ledger_dir = sdd / "ledger"
+        ledger_dir.mkdir(parents=True)
+        db_path = ledger_dir / "fleet.db"
+        conn = sqlite3.connect(db_path)
+        conn.execute("CREATE TABLE dummy (id INTEGER)")
+        conn.commit()
+        conn.close()
+        assert load_decisions(sdd) == []
+
+    def test_returns_decisions_ordered_desc(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "sdd"
+        ledger_dir = sdd / "ledger"
+        ledger_dir.mkdir(parents=True)
+        db_path = ledger_dir / "fleet.db"
+        conn = sqlite3.connect(db_path)
+        conn.execute(
+            "CREATE TABLE decisions ("
+            "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+            "decided_at TEXT NOT NULL, level INTEGER NOT NULL, "
+            "decider TEXT NOT NULL, artifact TEXT, description TEXT NOT NULL)"
+        )
+        conn.execute(
+            "INSERT INTO decisions (decided_at, level, decider, description) "
+            "VALUES ('2026-06-01T00:00:00Z', 0, 'dev', 'First decision')"
+        )
+        conn.execute(
+            "INSERT INTO decisions (decided_at, level, decider, description) "
+            "VALUES ('2026-06-02T00:00:00Z', 1, 'arch', 'Second decision')"
+        )
+        conn.commit()
+        conn.close()
+
+        result = load_decisions(sdd)
+        assert len(result) == 2
+        assert result[0]["timestamp"] == "2026-06-02T00:00:00Z"
+        assert result[0]["decider"] == "arch"
+        assert result[1]["timestamp"] == "2026-06-01T00:00:00Z"
+
+    def test_respects_limit(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "sdd"
+        ledger_dir = sdd / "ledger"
+        ledger_dir.mkdir(parents=True)
+        db_path = ledger_dir / "fleet.db"
+        conn = sqlite3.connect(db_path)
+        conn.execute(
+            "CREATE TABLE decisions ("
+            "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+            "decided_at TEXT NOT NULL, level INTEGER NOT NULL, "
+            "decider TEXT NOT NULL, artifact TEXT, description TEXT NOT NULL)"
+        )
+        for i in range(10):
+            conn.execute(
+                "INSERT INTO decisions (decided_at, level, decider, description) "
+                f"VALUES ('2026-06-{i+1:02d}T00:00:00Z', 0, 'dev', 'Decision {i}')"
+            )
+        conn.commit()
+        conn.close()
+
+        result = load_decisions(sdd, limit=3)
+        assert len(result) == 3
+
+    def test_default_limit_is_50(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "sdd"
+        ledger_dir = sdd / "ledger"
+        ledger_dir.mkdir(parents=True)
+        db_path = ledger_dir / "fleet.db"
+        conn = sqlite3.connect(db_path)
+        conn.execute(
+            "CREATE TABLE decisions ("
+            "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+            "decided_at TEXT NOT NULL, level INTEGER NOT NULL, "
+            "decider TEXT NOT NULL, artifact TEXT, description TEXT NOT NULL)"
+        )
+        for i in range(60):
+            conn.execute(
+                "INSERT INTO decisions (decided_at, level, decider, description) "
+                f"VALUES ('2026-06-{(i % 28)+1:02d}T{i:02d}:00:00Z', 0, 'dev', 'D{i}')"
+            )
+        conn.commit()
+        conn.close()
+
+        result = load_decisions(sdd)
+        assert len(result) == 50
 
 
 # ---------------------------------------------------------------------------

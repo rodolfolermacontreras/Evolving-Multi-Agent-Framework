@@ -422,33 +422,35 @@ on the wrapper). PI tabs wrap to second line.
 
 ---
 
-### 5.6 Agent Lineage (Priority 5)
+### 5.6 Fleet Agent Traceability (Priority 5)
 
-> **Amendment (2026-06-02, PI-4 S1):** This section was originally a placeholder
-> deferring per-agent visibility to PI-5. The human requested agent lineage
-> visualization during PI-4 implementation. The placeholder was replaced with a
-> static agent roster and promotion timeline. The real-time per-agent activity
-> data contract (Section 5.6.1) remains the PI-5 target.
+> **Amendment (2026-06-02, PI-4):** This section was originally a placeholder
+> deferring per-agent visibility to PI-5. Implemented during PI-4 using the
+> approved mockup (`specs/2026-05-26-live-ui-v2/mockup.html` lines 1731-1811)
+> and the original DESIGN.md (`specs/2026-05-13-fleet-bridge-dashboard/DESIGN.md`
+> Section 4.2 Hierarchy Panel) as canonical references.
 >
-> Process note: This amendment was applied retroactively. The implementation
-> preceded the spec update. See `sprints/PI-4/lessons.md` LESSON-014.
+> Process note: First implementation (roster table) was built without consulting
+> these references. Corrected in commit `f723e96` to match the mockup design.
+> See `sprints/PI-4/lessons.md` LESSON-014.
 
 **Data shown (v2, implemented in PI-4):**
 
-Layer 1 -- Fleet summary stats (carried from v1):
-- Principal count, generic count, specialist count, total skills count
+Layer 1 -- Fleet summary stats:
+- Principal count, Worker count (generic + specialist), Active dispatches
+  (outcome IS NULL), Total dispatches (COUNT from ledger)
 
-Layer 2 -- Agent roster table:
-- All agents from `roster/agents.json`, one row per agent
-- Columns: Agent ID (monospace), Role, Kind (badge: principal=oxblood,
-  specialist=jade, generic=amber), Specialization (or "--"), Created date,
-  Provenance (truncated to 80 chars, full text on hover via `title` attribute)
+Layer 2 -- Agent hierarchy tree (from mockup Section 5):
+- Unicode box-drawing tree (`├──`, `└──`, `│`) showing principal-worker relationships
+- Executive Manager at root, each Principal indented (level 1), workers under their
+  dispatching principal (level 2)
+- Status dots per agent: jade (idle), oxblood (active dispatch)
+- Under each principal, dispatch actions showing worker assignment and task
 
-Layer 3 -- Promotion timeline:
-- Events extracted from agents whose `provenance` field contains "Promoted" or
-  "Hired" (case-insensitive)
-- Sorted by `created_at` date ascending
-- Each event: date + agent ID + provenance summary
+Layer 3 -- Recent dispatches table (from mockup Section 5):
+- Columns: Task (task_id), Chain (dispatcher -> worker), Artifact (task_title),
+  Status (outcome with status dot)
+- Data from `ledger.recent` dispatches
 
 **Data source:**
 - `state_builder.load_roster()` returns dict with `agents` list (full agent
@@ -457,24 +459,27 @@ Layer 3 -- Promotion timeline:
 **Semantic HTML:**
 ```html
 <section class="zone-agents" aria-labelledby="agents-heading">
-  <h2 id="agents-heading">Agent Lineage</h2>
+  <h2 id="agents-heading">Fleet -- Agent Traceability</h2>
   <div class="fleet-summary"> <!-- 4 stat cards --> </div>
-  <table class="agent-table"> <!-- full roster --> </table>
-  <div class="timeline-section">
-    <h3>Fleet Timeline</h3>
-    <!-- promotion/hire events -->
+  <div class="agent-tree" role="img" aria-label="Agent hierarchy tree">
+    <!-- Unicode box-drawing tree with .agent-principal, .agent-worker,
+         .agent-tree-chrome, .agent-tree-action spans -->
   </div>
+  <table class="dispatch-table"> <!-- Task/Chain/Artifact/Status --> </table>
 </section>
 ```
 
 **Visual treatment:**
 - Background: `--bg-carbon`
-- Kind badges: `.kind-principal` uses `--accent-oxblood`, `.kind-specialist` uses
-  `--signal-jade`, `.kind-generic` uses `--signal-amber`
-- Agent IDs: `var(--type-mono)`, monospace
-- Provenance: `--ink-paper-dim`, truncated with `text-overflow: ellipsis`,
-  full text on hover
-- Timeline events: left-border accent with `--accent-oxblood`
+- Hierarchy tree: `.agent-tree` with `--bg-graphite` background, monospace,
+  `white-space: pre`, `overflow-x: auto`
+- Principals: `.agent-principal` in `--accent-oxblood`, `font-weight: 600`
+- Workers: `.agent-worker` in `--ink-paper-dim`
+- Box-drawing characters: `.agent-tree-chrome` in `--ink-paper-faint`
+- Dispatch actions: `.agent-tree-action` in `--ink-paper-faint`, normal weight
+- Dispatch table: `.dispatch-table` with header in uppercase micro, rows with
+  hover highlight `--bg-graphite-2`
+- Dispatch chain text: `.dispatch-chain` in `--ink-paper-faint`
 - Border: 1px `--rule-line` top and bottom
 
 #### 5.6.1 Agent Activity Data Contract (for PI-5 implementation)
@@ -596,18 +601,17 @@ The dashboard integrates the three-tier Management navigation layer as follows:
 
 ---
 
-## 7. Agent Lineage (Q4 -- amended)
+## 7. Fleet Agent Traceability (Q4 -- amended)
 
-> **Amendment (2026-06-02):** Q4 originally approved "placeholder". The human
-> requested full agent lineage during PI-4 implementation. The scope was expanded
-> from placeholder to static roster + promotion timeline. See Section 5.6.
+> **Amendment (2026-06-02):** Q4 originally approved "placeholder". Implemented
+> during PI-4 using the approved mockup design. See Section 5.6.
 
 Summary of what shipped in PI-4:
-- Full agent roster table with kind badges, specialization, provenance
-- Promotion/hire timeline extracted from `roster/agents.json` provenance fields
-- Fleet summary stats retained from v1
+- Agent hierarchy tree with Unicode box-drawing, status dots, dispatch actions
+- Recent dispatches table with Task/Chain/Artifact/Status columns
+- Fleet summary stats: Principals, Workers, Active, Total Dispatches
 - The PI-5 data contract (Section 5.6.1) remains: real-time dispatch status will
-  be layered on top of the existing roster table
+  be layered on top of the existing hierarchy tree
 
 ---
 

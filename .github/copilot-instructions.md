@@ -238,6 +238,15 @@ The framework has never been used to deliver a real feature. All assets are scaf
 - **Files**: lowercase + hyphens for directories, snake_case for Python files
 - **Uppercase exceptions**: `README.md`, `CONTEXT.md`, `GENERALIZATION_SDD.md`, constitution files
 
+## One Feature, One Session (Article VII corollary)
+
+Do not contaminate context across features. In practice:
+
+- Open a NEW Copilot Chat session when starting work on a different feature (different spec dir under `spec-driven-development/specs/`).
+- Reusing a session is acceptable for: continuing the SAME feature, EM-level routing/status questions, or small one-off edits (typos, doc fixes <3 files).
+- The Executive Manager session stays high-level (routing, synthesis); it never absorbs feature implementation depth.
+- When a session ends, durable state lives in the spec dir, the ledger, and `spec-driven-development/sessions/SESSION-MEMORY.md` -- not in chat history.
+
 ---
 
 ## Key Documents to Read

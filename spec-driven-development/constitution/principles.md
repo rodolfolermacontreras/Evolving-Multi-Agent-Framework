@@ -1,7 +1,7 @@
 ---
-version: '1.0.0'
+version: '1.1.0'
 ratified: 2026-05-12
-last_amended: 2026-05-12
+last_amended: 2026-06-03
 ---
 
 # Framework Principles
@@ -90,6 +90,16 @@ is recorded in `spec-driven-development/ledger/fleet.db` with timestamp,
 task, agent, and outcome. The answer to "why was this built this way?" is
 always a file you can open. The answer to "who did this and when?" is always
 a ledger row.
+
+**One feature, one session.** A direct corollary of the rule above: chat
+sessions are ephemeral context, not project state. Each in-flight feature
+SHOULD use its own dedicated Copilot session so context from one feature does
+not contaminate work on another. The Principal Executive Manager session
+stays high-level (routing, status, synthesis) and never absorbs feature
+implementation depth. When a session ends, the durable artifacts (specs,
+tasks, validation, ledger rows, session checkpoints under
+`spec-driven-development/sessions/`) carry the state forward -- not the chat
+history.
 
 ## Article VIII: Constitution Is Immutable Without An ADR
 

@@ -1,7 +1,7 @@
 ---
-version: '1.0.0'
+version: '1.1.0'
 ratified: 2026-05-12
-last_amended: 2026-05-12
+last_amended: 2026-06-03
 ---
 
 # Decision Policy
@@ -56,7 +56,7 @@ the shape of the public API. Examples:
 
 **Authority**: Rodolfo (human owner)
 **Approval**: Explicit human approval required before implementation begins
-**Documentation**: ADR + note in the relevant spec
+**Documentation**: Level-2 decision brief (see template below) submitted FIRST; on approval, an ADR is drafted that links back to the brief; a note is added to the relevant spec.
 
 Decisions that are irreversible, high-risk, privacy-sensitive, or that affect production.
 Implementation must STOP until approval is received. Examples:
@@ -72,6 +72,21 @@ Implementation must STOP until approval is received. Examples:
 - Changing privacy-sensitive behavior (what data is logged, what is sent to LLM)
 
 **Rule**: If it cannot be cleanly reverted, affects production, or involves credentials/privacy, it is Level 2.
+
+### Required: Friction Analysis brief
+
+Every Level 2 submission MUST use the brief template at
+`spec-driven-development/templates/level-2-decision.md` and fill in all
+five sections: money cost (one-time + recurring), complexity cost
+(added moving parts; new dependencies), maintenance burden (who maintains;
+cadence of upkeep), expected benefit (concrete, measurable where possible),
+and alternatives considered (cheaper paths evaluated and why rejected).
+The brief is the input to the human approval gate; the ADR drafted on
+approval links back to the brief as evidence. A worked example for
+ADR-0008 (Cloud-Security Architect hire) lives at
+`spec-driven-development/templates/level-2-decision-EXAMPLE.md`.
+
+Level 0 and Level 1 decisions are not required to use this template.
 
 ---
 

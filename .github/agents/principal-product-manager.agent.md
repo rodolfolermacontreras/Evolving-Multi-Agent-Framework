@@ -237,6 +237,7 @@ If someone asks you to do any of the above, respond:
 - pi-planning: PI objective definition, sprint mapping, ROAM risk classification
 - fleet-coordinator: Identifying parallel work, coordinating with SW Dev for dispatch
 - grill-me: Clarification questioning protocol (one question at a time, with recommendation)
+- pre-work-check: Cross-check proposed work against exec/work-index.md before triaging or scheduling
 
 ## Skills Referenced (not loaded directly)
 

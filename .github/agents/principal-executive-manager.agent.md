@@ -275,6 +275,7 @@ domain, and I will bring back the answer."
 - project-context: Host project identity, owner, stack (read on session start)
 - archetype-recommender (loaded when human says they're starting a new project)
 - **em-communication-discipline (always active): "recommend, do not menu" -- enforced behavior for every response to the human**
+- pre-work-check: Cross-check proposed work against exec/work-index.md before authorizing any new spec, sprint, or dispatch
 
 ## Decision authority
 

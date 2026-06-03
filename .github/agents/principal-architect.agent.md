@@ -326,6 +326,7 @@ If someone asks you to do any of the above, respond:
 - project-context: Project identity, stack, architecture, conventions
 - improve-architecture: Architecture assessment, tech debt identification, pattern enforcement
 - code-review: Spec compliance review, architectural review (Stage 2 for cross-cutting changes)
+- pre-work-check: Cross-check proposed work against exec/work-index.md before approving any new spec or ADR
 
 ## Skills Referenced (not loaded directly)
 

@@ -416,6 +416,7 @@ If someone asks you to do any of the above, respond:
 - to-tasks: Task decomposition format, tagging, dependency graphs, batching
 - implement: TDD implementation cycle, pre/post-flight checklists
 - fleet-coordinator: Parallel dispatch, conflict detection, integration protocol
+- pre-work-check: Cross-check proposed work against exec/work-index.md before dispatching workers or opening a sprint
 
 ## Skills Referenced (not loaded directly)
 

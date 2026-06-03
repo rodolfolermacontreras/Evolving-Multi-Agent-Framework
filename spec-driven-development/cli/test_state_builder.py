@@ -1666,3 +1666,77 @@ class TestAgentLineage:
         assert "<th>Artifact</th>" in htm
         assert "<th>Status</th>" in htm
         assert "dispatch-chain" in htm
+
+
+# ---------------------------------------------------------------------------
+# T-016: Project Timeline + Work Index (IDEA 2026-06-03)
+# ---------------------------------------------------------------------------
+
+
+from cli.state_builder import render_work_index  # noqa: E402
+
+
+class TestProjectTimelineSection:
+    """Timeline section renders chronological feature progression."""
+
+    def test_timeline_section_renders_with_css_classes(self) -> None:
+        htm = _render_html_with_features(
+            backlog=[BacklogItem(pid="B1", title="Future thing", priority="P1",
+                                 rice="", sprint="", status="NEW")]
+        )
+        assert 'class="timeline"' in htm, "Timeline <ol> missing"
+        assert "tl-item" in htm, "Timeline item class missing"
+        assert "tl-marker" in htm, "Timeline marker class missing"
+        assert 'id="timeline-heading"' in htm, "Timeline heading missing"
+
+    def test_timeline_shows_done_and_inflight_markers(self) -> None:
+        htm = _render_html_with_features()
+        # Defaults include feat-b (DONE) and feat-a (IMPLEMENT, in-flight)
+        assert "tl-marker-done" in htm, "DONE marker missing (jade dot)"
+        assert "tl-marker-current" in htm, "In-flight marker missing (amber dot)"
+        assert "tl-done" in htm and "tl-current" in htm
+        # DONE feature name and in-flight feature name both surface
+        assert "feat-b" in htm
+        assert "feat-a" in htm
+
+    def test_timeline_handles_empty_backlog_without_error(self) -> None:
+        # Regression for the NameError fix: render_html must not require backlog
+        htm = _render_html_with_features()  # no backlog kwarg
+        assert 'id="timeline-heading"' in htm
+
+
+class TestWorkIndexGeneration:
+    """exec/work-index.md is rendered by build() for principal cross-checks."""
+
+    def test_render_work_index_lists_done_features(self) -> None:
+        features = [
+            Feature(feature_dir=Path("specs/done-one"), name="done-one",
+                    stage="DONE", created="2026-05-01", notes=""),
+            Feature(feature_dir=Path("specs/wip-one"), name="wip-one",
+                    stage="IMPLEMENT", created="2026-06-01", notes=""),
+        ]
+        backlog = [BacklogItem(pid="B1", title="Queued idea", priority="P2",
+                               rice="", sprint="", status="NEW")]
+        pi = PIBlock(name="PI-4", title="Alpha Release",
+                     checkboxes=[(True, "A")], is_current=True)
+        md = render_work_index(generated_date="2026-06-03",
+                               features=features, backlog=backlog, pi=pi)
+        assert "# Work Index" in md
+        assert "## 1. DONE" in md
+        assert "done-one" in md, "DONE feature must appear in work-index"
+        assert "wip-one" in md, "IN-FLIGHT feature must appear in work-index"
+        assert "Queued idea" in md, "QUEUED backlog item must appear"
+        assert "PI-4" in md
+
+    def test_build_writes_work_index_file(self, tmp_path: Path) -> None:
+        # Reuse the integration fixture to get a full sdd-root
+        sdd = TestIntegration()._make_sdd(tmp_path)
+        result = build(sdd_root=sdd, write=True, live_html=False,
+                       fixed_date="2026-06-02")
+        assert "work_index" in result, "build() must return work_index payload"
+        work_index_path = sdd / "exec" / "work-index.md"
+        assert work_index_path.exists(), "exec/work-index.md must be written"
+        body = work_index_path.read_text(encoding="utf-8")
+        assert "# Work Index" in body
+        assert "DONE" in body
+

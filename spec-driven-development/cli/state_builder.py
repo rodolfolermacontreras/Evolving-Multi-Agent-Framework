@@ -897,6 +897,7 @@ main.grid-v3 {
   grid-template-areas:
     "sprint sprint"
     "next   wip"
+    "timeline timeline"
     "pi     pi"
     "agents agents"
     "feed   feed";
@@ -907,12 +908,13 @@ main.grid-v3 {
 }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 
-.zone-sprint { grid-area: sprint; }
-.zone-next   { grid-area: next; }
-.zone-wip    { grid-area: wip; }
-.zone-pi     { grid-area: pi; }
-.zone-agents { grid-area: agents; }
-.zone-feed   { grid-area: feed; }
+.zone-sprint   { grid-area: sprint; }
+.zone-next     { grid-area: next; }
+.zone-wip      { grid-area: wip; }
+.zone-timeline { grid-area: timeline; }
+.zone-pi       { grid-area: pi; }
+.zone-agents   { grid-area: agents; }
+.zone-feed     { grid-area: feed; }
 
 main.grid-v3 > section {
   background: var(--color-surface-raised);
@@ -1213,6 +1215,58 @@ table.sprint-table tbody tr:hover {
 .feed-event .badge.b-commit   { color: var(--signal-jade);   border-color: var(--signal-jade-dim); }
 .feed-event .desc { color: var(--color-text-secondary); }
 
+/* SECTION 7: Project Timeline ---------------------------------- */
+.timeline-legend {
+  font-size: var(--fs-xs); color: var(--color-text-tertiary);
+  margin: 0 0 var(--sp-3) 0; letter-spacing: 0.06em;
+}
+.tl-key {
+  display: inline-block; padding: 1px var(--sp-2);
+  border: 1px solid var(--color-border-default); border-radius: 2px;
+  font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
+}
+.tl-key-done    { color: var(--signal-jade);   border-color: var(--signal-jade-dim); }
+.tl-key-current { color: var(--signal-amber);  border-color: var(--signal-amber-3); }
+.tl-key-future  { color: var(--color-text-tertiary); }
+
+.timeline {
+  list-style: none; padding: 0 0 0 var(--sp-4); margin: 0;
+  position: relative; counter-reset: tl;
+}
+.timeline::before {
+  content: ""; position: absolute; left: 7px; top: 6px; bottom: 6px;
+  width: 2px; background: var(--color-border-default);
+}
+.tl-item {
+  position: relative; display: grid;
+  grid-template-columns: 1fr auto; align-items: baseline;
+  padding: var(--sp-2) 0 var(--sp-2) var(--sp-3);
+}
+.tl-marker {
+  position: absolute; left: -17px; top: 14px;
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 2px solid var(--color-surface-raised);
+}
+.tl-marker-done    { background: var(--signal-jade); }
+.tl-marker-current { background: var(--signal-amber); box-shadow: 0 0 0 4px rgba(210,154,59,0.18); }
+.tl-marker-future  { background: var(--color-text-tertiary); opacity: 0.6; }
+
+.tl-content { display: flex; align-items: baseline; gap: var(--sp-3); flex-wrap: wrap; }
+.tl-date {
+  font-family: var(--font-mono, monospace); font-size: var(--fs-xs);
+  color: var(--color-text-tertiary); letter-spacing: 0.04em; min-width: 80px;
+}
+.tl-name { color: var(--color-text-primary); font-weight: 600; }
+.tl-item.tl-future .tl-name { color: var(--color-text-secondary); font-weight: 400; }
+.tl-stage {
+  font-size: var(--fs-xs); padding: 1px var(--sp-2);
+  border: 1px solid var(--color-border-default); border-radius: 2px;
+  text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;
+  color: var(--color-text-tertiary);
+}
+.tl-item.tl-done    .tl-stage { color: var(--signal-jade);  border-color: var(--signal-jade-dim); }
+.tl-item.tl-current .tl-stage { color: var(--signal-amber); border-color: var(--signal-amber-3); }
+
 /* FOOTER -------------------------------------------------------- */
 footer[role="contentinfo"] {
   height: 32px;
@@ -1232,6 +1286,7 @@ footer[role="contentinfo"] {
       "sprint"
       "next"
       "wip"
+      "timeline"
       "pi"
       "agents"
       "feed";
@@ -1343,6 +1398,7 @@ def _next_for(feature: Feature) -> str:
 def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature],
                 roster: dict, ledger: LedgerView, commits: list[tuple[str, str, str]],
                 next_action: tuple[str, str, str | None],
+                backlog: list[BacklogItem] | None = None,
                 live: bool = False, port: int | None = None,
                 all_pis: list[PIBlock] | None = None,
                 about_pi: str = "", about_sprint: str = "",
@@ -1841,6 +1897,80 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
         f'</section>'
     )
 
+    # ---- TIMELINE SECTION (chronological progression, IDEA 2026-06-03) ---
+    # Group features by stage; sort DONE by date; show current + next
+    done_feats = sorted(
+        [f for f in features if f.stage == "DONE"],
+        key=lambda x: x.created,
+    )
+    inflight_feats = [
+        f for f in features
+        if f.stage in ("IMPLEMENT", "TASKS", "PLAN", "SPEC", "CLARIFY")
+    ]
+    inflight_feats.sort(key=lambda x: x.created)
+    # Next from backlog (top 3 P1/P2)
+    _backlog = backlog or []
+    next_backlog = [b for b in _backlog if b.priority in ("P1", "P2")][:3]
+
+    timeline_items_html: list[str] = []
+    # Past: DONE
+    for f in done_feats:
+        timeline_items_html.append(
+            f'<li class="tl-item tl-done">'
+            f'<div class="tl-marker tl-marker-done" aria-hidden="true"></div>'
+            f'<div class="tl-content">'
+            f'<span class="tl-date">{h(f.created)}</span>'
+            f'<span class="tl-name">{h(f.name)}</span>'
+            f'<span class="tl-stage">DONE</span>'
+            f'</div>'
+            f'</li>'
+        )
+    # Present: in-flight
+    for f in inflight_feats:
+        stage_class = f.stage.lower()
+        timeline_items_html.append(
+            f'<li class="tl-item tl-current">'
+            f'<div class="tl-marker tl-marker-current" aria-hidden="true"></div>'
+            f'<div class="tl-content">'
+            f'<span class="tl-date">{h(f.created)}</span>'
+            f'<span class="tl-name">{h(f.name)}</span>'
+            f'<span class="tl-stage tl-stage-{stage_class}">{h(f.stage)}</span>'
+            f'</div>'
+            f'</li>'
+        )
+    # Future: next from backlog
+    for b in next_backlog:
+        timeline_items_html.append(
+            f'<li class="tl-item tl-future">'
+            f'<div class="tl-marker tl-marker-future" aria-hidden="true"></div>'
+            f'<div class="tl-content">'
+            f'<span class="tl-date">{h(b.priority)}</span>'
+            f'<span class="tl-name">{h(b.title)}</span>'
+            f'<span class="tl-stage">QUEUED</span>'
+            f'</div>'
+            f'</li>'
+        )
+
+    timeline_body = (
+        f'<ol class="timeline" aria-label="Project timeline">'
+        f'{"".join(timeline_items_html)}'
+        f'</ol>'
+        if timeline_items_html else
+        '<div class="empty-state">No timeline data yet.</div>'
+    )
+    timeline_section = (
+        f'<section class="zone-timeline" aria-labelledby="timeline-heading">'
+        f'<h2 id="timeline-heading">Project Timeline</h2>'
+        f'<p class="timeline-legend">'
+        f'<span class="tl-key tl-key-done">Done</span> &middot; '
+        f'<span class="tl-key tl-key-current">In Progress</span> &middot; '
+        f'<span class="tl-key tl-key-future">Next</span> &middot; '
+        f'serial-first execution (no parallel work unless tasks are truly independent)'
+        f'</p>'
+        f'{timeline_body}'
+        f'</section>'
+    )
+
     # ---- CONTEXT BAR (mockup lines 1380-1401) ----------------------------
     if about_pi and about_sprint and about_focus:
         about_dynamic = f'{h(about_pi)} | {h(about_sprint)} | {h(about_focus)}'
@@ -1913,6 +2043,7 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
   {sprint_section}
   {next_section}
   {wip_section}
+  {timeline_section}
   {pi_section}
   {agents_section}
   {feed_section}
@@ -1920,6 +2051,98 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
 {footer_html}
 </body></html>
 """
+# ---------------------------------------------------------------------------- #
+# Work index generator (for principal pre-work checks, IDEA 2026-06-03)
+# ---------------------------------------------------------------------------- #
+
+def render_work_index(
+    *, generated_date: str, features: list[Feature],
+    backlog: list[BacklogItem], pi: PIBlock | None,
+) -> str:
+    """Render exec/work-index.md -- canonical reference for principals before
+    authorizing new work. Lists DONE, IN-FLIGHT, and QUEUED items so principals
+    can cross-check that proposed work is not duplicate or conflicting.
+    """
+    done = sorted([f for f in features if f.stage == "DONE"], key=lambda x: x.created)
+    inflight = sorted(
+        [f for f in features if f.stage in ("IMPLEMENT", "TASKS", "PLAN", "SPEC", "CLARIFY")],
+        key=lambda x: x.created,
+    )
+    queued = [b for b in backlog if b.priority in ("P1", "P2", "P3")]
+
+    lines = [
+        "# Work Index",
+        "",
+        f"_Auto-generated by `state_builder.py` on {generated_date}._",
+        "",
+        "**Purpose**: Authoritative reference for principals before authorizing",
+        "any new work. Consult this file BEFORE writing a spec, planning a sprint,",
+        "or dispatching a worker, to ensure you are not duplicating completed work",
+        "or introducing conflicts with in-flight work.",
+        "",
+        f"Current PI: **{pi.name} ({pi.title})**" if pi else "No active PI.",
+        "",
+        "---",
+        "",
+        "## 1. DONE -- Already shipped (do not re-implement)",
+        "",
+    ]
+    if done:
+        lines.append("| Date | Feature | Spec dir |")
+        lines.append("|------|---------|----------|")
+        for f in done:
+            lines.append(f"| {f.created} | {f.name} | `specs/{f.feature_dir.name}/` |")
+    else:
+        lines.append("_No completed features yet._")
+
+    lines += [
+        "",
+        "## 2. IN-FLIGHT -- Currently being worked on (coordinate before touching)",
+        "",
+    ]
+    if inflight:
+        lines.append("| Started | Feature | Stage | Spec dir |")
+        lines.append("|---------|---------|-------|----------|")
+        for f in inflight:
+            lines.append(f"| {f.created} | {f.name} | {f.stage} | `specs/{f.feature_dir.name}/` |")
+    else:
+        lines.append("_Nothing in flight._")
+
+    lines += [
+        "",
+        "## 3. QUEUED -- Backlog (next candidates for triage)",
+        "",
+    ]
+    if queued:
+        lines.append("| ID | Priority | Title | Sprint |")
+        lines.append("|----|----------|-------|--------|")
+        for b in queued[:20]:
+            lines.append(f"| {b.pid} | {b.priority} | {b.title} | {b.sprint or '--'} |")
+    else:
+        lines.append("_Backlog is empty._")
+
+    lines += [
+        "",
+        "---",
+        "",
+        "## Cross-check protocol (for principals)",
+        "",
+        "Before authorizing new work, verify ALL of:",
+        "",
+        "1. **Not in DONE**: the proposed work is not already shipped above.",
+        "2. **No conflict with IN-FLIGHT**: the proposed work does not touch the",
+        "   same files or contradict the design of any in-flight feature.",
+        "3. **Not a duplicate of QUEUED**: the idea is not already in backlog.",
+        "4. **Aligns with current PI objective**: the work supports the active PI.",
+        "",
+        "If ANY check fails, surface as an escalation to the Executive Manager",
+        "instead of proceeding. See `.github/skills/core/pre-work-check/SKILL.md`",
+        "for the full protocol.",
+        "",
+    ]
+    return "\n".join(lines) + "\n"
+
+
 # ---------------------------------------------------------------------------- #
 # Build orchestration
 # ---------------------------------------------------------------------------- #
@@ -1963,8 +2186,8 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
         roster=roster, ledger=ledger, next_action=next_action,
     )
     htm = render_html(
-        generated_at=generated_at, pi=pi, features=features, roster=roster,
-        ledger=ledger, commits=commits, next_action=next_action,
+        generated_at=generated_at, pi=pi, features=features, backlog=backlog,
+        roster=roster, ledger=ledger, commits=commits, next_action=next_action,
         live=live_html, port=port, all_pis=pis,
         about_pi=about_pi, about_sprint=about_sprint, about_focus=about_focus,
         sprint_table=sprint_table, current_sprint=current_sprint,
@@ -1977,12 +2200,22 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
         "dispatches": len(ledger.recent), "pi": pi.name if pi else None,
         "html": htm, "markdown": md,
     }
+    # Work index for principal pre-work checks (IDEA 2026-06-03)
+    work_index_md = render_work_index(
+        generated_date=generated_date, features=features, backlog=backlog, pi=pi,
+    )
+    result["work_index"] = work_index_md
     if write:
         exec_dir = sdd_root / "exec"
         exec_dir.mkdir(parents=True, exist_ok=True)
         (exec_dir / "state.md").write_text(md, encoding="utf-8")
         (exec_dir / "state.html").write_text(htm, encoding="utf-8")
-        result["wrote"] = [str(exec_dir / "state.md"), str(exec_dir / "state.html")]
+        (exec_dir / "work-index.md").write_text(work_index_md, encoding="utf-8")
+        result["wrote"] = [
+            str(exec_dir / "state.md"),
+            str(exec_dir / "state.html"),
+            str(exec_dir / "work-index.md"),
+        ]
     return result
 
 

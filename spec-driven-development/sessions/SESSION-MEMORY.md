@@ -1,15 +1,81 @@
 # Session Memory — Evolving Multi-Agent Framework
 
-**Latest checkpoint:** PI-4: S1+S2 DONE. Agent lineage shipped (94 tests). Spec retroactively amended. LESSON-014 captured. Dashboard deployed to Azure.
+**Latest checkpoint:** PI-4 polish in progress. Timeline + Work-Index features partially implemented. **UNCOMMITTED + 62 tests failing — NameError bug to fix on resume.**
 
-**Date:** 2026-06-02
+**Date:** 2026-06-03 (computer restart mid-session)
 **Owner:** Rodolfo Lerma
 **Repo:** https://github.com/rodolfolermacontreras/Evolving-Multi-Agent-Framework
 **Local path:** `C:\Training\Projects\Evolving-Multi-Agent-Framework`
 
 ---
 
-## Resume Instructions
+## CRITICAL: Resume Here
+
+### Immediate fix needed (5-10 minutes)
+
+**Bug**: In `spec-driven-development/cli/state_builder.py` around line 1911, the timeline section references `backlog` and `features` variables that are NOT in `render_html()`'s signature. Result: 62 test failures with `NameError: name 'backlog' is not defined`.
+
+**Fix path (recommended)**: Move the timeline-section build logic OUT of `render_html()` and INTO `build()` where `features` and `backlog` are in scope. Pass the pre-built `timeline_section` string into `render_html()` as a new parameter.
+
+OR (simpler): Add `features` and `backlog` parameters to `render_html()` signature. Search for `def render_html(` to find the signature.
+
+After fix:
+1. `python -m pytest spec-driven-development/cli/test_state_builder.py -q` -- expect 95+ pass
+2. Add 2-3 tests for timeline section (test_timeline_section_renders, test_timeline_has_done_items, test_work_index_generated)
+3. Add 1-2 tests for work-index (test_work_index_file_written, test_work_index_lists_done_features)
+4. `python spec-driven-development/cli/state_builder.py` to regenerate dashboard
+5. Commit + push (triggers Azure auto-deploy)
+
+### What was being built (user's exact request)
+
+User said: "we need a diagram, clearly showing what was done first, then second, and where we are right now. A time series of sorts, like a timeline line, clearly showing the progress." AND "we need the system to be informed on what was already worked on (the executive agent or principals) what is in the backlog, and what we are working on, so we can do the cross check validation to not work on something that was already done, or poison other pieces of the code by introducing new features that cancel each other."
+
+**Two-part deliverable:**
+
+1. **Project Timeline (visible UI)** — New Section 7 on dashboard. Vertical timeline with markers:
+   - DONE features (jade dots, sorted by spec date)
+   - IN-FLIGHT features (amber pulsing dots)
+   - QUEUED items from backlog (gray dots)
+   - Legend at top: "serial-first execution (no parallel work unless tasks are truly independent)"
+   - CSS classes: `.timeline`, `.tl-item`, `.tl-marker`, `.tl-done/.tl-current/.tl-future`, `.tl-content`, `.tl-date`, `.tl-name`, `.tl-stage`
+   - Grid area `timeline` added between `wip` and `pi`
+
+2. **Cross-check protocol** — Auto-generated `exec/work-index.md` for principal consumption.
+   - Function: `render_work_index()` (DONE — already in state_builder.py)
+   - Wired into `build()` to write `exec/work-index.md` (DONE)
+   - **NOT YET DONE**: Create `.github/skills/core/pre-work-check/SKILL.md`
+   - **NOT YET DONE**: Update all 4 principal `.agent.md` files to load the skill
+
+### Files modified (uncommitted)
+
+- `spec-driven-development/cli/state_builder.py`:
+  - Added timeline CSS (lines ~1218 area, before footer)
+  - Added timeline grid area to main.grid-v3 (lines ~894-915)
+  - Added timeline to responsive media query
+  - Added `timeline_section` build logic in render_html (BUGGY — references `features`/`backlog` not in scope)
+  - Added `render_work_index()` function (~line 2055)
+  - Wired work-index write into `build()` orchestration
+  - Added `{timeline_section}` to HTML body template
+
+- `spec-driven-development/backlog/IDEAS.md`:
+  - Added 2026-06-03 timeline visualization idea
+  - Added 2026-06-03 cross-check validation protocol idea
+
+### Remaining work
+
+After fixing the bug:
+
+1. ✅ Fix render_html NameError (5 min)
+2. ⬜ Run tests, verify 95+ pass
+3. ⬜ Add 3-5 new tests (timeline rendering, work-index generation)
+4. ⬜ Create `.github/skills/core/pre-work-check/SKILL.md` (15 min)
+5. ⬜ Update 4 principal agent files to load pre-work-check skill (10 min)
+6. ⬜ Regenerate dashboard, commit, push
+7. ⬜ Verify Azure deploy renders timeline correctly
+
+---
+
+## Resume Instructions (longer-term)
 
 ### PI-4 Summary
 

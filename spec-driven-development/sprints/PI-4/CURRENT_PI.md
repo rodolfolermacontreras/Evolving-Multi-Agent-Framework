@@ -55,9 +55,9 @@ Deliver the alpha-quality framework package: a sprint-first dashboard (Live UI v
 **Goal**: Absorb the two lowest-cost / highest-leverage items from the Scott Feedback Bundle without disrupting Sprints 1 and 2.
 **Rationale**: Human approved option (c) from EM scope-conflict escalation (2026-06-03). The other 4 P1 Scott items (SDD-015, 016+017, 018) are deferred to PI-5. Foundry/model-pressure framing for SDD-015 was specific to another project, so SDD-015 loses its urgency here and waits for PI-5 cleanly.
 **Tasks**:
-- [ ] **SDD-013** -- "One feature, one session" rule -- one-line binding rule added to `constitution/principles.md` and operational guidance added to `.github/copilot-instructions.md`. **Skip-to-implement per spec-sizing rule** (less than 3 files, no spec needed). Owner: Architect.
-- [ ] **SDD-014** -- Friction Analysis section in Level-2 decision template -- locate or create the Level-2 decision template, add required section covering money cost, complexity cost, maintenance burden, expected benefit, alternatives considered. One-page max. Owner: Architect (SPEC -> IMPLEMENT).
-**Capacity**: 2 items, effort XS+S overall (total < 1 sprint of typical work)
+- [x] **SDD-013** -- "One feature, one session" rule -- one-line binding rule added to `constitution/principles.md` and operational guidance added to `.github/copilot-instructions.md`. **Skip-to-implement per spec-sizing rule** (less than 3 files, no spec needed). Owner: Architect. **DONE** commit `5992ec8`.
+- [x] **SDD-014** -- Friction Analysis section in Level-2 decision template -- locate or create the Level-2 decision template, add required section covering money cost, complexity cost, maintenance burden, expected benefit, alternatives considered. One-page max. Owner: Architect (SPEC -> IMPLEMENT). **DONE** commit `85b39be`.
+**Capacity**: 2 items, effort XS+S overall (total < 1 sprint of typical work). **STATUS: COMPLETE 2026-06-03.**
 **Validation**: SDD-013 -- single-line edit verifiable by `grep` for the rule phrase in both files. SDD-014 -- template file exists with the 5 required headings; reference link from `constitution/decision-policy.md` added.
 
 ---

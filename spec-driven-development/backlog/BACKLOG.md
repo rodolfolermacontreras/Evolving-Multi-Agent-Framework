@@ -18,8 +18,8 @@ Prioritized backlog with RICE scoring. Managed by Principal Product Manager.
 
 | ID | Title | Priority | R | I | C | E | RICE | Sprint | Status |
 |----|-------|----------|---|---|---|---|------|--------|--------|
-| SDD-013 | "One feature, one session" rule -- one-line edit to principles.md + copilot-instructions.md | P1 | H | M | H | XS | -- | **PI-4 Sprint 3** | **COMMITTED** (human option (c) 2026-06-03); SKIP TO IMPLEMENT; routed to Architect |
-| SDD-014 | Friction Analysis section in Level-2 decision template | P1 | H | H | H | S | -- | **PI-4 Sprint 3** | **COMMITTED** (human option (c) 2026-06-03); SPEC -> IMPLEMENT; routed to Architect; foundation infrastructure (Foundry/model-pressure framing was specific to another project, not this one) |
+| SDD-013 | "One feature, one session" rule -- one-line edit to principles.md + copilot-instructions.md | P1 | H | M | H | XS | -- | PI-4 Sprint 3 | **DONE** 2026-06-03 commit `5992ec8` (principles.md 1.0.0 -> 1.1.0) |
+| SDD-014 | Friction Analysis section in Level-2 decision template | P1 | H | H | H | S | -- | PI-4 Sprint 3 | **DONE** 2026-06-03 commit `85b39be` (decision-policy.md 1.0.0 -> 1.1.0; template + example shipped) |
 | SDD-015 | Model upgrades as Level-2 decisions w/ regression-test branch + A/B + cost analysis | P1 | H | H | H | S | -- | PI-5 (deferred) | **DEFERRED to PI-5** (human option (c) 2026-06-03); blocked on SDD-014; not currently under stakeholder pressure in this project |
 | SDD-016 | `.github/` symlink portability trick -- host-integration-symlink skill + bootstrap.py extension | P1 | H | H | H | M | -- | PI-5 (deferred) | **DEFERRED to PI-5** (human option (c) 2026-06-03); CLARIFY first; co-spec with SDD-017 |
 | SDD-017 | Hire `dev-env-manager` worker -- worktree, symlink, branch hygiene, env bootstrap | P1 | M | H | H | S | -- | PI-5 (deferred) | **DEFERRED to PI-5** (human option (c) 2026-06-03); SPEC; co-spec with SDD-016 |

@@ -18,12 +18,12 @@ Prioritized backlog with RICE scoring. Managed by Principal Product Manager.
 
 | ID | Title | Priority | R | I | C | E | RICE | Sprint | Status |
 |----|-------|----------|---|---|---|---|------|--------|--------|
-| SDD-013 | "One feature, one session" rule -- one-line edit to principles.md + copilot-instructions.md | P1 | H | M | H | XS | -- | PI-4 (proposed) | Triaged; SKIP TO IMPLEMENT (bypass spec per sizing rule); routed to Architect |
-| SDD-014 | Friction Analysis section in Level-2 decision template -- foundation for SDD-015 + SDD-016 | P1 | H | H | H | S | -- | PI-4 (proposed) | Triaged; SPEC directly; routed to Architect; defends active GPT-5.5 / Foundry stakeholder pressure |
-| SDD-015 | Model upgrades as Level-2 decisions w/ regression-test branch + A/B + cost analysis | P1 | H | H | H | S | -- | PI-4 (proposed) | Triaged; SPEC after SDD-014; HITL; Architect + Cloud-Security co-sign |
-| SDD-016 | `.github/` symlink portability trick -- host-integration-symlink skill + bootstrap.py extension | P1 | H | H | H | M | -- | PI-4 (proposed) | Triaged; CLARIFY (Windows Dev Mode, cross-platform); co-spec with SDD-017 |
-| SDD-017 | Hire `dev-env-manager` worker -- worktree, symlink, branch hygiene, env bootstrap | P1 | M | H | H | S | -- | PI-4 (proposed) | Triaged; SPEC; co-spec with SDD-016; first task is SDD-016 implementation |
-| SDD-018 | UI development lifecycle variant -- relaxed Article X with validation.md delta entries | P1 | M | H | M | M | -- | PI-4 (proposed) | Triaged (P2 -> P1 override; live dashboard pain); CLARIFY (ADR vs separate command) |
+| SDD-013 | "One feature, one session" rule -- one-line edit to principles.md + copilot-instructions.md | P1 | H | M | H | XS | -- | **PI-4 Sprint 3** | **COMMITTED** (human option (c) 2026-06-03); SKIP TO IMPLEMENT; routed to Architect |
+| SDD-014 | Friction Analysis section in Level-2 decision template | P1 | H | H | H | S | -- | **PI-4 Sprint 3** | **COMMITTED** (human option (c) 2026-06-03); SPEC -> IMPLEMENT; routed to Architect; foundation infrastructure (Foundry/model-pressure framing was specific to another project, not this one) |
+| SDD-015 | Model upgrades as Level-2 decisions w/ regression-test branch + A/B + cost analysis | P1 | H | H | H | S | -- | PI-5 (deferred) | **DEFERRED to PI-5** (human option (c) 2026-06-03); blocked on SDD-014; not currently under stakeholder pressure in this project |
+| SDD-016 | `.github/` symlink portability trick -- host-integration-symlink skill + bootstrap.py extension | P1 | H | H | H | M | -- | PI-5 (deferred) | **DEFERRED to PI-5** (human option (c) 2026-06-03); CLARIFY first; co-spec with SDD-017 |
+| SDD-017 | Hire `dev-env-manager` worker -- worktree, symlink, branch hygiene, env bootstrap | P1 | M | H | H | S | -- | PI-5 (deferred) | **DEFERRED to PI-5** (human option (c) 2026-06-03); SPEC; co-spec with SDD-016 |
+| SDD-018 | UI development lifecycle variant -- relaxed Article X with validation.md delta entries | P1 | M | H | M | M | -- | PI-5 (deferred) | **DEFERRED to PI-5** (human option (c) 2026-06-03); CLARIFY (ADR vs separate command) |
 | SDD-019 | Serial gate on CLARIFY/SPEC (repo-wide) -- constitutional amendment; fleet.py enforcement | P1 | H | H | M | M | -- | PI-5 (proposed) | Triaged; CLARIFY; HITL; bundle with SDD-020 |
 | SDD-020 | Cross-feature deduplication pass at /triage and /clarify -- pre-spec overlap scan | P1 | M | H | H | S | -- | PI-5 (proposed) | Triaged; SPEC; bundle with SDD-019 |
 

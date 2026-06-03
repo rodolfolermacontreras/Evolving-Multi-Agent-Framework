@@ -1,6 +1,6 @@
 # Executive State
 
-Generated date: 2026-06-02
+Generated date: 2026-06-03
 Current PI: PI-4 (Alpha Release)
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
 Active focus: Start: 'Domain skills marked as reference examples'

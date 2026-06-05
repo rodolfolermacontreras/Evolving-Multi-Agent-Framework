@@ -29,9 +29,31 @@ Maintained by feature workers themselves. The Executive Manager and the
 - Sequence: F-01 -> F-02
 - Owner: Principal Software Developer (lead)
 
-### F-01 -- fdc-tasks -- NOT STARTED
+### F-01 -- fdc-tasks -- DONE
 
-(append block here on completion)
+- Date: 2026-06-05
+- Owner: Principal Software Developer
+- Commits: <pending-sha>
+- Files changed: 2
+  - spec-driven-development/specs/2026-06-04-filesystem-data-contracts/tasks.md (new)
+  - spec-driven-development/exec/sprint-progress.md (this block)
+- Tests: 152 -> 152 (docs-only; no code changes in F-01)
+- Validation: tasks.md frontmatter present (id/type/status/owner/updated);
+  traceability matrix complete (9 tasks -> R1..R7 + O1..O2 mapped, zero
+  orphans); per-task allowed_files/blocked_files scoping recorded (AC-3); no
+  locked-function modification implied (AC-4); no third-party dep references
+  (AC-5).
+- Notes: Decomposed FDC plan into 9 tasks across 5 phases. Sequence:
+  T-FDC-01 (schema doc) -> T-FDC-02 (S1 lock guard test, pulled forward as
+  tripwire) -> T-FDC-03 (lint extension) -> T-FDC-04 (rollup helpers) ->
+  T-FDC-05 (cmd_count handler) -> T-FDC-06 (COMMIT-CONVENTION) -> T-FDC-07
+  (opt-in hook) -> T-FDC-08 (backfill) -> T-FDC-09 (validation closeout).
+  Lock-guard task = T-FDC-02. Backfill task = T-FDC-08. One deviation
+  documented in tasks.md "Frontmatter contract note": AC-1 mandates literal
+  `status: locked` in tasks.md frontmatter but the FDC status enum does not
+  include `locked` -- T-FDC-08 reconciles during backfill (either change to
+  `active` or extend enum). No spec/plan/ADR/validation edits made.
+- Next: F-02 ready -- paste F-02-fdc-implement.prompt.md in a fresh session
 
 ### F-02 -- fdc-implement -- NOT STARTED
 

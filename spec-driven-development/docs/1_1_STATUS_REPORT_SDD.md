@@ -2,6 +2,113 @@
 
 ---
 
+## Week of May 27 - June 4, 2026
+
+Date: June 4, 2026 | Owner: Rodolfo Lerma | Branch: master at 7438bfd (143 commits)
+
+### Progress since last week (May 26)
+
+**Massive week: PI-3 closed, PI-4 launched and Sprint 3 already done. 57 commits, +11,334/-1,098 lines across 55 files.**
+
+**PI-3 Sprint S4 -- Live UI v2 Spec (COMPLETE, May 31)**
+- Human approved all 6 design decisions from CLARIFY doc (visual style, info priority, nav depth, agent visibility, responsive targets, animation).
+- Principal UI Designer authored `DESIGN_TOKENS.md` (59 CSS custom properties across 8 sections) and 37KB `spec.md` (12 sections + 3 appendices).
+- Static HTML mockup created (`mockup.html`, 34KB prototype). Human feedback incorporated (timeline redesign, sprint naming consistency fix).
+- `plan.md`, `tasks.md`, `validation.md` (LOCKED, 15+21 acceptance criteria) authored.
+- `design-tokens` skill v1.0 created (closes LESSON-007, deferred from PI-3/S3).
+- Architect review notes applied to spec.
+
+**PI-3 Sprint S1 -- Dashboard About + Freshness Unblock (COMPLETE, Jun 1)**
+- Human ran 9 HITL Azure provisioning steps (T-001, T-002) -- federated credential + deploy app registration.
+- Deploy workflow authored (`.github/workflows/deploy-dashboard.yml`) with ACR + OIDC auto-deploy (T-003).
+- About section added to dashboard HTML with static purpose paragraph + dynamic PI line (T-004).
+- Both worktrees merged to master, torn down. 68 tests passing. Deploy workflow GREEN.
+- ACR role fix required during provisioning.
+
+**PI-3 Sprint S2 -- Day-to-Day Brownfield Bootstrap (COMPLETE, Jun 1)**
+- Human picked dogfood feature F8 (Markdown export). Repo path confirmed.
+- Full spec, plan, and tasks authored for brownfield bootstrap with Markdown export dogfood (SDD-S2-001).
+- All 5 PI-3 sprints now DONE. PI-3 formally closed.
+
+**PI-3 Closure (Jun 2, commit 683237e)**
+- Created PI-3 sprint artifacts (`CURRENT_PI.md`, `lessons.md`). PI-3 INDEX closed.
+- LESSON-013 captured: PI kickoff checklist was missing. Fix: `pi-planning` skill updated to v1.1 with mandatory checklist.
+
+**PI-4 Kickoff: Alpha Release (Jun 2, commit a702c23)**
+- PI-4 scoped with goal: make the framework ready for external consumption.
+- Sprint 1 (Live UI v2): DONE in same session.
+- Sprint 2 (Alpha Release Housekeeping): DONE in same session.
+
+**PI-4 Sprint S1 -- Live UI v2 Implementation (COMPLETE, Jun 2)**
+- `state_builder.py` rewritten to v3.0 sprint-first layout -- data-layer functions (T-001..T-004), full HTML renderer rewrite (T-005..T-011).
+- Accessibility audit, security tests, and integration tests added (T-012..T-014). Code review fix: `try/finally` for sqlite connection in `load_decisions()`.
+- Agent lineage section added to dashboard Section 5 (roster table + promotion timeline).
+- Fleet Agent Traceability design applied per approved DESIGN.md Section 4.2.
+- Dashboard header redesigned with project title and context bar. BRIDGE title enlarged to 32px bold.
+- 94 tests passing after S1.
+
+**PI-4 Sprint S2 -- Alpha Release Housekeeping (COMPLETE, Jun 2)**
+- Root `README.md` rewritten with quickstart, key concepts, origin story.
+- `ARCHITECTURE.md` created (530 lines) with code and framework diagrams.
+- Roadmap updated through PI-4. Domain skill annotations verified.
+- Live dashboard URL documented in README and ARCHITECTURE.
+- Dashboard bug fixes: PI detection, feature stages, 404 links, PI_MISSION dict, missing RETROs.
+
+**PI-4 Sprint S3 -- Scott Feedback Bundle (COMPLETE, Jun 3)**
+- Scott Feedback Bundle from Jun 2 meeting triaged: 14 items captured in backlog as SDD-013 through SDD-026.
+- Human approved triage; selected option (c) to absorb SDD-013 + SDD-014 into Sprint 3 immediately.
+- SDD-013: "One feature, one session" rule added to `principles.md` as binding constitutional amendment.
+- SDD-014: Friction Analysis section added to Level-2 decision template (new `level-2-decision.md` + example template).
+- Sprint 3 closed same day.
+
+**Timeline + Work-Index Feature (Jun 3, WIP committed)**
+- Project timeline section (Section 7) added to dashboard: vertical timeline with DONE/IN-FLIGHT/QUEUED markers.
+- `render_work_index()` function added to `state_builder.py` -- auto-generates `exec/work-index.md` for principal consumption.
+- `pre-work-check` skill created and wired into all 4 principal agents -- cross-check protocol to avoid duplicate/conflicting work.
+- NameError bug in `render_html()` fixed (backlog/features variables not in scope). 152 tests passing after fix.
+
+### Blockers / Next Steps
+
+| Item | Status | Blocker |
+|------|--------|---------|
+| PI-5 planning | Not started | Awaiting `/replan` |
+| Scott Feedback Bundle (SDD-015..SDD-026) | Backlogged | 12 items remain from 14-item triage (2 absorbed in S3) |
+| Second-project bootstrap (non-Day-to-Day) | Planned | Needs project selection |
+| GENERALIZATION_SDD.md v1.0 | Planned | After second-project test |
+| Push to origin | Up to date | Last push included all commits |
+
+### Key Meetings This Week
+
+| Meeting | Date | Key Outcome |
+|---------|------|-------------|
+| Scott feedback session | Jun 2 | 14 actionable items triaged. 2 absorbed immediately (SDD-013, SDD-014). 12 backlogged for future PIs. |
+
+### Scorecard
+
+| Metric | Last Week (May 26) | This Week (Jun 4) | Delta |
+|--------|-------------------|-------------------|-------|
+| Total commits | 86 | 143 | +57 |
+| Tests passing | 73 | 152 | +79 |
+| PI status | PI-3 active (S3/S5 DONE) | PI-3 closed, PI-4 active (S1/S2/S3 DONE) | +2 PIs of progress |
+| CLI tools operational | 6 + build-index | 6 + build-index + work-index | +1 subcommand |
+| CLI code lines | ~3,199 | ~4,074 | +875 |
+| Agent definitions | 12 | 12 | Unchanged |
+| Skills | 30 | 32 (added design-tokens, pre-work-check) | +2 |
+| Slash commands | 17 | 17 | Unchanged |
+| ADRs | 11 | 11 | Unchanged |
+| Features DONE through SDD | 8 | 11 (added dashboard-freshness, brownfield, live-ui-v2) | +3 |
+| Fleet dispatch success rate | 100% | 100% | Unchanged |
+| Lessons captured | 10 | 14 (added 011, 012, 013, 014) | +4 |
+| Lessons open | 0 | 0 | Unchanged |
+| Specs in flight | 8 | 6 (3 closed, 1 new: friction-analysis) | -2 |
+| Specialists promoted | 1 | 1 | Unchanged |
+| Dashboard version | v2.1 (4-zone) | v3.0 (sprint-first + timeline + agent traceability) | Major rewrite |
+| ARCHITECTURE.md | Not exists | 530 lines with diagrams | New |
+| Backlog items (Scott) | 0 | 14 triaged (2 done, 12 queued) | New |
+| Templates | 8 | 10 (added level-2-decision + example) | +2 |
+
+---
+
 ## Week of May 22-26, 2026
 
 Date: May 26, 2026 | Owner: Rodolfo Lerma | Branch: master at 7e433a8 (86 commits)

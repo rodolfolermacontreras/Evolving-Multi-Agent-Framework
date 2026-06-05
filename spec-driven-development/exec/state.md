@@ -1,9 +1,9 @@
 # Executive State
 
-Generated date: 2026-06-03
+Generated date: 2026-06-05
 Current PI: PI-4 (Alpha Release)
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
-Active focus: Start: 'Domain skills marked as reference examples'
+Active focus: Finish implementation of 'friction-analysis-template'
 
 PI progress: 3/5 commitments complete (60%)
 
@@ -27,6 +27,8 @@ PI progress: 3/5 commitments complete (60%)
 | day-to-day-brownfield-bootstrap | DONE | Done | Status: done, RETRO present |
 | live-ui-v2 | DONE | done | validation 100%, RETRO present |
 | principal-agent-hygiene | SPEC | - | spec.md present |
+| friction-analysis-template | IMPLEMENT | APPROVED | validation 0% (0/12) |
+| filesystem-data-contracts | PLAN | APPROVED WITH CONDITIONS (Architect, 2026-06-05) -- conditions resolved in /plan | Status: APPROVED WITH CONDITIONS (Architect, 2026-06-05) -- conditions resolved in /plan |
 
 ## Sprint Plan
 

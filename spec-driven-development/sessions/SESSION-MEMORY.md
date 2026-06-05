@@ -1,6 +1,15 @@
 # Session Memory — Evolving Multi-Agent Framework
 
-**Latest checkpoint:** PI-4 polish in progress. Timeline + Work-Index features partially implemented. **UNCOMMITTED + 62 tests failing — NameError bug to fix on resume.**
+**Latest checkpoint (2026-06-05):** PI-4 Sprint 4 "Filesystem Data Contracts" (SDD-FDC-001)
+through PLAN. Clarify CLOSED (D1-D5), Spec APPROVED WITH CONDITIONS (Architect),
+plan.md + ADR-012 written, all 5 review conditions closed. **Next: /tasks (Software
+Developer).** Hard constraint carried throughout: b7ce642 S1 footprint locked
+(`render_html()` + T-001..T-004 immutable; additive code only). Artifacts under
+`specs/2026-06-04-filesystem-data-contracts/` (spec, validation, clarification-log,
+handoff-to-plan, plan) + `docs/ADR/012-filesystem-frontmatter-data-contract.md`.
+PM role pauses until AC verification (AC-1..AC-7) post-implement.
+
+**Prior checkpoint:** PI-4 polish in progress. Timeline + Work-Index features partially implemented. **UNCOMMITTED + 62 tests failing — NameError bug to fix on resume.**
 
 **Date:** 2026-06-03 (computer restart mid-session)
 **Owner:** Rodolfo Lerma

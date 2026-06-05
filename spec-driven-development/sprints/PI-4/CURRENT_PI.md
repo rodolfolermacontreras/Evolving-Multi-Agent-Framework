@@ -60,6 +60,14 @@ Deliver the alpha-quality framework package: a sprint-first dashboard (Live UI v
 **Capacity**: 2 items, effort XS+S overall (total < 1 sprint of typical work). **STATUS: COMPLETE 2026-06-03.**
 **Validation**: SDD-013 -- single-line edit verifiable by `grep` for the rule phrase in both files. SDD-014 -- template file exists with the 5 required headings; reference link from `constitution/decision-policy.md` added.
 
+### Sprint 4: Filesystem Data Contracts (added 2026-06-04)
+**Goal**: Establish machine-readable filesystem data contracts so dashboard doc metrics are reproducible and lintable.
+**Spec**: `specs/2026-06-04-filesystem-data-contracts/` -- SDD-FDC-001. P2 / HITL.
+**Deliverables**: (1) YAML frontmatter schema for `specs/**` + `sprints/**`; (2) schema-lint extension; (3) doc-count rollup; (4) new `count` subcommand on `state_builder.py`; (5) opt-in commit-msg convention.
+**Hard constraint**: b7ce642 S1 footprint locked -- `render_html()` + data-layer T-001..T-004 immutable (additive code only).
+**Status (2026-06-05)**: Clarify CLOSED (D1-D5). Spec APPROVED WITH CONDITIONS (Architect). Plan + ADR-012 DONE. Conditions closed. **Next: /tasks (Software Developer).**
+**Validation**: `specs/2026-06-04-filesystem-data-contracts/validation.md` -- R1-R7 required (R5 = automated b7ce642 lock guard), O1-O2 optional.
+
 ---
 
 ## Risks (ROAM)
@@ -105,3 +113,6 @@ Deliver the alpha-quality framework package: a sprint-first dashboard (Live UI v
 - Design tokens: `specs/2026-05-26-live-ui-v2/DESIGN_TOKENS.md`
 - Mockup: `specs/2026-05-26-live-ui-v2/mockup.html`
 - Management index: `docs/Management/PI-4/INDEX.md`
+- Filesystem Data Contracts spec: `specs/2026-06-04-filesystem-data-contracts/spec.md`
+- Filesystem Data Contracts plan: `specs/2026-06-04-filesystem-data-contracts/plan.md`
+- ADR-012 (frontmatter data contract): `docs/ADR/012-filesystem-frontmatter-data-contract.md`

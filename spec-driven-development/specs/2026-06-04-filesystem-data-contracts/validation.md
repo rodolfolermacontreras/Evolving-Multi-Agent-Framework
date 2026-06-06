@@ -18,8 +18,8 @@
 - [ ] R4. `state_builder.py count --format table` prints a human-readable table and
   exits zero. (AC-4)
 - [ ] R5. LOCK: `render_html()` and data-layer functions T-001..T-004 are
-  byte-identical to commit `b7ce642`, enforced by an automated guard test
-  (stdlib `inspect.getsource` + `hashlib.sha256` vs golden hashes from `b7ce642`). (AC-5)
+  byte-identical to commit `257b081` (re-anchored 2026-06-06 -- see clarification-log Q5), enforced by an automated guard test
+  (stdlib `inspect.getsource` + `hashlib.sha256` vs golden hashes from `257b081`). (AC-5)
 - [ ] R6. All in-scope `specs/**` and `sprints/**` markdown carry valid frontmatter
   (`id`, `type`, `status`, `owner`, `updated`). (Backfill complete)
 - [ ] R7. Full existing test suite passes (no regression). (AC-7)
@@ -32,6 +32,6 @@
 
 ## Notes
 
-- R5 is the hard constraint from the original request (b7ce642 S1 footprint lock).
+- R5 is the hard constraint from the original request (S1 footprint lock; anchor re-anchored to 257b081 on 2026-06-06 -- see clarification-log Q5).
 - O1/O2 are optional because Sprint 4 ships the convention as documentation + opt-in
   only; mandatory enforcement is deferred (D3).

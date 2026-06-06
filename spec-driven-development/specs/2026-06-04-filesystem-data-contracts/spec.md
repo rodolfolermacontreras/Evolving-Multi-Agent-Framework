@@ -24,7 +24,7 @@ This creates three concrete failures:
 3. Commit history is inconsistent, weakening traceability the framework promises.
 
 Constraint: the S1 dashboard footprint is locked. `render_html()` and the four
-data-layer functions (T-001..T-004) shipped in commit `b7ce642` MUST NOT change.
+data-layer functions (T-001..T-004) shipped in commit `257b081` MUST NOT change. (re-anchored 2026-06-06; the original anchor SHA predated Sprint 3 state_builder.py evolution -- see clarification-log Q5)
 
 ## Proposed Solution
 
@@ -63,9 +63,9 @@ Five deliverables:
    values.
 4. Given the in-scope artifact set, when `state_builder.py count --format table`
    runs, then it prints a human-readable table of the same counts and exits zero.
-5. Given commit `b7ce642`, when this feature is fully implemented, then a diff of
+5. Given commit `257b081`, when this feature is fully implemented, then a diff of
    `render_html()` and the four data-layer functions (T-001..T-004) against
-   `b7ce642` shows zero changes.
+   `257b081` shows zero changes.
 6. Given the documented commit-message convention, when a contributor installs the
    opt-in `commit-msg` hook and writes a non-conforming message, then the hook
    rejects the commit with a message pointing to the convention doc; when the hook
@@ -140,7 +140,7 @@ No changes to `serve`, `build-index`, or default build behavior.
 - Regression:
   - Full existing suite must stay green.
   - Lock check: assert `render_html()` and T-001..T-004 are byte-identical to
-    `b7ce642` (manual diff or a guard test).
+    `257b081` (manual diff or a guard test).
 
 ## Validation Contract
 
@@ -183,7 +183,7 @@ additive surface, no `fleet.db` changes, no new dependencies. Conditions are
    `by_sprint` key WITHOUT changing the top-level shape.
 2. Specify an AUTOMATED S1 lock guard test: stdlib `inspect.getsource` +
    `hashlib.sha256` over `render_html` and T-001..T-004, compared to golden
-   hashes captured from the `b7ce642` checkout (satisfies AC-5 / R5). Replaces
+   hashes captured from the `257b081` checkout (satisfies AC-5 / R5). Replaces
    the brittle manual/line-range diff.
 3. Author one ADR for the filesystem frontmatter data contract + the
    `parse_frontmatter` shared-boundary decision.
@@ -203,7 +203,7 @@ Give `count` its own handler function (CLI-PATTERN rule 9); do not bloat `main()
 - Applying frontmatter to `docs/**` or constitution files (deferred past Sprint 4).
 - Mandatory commit-message enforcement via CI or auto-installed hooks (later HITL /
   Level-2 decision).
-- Any change to `render_html()` or the b7ce642 data-layer functions.
+- Any change to `render_html()` or the 257b081 data-layer functions.
 - `fleet.db` schema changes.
 
 ---
@@ -260,7 +260,7 @@ Both are configuration decisions, not architectural unknowns.
 Manual diff is insufficient (not enforced per-change, humans forget). Lightest
 reliable mechanism: a guard test using stdlib `inspect.getsource` +
 `hashlib.sha256` over `render_html` and the four functions, compared to golden
-hashes captured from the `b7ce642` checkout and pinned in the test. Stdlib-only,
+hashes captured from the `257b081` checkout and pinned in the test. Stdlib-only,
 no git dependency, robust to surrounding line shifts. This satisfies AC-5/R5.
 
 ### ADR / patterns

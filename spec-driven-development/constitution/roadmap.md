@@ -98,7 +98,7 @@ lifecycle end-to-end on a real feature.
 - [ ] Domain skills marked as reference examples (DEFERRED to PI-5)
 - [ ] GitHub Actions Node.js deprecation resolved (DEFERRED to PI-5)
 
-**PI-4 close decision (pending owner ratification): DONE-WITH-DEFERRED.** Three of five PI-4 commitments shipped (dashboard, README + roadmap, filesystem data contracts). Two cosmetic / maintenance commitments deferred to PI-5: domain-skill annotation, Node.js Actions bump. No PI-4 commitment was loosened or scope-reduced; the deferred items are explicitly out of Sprint 4's accepted scope.
+**PI-4 close decision: DONE-WITH-DEFERRED.** Ratified by owner 2026-06-06 (Level-2, via Executive Manager). Three of five PI-4 commitments shipped (dashboard, README + roadmap, filesystem data contracts). Two cosmetic / maintenance commitments deferred to PI-5: domain-skill annotation, Node.js Actions bump. No PI-4 commitment was loosened or scope-reduced; the deferred items are explicitly out of Sprint 4's accepted scope.
 
 ---
 

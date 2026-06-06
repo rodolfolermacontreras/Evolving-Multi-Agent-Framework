@@ -94,7 +94,7 @@ Maintained by feature workers themselves. The Executive Manager and the
 ### Sprint 4 -- CLOSED
 
 - Date: 2026-06-06
-- Owner: Principal Software Developer (closing); Principal Executive Manager (ratification pending)
+- Owner: Principal Software Developer (closing); Principal Executive Manager (routing); Owner Rodolfo Lerma (ratified Level-2, 2026-06-06)
 - Features completed: F-01 (fdc-tasks DONE 2026-06-05), F-02 (fdc-implement DONE 2026-06-06)
 - Final SHA: (this commit's parent will be the sprint-close commit -- see commit log)
 - Sprint chain (chronological, in master): `2bf2e96` (F-01) -> `257b081` -> `2335a2a` -> `e96f849` -> `c2e5871` -> `405c332` -> `62006f4` -> `99499ac` -> `47b1568` -> `b2586dc` -> `20c16dc` -> sprint-close commit

@@ -9,7 +9,7 @@ sprint: PI-4
 
 # PI-4: Alpha Release
 
-- Status: **Active** (Sprints 1-4 DONE, 2 PI-4 commitments deferred to PI-5)
+- Status: **Active** (Sprints 1-4 DONE, 2 PI-4 commitments deferred to PI-5; PI-4 close = DONE-WITH-DEFERRED, ratified by owner 2026-06-06)
 - Theme: Ship the Live UI v2 dashboard, update roadmap, create root README, release alpha-quality framework
 - Started: 2026-06-02
 - Owner: principal-executive-manager
@@ -78,7 +78,7 @@ Deliver the alpha-quality framework package: a sprint-first dashboard (Live UI v
 **Validation**: `specs/2026-06-04-filesystem-data-contracts/validation.md` -- R1-R7 required (R5 = automated b7ce642 lock guard), O1-O2 optional.
 
 ### Sprint 4: Filesystem Data Contracts -- CLOSED 2026-06-06
-**Status**: **DONE**
+**Status**: **DONE** (ratified by owner 2026-06-06, Level-2 via Executive Manager)
 **Closed**: 2026-06-06
 **Spec**: `specs/2026-06-04-filesystem-data-contracts/` -- SDD-FDC-001. P2 / HITL.
 **Sprint 4 commits (in order)**:

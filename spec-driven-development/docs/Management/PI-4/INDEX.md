@@ -8,10 +8,10 @@
 
 ## Sprints
 
-| Sprint | Title | Status | Spec Location |
-|--------|-------|--------|---------------|
-| S1 | Live UI v2 Implementation | **Active** | `specs/2026-05-26-live-ui-v2/` (LOCKED) |
-| S2 | Alpha Release Housekeeping | Proposed | (inline in CURRENT_PI.md) |
+<!-- BEGIN auto-generated:sprints (refreshed by `cli/state_builder.py build-index`) -->
+| Sprint | Title | Status | Dispatches | Last Outcome | Detail |
+|--------|-------|--------|------------|--------------|--------|
+<!-- END auto-generated:sprints -->
 
 ---
 

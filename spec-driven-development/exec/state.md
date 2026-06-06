@@ -1,34 +1,34 @@
 # Executive State
 
-Generated date: 2026-06-05
+Generated date: 2026-06-06
 Current PI: PI-4 (Alpha Release)
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
-Active focus: Finish implementation of 'friction-analysis-template'
+Active focus: Close out 'principal-agent-hygiene' (currently in REVIEW)
 
-PI progress: 3/5 commitments complete (60%)
+PI progress: 4/6 commitments complete (67%)
 
 ## Spec Pipeline
 
 | Feature | Stage | Status | Notes |
 |---------|-------|--------|-------|
-| fleet-ledger | DONE | Done | validation 100%, RETRO present |
+| fleet-ledger | DONE | done | validation 100%, RETRO present |
 | fleet-bridge-dashboard | CLARIFY | - | DESIGN.md only (pre-spec design exploration) |
 | cloud-dashboard | CLARIFY | - | DESIGN.md only (pre-spec design exploration) |
-| dashboard-about-and-freshness | DONE | Done | Status: done, RETRO present |
+| dashboard-about-and-freshness | DONE | done | Status: done, RETRO present |
 | fleet | DONE | done | validation 100%, RETRO present |
-| fleet-cli | DONE | Done | validation 100%, RETRO present |
-| qa-cli | DONE | Done | validation 100%, RETRO present |
-| retro-cli | DONE | Done | validation 100%, RETRO present |
+| fleet-cli | DONE | done | validation 100%, RETRO present |
+| qa-cli | DONE | done | validation 100%, RETRO present |
+| retro-cli | DONE | done | validation 100%, RETRO present |
 | retro-closure | TASKS | - | tasks.md present |
 | schema-lint | DONE | done | validation 100%, RETRO present |
 | sprint-c-validation | BACKLOG | - | directory exists, no artifacts yet |
-| state-builder | DONE | Done | validation 100%, RETRO present |
+| state-builder | DONE | done | validation 100%, RETRO present |
 | state-dashboard | DONE | done | validation 100%, RETRO present |
-| day-to-day-brownfield-bootstrap | DONE | Done | Status: done, RETRO present |
+| day-to-day-brownfield-bootstrap | DONE | done | Status: done, RETRO present |
 | live-ui-v2 | DONE | done | validation 100%, RETRO present |
-| principal-agent-hygiene | SPEC | - | spec.md present |
-| friction-analysis-template | IMPLEMENT | APPROVED | validation 0% (0/12) |
-| filesystem-data-contracts | PLAN | APPROVED WITH CONDITIONS (Architect, 2026-06-05) -- conditions resolved in /plan | Status: APPROVED WITH CONDITIONS (Architect, 2026-06-05) -- conditions resolved in /plan |
+| principal-agent-hygiene | REVIEW | done | Status: done but RETRO missing |
+| friction-analysis-template | REVIEW | done | Status: done but RETRO missing |
+| filesystem-data-contracts | REVIEW | done | Status: done but RETRO missing |
 
 ## Sprint Plan
 
@@ -109,8 +109,8 @@ _none -- no dispatches without outcome older than 24h_
 
 ## Next Milestones
 
-- Domain skills marked as reference examples
-- GitHub Actions Node.js deprecation resolved
+- Domain skills marked as reference examples (DEFERRED to PI-5)
+- GitHub Actions Node.js deprecation resolved (DEFERRED to PI-5)
 
 ---
 

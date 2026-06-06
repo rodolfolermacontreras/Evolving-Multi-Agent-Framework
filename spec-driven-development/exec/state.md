@@ -29,6 +29,7 @@ PI progress: 4/6 commitments complete (67%)
 | principal-agent-hygiene | REVIEW | done | Status: done but RETRO missing |
 | friction-analysis-template | REVIEW | done | Status: done but RETRO missing |
 | filesystem-data-contracts | REVIEW | done | Status: done but RETRO missing |
+| symlink-portability | REVIEW | done | Status: done but RETRO missing |
 
 ## Sprint Plan
 
@@ -89,10 +90,10 @@ PI progress: 4/6 commitments complete (67%)
 ## Fleet
 
 - Principals: 6
-- Generic workers: 4
+- Generic workers: 5
 - Specialists: 1
-- Total agents: 11
-- Skills: 31 across 5 categories
+- Total agents: 12
+- Skills: 32 across 5 categories
 
 ## Recently Completed
 

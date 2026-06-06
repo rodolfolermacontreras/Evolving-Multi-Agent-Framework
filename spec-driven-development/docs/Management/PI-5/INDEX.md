@@ -11,7 +11,6 @@
 <!-- BEGIN auto-generated:sprints (refreshed by `cli/state_builder.py build-index`) -->
 | Sprint | Title | Status | Dispatches | Last Outcome | Detail |
 |--------|-------|--------|------------|--------------|--------|
-| Sprint 1 | Brownfield Portability (SDD-016 + SDD-017) | Active | 0 | -- | [Sprint 1](../../../sprints/PI-5/CURRENT_PI.md#sprint-1----brownfield-portability-this-sprint) |
 <!-- END auto-generated:sprints -->
 
 ---

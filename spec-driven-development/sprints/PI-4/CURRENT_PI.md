@@ -9,7 +9,7 @@ sprint: PI-4
 
 # PI-4: Alpha Release
 
-- Status: **Active**
+- Status: **Active** (Sprints 1-4 DONE, 2 PI-4 commitments deferred to PI-5)
 - Theme: Ship the Live UI v2 dashboard, update roadmap, create root README, release alpha-quality framework
 - Started: 2026-06-02
 - Owner: principal-executive-manager
@@ -76,6 +76,30 @@ Deliver the alpha-quality framework package: a sprint-first dashboard (Live UI v
 **Hard constraint**: b7ce642 S1 footprint locked -- `render_html()` + data-layer T-001..T-004 immutable (additive code only).
 **Status (2026-06-05)**: Clarify CLOSED (D1-D5). Spec APPROVED WITH CONDITIONS (Architect). Plan + ADR-012 DONE. Conditions closed. **Next: /tasks (Software Developer).**
 **Validation**: `specs/2026-06-04-filesystem-data-contracts/validation.md` -- R1-R7 required (R5 = automated b7ce642 lock guard), O1-O2 optional.
+
+### Sprint 4: Filesystem Data Contracts -- CLOSED 2026-06-06
+**Status**: **DONE**
+**Closed**: 2026-06-06
+**Spec**: `specs/2026-06-04-filesystem-data-contracts/` -- SDD-FDC-001. P2 / HITL.
+**Sprint 4 commits (in order)**:
+- `2335a2a` spec(fdc): amend R5/AC-5 anchor b7ce642 -> 257b081 (Article X)
+- `e96f849` docs(fdc): log Q5 amendment of R5 anchor in clarification-log
+- `c2e5871` test(fdc): T-FDC-02 add S1 footprint lock guard against 257b081
+- `405c332` docs(fdc): T-FDC-01 + T-FDC-06 frontmatter schema and commit convention
+- `62006f4` feat(fdc): T-FDC-03 extend schema_lint with artifact contract validator
+- `99499ac` feat(fdc): T-FDC-07 add opt-in commit-msg hook + tests
+- `47b1568` feat(fdc): T-FDC-04 + T-FDC-05 add count subcommand (rollup + handler)
+- `b2586dc` docs(fdc): T-FDC-08 backfill frontmatter across specs/** and sprints/**
+- `20c16dc` spec(fdc): T-FDC-09 close validation -- R1..R7 + O1/O2 all checked
+**Tests**: 152 -> 200 (+48 net; +47 new tests across all five deliverables, +1 from previously-skipped real-repo lint test that now passes because the in-scope tree lints clean)
+**Validation**: 7/7 REQUIRED, 2/2 OPTIONAL all checked. R5 lock guard PASS against 257b081 (re-anchored from b7ce642 via Article X amendment 2026-06-06; see clarification-log Q5). R6 `python schema_lint.py specs/ sprints/` exits 0.
+**Lock evidence (current HEAD)**: sha256 of `inspect.getsource(state_builder.<fn>)` for the five locked symbols:
+- `render_html`             5b41283be94e5db1adfb99692b457d370b84fe100eeda7734c95cafe823a705b
+- `load_sprint_table`       35ab5ad467970ec88709ef923ac608511d49408d31a7787cf2146fccb0e7248f
+- `load_sprint_goal`        a50e52427f26b489b98f1030cb99f004127fc177d37dedc8de9c5f3e7de00716
+- `detect_current_sprint`   81af06480d402b032665be3d6a2a34c343be0a7005704dc096d52a7280263311
+- `load_decisions`          98ba432c79d2a3c6e3c9eb84a69b07ea8af6d7deb7a5cf8fa3245692cd712eaf
+**Retro (one paragraph)**: Sprint 4 closed cleanly after a Day-1 anchor drift was caught by the lock guard and resolved via Article X amendment rather than relaxation -- proving the locked-validation discipline works even when the literal anchor is itself wrong. The TDD discipline of landing T-FDC-02 (tripwire) FIRST paid off twice: it gated subsequent state_builder.py edits, and it produced the goldens that the amendment then ratified. The 77-file frontmatter backfill (T-FDC-08) was the largest single touch but went smoothly because the schema lint was written before the backfill ran -- every prepended block was verified by the lint that would later police it. The five-line legacy-frontmatter patch (DESIGN.md, live-ui-v2 family) surfaced naturally during R6 verification and was fixed in-line without scope creep. Net: 9 commits, 152 -> 200 tests, zero contract loosening.
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 version: '1.0.0'
 ratified: 2026-05-12
-last_amended: 2026-06-02
+last_amended: 2026-06-06
 ---
 
 # Roadmap
@@ -94,8 +94,11 @@ lifecycle end-to-end on a real feature.
 - [x] Live UI v2 dashboard (sprint-first layout, 90 tests, v3.0)
 - [x] Root README.md with quickstart and bootstrap pointer
 - [x] Roadmap updated to reflect PI-1 through PI-4
-- [ ] Domain skills marked as reference examples
-- [ ] GitHub Actions Node.js deprecation resolved
+- [x] Filesystem data contracts (SDD-FDC-001) -- schema, lint, count subcommand, opt-in commit-msg hook, 77-file backfill, S1 lock guard. Closed Sprint 4 on 2026-06-06 at SHA `20c16dc`; 152 -> 200 tests; R1-R7 + O1/O2 all checked.
+- [ ] Domain skills marked as reference examples (DEFERRED to PI-5)
+- [ ] GitHub Actions Node.js deprecation resolved (DEFERRED to PI-5)
+
+**PI-4 close decision (pending owner ratification): DONE-WITH-DEFERRED.** Three of five PI-4 commitments shipped (dashboard, README + roadmap, filesystem data contracts). Two cosmetic / maintenance commitments deferred to PI-5: domain-skill annotation, Node.js Actions bump. No PI-4 commitment was loosened or scope-reduced; the deferred items are explicitly out of Sprint 4's accepted scope.
 
 ---
 

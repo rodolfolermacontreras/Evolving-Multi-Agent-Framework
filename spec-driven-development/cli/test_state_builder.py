@@ -369,6 +369,9 @@ class TestStdlibOnly:
             "os",
             "typing",
             "webbrowser",
+            # In-tree sibling module imported via the established sys.path
+            # bootstrap (ADR-012 / SDD-FDC-001). Not a third-party dep.
+            "schema_lint",
         }
 
         for node in ast.walk(tree):
@@ -1461,6 +1464,9 @@ class TestSecurityAudit:
             "sqlite3", "subprocess", "sys", "webbrowser", "dataclasses",
             "http.server", "http", "pathlib",
             "__future__",
+            # In-tree sibling module imported via the established sys.path
+            # bootstrap (ADR-012 / SDD-FDC-001). Not a third-party dep.
+            "schema_lint",
         }
         for line in text.splitlines():
             stripped = line.strip()
@@ -1807,4 +1813,298 @@ class TestWorkIndexGeneration:
         body = work_index_path.read_text(encoding="utf-8")
         assert "# Work Index" in body
         assert "DONE" in body
+
+
+# ---------------------------------------------------------------------------
+# T-FDC-04 + T-FDC-05: count subcommand (SDD-FDC-001 / R3, R4)
+# ---------------------------------------------------------------------------
+
+import subprocess  # noqa: E402  -- used by CLI subprocess tests below
+
+from cli.state_builder import (  # noqa: E402
+    build_doc_count,
+    build_doc_count_by_sprint,
+    render_count_table,
+    cmd_count,
+)
+
+
+def _seed_doc_count_root(tmp_path: Path) -> Path:
+    """Build a minimal sdd-root with frontmatter-bearing artifacts under
+    specs/** and sprints/**.
+    """
+    sdd = tmp_path / "sdd"
+    (sdd / "specs" / "feat-a").mkdir(parents=True)
+    (sdd / "specs" / "feat-b").mkdir(parents=True)
+    (sdd / "sprints" / "PI-9").mkdir(parents=True)
+
+    def write(path: Path, kind: str, status: str) -> None:
+        path.write_text(
+            f"---\n"
+            f"id: SDD-X-{path.stem}\n"
+            f"type: {kind}\n"
+            f"status: {status}\n"
+            f"owner: principal-test\n"
+            f"updated: 2026-06-06\n"
+            f"---\n"
+            f"# {path.stem}\n",
+            encoding="utf-8",
+        )
+
+    write(sdd / "specs" / "feat-a" / "spec.md", "spec", "active")
+    write(sdd / "specs" / "feat-a" / "plan.md", "plan", "active")
+    write(sdd / "specs" / "feat-b" / "spec.md", "spec", "done")
+    write(sdd / "sprints" / "PI-9" / "INDEX.md", "index", "active")
+    write(sdd / "sprints" / "PI-9" / "retro.md", "retro", "done")
+
+    # Files that should be SKIPPED: template + _-prefixed + bad frontmatter
+    (sdd / "sprints" / "lessons-template.md").write_text(
+        "# placeholder, intentionally no frontmatter\n", encoding="utf-8"
+    )
+    (sdd / "specs" / "feat-a" / "_template.md").write_text(
+        "# skipped via _-prefix\n", encoding="utf-8"
+    )
+    (sdd / "specs" / "feat-b" / "scratch.md").write_text(
+        "# no frontmatter -- silently skipped by count (lint flags it)\n",
+        encoding="utf-8",
+    )
+
+    return sdd
+
+
+class TestBuildDocCount:
+    """T-FDC-04 R3 / AC-3: rollup helper contract + invariant."""
+
+    def test_returns_stable_contract_shape(self, tmp_path: Path) -> None:
+        sdd = _seed_doc_count_root(tmp_path)
+        rollup = build_doc_count(sdd)
+        assert set(rollup.keys()) == {"by_status", "by_type", "total"}
+        assert isinstance(rollup["by_status"], dict)
+        assert isinstance(rollup["by_type"], dict)
+        assert isinstance(rollup["total"], int)
+
+    def test_invariant_total_equals_both_sums(self, tmp_path: Path) -> None:
+        sdd = _seed_doc_count_root(tmp_path)
+        rollup = build_doc_count(sdd)
+        assert rollup["total"] == sum(rollup["by_status"].values())
+        assert rollup["total"] == sum(rollup["by_type"].values())
+
+    def test_total_matches_seeded_artifact_count(self, tmp_path: Path) -> None:
+        sdd = _seed_doc_count_root(tmp_path)
+        rollup = build_doc_count(sdd)
+        # 5 frontmatter-bearing artifacts; 3 skipped (template, _-prefix, no fm)
+        assert rollup["total"] == 5
+
+    def test_zero_count_policy_seeds_all_enum_keys(self, tmp_path: Path) -> None:
+        """Every enum key must appear with at least 0 (stable dashboard shape)."""
+        from schema_lint import ARTIFACT_STATUS_ENUM, ARTIFACT_TYPE_ENUM
+        sdd = _seed_doc_count_root(tmp_path)
+        rollup = build_doc_count(sdd)
+        for key in ARTIFACT_STATUS_ENUM:
+            assert key in rollup["by_status"], f"missing seeded status key: {key}"
+        for key in ARTIFACT_TYPE_ENUM:
+            assert key in rollup["by_type"], f"missing seeded type key: {key}"
+
+    def test_per_status_counts_correct(self, tmp_path: Path) -> None:
+        sdd = _seed_doc_count_root(tmp_path)
+        rollup = build_doc_count(sdd)
+        # active: feat-a/spec + feat-a/plan + PI-9/INDEX = 3
+        # done:   feat-b/spec + PI-9/retro = 2
+        assert rollup["by_status"]["active"] == 3
+        assert rollup["by_status"]["done"] == 2
+        assert rollup["by_status"]["blocked"] == 0
+
+    def test_per_type_counts_correct(self, tmp_path: Path) -> None:
+        sdd = _seed_doc_count_root(tmp_path)
+        rollup = build_doc_count(sdd)
+        # spec: 2 (feat-a, feat-b)
+        # plan: 1
+        # index: 1
+        # retro: 1
+        assert rollup["by_type"]["spec"] == 2
+        assert rollup["by_type"]["plan"] == 1
+        assert rollup["by_type"]["index"] == 1
+        assert rollup["by_type"]["retro"] == 1
+        assert rollup["by_type"]["tasks"] == 0
+
+    def test_empty_tree_yields_all_zeros(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "empty-sdd"
+        (sdd / "specs").mkdir(parents=True)
+        (sdd / "sprints").mkdir()
+        rollup = build_doc_count(sdd)
+        assert rollup["total"] == 0
+        assert all(v == 0 for v in rollup["by_status"].values())
+        assert all(v == 0 for v in rollup["by_type"].values())
+
+    def test_unparseable_frontmatter_skipped_no_crash(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "skip-sdd"
+        spec_dir = sdd / "specs" / "x"
+        spec_dir.mkdir(parents=True)
+        (sdd / "sprints").mkdir()
+        (spec_dir / "no-fm.md").write_text("# no frontmatter at all", encoding="utf-8")
+        rollup = build_doc_count(sdd)  # must not raise
+        assert rollup["total"] == 0
+
+    def test_sprint_filter_narrows_results(self, tmp_path: Path) -> None:
+        sdd = _seed_doc_count_root(tmp_path)
+        # Add a second sprint with its own artifacts
+        (sdd / "sprints" / "PI-8").mkdir()
+        (sdd / "sprints" / "PI-8" / "INDEX.md").write_text(
+            "---\nid: idx-pi8\ntype: index\nstatus: archived\nowner: x\nupdated: 2026-06-06\n---\nx\n",
+            encoding="utf-8",
+        )
+        rollup_all = build_doc_count(sdd)
+        rollup_pi8 = build_doc_count(sdd, sprint="PI-8")
+        rollup_pi9 = build_doc_count(sdd, sprint="PI-9")
+        # PI-8: just INDEX (archived). PI-9: INDEX (active) + retro (done) = 2
+        assert rollup_pi8["total"] == 1
+        assert rollup_pi9["total"] == 2
+        # Top-level shape stays the same regardless of filter
+        assert set(rollup_pi8.keys()) == set(rollup_all.keys())
+        # PI-8 narrowing excludes specs/ artifacts
+        assert rollup_pi8["by_type"]["spec"] == 0
+
+    def test_out_of_enum_value_skipped(self, tmp_path: Path) -> None:
+        """Lint flags out-of-enum values; count skips them to preserve invariant."""
+        sdd = tmp_path / "bad-enum-sdd"
+        spec_dir = sdd / "specs" / "x"
+        spec_dir.mkdir(parents=True)
+        (sdd / "sprints").mkdir()
+        (spec_dir / "bad.md").write_text(
+            "---\nid: x\ntype: not-a-real-type\nstatus: active\n"
+            "owner: x\nupdated: 2026-06-06\n---\nbody\n",
+            encoding="utf-8",
+        )
+        rollup = build_doc_count(sdd)
+        assert rollup["total"] == 0
+        # Invariant preserved even with out-of-enum input
+        assert rollup["total"] == sum(rollup["by_status"].values())
+        assert rollup["total"] == sum(rollup["by_type"].values())
+
+
+class TestBuildDocCountBySprint:
+    """T-FDC-04: per-sprint rollup helper."""
+
+    def test_by_sprint_groups_correctly(self, tmp_path: Path) -> None:
+        sdd = _seed_doc_count_root(tmp_path)
+        per_sprint = build_doc_count_by_sprint(sdd)
+        assert "PI-9" in per_sprint
+        assert per_sprint["PI-9"]["total"] == 2
+
+    def test_by_sprint_no_sprints_yields_empty(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "sdd-empty"
+        (sdd / "specs").mkdir(parents=True)
+        # no sprints/ directory at all
+        per_sprint = build_doc_count_by_sprint(sdd)
+        assert per_sprint == {}
+
+
+class TestRenderCountTable:
+    """T-FDC-04: human-readable table renderer."""
+
+    def test_table_contains_headers_and_total(self, tmp_path: Path) -> None:
+        sdd = _seed_doc_count_root(tmp_path)
+        rollup = build_doc_count(sdd)
+        out = render_count_table(rollup)
+        assert "BY STATUS" in out
+        assert "BY TYPE" in out
+        assert "TOTAL: 5" in out
+
+    def test_table_lists_every_seeded_key(self, tmp_path: Path) -> None:
+        from schema_lint import ARTIFACT_STATUS_ENUM, ARTIFACT_TYPE_ENUM
+        sdd = _seed_doc_count_root(tmp_path)
+        out = render_count_table(build_doc_count(sdd))
+        for k in ARTIFACT_STATUS_ENUM:
+            assert k in out, f"status key '{k}' missing from table"
+        for k in ARTIFACT_TYPE_ENUM:
+            assert k in out, f"type key '{k}' missing from table"
+
+
+class TestCountSubcommand:
+    """T-FDC-05 R3 / R4 / AC-3 / AC-4: CLI surface."""
+
+    STATE_BUILDER = Path(__file__).resolve().parent / "state_builder.py"
+
+    def test_count_default_json_shape(self, tmp_path: Path) -> None:
+        sdd = _seed_doc_count_root(tmp_path)
+        result = subprocess.run(
+            [sys.executable, str(self.STATE_BUILDER), "--sdd-root", str(sdd), "count"],
+            capture_output=True, text=True,
+        )
+        assert result.returncode == 0, result.stderr
+        payload = json.loads(result.stdout)
+        assert set(payload.keys()) == {"by_status", "by_type", "total"}
+        assert payload["total"] == 5
+        assert payload["total"] == sum(payload["by_status"].values())
+        assert payload["total"] == sum(payload["by_type"].values())
+
+    def test_count_table_format_exits_zero_and_prints(self, tmp_path: Path) -> None:
+        sdd = _seed_doc_count_root(tmp_path)
+        result = subprocess.run(
+            [sys.executable, str(self.STATE_BUILDER), "--sdd-root", str(sdd),
+             "count", "--format", "table"],
+            capture_output=True, text=True,
+        )
+        assert result.returncode == 0, result.stderr
+        assert "BY STATUS" in result.stdout
+        assert "BY TYPE" in result.stdout
+        assert "TOTAL:" in result.stdout
+
+    def test_count_sprint_filter_narrows_without_changing_top_shape(
+        self, tmp_path: Path
+    ) -> None:
+        sdd = _seed_doc_count_root(tmp_path)
+        result = subprocess.run(
+            [sys.executable, str(self.STATE_BUILDER), "--sdd-root", str(sdd),
+             "count", "--sprint", "PI-9"],
+            capture_output=True, text=True,
+        )
+        assert result.returncode == 0, result.stderr
+        payload = json.loads(result.stdout)
+        assert set(payload.keys()) == {"by_status", "by_type", "total"}
+        assert payload["total"] == 2  # only sprint artifacts
+        assert payload["by_type"]["spec"] == 0  # specs/ excluded
+
+    def test_count_by_sprint_flag_adds_nested_key(self, tmp_path: Path) -> None:
+        sdd = _seed_doc_count_root(tmp_path)
+        result = subprocess.run(
+            [sys.executable, str(self.STATE_BUILDER), "--sdd-root", str(sdd),
+             "count", "--by-sprint"],
+            capture_output=True, text=True,
+        )
+        assert result.returncode == 0, result.stderr
+        payload = json.loads(result.stdout)
+        assert "by_sprint" in payload
+        assert "by_status" in payload  # top-level shape preserved
+        assert "by_type" in payload
+        assert "total" in payload
+        assert "PI-9" in payload["by_sprint"]
+
+    def test_count_no_subparser_breakage_serve_unchanged(self, tmp_path: Path) -> None:
+        """Smoke: parser still accepts the legacy `build-index` subparser."""
+        result = subprocess.run(
+            [sys.executable, str(self.STATE_BUILDER), "--help"],
+            capture_output=True, text=True,
+        )
+        assert result.returncode == 0
+        assert "serve" in result.stdout
+        assert "build-index" in result.stdout
+        assert "count" in result.stdout
+
+    def test_count_handler_returns_zero(self, tmp_path: Path) -> None:
+        """cmd_count returns 0 on success (CLI-PATTERN exit-code contract)."""
+        sdd = _seed_doc_count_root(tmp_path)
+        ns = argparse.Namespace(format="json", sprint=None, by_sprint=False)
+        # Capture stdout to keep test output clean
+        import io
+        import contextlib
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = cmd_count(ns, sdd)
+        assert rc == 0
+        payload = json.loads(buf.getvalue())
+        assert payload["total"] == 5
+
+
+import argparse  # noqa: E402  -- used by TestCountSubcommand.test_count_handler_returns_zero
 

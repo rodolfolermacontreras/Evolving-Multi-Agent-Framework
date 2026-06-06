@@ -1,7 +1,7 @@
 ---
 id: SDD-20260604FILE-validation
 type: validation
-status: active
+status: done
 owner: principal-architect
 updated: 2026-06-06
 feature: 2026-06-04-filesystem-data-contracts
@@ -17,27 +17,27 @@ feature: 2026-06-04-filesystem-data-contracts
 
 ## Required Items
 
-- [ ] R1. Schema-lint reports a finding (file + missing field) and exits non-zero for
+- [x] R1. Schema-lint reports a finding (file + missing field) and exits non-zero for
   any in-scope artifact missing a required frontmatter field. (AC-1)
-- [ ] R2. Schema-lint exits zero with no frontmatter findings when all in-scope
+- [x] R2. Schema-lint exits zero with no frontmatter findings when all in-scope
   artifacts are valid. (AC-2)
-- [ ] R3. `state_builder.py count` (default) prints JSON matching
+- [x] R3. `state_builder.py count` (default) prints JSON matching
   `{ "by_status": {...}, "by_type": {...}, "total": int }`; `total` equals the sum of
   `by_status` and the sum of `by_type`. (AC-3)
-- [ ] R4. `state_builder.py count --format table` prints a human-readable table and
+- [x] R4. `state_builder.py count --format table` prints a human-readable table and
   exits zero. (AC-4)
-- [ ] R5. LOCK: `render_html()` and data-layer functions T-001..T-004 are
+- [x] R5. LOCK: `render_html()` and data-layer functions T-001..T-004 are
   byte-identical to commit `257b081` (re-anchored 2026-06-06 -- see clarification-log Q5), enforced by an automated guard test
   (stdlib `inspect.getsource` + `hashlib.sha256` vs golden hashes from `257b081`). (AC-5)
-- [ ] R6. All in-scope `specs/**` and `sprints/**` markdown carry valid frontmatter
+- [x] R6. All in-scope `specs/**` and `sprints/**` markdown carry valid frontmatter
   (`id`, `type`, `status`, `owner`, `updated`). (Backfill complete)
-- [ ] R7. Full existing test suite passes (no regression). (AC-7)
+- [x] R7. Full existing test suite passes (no regression). (AC-7)
 
 ## Optional / Best-Effort Items
 
-- [ ] O1. Opt-in `commit-msg` hook rejects a non-conforming message and allows a
+- [x] O1. Opt-in `commit-msg` hook rejects a non-conforming message and allows a
   conforming one; uninstalled state is unaffected. (AC-6)
-- [ ] O2. `COMMIT-CONVENTION.md` documents the format with examples.
+- [x] O2. `COMMIT-CONVENTION.md` documents the format with examples.
 
 ## Notes
 

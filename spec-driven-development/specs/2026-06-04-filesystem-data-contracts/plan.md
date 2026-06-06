@@ -1,9 +1,9 @@
 ---
 id: SDD-FDC-001-plan
 type: plan
-status: active
+status: done
 owner: principal-architect
-updated: 2026-06-05
+updated: 2026-06-06
 feature: filesystem-data-contracts
 sprint: PI-4 / Sprint 4
 spec: spec.md (APPROVED WITH CONDITIONS 2026-06-05)

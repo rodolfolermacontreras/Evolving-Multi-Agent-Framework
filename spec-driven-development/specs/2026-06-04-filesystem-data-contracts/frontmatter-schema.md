@@ -1,7 +1,7 @@
 ---
 id: SDD-FDC-001-frontmatter-schema
 type: spec
-status: active
+status: done
 owner: principal-architect
 updated: 2026-06-06
 feature: filesystem-data-contracts

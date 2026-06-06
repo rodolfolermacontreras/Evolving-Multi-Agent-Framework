@@ -1,7 +1,7 @@
 ---
 id: SDD-20260604FILE-spec
 type: spec
-status: active
+status: done
 owner: principal-architect
 updated: 2026-06-06
 feature: 2026-06-04-filesystem-data-contracts

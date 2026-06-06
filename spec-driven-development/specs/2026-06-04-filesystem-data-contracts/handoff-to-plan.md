@@ -1,7 +1,7 @@
 ---
 id: SDD-20260604FILE-session-handoff-to-plan
 type: session
-status: active
+status: done
 owner: principal-software-developer
 updated: 2026-06-06
 feature: 2026-06-04-filesystem-data-contracts

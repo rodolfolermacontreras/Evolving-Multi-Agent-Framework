@@ -15,6 +15,7 @@ from pathlib import Path
 import argparse
 import datetime
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -119,6 +120,38 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "--apply",
         action="store_true",
         help="After prompting for approval, copy framework assets and the proposed constitution into the target.",
+    )
+
+    host_link = subparsers.add_parser(
+        "host-link",
+        help="Install the framework's .github/ into a host repo via cross-platform symlink/junction (SDD-016).",
+        description=(
+            "Create a symlink (Linux/macOS) or junction (Windows) at "
+            "<target>/.github pointing at this framework's .github/, so a "
+            "host repository can adopt SDD without copying the .github/ tree. "
+            "Dry-run is the default; pass --apply to mutate the filesystem."
+        ),
+    )
+    host_link.add_argument(
+        "--target",
+        required=True,
+        help="Existing git repository root to install the .github/ link into.",
+    )
+    host_link.add_argument(
+        "--apply",
+        action="store_true",
+        help="Actually create the link. Without --apply the command is a dry-run.",
+    )
+    host_link_conflict = host_link.add_mutually_exclusive_group()
+    host_link_conflict.add_argument(
+        "--backup",
+        action="store_true",
+        help="If <target>/.github already exists, move it to .github.bak.<timestamp> before linking.",
+    )
+    host_link_conflict.add_argument(
+        "--force",
+        action="store_true",
+        help="If <target>/.github already exists, recursively delete it before linking (destructive).",
     )
     return parser.parse_args(argv)
 
@@ -553,6 +586,158 @@ def run_greenfield(args: argparse.Namespace) -> None:
     print("3. Ask the Product Manager to run /triage on that idea.")
 
 
+# --------------------------------------------------------------------------- #
+# host-link (SDD-016 + SDD-017) -- install framework's .github/ into a host
+# repo via cross-platform symlink/junction. Dry-run by default.
+# --------------------------------------------------------------------------- #
+
+
+def resolve_framework_github() -> Path:
+    """Return absolute path to the framework's .github/ directory."""
+    return (framework_root() / ".github").resolve()
+
+
+def validate_host_link_target(target: Path) -> Path:
+    """Resolve and confirm the target is a real git repository.
+
+    Reuses the brownfield repo-root guard. Returns the resolved absolute path.
+    """
+    return validate_brownfield_target(target)
+
+
+def _windows_junction(link_path: Path, source: Path) -> None:
+    """Create a Windows junction at link_path -> source via cmd /c mklink /J."""
+    result = subprocess.run(
+        ["cmd", "/c", "mklink", "/J", str(link_path), str(source)],
+        capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout or "").strip()
+        fail(
+            f"mklink /J fallback failed for {link_path} -> {source}",
+            f"Run with developer mode enabled or use a Windows account with the privilege. Details: {detail}",
+        )
+
+
+def install_link(framework_github: Path, link_path: Path) -> str:
+    """Create a symlink at link_path -> framework_github.
+
+    Prefer os.symlink. On OSError (typically Windows without developer mode
+    or symlink privilege), fall back to a Windows junction via mklink /J.
+
+    Returns "symlink" or "junction" depending on which path succeeded.
+    """
+    if link_path.exists() or link_path.is_symlink():
+        fail(
+            f"Link path already exists: {link_path}",
+            "Pre-install conflict handling is the caller's job; resolve and retry.",
+        )
+    try:
+        os.symlink(str(framework_github), str(link_path), target_is_directory=True)
+        return "symlink"
+    except OSError:
+        # Windows fallback: junction. Junctions require absolute paths.
+        _windows_junction(link_path, framework_github.resolve())
+        return "junction"
+
+
+def _timestamp() -> str:
+    return datetime.datetime.now().strftime("%Y-%m-%d-%H%M%S")
+
+
+def handle_existing_github(link_path: Path, mode: str) -> str | None:
+    """Resolve an existing <target>/.github per the conflict mode.
+
+    mode in {"abort", "backup", "force"}.
+
+    - "abort": raise BootstrapError naming --backup and --force.
+    - "backup": move link_path to .github.bak.<timestamp>; return the backup path.
+    - "force": recursively remove link_path; return None.
+    """
+    if mode == "abort":
+        fail(
+            f"Host .github/ already exists at {link_path}",
+            "Re-run with --backup to move it aside, or --force to overwrite (destructive).",
+        )
+    if mode == "backup":
+        backup = link_path.parent / f".github.bak.{_timestamp()}"
+        shutil.move(str(link_path), str(backup))
+        return str(backup)
+    if mode == "force":
+        if link_path.is_symlink() or link_path.is_file():
+            link_path.unlink()
+        else:
+            shutil.rmtree(link_path)
+        return None
+    fail(
+        f"Unknown conflict mode: {mode}",
+        "Internal error; expected one of abort/backup/force.",
+    )
+    return None  # unreachable
+
+
+def format_dry_run_report(target: Path, link_path: Path,
+                          framework_github: Path, existing: bool,
+                          mode: str) -> str:
+    """Build the human-readable dry-run summary."""
+    lines = [
+        "host-link dry-run (no filesystem changes will occur):",
+        f"  target host repo : {target}",
+        f"  link path        : {link_path}",
+        f"  framework source : {framework_github}",
+    ]
+    if existing:
+        if mode == "abort":
+            lines.append("  existing .github: present -- would ABORT (no flag)")
+        elif mode == "backup":
+            lines.append("  existing .github: present -- would MOVE to .github.bak.<timestamp>")
+        elif mode == "force":
+            lines.append("  existing .github: present -- would RECURSIVELY DELETE")
+    else:
+        lines.append("  existing .github: absent -- would create link directly")
+    lines.append("Re-run with --apply to perform the action.")
+    return "\n".join(lines)
+
+
+def run_host_link(args: argparse.Namespace) -> None:
+    """Dispatcher for `bootstrap.py host-link --target <host> [...]`."""
+    target = validate_host_link_target(Path(args.target))
+    framework_github = resolve_framework_github()
+    if not framework_github.is_dir():
+        fail(
+            f"Framework .github/ not found at {framework_github}",
+            "Run this script from an intact checkout of the framework repository.",
+        )
+    link_path = target / ".github"
+
+    existing = link_path.exists() or link_path.is_symlink()
+    if args.backup:
+        mode = "backup"
+    elif args.force:
+        mode = "force"
+    else:
+        mode = "abort"
+
+    if not args.apply:
+        print(format_dry_run_report(target, link_path, framework_github,
+                                    existing, mode))
+        return
+
+    if existing:
+        backup_path = handle_existing_github(link_path, mode)
+    else:
+        backup_path = None
+
+    kind = install_link(framework_github, link_path)
+
+    print(f"host-link complete: {kind} created at {link_path} -> {framework_github}")
+    if backup_path:
+        print(f"  previous .github/ preserved at: {backup_path}")
+    print("\nNext steps for the host operator:")
+    print("  - Inspect .github/ from the host root; framework agents/skills are now visible.")
+    print("  - Review docs/HOST-INTEGRATION.md for the CI/Actions trade-off and rollback procedure.")
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv if argv is not None else sys.argv[1:])
     try:
@@ -561,6 +746,9 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.command == "brownfield":
             run_brownfield(args)
+            return 0
+        if args.command == "host-link":
+            run_host_link(args)
             return 0
         fail(f"Unsupported command: {args.command}", "Run python bootstrap.py --help for valid commands.")
     except BootstrapError as exc:

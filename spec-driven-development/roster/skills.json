@@ -184,5 +184,11 @@
     "path": ".github/skills/operational/design-tokens/SKILL.md",
     "category": "operational",
     "description": "Enforces the framework's visual token structure: semantic color palette, modular type scale, spacing scale, motion principles, accessibility contract. Ensures tokens are implementable as CSS custom properties and maintain WCAG 2.1 AA compliance."
+  },
+  {
+    "id": "host-integration-symlink",
+    "path": ".github/skills/operational/host-integration-symlink/SKILL.md",
+    "category": "operational",
+    "description": "Installs the framework's .github/ into a host repo via cross-platform symlink (Linux/macOS) or junction (Windows); handles conflict detection (abort/backup/force), platform fallback, and rollback. Loaded by dev-env-manager-general worker for SDD-016 host-link tasks."
   }
 ]

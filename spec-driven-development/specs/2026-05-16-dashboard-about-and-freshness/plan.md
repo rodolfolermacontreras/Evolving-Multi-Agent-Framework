@@ -1,3 +1,12 @@
+---
+id: SDD-20260516DASH-plan
+type: plan
+status: done
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-05-16-dashboard-about-and-freshness
+---
+
 # Implementation Plan: Dashboard About Section and Data Freshness
 
 - Spec Reference: `spec-driven-development/specs/2026-05-16-dashboard-about-and-freshness/spec.md`

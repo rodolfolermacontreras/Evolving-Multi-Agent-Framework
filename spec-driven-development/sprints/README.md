@@ -1,3 +1,11 @@
+---
+id: SDD-SPRINTS-README-index
+type: index
+status: active
+owner: principal-product-manager
+updated: 2026-06-06
+---
+
 # Sprints
 
 Per-PI artifacts:

@@ -1,3 +1,12 @@
+---
+id: SDD-20260526DAYT-retro
+type: retro
+status: done
+owner: principal-software-developer
+updated: 2026-06-06
+feature: 2026-05-26-day-to-day-brownfield-bootstrap
+---
+
 # Retrospective: Day-to-Day Brownfield Bootstrap
 
 **Feature**: Bootstrap SDD onto the Day-to-Day Agent project (brownfield)

@@ -1,3 +1,12 @@
+---
+id: SDD-20260526DAYT-spec
+type: spec
+status: done
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-05-26-day-to-day-brownfield-bootstrap
+---
+
 # Feature Spec: Day-to-Day Brownfield Bootstrap
 
 - Date: 2026-06-01

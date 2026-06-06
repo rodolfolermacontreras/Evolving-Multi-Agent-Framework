@@ -1,3 +1,12 @@
+---
+id: SDD-20260516SCHE-retro
+type: retro
+status: done
+owner: principal-software-developer
+updated: 2026-06-06
+feature: 2026-05-16-schema-lint
+---
+
 # RETRO: schema_lint.py (SDD-006)
 
 - Date: 2026-05-16

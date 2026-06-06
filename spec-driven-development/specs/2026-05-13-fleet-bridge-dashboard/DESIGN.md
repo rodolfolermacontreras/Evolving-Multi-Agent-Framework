@@ -1,10 +1,14 @@
 ---
 feature: fleet-bridge-dashboard
-status: pre-spec design exploration
+status: superseded
 created: 2026-05-13
 designer: gem-designer (sub-agent)
 spec_status: not yet written -- this is design exploration, not approved scope
 supersedes: none
+id: SDD-FBDASH-design
+type: spec
+owner: principal-ui-designer
+updated: 2026-06-06
 ---
 
 # Fleet Bridge — Design Specification

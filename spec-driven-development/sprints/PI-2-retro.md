@@ -1,3 +1,12 @@
+---
+id: SDD-SPRINTS-PI2RETRO-retro
+type: retro
+status: done
+owner: principal-software-developer
+updated: 2026-06-06
+sprint: PI-2-retro.md
+---
+
 # Sprint Retrospective: PI-2
 
 Generated: 2026-05-16

@@ -1,3 +1,12 @@
+---
+id: SDD-20260512FLEE-plan
+type: plan
+status: done
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-05-12-fleet-ledger
+---
+
 # Implementation Plan: Fleet Ledger v0.1
 
 - Spec Reference: `spec-driven-development/specs/2026-05-12-fleet-ledger/spec.md`

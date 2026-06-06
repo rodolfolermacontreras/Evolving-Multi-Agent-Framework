@@ -1,3 +1,12 @@
+---
+id: SDD-20260516SCHE-validation
+type: validation
+status: done
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-05-16-schema-lint
+---
+
 # Validation Contract: schema_lint.py (SDD-006)
 
 - Date: 2026-05-16

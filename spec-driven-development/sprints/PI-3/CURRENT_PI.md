@@ -1,3 +1,12 @@
+---
+id: SDD-PI-3-CURRENT_PI-sprint
+type: sprint
+status: done
+owner: principal-product-manager
+updated: 2026-06-06
+sprint: PI-3
+---
+
 # PI-3: Portability Validation + Live UI v2 + Navigation Layer
 
 - Status: **DONE** (all 5 sprints complete)

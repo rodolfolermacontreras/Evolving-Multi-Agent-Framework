@@ -1,3 +1,12 @@
+---
+id: SDD-20260526DAYT-clarification
+type: clarification
+status: done
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-05-26-day-to-day-brownfield-bootstrap
+---
+
 # Day-to-Day Brownfield Bootstrap -- Clarification Log
 
 **Sprint:** PI-3/S2

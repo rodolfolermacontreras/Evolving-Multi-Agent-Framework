@@ -1,3 +1,12 @@
+---
+id: SDD-20260516RETR-validation
+type: validation
+status: done
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-05-16-retro-cli
+---
+
 # Validation Contract: retro.py
 
 - Spec Reference: `spec-driven-development/specs/2026-05-16-retro-cli/spec.md`

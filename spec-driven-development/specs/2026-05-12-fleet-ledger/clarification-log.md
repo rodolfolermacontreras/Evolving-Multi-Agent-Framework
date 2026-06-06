@@ -1,3 +1,12 @@
+---
+id: SDD-20260512FLEE-clarification
+type: clarification
+status: done
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-05-12-fleet-ledger
+---
+
 # Clarification Log: Fleet Ledger v0.1
 
 - Date: 2026-05-12

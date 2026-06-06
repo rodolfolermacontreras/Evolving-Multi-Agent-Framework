@@ -1,3 +1,12 @@
+---
+id: SDD-20260526PRIN-spec
+type: spec
+status: done
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-05-26-principal-agent-hygiene
+---
+
 # Principal Agent & Skill Hygiene -- Remove Day-to-Day References
 
 **Date:** 2026-05-26

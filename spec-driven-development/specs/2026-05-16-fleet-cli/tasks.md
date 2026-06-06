@@ -1,3 +1,12 @@
+---
+id: SDD-20260516FLEE-tasks
+type: tasks
+status: done
+owner: principal-software-developer
+updated: 2026-06-06
+feature: 2026-05-16-fleet-cli
+---
+
 # Task List: fleet.py
 
 - Spec Reference: `spec-driven-development/specs/2026-05-16-fleet-cli/spec.md`

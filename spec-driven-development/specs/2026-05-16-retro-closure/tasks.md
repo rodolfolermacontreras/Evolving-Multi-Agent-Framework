@@ -1,3 +1,12 @@
+---
+id: SDD-20260516RETR-tasks
+type: tasks
+status: done
+owner: principal-software-developer
+updated: 2026-06-06
+feature: 2026-05-16-retro-closure
+---
+
 # Task List: Retro Closure (Sprint C batch dispatch exercise)
 
 - Spec Reference: Sprint C validation -- no full spec (Article VI, < 3 files per task)

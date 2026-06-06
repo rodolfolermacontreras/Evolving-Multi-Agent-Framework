@@ -1,3 +1,12 @@
+---
+id: SDD-20260516DASH-validation
+type: validation
+status: done
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-05-16-dashboard-about-and-freshness
+---
+
 # Validation Contract: Dashboard About Section and Data Freshness
 
 LOCKED 2026-05-16 -- modifications require human approval

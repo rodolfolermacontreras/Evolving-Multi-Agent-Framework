@@ -1,7 +1,7 @@
 ---
 id: SDD-FDC-001-tasks
 type: tasks
-status: locked
+status: active
 owner: principal-software-developer
 updated: 2026-06-05
 feature: filesystem-data-contracts

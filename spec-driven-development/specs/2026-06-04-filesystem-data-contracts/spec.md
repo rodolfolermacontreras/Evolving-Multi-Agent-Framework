@@ -1,3 +1,12 @@
+---
+id: SDD-20260604FILE-spec
+type: spec
+status: active
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-06-04-filesystem-data-contracts
+---
+
 # Feature Spec: Filesystem Data Contracts (Sprint 4)
 
 - Date: 2026-06-04

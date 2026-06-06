@@ -1,3 +1,12 @@
+---
+id: SDD-20260516DASH-retro
+type: retro
+status: done
+owner: principal-software-developer
+updated: 2026-06-06
+feature: 2026-05-16-dashboard-about-and-freshness
+---
+
 # Retrospective: Dashboard About and Freshness
 
 **Feature**: About section and data-freshness indicators for the Bridge dashboard

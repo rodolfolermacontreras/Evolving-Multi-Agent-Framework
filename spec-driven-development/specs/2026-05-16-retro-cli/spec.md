@@ -1,3 +1,12 @@
+---
+id: SDD-20260516RETR-spec
+type: spec
+status: done
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-05-16-retro-cli
+---
+
 # Feature Spec: retro.py
 
 - Date: 2026-05-16

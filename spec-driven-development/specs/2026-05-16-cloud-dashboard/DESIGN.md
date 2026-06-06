@@ -1,6 +1,6 @@
 ---
 feature: cloud-dashboard
-status: deployed (v1 LIVE 2026-05-16)
+status: done
 created: 2026-05-16
 designer: principal-cloud-security-architect (draft Principal)
 priority: P3 (backlog SDD-007) -- shipped same day as design
@@ -9,6 +9,10 @@ subscription_target: 05e7b074-305c-48d8-9bd0-ce5305cd027c (Visual Studio Enterpr
 tenant: rodolfolermacontrerasgmail.onmicrosoft.com
 cost_ceiling: $10/month (actual: $0 expected)
 live_url: https://state-dashboard.politehill-ac7984d9.westus2.azurecontainerapps.io/
+id: SDD-CLOUDDASH-design
+type: spec
+owner: principal-ui-designer
+updated: 2026-06-06
 ---
 
 # Cloud Dashboard -- Design Spec (SDD-007)

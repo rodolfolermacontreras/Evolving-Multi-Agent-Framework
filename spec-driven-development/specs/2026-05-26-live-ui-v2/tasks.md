@@ -1,6 +1,6 @@
 ---
 feature: live-ui-v2
-status: approved
+status: done
 sprint: PI-4
 created: 2026-05-31
 author: principal-software-developer
@@ -8,6 +8,10 @@ plan: plan.md
 spec: spec.md
 total_tasks: 14
 parallel_batches: 5
+id: SDD-LIVEUIV2-tasks
+type: tasks
+owner: principal-software-developer
+updated: 2026-06-06
 ---
 
 # Live UI v2 -- Task List

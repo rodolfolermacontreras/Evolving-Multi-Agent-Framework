@@ -1,3 +1,12 @@
+---
+id: SDD-20260526DAYT-validation
+type: validation
+status: done
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-05-26-day-to-day-brownfield-bootstrap
+---
+
 # Validation Contract: Day-to-Day Brownfield Bootstrap
 
 - Spec: SDD-S2-001

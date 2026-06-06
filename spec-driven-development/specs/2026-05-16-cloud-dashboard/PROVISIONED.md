@@ -1,3 +1,12 @@
+---
+id: SDD-20260516CLOU-session-provisioned
+type: session
+status: done
+owner: principal-software-developer
+updated: 2026-06-06
+feature: 2026-05-16-cloud-dashboard
+---
+
 # Cloud Dashboard -- Provisioned State (v1.0 LIVE)
 
 - **Status:** DEPLOYED AND LIVE

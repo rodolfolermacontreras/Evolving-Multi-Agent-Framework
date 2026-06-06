@@ -1,3 +1,12 @@
+---
+id: SDD-20260516DASH-clarification
+type: clarification
+status: done
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-05-16-dashboard-about-and-freshness
+---
+
 # Clarification Record: dashboard-about-and-freshness
 
 - Date: 2026-05-16

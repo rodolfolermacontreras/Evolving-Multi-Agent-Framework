@@ -1,3 +1,12 @@
+---
+id: SDD-20260512FLEE-tasks
+type: tasks
+status: done
+owner: principal-software-developer
+updated: 2026-06-06
+feature: 2026-05-12-fleet-ledger
+---
+
 # Task List: Fleet Ledger v0.1
 
 - Spec Reference: `spec-driven-development/specs/2026-05-12-fleet-ledger/spec.md`

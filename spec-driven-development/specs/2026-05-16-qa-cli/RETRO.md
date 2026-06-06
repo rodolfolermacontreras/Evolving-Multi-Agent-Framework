@@ -1,3 +1,12 @@
+---
+id: SDD-20260516QACL-retro
+type: retro
+status: done
+owner: principal-software-developer
+updated: 2026-06-06
+feature: 2026-05-16-qa-cli
+---
+
 # Retro: QA CLI (SDD-004)
 
 - Date: 2026-05-16

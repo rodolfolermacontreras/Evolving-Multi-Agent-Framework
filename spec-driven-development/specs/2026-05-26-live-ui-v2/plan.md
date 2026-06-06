@@ -1,6 +1,6 @@
 ---
 feature: live-ui-v2
-status: approved
+status: done
 sprint: PI-4
 created: 2026-05-31
 author: principal-software-developer
@@ -8,6 +8,10 @@ spec: spec.md (approved 2026-05-31, architect review T-007)
 design_tokens: DESIGN_TOKENS.md (LOCKED 2026-05-31)
 implementation_target: cli/state_builder.py
 test_target: cli/test_state_builder.py
+id: SDD-LIVEUIV2-plan
+type: plan
+owner: principal-architect
+updated: 2026-06-06
 ---
 
 # Live UI v2 -- Implementation Plan

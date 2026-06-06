@@ -8,6 +8,10 @@ sprint: A
 priority: P1
 related_spec: SDD-002 (cli/state_builder.py shared implementation)
 adjacent_backlog: SDD-001 (Fleet Bridge Dashboard, P3) -- this feature delivers ~70% of its operator-visibility value at v0.2 (live server + UX-polished Bridge dashboard)
+id: SDD-STATEDASH-spec
+type: spec
+owner: principal-architect
+updated: 2026-06-06
 ---
 
 # Feature Spec -- State Dashboard v0.1

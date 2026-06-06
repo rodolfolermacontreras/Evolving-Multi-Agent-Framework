@@ -1,3 +1,12 @@
+---
+id: SDD-PI-4-LESSONS-lessons
+type: lessons
+status: active
+owner: principal-software-developer
+updated: 2026-06-06
+sprint: PI-4
+---
+
 # PI-4 Lessons Learned
 
 Capture lessons during PI-4 execution. Format: one lesson per section, tagged by phase.

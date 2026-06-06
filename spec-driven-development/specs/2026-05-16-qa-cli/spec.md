@@ -1,3 +1,12 @@
+---
+id: SDD-20260516QACL-spec
+type: spec
+status: done
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-05-16-qa-cli
+---
+
 # Feature Spec: qa.py
 
 - Date: 2026-05-16

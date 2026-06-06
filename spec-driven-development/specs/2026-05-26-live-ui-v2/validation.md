@@ -1,6 +1,6 @@
 ---
 feature: live-ui-v2
-status: LOCKED
+status: done
 lock_date: 2026-05-31
 locked_by: principal-software-developer
 spec: spec.md (Section 11)
@@ -8,6 +8,10 @@ plan: plan.md
 tasks: tasks.md
 article_x_ref: "Validation contract LOCKED before implementation begins (Article X)"
 unlock_requires: human approval + principal-architect co-sign
+id: SDD-LIVEUIV2-validation
+type: validation
+owner: principal-architect
+updated: 2026-06-06
 ---
 
 # Live UI v2 -- Validation Contract

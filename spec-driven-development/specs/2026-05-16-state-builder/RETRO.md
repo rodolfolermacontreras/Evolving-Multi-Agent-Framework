@@ -1,3 +1,12 @@
+---
+id: SDD-20260516STAT-retro
+type: retro
+status: done
+owner: principal-software-developer
+updated: 2026-06-06
+feature: 2026-05-16-state-builder
+---
+
 # Retrospective: state_builder.py (SDD-002)
 
 - Date: 2026-05-16

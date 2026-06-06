@@ -1,3 +1,12 @@
+---
+id: SDD-PI-1-LESSONS-lessons
+type: lessons
+status: done
+owner: principal-software-developer
+updated: 2026-06-06
+sprint: PI-1
+---
+
 # Lessons: PI-1
 
 Living document. Updated by /retro and /replan after each feature DONE.

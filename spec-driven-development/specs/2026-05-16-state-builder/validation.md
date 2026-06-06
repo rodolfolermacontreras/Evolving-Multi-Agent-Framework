@@ -1,3 +1,12 @@
+---
+id: SDD-20260516STAT-validation
+type: validation
+status: done
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-05-16-state-builder
+---
+
 # Validation Contract: state_builder.py
 
 - Spec Reference: `spec-driven-development/specs/2026-05-16-state-builder/spec.md`

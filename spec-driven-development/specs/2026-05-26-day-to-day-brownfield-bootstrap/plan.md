@@ -1,3 +1,12 @@
+---
+id: SDD-20260526DAYT-plan
+type: plan
+status: done
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-05-26-day-to-day-brownfield-bootstrap
+---
+
 # Implementation Plan: Day-to-Day Brownfield Bootstrap
 
 - Spec Reference: SDD-S2-001 (`spec.md` in this directory)

@@ -1,3 +1,12 @@
+---
+id: SDD-20260603FRIC-spec
+type: spec
+status: done
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-06-03-friction-analysis-template
+---
+
 # Feature Spec: Friction Analysis Section in Level-2 Decision Template
 
 - Date: 2026-06-03

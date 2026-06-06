@@ -1,3 +1,12 @@
+---
+id: SDD-20260516FLEE-retro
+type: retro
+status: done
+owner: principal-software-developer
+updated: 2026-06-06
+feature: 2026-05-16-fleet
+---
+
 # RETRO: fleet.py (SDD-003)
 
 - Date: 2026-05-16

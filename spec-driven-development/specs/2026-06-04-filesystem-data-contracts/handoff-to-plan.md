@@ -1,3 +1,12 @@
+---
+id: SDD-20260604FILE-session-handoff-to-plan
+type: session
+status: active
+owner: principal-software-developer
+updated: 2026-06-06
+feature: 2026-06-04-filesystem-data-contracts
+---
+
 # Handoff: SDD-FDC-001 -> /plan (Architect-owned)
 
 - Date: 2026-06-05

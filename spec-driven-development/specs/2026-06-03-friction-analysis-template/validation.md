@@ -1,3 +1,12 @@
+---
+id: SDD-20260603FRIC-validation
+type: validation
+status: done
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-06-03-friction-analysis-template
+---
+
 # Validation Contract: Friction Analysis Section in Level-2 Decision Template
 
 - Spec Reference: `spec-driven-development/specs/2026-06-03-friction-analysis-template/spec.md`

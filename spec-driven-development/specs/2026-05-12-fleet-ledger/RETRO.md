@@ -1,3 +1,12 @@
+---
+id: SDD-20260512FLEE-retro
+type: retro
+status: done
+owner: principal-software-developer
+updated: 2026-06-06
+feature: 2026-05-12-fleet-ledger
+---
+
 # Retro: Fleet Ledger v0.1 First SDD Pilot
 
 - Date: 2026-05-12

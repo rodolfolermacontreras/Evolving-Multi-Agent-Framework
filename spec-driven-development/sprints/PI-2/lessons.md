@@ -1,3 +1,12 @@
+---
+id: SDD-PI-2-LESSONS-lessons
+type: lessons
+status: done
+owner: principal-software-developer
+updated: 2026-06-06
+sprint: PI-2
+---
+
 # PI-2 Lessons
 
 Captured during PI-2. Curated via `/evolve` at PI close.

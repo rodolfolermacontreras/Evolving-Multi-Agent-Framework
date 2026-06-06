@@ -1,3 +1,12 @@
+---
+id: SDD-20260526LIVE-clarification
+type: clarification
+status: done
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-05-26-live-ui-v2
+---
+
 # Live UI v2 -- Clarification Log
 
 **Sprint:** PI-3/S4

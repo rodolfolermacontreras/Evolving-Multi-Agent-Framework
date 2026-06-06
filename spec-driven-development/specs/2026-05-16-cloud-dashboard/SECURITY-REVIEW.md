@@ -1,3 +1,12 @@
+---
+id: SDD-20260516CLOU-session-security-review
+type: session
+status: done
+owner: principal-software-developer
+updated: 2026-06-06
+feature: 2026-05-16-cloud-dashboard
+---
+
 # Security Review -- Bridge Dashboard Live Azure Deployment
 
 - **Reviewer:** Principal Cloud-Security Architect (active per ADR-0008)

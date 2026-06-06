@@ -1,3 +1,12 @@
+---
+id: SDD-20260516STAT-validation
+type: validation
+status: done
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-05-16-state-dashboard
+---
+
 # Validation Contract -- State Dashboard v0.1
 
 Per Article X: validation criteria written DURING spec, locked at tasks, verified at REVIEW.

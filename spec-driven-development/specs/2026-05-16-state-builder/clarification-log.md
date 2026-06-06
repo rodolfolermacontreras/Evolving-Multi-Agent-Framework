@@ -1,3 +1,12 @@
+---
+id: SDD-20260516STAT-clarification
+type: clarification
+status: done
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-05-16-state-builder
+---
+
 # Clarification Log: state_builder.py
 
 - Date: 2026-05-16

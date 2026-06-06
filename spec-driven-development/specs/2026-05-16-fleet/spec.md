@@ -6,6 +6,10 @@ pi: PI-2
 sprint: A
 priority: P2
 spec_id: SDD-003
+id: SDD-FLEET-spec
+type: spec
+owner: principal-architect
+updated: 2026-06-06
 ---
 
 # Feature Spec: cli/fleet.py (SDD-003)

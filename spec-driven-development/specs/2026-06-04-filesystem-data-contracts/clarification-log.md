@@ -1,3 +1,12 @@
+---
+id: SDD-20260604FILE-clarification
+type: clarification
+status: active
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-06-04-filesystem-data-contracts
+---
+
 # Clarification Log: Sprint 4 -- Filesystem Data Contracts
 
 - Date: 2026-06-04

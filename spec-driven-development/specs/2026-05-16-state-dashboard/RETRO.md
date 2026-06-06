@@ -1,3 +1,12 @@
+---
+id: SDD-20260516STAT-retro
+type: retro
+status: done
+owner: principal-software-developer
+updated: 2026-06-06
+feature: 2026-05-16-state-dashboard
+---
+
 # Retrospective -- State Dashboard v0.1
 
 **Date:** 2026-05-16

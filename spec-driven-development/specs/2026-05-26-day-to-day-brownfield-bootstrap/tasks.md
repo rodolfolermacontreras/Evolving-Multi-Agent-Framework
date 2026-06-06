@@ -1,3 +1,12 @@
+---
+id: SDD-20260526DAYT-tasks
+type: tasks
+status: done
+owner: principal-software-developer
+updated: 2026-06-06
+feature: 2026-05-26-day-to-day-brownfield-bootstrap
+---
+
 # Task List: Day-to-Day Brownfield Bootstrap
 
 - Spec Reference: SDD-S2-001 (`spec.md`)

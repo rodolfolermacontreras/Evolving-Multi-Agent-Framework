@@ -1,3 +1,12 @@
+---
+id: SDD-PI-4-TRIAGESCOTTF-session
+type: session
+status: active
+owner: principal-software-developer
+updated: 2026-06-06
+sprint: PI-4
+---
+
 # Triage Report: Scott Feedback Bundle (14 items)
 
 **Triaged by:** Principal Product Manager

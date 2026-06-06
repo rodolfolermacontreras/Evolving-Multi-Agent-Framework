@@ -1,3 +1,12 @@
+---
+id: SDD-20260516FLEE-spec
+type: spec
+status: done
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-05-16-fleet-cli
+---
+
 # Feature Spec: fleet.py
 
 - Date: 2026-05-16

@@ -1,3 +1,12 @@
+---
+id: SDD-20260526LIVE-retro
+type: retro
+status: done
+owner: principal-software-developer
+updated: 2026-06-06
+feature: 2026-05-26-live-ui-v2
+---
+
 # Retrospective: Live UI v2
 
 **Feature**: Live UI v2 (sprint-first dashboard layout)

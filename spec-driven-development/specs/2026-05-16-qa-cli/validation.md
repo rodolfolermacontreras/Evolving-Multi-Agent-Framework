@@ -1,3 +1,12 @@
+---
+id: SDD-20260516QACL-validation
+type: validation
+status: done
+owner: principal-architect
+updated: 2026-06-06
+feature: 2026-05-16-qa-cli
+---
+
 # Validation Contract: qa.py
 
 - Spec Reference: `spec-driven-development/specs/2026-05-16-qa-cli/spec.md`

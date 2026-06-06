@@ -1,3 +1,12 @@
+---
+id: SDD-PI-4-CURRENT_PI-sprint
+type: sprint
+status: active
+owner: principal-product-manager
+updated: 2026-06-06
+sprint: PI-4
+---
+
 # PI-4: Alpha Release
 
 - Status: **Active**

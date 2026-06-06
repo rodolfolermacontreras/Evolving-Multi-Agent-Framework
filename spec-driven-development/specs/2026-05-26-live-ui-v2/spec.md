@@ -9,6 +9,9 @@ backlog_id: SDD-013
 supersedes: specs/2026-05-13-fleet-bridge-dashboard/DESIGN.md (design exploration, not a spec)
 implementation_target: PI-4
 scope: SPEC ONLY -- no code changes in this PI
+id: SDD-LIVEUIV2-spec
+type: spec
+updated: 2026-06-06
 ---
 
 # Live UI v2 -- Specification

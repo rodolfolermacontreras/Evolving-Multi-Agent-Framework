@@ -185,13 +185,14 @@ GitHub Actions bump).
 **Goal**: Ship SDD-016 + SDD-017 end-to-end (CLARIFY -> SPEC -> PLAN -> TASKS
 -> IMPLEMENT -> QA -> RETRO).
 **Spec dir**: `specs/2026-06-06-symlink-portability/`
+**Spec**: APPROVED 2026-06-06; validation contract LOCKED R1..R7 + O1..O2 (F-04).
 **Sprint kickoff**: [`../../feature-prompts/SPRINT-05-KICKOFF.prompt.md`](../../feature-prompts/SPRINT-05-KICKOFF.prompt.md)
 **Status**: ACTIVE (executing F-03 -> F-04 -> F-05 in a single consolidated
 worker session per owner directive 2026-06-06).
 **Capacity**: ~10 tasks, effort M. Dispatch pattern: linear single-session
 execution (no fleet split) consistent with the PI-4 Sprint 4 precedent for
 additive well-scoped CLI work.
-**Validation**: REQUIRED set R1..Rn (locked in
+**Validation**: REQUIRED set R1..R7 + O1..O2 (locked in
 `specs/2026-06-06-symlink-portability/validation.md` at /tasks).
 
 ### Sprint 2 -- Anti-Conflict Gates + Carry-Over (planned)

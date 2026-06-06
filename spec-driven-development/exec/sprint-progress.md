@@ -144,9 +144,20 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 - Next sprint to plan: PI-5 Sprint 2 = SDD-019 + SDD-020 + carry-over -- kickoff prompt to be authored at PI-5 Sprint 1 close (= when this F-05 closes).
 - Next: F-04 begins in this same session (owner directive overrides Article VII one-feature-one-session default for Sprint 5 only).
 
-### F-04 -- symlink-portability-clarify-spec -- NOT STARTED
+### F-04 -- symlink-portability-clarify-spec -- DONE
 
-(append block here on completion)
+- Date: 2026-06-06
+- Owner: Principal Product Manager + Principal Architect (consolidated worker session per owner directive 2026-06-06)
+- Commits: <pending-sha for this F-04 commit>
+- Files changed: 4
+  - spec-driven-development/specs/2026-06-06-symlink-portability/clarification-log.md (new)
+  - spec-driven-development/specs/2026-06-06-symlink-portability/spec.md (new)
+  - spec-driven-development/specs/2026-06-06-symlink-portability/validation.md (new)
+  - spec-driven-development/sprints/PI-5/CURRENT_PI.md (Sprint 1 spec link surfaced)
+- Tests: 200 -> 200 (doc-only)
+- Owner approvals: 2026-06-06 (owner directive authorizes consolidated execution under PM + Architect default decisions; any C-row disagreement surfaces in post-sprint status block)
+- Notes: C1..C9 all CLOSED. Defaults chosen by PM + Architect: explicit `host-link` subcommand (C1); `os.symlink` with `mklink /J` fallback on Windows OSError (C2); abort-by-default with `--backup` and `--force` opt-ins (C3); no auto-detection of host context in v1 (C4); live symlink, no version pin (C5); host CI inherits framework workflows, documented in HOST-INTEGRATION.md (C6); `dev-env-manager-general` as generic worker not Principal (C7); three additive files + two roster rows (C8); dispatch via existing `cli/fleet.py`, no new slash command (C9). Validation contract LOCKED at R1..R7 REQUIRED + O1..O2 OPTIONAL-treated-REQUIRED. All three spec dir artifacts carry valid SDD-FDC-001 frontmatter.
+- Next: F-05 begins in this same session.
 
 ### F-05 -- symlink-portability-implement -- NOT STARTED
 

@@ -1,0 +1,83 @@
+#!/usr/bin/env python3
+"""Opt-in commit-msg hook for the Evolving Multi-Agent Framework.
+
+Validates the first line of a commit message against the convention
+documented at spec-driven-development/docs/COMMIT-CONVENTION.md.
+
+Install: see COMMIT-CONVENTION.md sections "Installing the opt-in hook".
+This hook is NEVER auto-installed and is NOT enforced by CI (per ADR-012 / FDC D3).
+
+Exit codes:
+    0 -- first line matches the convention
+    1 -- first line does not match (rejected); prints pointer to convention doc
+
+Stdlib only. No third-party imports.
+"""
+
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+CONVENTION_REGEX = re.compile(
+    r"^(feat|fix|refactor|test|docs|chore|spec|plan|tasks|triage|close|ideas|retro)"
+    r"(\([\w-]+\))?: .+"
+)
+
+CONVENTION_DOC = "spec-driven-development/docs/COMMIT-CONVENTION.md"
+
+
+def validate(first_line: str) -> bool:
+    """Return True when the line matches the commit convention."""
+    return bool(CONVENTION_REGEX.match(first_line))
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = list(sys.argv[1:] if argv is None else argv)
+    if not args:
+        # git always passes the message file path as argv[1].
+        # Defensive: if missing, treat as a usage error but do not block commits
+        # (we cannot read the message, so we cannot validate it).
+        print("commit-msg hook: no message file path argued; skipping validation.",
+              file=sys.stderr)
+        return 0
+
+    msg_path = Path(args[0])
+    if not msg_path.is_file():
+        print(f"commit-msg hook: message file not found: {msg_path}", file=sys.stderr)
+        return 0
+
+    text = msg_path.read_text(encoding="utf-8", errors="replace")
+    # The first non-empty, non-comment line is the subject.
+    first_line = ""
+    for line in text.splitlines():
+        stripped = line.lstrip()
+        if not stripped:
+            continue
+        if stripped.startswith("#"):
+            continue
+        first_line = line.rstrip()
+        break
+
+    if not first_line:
+        print("commit-msg hook: empty commit message rejected.", file=sys.stderr)
+        print(f"See {CONVENTION_DOC} for the required format.", file=sys.stderr)
+        return 1
+
+    if validate(first_line):
+        return 0
+
+    print("commit-msg hook: commit message does not match the convention.",
+          file=sys.stderr)
+    print(f"  subject:  {first_line}", file=sys.stderr)
+    print("  required: <type>(<scope>): <short description>", file=sys.stderr)
+    print("  types:    feat|fix|refactor|test|docs|chore|spec|plan|tasks|triage|close|ideas|retro",
+          file=sys.stderr)
+    print(f"See {CONVENTION_DOC} for full convention and examples.",
+          file=sys.stderr)
+    return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

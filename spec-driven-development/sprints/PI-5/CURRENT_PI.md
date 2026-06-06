@@ -9,7 +9,7 @@ sprint: PI-5
 
 # PI-5: Brownfield Adoption + Anti-Conflict + Stakeholder Discipline
 
-- Status: **Active**
+- Status: **Active** (Sprint 1 CLOSED 2026-06-06; 4 sprints remaining)
 - Theme: Make the framework safely adoptable by other teams, harden the gates that prevent two features from colliding, and finish the discipline tools surfaced by the Scott Feedback Bundle.
 - Started: 2026-06-06
 - Owner: principal-executive-manager
@@ -181,19 +181,37 @@ GitHub Actions bump).
 
 ## Sprints
 
-### Sprint 1 -- Brownfield Portability (this sprint)
-**Goal**: Ship SDD-016 + SDD-017 end-to-end (CLARIFY -> SPEC -> PLAN -> TASKS
--> IMPLEMENT -> QA -> RETRO).
+### Sprint 1 -- Brownfield Portability -- CLOSED 2026-06-06
+**Status**: **DONE** (ratified by owner directive 2026-06-06)
+**Closed**: 2026-06-06
 **Spec dir**: `specs/2026-06-06-symlink-portability/`
-**Spec**: APPROVED 2026-06-06; validation contract LOCKED R1..R7 + O1..O2 (F-04).
+**Spec**: APPROVED 2026-06-06; validation contract LOCKED R1..R7 + O1..O2 -- all checked.
 **Sprint kickoff**: [`../../feature-prompts/SPRINT-05-KICKOFF.prompt.md`](../../feature-prompts/SPRINT-05-KICKOFF.prompt.md)
-**Status**: ACTIVE (executing F-03 -> F-04 -> F-05 in a single consolidated
-worker session per owner directive 2026-06-06).
+**Sprint chain (chronological, on master)**:
+- `7cf90fe` plan(pi-5): launch PI-5 -- sprint allocation
+- `7182841` spec(symlink-portability): SDD-016 + SDD-017 co-spec approved
+- `1a5e127` plan(symlink-portability): plan + tasks
+- `30482d5` feat(symlink-portability): SDD-016 host-link + SDD-017 dev-env-manager hire
+- (next: close + state regen)
+**Tests**: 200 -> 213 (+13 net; all new in `cli/test_bootstrap.py` covering R1..R6 plus argparse regression smoke and roster sanity).
+**Validation**: 7/7 REQUIRED checked, 2/2 OPTIONAL checked.
+**Retro (one paragraph)**: Sprint 5 ran as a consolidated F-03 -> F-04 -> F-05
+worker session (owner directive 2026-06-06), departing from the default
+Article VII one-feature-one-session pattern. The departure was justified by
+the sprint's tight coupling (F-03's allocation is needed to write F-04 + F-05;
+F-04's spec is needed to write F-05; the three artifacts share a single
+brownfield concern) and the precedent set by PI-4 Sprint 4's F-02 linear
+single-session execution. The TDD discipline held: 13 tests authored before
+implementation, the Windows-fallback test required one mock-scope adjustment
+(only intercept `mklink`, let `git rev-parse` pass through) caught by a
+clear failure message. Schema_lint clean throughout. Two PI-4 carry-over
+housekeeping items (domain-skill annotations, GitHub Actions Node.js bump)
+intentionally NOT pulled into Sprint 5 -- allocated to PI-5 Sprint 2 per
+the plan. Net: 11 commits anticipated (4 already on master + close +
+state-regen), 200 -> 213 tests, zero contract loosening.
 **Capacity**: ~10 tasks, effort M. Dispatch pattern: linear single-session
 execution (no fleet split) consistent with the PI-4 Sprint 4 precedent for
 additive well-scoped CLI work.
-**Validation**: REQUIRED set R1..R7 + O1..O2 (locked in
-`specs/2026-06-06-symlink-portability/validation.md` at /tasks).
 
 ### Sprint 2 -- Anti-Conflict Gates + Carry-Over (planned)
 **Items**: SDD-019, SDD-020, PI-4 carry-over (domain-skill annotations, GH

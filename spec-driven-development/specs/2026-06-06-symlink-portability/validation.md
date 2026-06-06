@@ -1,7 +1,7 @@
 ---
 id: SDD-PI-5-S1-validation
 type: validation
-status: active
+status: done
 owner: principal-architect
 updated: 2026-06-06
 feature: symlink-portability
@@ -28,28 +28,28 @@ R1..R7 are REQUIRED. Zero unchecked REQUIRED items before /qa pass.
 
 ### R1 -- Explicit subcommand, dry-run default
 
-- [ ] **R1**: `python bootstrap.py host-link --target <tmp>` (without
+- [x] **R1**: `python bootstrap.py host-link --target <tmp>` (without
   `--apply`) prints a dry-run summary and exits 0 without mutating the
   filesystem. Verified by `test_host_link_dry_run` in
   `cli/test_bootstrap.py`. Proves AC-1 / AC-2.
 
 ### R2 -- Clean install (Linux/macOS path)
 
-- [ ] **R2**: `python bootstrap.py host-link --target <tmp> --apply`
+- [x] **R2**: `python bootstrap.py host-link --target <tmp> --apply`
   against a clean target creates a symlink at `<tmp>/.github` that resolves
   to the framework's `.github/` directory. Verified by
   `test_host_link_apply_clean` in `cli/test_bootstrap.py`. Proves AC-1.
 
 ### R3 -- Conflict abort (default)
 
-- [ ] **R3**: When the target already has `.github/` and neither `--backup`
+- [x] **R3**: When the target already has `.github/` and neither `--backup`
   nor `--force` is passed, the tool aborts with a non-zero exit code and
   the stderr message names both `--backup` and `--force`. Verified by
   `test_host_link_conflict_abort`. Proves AC-3.
 
 ### R4 -- Conflict resolution via `--backup` / `--force`
 
-- [ ] **R4**: `--backup --apply` moves the existing `.github/` to
+- [x] **R4**: `--backup --apply` moves the existing `.github/` to
   `.github.bak.<timestamp>` and creates the link; `--force --apply`
   recursively removes the existing `.github/` and creates the link. Both
   preserve the framework's `.github/` source unchanged. Verified by
@@ -57,7 +57,7 @@ R1..R7 are REQUIRED. Zero unchecked REQUIRED items before /qa pass.
 
 ### R5 -- Windows junction fallback
 
-- [ ] **R5**: When `os.symlink` raises `OSError` (mocked), the tool falls
+- [x] **R5**: When `os.symlink` raises `OSError` (mocked), the tool falls
   back to invoking `mklink /J` via `subprocess.run` with the resolved
   absolute paths. The fallback path is exercised by
   `test_host_link_windows_junction_fallback` with `unittest.mock.patch`,
@@ -65,13 +65,13 @@ R1..R7 are REQUIRED. Zero unchecked REQUIRED items before /qa pass.
 
 ### R6 -- Non-git-repo guard
 
-- [ ] **R6**: When `--target` is a directory that is not a git repository,
+- [x] **R6**: When `--target` is a directory that is not a git repository,
   the tool aborts with a clear "not a git repository" message and exits 1.
   Verified by `test_host_link_not_a_git_repo`. Proves AC-7.
 
 ### R7 -- Roster + agent file + skill artifacts present and lint-clean
 
-- [ ] **R7**: All four new artifacts exist and lint-clean:
+- [x] **R7**: All four new artifacts exist and lint-clean:
   - `.github/agents/dev-env-manager-general.agent.md` (frontmatter:
     description present; `schema_lint.py` passes).
   - `.github/skills/operational/host-integration-symlink/SKILL.md`
@@ -91,7 +91,7 @@ R1..R7 are REQUIRED. Zero unchecked REQUIRED items before /qa pass.
 
 ### O1 -- HOST-INTEGRATION.md walkthrough exists
 
-- [ ] **O1**: `docs/HOST-INTEGRATION.md` exists and contains:
+- [x] **O1**: `docs/HOST-INTEGRATION.md` exists and contains:
   - End-to-end install walkthrough.
   - The three CI/Actions mitigation options from clarification C6.
   - The conflict-mode decision tree (abort / backup / force).
@@ -101,7 +101,7 @@ R1..R7 are REQUIRED. Zero unchecked REQUIRED items before /qa pass.
 
 ### O2 -- skill content rigor
 
-- [ ] **O2**: `.github/skills/operational/host-integration-symlink/SKILL.md`
+- [x] **O2**: `.github/skills/operational/host-integration-symlink/SKILL.md`
   body instructs the worker to (a) confirm `--target`, (b) prefer dry-run
   first, (c) prefer `--backup` over `--force`, (d) escalate to Architect
   on any unrecognised host state. Verified by manual read of the SKILL.md

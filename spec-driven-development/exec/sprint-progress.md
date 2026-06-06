@@ -159,6 +159,54 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 - Notes: C1..C9 all CLOSED. Defaults chosen by PM + Architect: explicit `host-link` subcommand (C1); `os.symlink` with `mklink /J` fallback on Windows OSError (C2); abort-by-default with `--backup` and `--force` opt-ins (C3); no auto-detection of host context in v1 (C4); live symlink, no version pin (C5); host CI inherits framework workflows, documented in HOST-INTEGRATION.md (C6); `dev-env-manager-general` as generic worker not Principal (C7); three additive files + two roster rows (C8); dispatch via existing `cli/fleet.py`, no new slash command (C9). Validation contract LOCKED at R1..R7 REQUIRED + O1..O2 OPTIONAL-treated-REQUIRED. All three spec dir artifacts carry valid SDD-FDC-001 frontmatter.
 - Next: F-05 begins in this same session.
 
-### F-05 -- symlink-portability-implement -- NOT STARTED
+### F-05 -- symlink-portability-implement -- DONE
 
-(append block here on completion)
+- Date: 2026-06-06
+- Owner: Principal Software Developer (no fleet dispatch; linear single-session execution per consolidated worker session directive)
+- Commits (this feature chain):
+  - `1a5e127` plan(symlink-portability): plan + tasks for SDD-016 + SDD-017
+  - `30482d5` feat(symlink-portability): SDD-016 host-link + SDD-017 dev-env-manager hire
+  - (this commit: close blocks + state regen)
+- Files changed (F-05 only, excluding prior plan/spec commits): 12
+  - spec-driven-development/specs/2026-06-06-symlink-portability/plan.md (new)
+  - spec-driven-development/specs/2026-06-06-symlink-portability/tasks.md (new; status flipped pending -> done at close)
+  - spec-driven-development/specs/2026-06-06-symlink-portability/spec.md (status active -> done)
+  - spec-driven-development/specs/2026-06-06-symlink-portability/validation.md (R1..R7 + O1..O2 all checked; status active -> done)
+  - spec-driven-development/cli/bootstrap.py (extension: +1 import, +1 subparser block, +6 helpers, +1 dispatcher, +3 lines in main; greenfield/brownfield untouched)
+  - spec-driven-development/cli/test_bootstrap.py (new, 13 tests)
+  - .github/agents/dev-env-manager-general.agent.md (new)
+  - .github/skills/operational/host-integration-symlink/SKILL.md (new)
+  - spec-driven-development/roster/agents.json (+1 row: dev-env-manager-general)
+  - spec-driven-development/roster/skills.json (+1 row: host-integration-symlink)
+  - spec-driven-development/docs/HOST-INTEGRATION.md (new)
+  - spec-driven-development/backlog/BACKLOG.md (SDD-016 + SDD-017 status to DONE with SHA `30482d5`)
+  - spec-driven-development/sprints/PI-5/CURRENT_PI.md (Sprint 1 retro + DONE)
+- Tests: 200 -> 213 (+13). All R1..R6 covered by `cli/test_bootstrap.py`. R7 covered by `schema_lint.py` clean + manual roster row check.
+- Validation: 7/7 REQUIRED checked; 2/2 OPTIONAL checked.
+  - R1 PASS (test_host_link_dry_run_default)
+  - R2 PASS (test_host_link_apply_clean_creates_link)
+  - R3 PASS (test_host_link_conflict_abort_default)
+  - R4 PASS (test_host_link_backup_moves_then_links, test_host_link_force_deletes_then_links)
+  - R5 PASS (test_host_link_windows_junction_fallback; mocked)
+  - R6 PASS (test_host_link_target_not_git_repo)
+  - R7 PASS (schema_lint full repo scan exits 0; agents.json + skills.json rows present)
+  - O1 PASS (HOST-INTEGRATION.md walkthrough + 3 CI mitigation options + rollback)
+  - O2 PASS (SKILL.md body has the 4 protocol points)
+- Schema-lint full scan: `python spec-driven-development/cli/schema_lint.py` exits 0.
+- Notes: Linear single-session execution (no fleet dispatch) consistent with PI-4 Sprint 4 F-02 precedent. One TDD course-correction: the Windows-junction fallback test initially intercepted ALL `subprocess.run` calls and broke the upstream `git rev-parse` validation; fix was a 4-line scope tightening on the mock (intercept only `mklink` invocations). The dev-env-manager-general worker is HIRED but not dispatched on a real task in this sprint; first dispatch deferred to the realistic host-link demo (post-PI-5-S1).
+- Next: Sprint 5 close block below.
+
+### Sprint 5 -- CLOSED
+
+- Date: 2026-06-06
+- Owner: Principal Software Developer (closing); consolidated worker session executing F-03 -> F-04 -> F-05 per owner directive 2026-06-06
+- Features completed: F-03 (pi5-kickoff DONE), F-04 (symlink-portability-clarify-spec DONE), F-05 (symlink-portability-implement DONE)
+- Final SHA: (this commit's parent will be the sprint-close commit -- see commit log)
+- Sprint chain (chronological, in master): `7cf90fe` (F-03) -> `7182841` (F-04) -> `1a5e127` (F-05 plan+tasks) -> `30482d5` (F-05 implementation) -> sprint-close commit -> state-regen commit
+- Tests: 200 -> 213 (+13)
+- Validation: 7/7 REQUIRED, 2/2 OPTIONAL (symlink-portability validation contract fully checked)
+- PI-5 status: ACTIVE; Sprint 1 closed; 4 sprints remaining (Sprint 2 SDD-019+SDD-020+carry-over, Sprint 3 SDD-018, Sprint 4 SDD-022+SDD-015, Sprint 5 SDD-021+SDD-023+SDD-025)
+- SDD-016, SDD-017: DONE
+- Notes: Sprint 5 shipped the brownfield-portability bundle that unblocks every future second-project bootstrap. `bootstrap.py host-link` is cross-platform (POSIX symlink + Windows junction fallback), dry-run-by-default, abort-on-conflict-by-default with explicit `--backup` / `--force` opt-ins. The dev-env-manager-general worker is rostered with its host-integration-symlink skill pack. HOST-INTEGRATION.md provides the host operator with an end-to-end walkthrough including the three CI/Actions mitigation options. The sprint ran as a consolidated single-session execution (owner directive 2026-06-06) rather than the default Article VII three-session split -- the tight coupling between F-03 (PI plan that names the spec dir), F-04 (spec the implementation depends on), and F-05 (implementation that tests the spec) justified the departure. TDD discipline held: tests authored before code, schema_lint clean throughout, no validation loosening.
+- Next: PI-5 Sprint 2 = SDD-019 + SDD-020 + PI-4 carry-over housekeeping. Kickoff prompt not yet authored -- owner to request from EM (or author directly when ready to start Sprint 6).
+- Lesson candidate (PI-5 retrospective): the consolidated-session pattern worked for tightly-coupled brownfield-portability work where every artifact is small. It may NOT scale to larger sprints with cross-cutting CLI extensions; the next consolidated-session decision should be made per-sprint, not as a new default.

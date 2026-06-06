@@ -1,7 +1,7 @@
 ---
 id: SDD-PI-5-S1-spec
 type: spec
-status: active
+status: done
 owner: principal-architect
 updated: 2026-06-06
 feature: symlink-portability

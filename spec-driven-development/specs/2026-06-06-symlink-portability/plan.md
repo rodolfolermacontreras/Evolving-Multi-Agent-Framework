@@ -1,7 +1,7 @@
 ---
 id: SDD-PI-5-S1-plan
 type: plan
-status: active
+status: done
 owner: principal-software-developer
 updated: 2026-06-06
 feature: symlink-portability

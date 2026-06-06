@@ -87,3 +87,63 @@ Status: answered
 - Scope section -- artifact classes + field set (Q1)
 - Requirements section -- rollup semantics + `count` JSON contract (Q2)
 - Constraints section -- S1 lock (b7ce642) + commit-convention enforcement boundary (Q3)
+
+## Q5: [Amendment] R5/AC-5 lock anchor re-anchored b7ce642 -> 257b081
+
+Date: 2026-06-06
+Participants: Rodolfo Lerma (owner, ratifying), Principal Architect (drafting), Principal Executive Manager (routing), Principal Software Developer (blocked-finding)
+Authority: Article X amendment (validation contract change, pre-implementation, with owner ratification)
+
+### Question
+
+R5 (and AC-5) requires `render_html` and T-001..T-004 to be byte-identical to commit
+`b7ce642`. Hash verification at /implement time (T-FDC-02 lock guard) shows two of
+the five functions already diverged before the spec was authored. What is the
+correct anchor SHA?
+
+### Finding
+
+Independently verified via `git log b7ce642..257b081 -- spec-driven-development/cli/state_builder.py`:
+nine commits intentionally evolved `state_builder.py` during Sprint 3 (the dashboard
+v3.0 rewrite plus a sqlite resource-leak fix), all landing 2026-06-02 -- three days
+before the FDC spec was committed (2026-06-05, `58f3af3`). Two functions are
+affected: `render_html` (rewrite `a16819a`) and `load_decisions` (fix `86748f3`).
+The other three are unchanged.
+
+Hash evidence:
+
+| function | b7ce642 hash | 257b081 hash | match |
+|---|---|---|---|
+| render_html | ff94e248a81459703c27526029ade0cc0d96de2b3311a240fa9c15f09e7e7742 | 5b41283be94e5db1adfb99692b457d370b84fe100eeda7734c95cafe823a705b | NO |
+| load_sprint_table | 35ab5ad467970ec88709ef923ac608511d49408d31a7787cf2146fccb0e7248f | (unchanged) | YES |
+| load_sprint_goal | a50e52427f26b489b98f1030cb99f004127fc177d37dedc8de9c5f3e7de00716 | (unchanged) | YES |
+| detect_current_sprint | 81af06480d402b032665be3d6a2a34c343be0a7005704dc096d52a7280263311 | (unchanged) | YES |
+| load_decisions | 64f4318eb68b7f97e1f32f7919b9e31d7025be026aa67fb1ec5f02b51fb2b48e | 98ba432c79d2a3c6e3c9eb84a69b07ea8af6d7deb7a5cf8fa3245692cd712eaf | NO |
+
+### Decision
+
+Re-anchor R5/AC-5 from `b7ce642` to `257b081`. This is a mechanical correction of the
+literal SHA, not a change of intent. The spec author's stated intent in this log's
+opening ("S1 footprint is locked" -- meaning immutable for *this feature*) is
+preserved; what changes is only the snapshot the lock test compares against. R5/AC-5
+semantics, the lock-guard mechanism (`inspect.getsource` + `hashlib.sha256`), and the
+forward additive-only constraint on F-02 are all unchanged.
+
+Authority: Article X permits validation amendments only with explicit authorization.
+The owner pre-authorized Option A on 2026-06-06 via EM after reviewing the drift
+evidence and three options (A re-anchor, B revert, C shrink R5 scope). Architect
+drafts; owner ratifies by retaining this commit.
+
+### Action
+
+- validation.md R5: SHA updated to 257b081.
+- spec.md: all 9 occurrences of b7ce642 updated to 257b081; one inline note at
+  the first occurrence pointing back to this Q5.
+- tasks.md and plan.md are NOT touched (no SHA references; T-FDC-02 task body
+  cites validation.md / plan.md indirectly and remains correct).
+- T-FDC-02 implementation will capture golden hashes from 257b081 (the five hashes
+  in the table above are pre-computed and authoritative).
+
+### Status
+
+answered (amendment pending owner ratification on commit landing)

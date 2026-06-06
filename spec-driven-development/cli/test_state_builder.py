@@ -1471,6 +1471,74 @@ class TestSecurityAudit:
                     f"Non-stdlib import detected: {stripped}"
                 )
 
+
+# ---------------------------------------------------------------------------
+# T-FDC-02: S1 footprint lock guard (SDD-FDC-001 R5 / AC-5)
+#
+# These five functions in state_builder.py are LOCKED to commit 257b081
+# (re-anchored 2026-06-06 via Article X amendment -- see
+# specs/2026-06-04-filesystem-data-contracts/clarification-log.md Q5).
+#
+# Any change to their source bodies that alters the sha256 of
+# inspect.getsource(...) MUST fail this test. Repair: revert the locked
+# function to its 257b081 form. Do NOT update the golden hashes without an
+# Article X amendment ratified by the owner.
+# ---------------------------------------------------------------------------
+
+LOCKED_S1_FUNCTIONS = (
+    "render_html",
+    "load_sprint_table",
+    "load_sprint_goal",
+    "detect_current_sprint",
+    "load_decisions",
+)
+
+GOLDEN_S1_HASHES = {
+    "render_html":           "5b41283be94e5db1adfb99692b457d370b84fe100eeda7734c95cafe823a705b",
+    "load_sprint_table":     "35ab5ad467970ec88709ef923ac608511d49408d31a7787cf2146fccb0e7248f",
+    "load_sprint_goal":      "a50e52427f26b489b98f1030cb99f004127fc177d37dedc8de9c5f3e7de00716",
+    "detect_current_sprint": "81af06480d402b032665be3d6a2a34c343be0a7005704dc096d52a7280263311",
+    "load_decisions":        "98ba432c79d2a3c6e3c9eb84a69b07ea8af6d7deb7a5cf8fa3245692cd712eaf",
+}
+
+
+class TestS1FootprintLockGuard:
+    """R5/AC-5: byte-identity of the five S1 functions vs commit 257b081 goldens."""
+
+    def test_locked_function_set_is_exactly_five(self) -> None:
+        # If this assertion ever needs to change, an Article X amendment is required.
+        assert len(LOCKED_S1_FUNCTIONS) == 5
+        assert set(LOCKED_S1_FUNCTIONS) == set(GOLDEN_S1_HASHES.keys())
+
+    def test_s1_footprint_locked(self) -> None:
+        """Each locked function's inspect.getsource sha256 must match its golden hash."""
+        import hashlib
+        import inspect
+
+        from cli import state_builder as sb
+
+        mismatches: list[str] = []
+        for name in LOCKED_S1_FUNCTIONS:
+            func = getattr(sb, name, None)
+            assert func is not None, (
+                f"Locked function '{name}' is missing from state_builder.py. "
+                f"This is a contract violation -- restore the function or escalate."
+            )
+            src = inspect.getsource(func)
+            actual = hashlib.sha256(src.encode("utf-8")).hexdigest()
+            expected = GOLDEN_S1_HASHES[name]
+            if actual != expected:
+                mismatches.append(
+                    f"{name}: expected sha256 {expected}, got {actual}"
+                )
+
+        assert not mismatches, (
+            "S1 footprint lock violated -- the following functions drifted from "
+            "commit 257b081 goldens:\n  " + "\n  ".join(mismatches) +
+            "\nRepair: revert the function body to its 257b081 form. Do NOT update "
+            "GOLDEN_S1_HASHES without an Article X amendment + owner ratification."
+        )
+
     def test_footer_stdlib_badge(self) -> None:
         htm = _render_html_with_features()
         assert "stdlib only" in htm, "Footer must contain 'stdlib only' text"

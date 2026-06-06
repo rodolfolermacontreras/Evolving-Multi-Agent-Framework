@@ -122,9 +122,27 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 - Owner: Principal Executive Manager (lead); PM and Architect for planning;
   SW Dev + workers for implementation.
 
-### F-03 -- pi5-kickoff -- NOT STARTED
+### F-03 -- pi5-kickoff -- DONE
 
-(append block here on completion)
+- Date: 2026-06-06
+- Owner: Principal Product Manager (consolidated single-session execution per owner directive 2026-06-06)
+- Commits: <pending-sha for this F-03 commit>
+- Files changed: 3
+  - spec-driven-development/sprints/PI-5/CURRENT_PI.md (new)
+  - spec-driven-development/backlog/BACKLOG.md (sprint column updates for SDD-015..SDD-025)
+  - spec-driven-development/docs/Management/PI-5/INDEX.md (new)
+- Tests: 200 -> 200 (doc-only)
+- Owner approval: 2026-06-06 -- owner directive in Sprint 5 worker session "get sprint 5 done" authorizes consolidated F-03 -> F-05 execution under EM-recommended sprint allocation (no deviation from 2026-06-05 EM rationale)
+- PI-5 sprint allocation:
+  - Sprint 1 (= overall Sprint 5): SDD-016 + SDD-017 -- brownfield portability
+  - Sprint 2 (= overall Sprint 6): SDD-019 + SDD-020 + PI-4 carry-over housekeeping (domain-skill annotations, GH Actions Node.js bump)
+  - Sprint 3 (= overall Sprint 7): SDD-018 -- UI lifecycle variant
+  - Sprint 4 (= overall Sprint 8): SDD-022 + SDD-015 -- ADO/GitHub bridge + model upgrade discipline
+  - Sprint 5 (= overall Sprint 9): SDD-021 + SDD-023 + SDD-025 -- self-review + uniform gates + stakeholder defense
+  - Unscheduled: SDD-024 (P3 single-task; not PI-bound), SDD-026 (P4 deferred indefinitely per PM override)
+- Notes: PI-5 launched with five-sprint allocation matching the EM 2026-06-05 recommendation. PI-4 carry-over housekeeping (domain-skill annotations, GH Actions Node.js bump) ride along in Sprint 2 to avoid orphaning. No new SDD-IDs added; no priority/RICE changes; no constitution edits. All SDD-FDC-001 frontmatter contracts satisfied on the new PI-5 CURRENT_PI.md.
+- Next sprint to plan: PI-5 Sprint 2 = SDD-019 + SDD-020 + carry-over -- kickoff prompt to be authored at PI-5 Sprint 1 close (= when this F-05 closes).
+- Next: F-04 begins in this same session (owner directive overrides Article VII one-feature-one-session default for Sprint 5 only).
 
 ### F-04 -- symlink-portability-clarify-spec -- NOT STARTED
 

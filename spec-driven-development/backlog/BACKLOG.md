@@ -20,12 +20,12 @@ Prioritized backlog with RICE scoring. Managed by Principal Product Manager.
 |----|-------|----------|---|---|---|---|------|--------|--------|
 | SDD-013 | "One feature, one session" rule -- one-line edit to principles.md + copilot-instructions.md | P1 | H | M | H | XS | -- | PI-4 Sprint 3 | **DONE** 2026-06-03 commit `5992ec8` (principles.md 1.0.0 -> 1.1.0) |
 | SDD-014 | Friction Analysis section in Level-2 decision template | P1 | H | H | H | S | -- | PI-4 Sprint 3 | **DONE** 2026-06-03 commit `85b39be` (decision-policy.md 1.0.0 -> 1.1.0; template + example shipped) |
-| SDD-015 | Model upgrades as Level-2 decisions w/ regression-test branch + A/B + cost analysis | P1 | H | H | H | S | -- | PI-5 (deferred) | **DEFERRED to PI-5** (human option (c) 2026-06-03); blocked on SDD-014; not currently under stakeholder pressure in this project |
-| SDD-016 | `.github/` symlink portability trick -- host-integration-symlink skill + bootstrap.py extension | P1 | H | H | H | M | -- | PI-5 (deferred) | **DEFERRED to PI-5** (human option (c) 2026-06-03); CLARIFY first; co-spec with SDD-017 |
-| SDD-017 | Hire `dev-env-manager` worker -- worktree, symlink, branch hygiene, env bootstrap | P1 | M | H | H | S | -- | PI-5 (deferred) | **DEFERRED to PI-5** (human option (c) 2026-06-03); SPEC; co-spec with SDD-016 |
-| SDD-018 | UI development lifecycle variant -- relaxed Article X with validation.md delta entries | P1 | M | H | M | M | -- | PI-5 (deferred) | **DEFERRED to PI-5** (human option (c) 2026-06-03); CLARIFY (ADR vs separate command) |
-| SDD-019 | Serial gate on CLARIFY/SPEC (repo-wide) -- constitutional amendment; fleet.py enforcement | P1 | H | H | M | M | -- | PI-5 (proposed) | Triaged; CLARIFY; HITL; bundle with SDD-020 |
-| SDD-020 | Cross-feature deduplication pass at /triage and /clarify -- pre-spec overlap scan | P1 | M | H | H | S | -- | PI-5 (proposed) | Triaged; SPEC; bundle with SDD-019 |
+| SDD-015 | Model upgrades as Level-2 decisions w/ regression-test branch + A/B + cost analysis | P1 | H | H | H | S | -- | PI-5 Sprint 4 | Allocated to PI-5 Sprint 4 (per `sprints/PI-5/CURRENT_PI.md` 2026-06-06); unblocked by SDD-014 |
+| SDD-016 | `.github/` symlink portability trick -- host-integration-symlink skill + bootstrap.py extension | P1 | H | H | H | M | -- | PI-5 Sprint 1 | Allocated to PI-5 Sprint 1 (= overall Sprint 5) 2026-06-06; co-spec with SDD-017; spec dir `specs/2026-06-06-symlink-portability/` |
+| SDD-017 | Hire `dev-env-manager` worker -- worktree, symlink, branch hygiene, env bootstrap | P1 | M | H | H | S | -- | PI-5 Sprint 1 | Allocated to PI-5 Sprint 1 (= overall Sprint 5) 2026-06-06; co-spec with SDD-016 |
+| SDD-018 | UI development lifecycle variant -- relaxed Article X with validation.md delta entries | P1 | M | H | M | M | -- | PI-5 Sprint 3 | Allocated to PI-5 Sprint 3 (= overall Sprint 7) 2026-06-06; CLARIFY (ADR vs separate command) gates SPEC |
+| SDD-019 | Serial gate on CLARIFY/SPEC (repo-wide) -- constitutional amendment; fleet.py enforcement | P1 | H | H | M | M | -- | PI-5 Sprint 2 | Allocated to PI-5 Sprint 2 (= overall Sprint 6) 2026-06-06; bundled with SDD-020; CLARIFY-heavy |
+| SDD-020 | Cross-feature deduplication pass at /triage and /clarify -- pre-spec overlap scan | P1 | M | H | H | S | -- | PI-5 Sprint 2 | Allocated to PI-5 Sprint 2 (= overall Sprint 6) 2026-06-06; bundled with SDD-019 |
 
 Source: Scott Epperly meeting 2026-06-02 transcript; full triage report at `sprints/PI-4/triage-scott-feedback-2026-06-03.md`.
 
@@ -45,9 +45,9 @@ Source: Scott Epperly meeting 2026-06-02 transcript; full triage report at `spri
 
 | ID | Title | Priority | R | I | C | E | RICE | Sprint | Status |
 |----|-------|----------|---|---|---|---|------|--------|--------|
-| SDD-021 | End-of-session self-review loop -- skill that detects inefficiencies + proposes agent deltas via /evolve | P2 | M | M | M | M | -- | PI-5 (proposed) | Triaged; CLARIFY; blocked on Architect transcript-accessibility audit |
-| SDD-022 | ADO / GitHub Issues sync bridge -- `/taskstoissues` pattern (GitHub-first, ADO fast-follow) | P2 | H | M | M | L | -- | PI-5 (proposed) | Triaged; CLARIFY; Scott named this the gap keeping him from adopting |
-| SDD-023 | First-class user gates as uniform construct -- declared approver per phase + ledger record + dashboard surface | P2 | M | M | H | M | -- | PI-5 (proposed) | Triaged; CLARIFY (gate inventory pre-spec); synergistic with SDD-019 |
+| SDD-021 | End-of-session self-review loop -- skill that detects inefficiencies + proposes agent deltas via /evolve | P2 | M | M | M | M | -- | PI-5 Sprint 5 | Allocated to PI-5 Sprint 5 (= overall Sprint 9) 2026-06-06; CLARIFY; blocked on Architect transcript-accessibility audit |
+| SDD-022 | ADO / GitHub Issues sync bridge -- `/taskstoissues` pattern (GitHub-first, ADO fast-follow) | P2 | H | M | M | L | -- | PI-5 Sprint 4 | Allocated to PI-5 Sprint 4 (= overall Sprint 8) 2026-06-06; CLARIFY; Scott named this the gap keeping him from adopting |
+| SDD-023 | First-class user gates as uniform construct -- declared approver per phase + ledger record + dashboard surface | P2 | M | M | H | M | -- | PI-5 Sprint 5 | Allocated to PI-5 Sprint 5 (= overall Sprint 9) 2026-06-06; CLARIFY (gate inventory pre-spec); synergistic with SDD-019 |
 
 ## P3 - Could Have
 
@@ -61,8 +61,8 @@ Source: Scott Epperly meeting 2026-06-02 transcript; full triage report at `spri
 
 | ID | Title | Priority | R | I | C | E | RICE | Sprint | Status |
 |----|-------|----------|---|---|---|---|------|--------|--------|
-| SDD-024 | Map Microsoft self-improving skills paper against our skill mechanism -- 1-page memo | P3 | L | L | L | S | -- | Unscheduled | Triaged; single-task dispatch; needs paper citation confirmed first |
-| SDD-025 | Stakeholder-pressure defense pattern -- playbook invoking SDD-014 Friction Analysis template | P3 | M | M | M | S | -- | PI-5 (proposed) | Triaged; BLOCKED on SDD-014 |
+| SDD-024 | Map Microsoft self-improving skills paper against our skill mechanism -- 1-page memo | P3 | L | L | L | S | -- | Unscheduled | Triaged; single-task dispatch; not PI-bound (reconfirmed PI-5 plan 2026-06-06); needs paper citation confirmed first |
+| SDD-025 | Stakeholder-pressure defense pattern -- playbook invoking SDD-014 Friction Analysis template | P3 | M | M | M | S | -- | PI-5 Sprint 5 | Allocated to PI-5 Sprint 5 (= overall Sprint 9) 2026-06-06; unblocked by SDD-014 (shipped PI-4 Sprint 3 commit `85b39be`) |
 
 Notes:
 - Design spec pre-built at `specs/2026-05-13-fleet-bridge-dashboard/DESIGN.md`

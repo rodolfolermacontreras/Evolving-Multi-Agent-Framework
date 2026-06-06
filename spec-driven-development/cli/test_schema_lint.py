@@ -193,5 +193,168 @@ class SchemaLintAcceptance(unittest.TestCase):
             self.skipTest(f"{len(findings)} real-repo findings -- triage and fix:\n{sample}")
 
 
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
+# ----------------------------------------------------------------------- #
+# T-FDC-03: filesystem data contract (SDD-FDC-001 / R1, R2)
+#
+# Validates check_artifact() against the locked schema in ADR-012 and the
+# positional-paths invocation mode used by R6 verification.
+# ----------------------------------------------------------------------- #
+
+GOOD_ARTIFACT = """---
+id: SDD-TEST-001-spec
+type: spec
+status: active
+owner: principal-architect
+updated: 2026-06-06
+---
+# Example artifact
+"""
+
+
+class ArtifactContractAcceptance(unittest.TestCase):
+    """SDD-FDC-001 R1, R2 -- artifact frontmatter contract."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
+        self.tmp = Path(self._tmp.name)
+        self.specs = self.tmp / "specs" / "demo-feature"
+        self.specs.mkdir(parents=True)
+        self.sprints = self.tmp / "sprints" / "PI-X"
+        self.sprints.mkdir(parents=True)
+
+    def tearDown(self):
+        gc.collect()
+        self._tmp.cleanup()
+
+    def _write(self, path: Path, content: str) -> Path:
+        path.write_text(content, encoding="utf-8")
+        return path
+
+    # --- R1 / AC-1: missing field => finding + non-zero ---------------------
+
+    def test_artifact_no_frontmatter_reported(self):
+        """{} parse result must produce a finding, never crash."""
+        p = self._write(self.specs / "raw.md", "# raw doc no frontmatter\n")
+        findings = schema_lint.check_artifact(p)
+        self.assertEqual(len(findings), 1)
+        self.assertEqual(findings[0].kind, "artifact")
+        self.assertIn("no YAML frontmatter", findings[0].issue)
+
+    def test_artifact_missing_each_required_field_fails(self):
+        for missing in schema_lint.REQUIRED_CONTRACT_FIELDS:
+            fm_lines = [
+                "id: SDD-X",
+                "type: spec",
+                "status: active",
+                "owner: principal-architect",
+                "updated: 2026-06-06",
+            ]
+            kept = [line for line in fm_lines if not line.startswith(f"{missing}:")]
+            content = "---\n" + "\n".join(kept) + "\n---\n# body\n"
+            p = self._write(self.specs / f"missing-{missing}.md", content)
+            findings = schema_lint.check_artifact(p)
+            self.assertTrue(
+                any(f"missing '{missing}'" in f.issue for f in findings),
+                f"expected missing '{missing}' finding, got: {[f.issue for f in findings]}",
+            )
+
+    def test_artifact_bad_type_enum_reported(self):
+        bad = (
+            "---\nid: x\ntype: not-a-real-type\nstatus: active\n"
+            "owner: principal-architect\nupdated: 2026-06-06\n---\nbody\n"
+        )
+        p = self._write(self.specs / "bad-type.md", bad)
+        findings = schema_lint.check_artifact(p)
+        self.assertTrue(any("type 'not-a-real-type' not in enum" in f.issue for f in findings))
+
+    def test_artifact_bad_status_enum_reported(self):
+        bad = (
+            "---\nid: x\ntype: spec\nstatus: wibble\n"
+            "owner: principal-architect\nupdated: 2026-06-06\n---\nbody\n"
+        )
+        p = self._write(self.specs / "bad-status.md", bad)
+        findings = schema_lint.check_artifact(p)
+        self.assertTrue(any("status 'wibble' not in enum" in f.issue for f in findings))
+
+    def test_artifact_non_iso_updated_warning(self):
+        bad = (
+            "---\nid: x\ntype: spec\nstatus: active\n"
+            "owner: principal-architect\nupdated: not-a-date\n---\nbody\n"
+        )
+        p = self._write(self.specs / "bad-date.md", bad)
+        findings = schema_lint.check_artifact(p)
+        warnings = [f for f in findings if "not ISO YYYY-MM-DD" in f.issue]
+        self.assertTrue(warnings, "expected ISO-date warning")
+        self.assertEqual(warnings[0].severity, "WARNING")
+
+    # --- R2 / AC-2: valid tree => exit 0 -----------------------------------
+
+    def test_artifact_all_valid_passes(self):
+        self._write(self.specs / "spec.md", GOOD_ARTIFACT)
+        self._write(self.sprints / "INDEX.md", GOOD_ARTIFACT.replace("type: spec", "type: index"))
+        findings = schema_lint.scan(self.tmp, paths=[self.specs, self.sprints])
+        self.assertEqual(findings, [], f"unexpected findings: {[f.issue for f in findings]}")
+
+    # --- Skip list ----------------------------------------------------------
+
+    def test_artifact_skip_list_honored(self):
+        # lessons-template.md is the documented template skip.
+        self._write(self.sprints / "lessons-template.md", "# no frontmatter on purpose\n")
+        findings = schema_lint.scan(self.tmp, paths=[self.sprints])
+        self.assertEqual(findings, [],
+                         f"template should be skipped, got: {[f.path for f in findings]}")
+
+    def test_artifact_underscore_prefix_skipped(self):
+        self._write(self.sprints / "_template_session.md", "# no frontmatter\n")
+        findings = schema_lint.scan(self.tmp, paths=[self.sprints])
+        self.assertEqual(findings, [],
+                         f"_-prefixed file should be skipped, got: {[f.path for f in findings]}")
+
+    # --- R6 invocation mode (positional paths) -----------------------------
+
+    def test_positional_paths_mode_scans_only_given_dirs(self):
+        # Set up: an in-tree fake repo with both .github (bad agent) and specs (good)
+        fake_root = self.tmp / "fake-repo"
+        agents_dir = fake_root / ".github" / "agents"
+        agents_dir.mkdir(parents=True)
+        (agents_dir / "bad-agent.agent.md").write_text("---\nx: 1\n---\n", encoding="utf-8")
+        specs_only = fake_root / "specs"
+        specs_only.mkdir()
+        (specs_only / "good.md").write_text(GOOD_ARTIFACT, encoding="utf-8")
+
+        # Positional path => ignore .github/, scan only specs/, exit clean
+        findings_explicit = schema_lint.scan(fake_root, paths=[specs_only])
+        self.assertEqual(findings_explicit, [])
+
+        # Default (no positional) => walks .github/ AND specs/, bad-agent shows up
+        findings_default = schema_lint.scan(fake_root)
+        self.assertTrue(any("bad-agent" in f.path for f in findings_default))
+
+    def test_positional_paths_cli_exit_zero_for_valid_tree(self):
+        valid_specs = self.tmp / "valid-specs"
+        valid_specs.mkdir()
+        (valid_specs / "spec.md").write_text(GOOD_ARTIFACT, encoding="utf-8")
+        result = subprocess.run(
+            [sys.executable, str(SCHEMA_LINT), str(valid_specs)],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_positional_paths_cli_exit_one_for_invalid_tree(self):
+        bad_specs = self.tmp / "bad-specs"
+        bad_specs.mkdir()
+        (bad_specs / "raw.md").write_text("# no frontmatter\n", encoding="utf-8")
+        result = subprocess.run(
+            [sys.executable, str(SCHEMA_LINT), str(bad_specs)],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 1)
+
+    def test_positional_paths_cli_exit_two_for_missing_dir(self):
+        result = subprocess.run(
+            [sys.executable, str(SCHEMA_LINT), str(self.tmp / "does-not-exist")],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 2)
+
+

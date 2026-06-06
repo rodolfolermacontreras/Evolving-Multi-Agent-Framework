@@ -28,9 +28,56 @@ DEFAULT_REPO_ROOT = Path(__file__).resolve().parents[2]
 @dataclass
 class Finding:
     path: str
-    kind: str          # "agent" | "skill" | "prompt"
+    kind: str          # "agent" | "skill" | "prompt" | "artifact"
     issue: str
     severity: str = "ERROR"
+
+
+# ---------------------------------------------------------------------------- #
+# Filesystem data contract (SDD-FDC-001 / ADR-012)
+#
+# Every in-scope `*.md` under spec-driven-development/specs/** and
+# spec-driven-development/sprints/** MUST carry these five frontmatter fields.
+# The enums for `type` and `status` are CLOSED -- adding a value requires an
+# Architect decision recorded in plan.md or an ADR amendment.
+# ---------------------------------------------------------------------------- #
+
+REQUIRED_CONTRACT_FIELDS = ("id", "type", "status", "owner", "updated")
+
+ARTIFACT_TYPE_ENUM = {
+    "spec",
+    "plan",
+    "tasks",
+    "validation",
+    "clarification",
+    "sprint",
+    "retro",
+    "lessons",
+    "index",
+    "session",
+}
+
+ARTIFACT_STATUS_ENUM = {
+    "draft",
+    "active",
+    "blocked",
+    "done",
+    "superseded",
+    "archived",
+}
+
+# Skip list -- in-scope markdown that intentionally has no contract because
+# it is a template or scratch fragment, not a live artifact. Documented per
+# ADR-012; do not extend without justification.
+ARTIFACT_SKIP_NAMES = {
+    "lessons-template.md",  # sprint retros use it as a starter, body is placeholder
+}
+
+# Skip files whose basename starts with one of these prefixes (template convention).
+ARTIFACT_SKIP_PREFIXES = ("_",)
+
+# Best-effort ISO date pattern for the `updated` field.
+_ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
 # ---------------------------------------------------------------------------- #
@@ -196,12 +243,100 @@ def check_prompt(path: Path) -> list[Finding]:
     return findings
 
 
+def check_artifact(path: Path) -> list[Finding]:
+    """Artifact files (in-scope specs/** + sprints/** markdown) require the
+    SDD-FDC-001 frontmatter contract: id, type, status, owner, updated, with
+    `type` and `status` drawn from the locked enums.
+
+    A {} parse result (no YAML delimiters) produces a single finding and
+    short-circuits -- never crashes (ADR-012 / FDC plan section 1).
+    """
+    findings: list[Finding] = []
+    text = path.read_text(encoding="utf-8", errors="replace")
+    fm = parse_frontmatter(text)
+    if not fm:
+        findings.append(Finding(str(path), "artifact", "no YAML frontmatter delimiters"))
+        return findings
+
+    for field_name in REQUIRED_CONTRACT_FIELDS:
+        val = fm.get(field_name)
+        if val is None or (isinstance(val, str) and not val.strip()):
+            findings.append(Finding(str(path), "artifact",
+                                    f"missing '{field_name}'"))
+
+    type_val = fm.get("type")
+    if isinstance(type_val, str) and type_val.strip():
+        if type_val.strip() not in ARTIFACT_TYPE_ENUM:
+            findings.append(Finding(
+                str(path), "artifact",
+                f"type '{type_val.strip()}' not in enum "
+                f"{sorted(ARTIFACT_TYPE_ENUM)}",
+            ))
+
+    status_val = fm.get("status")
+    if isinstance(status_val, str) and status_val.strip():
+        if status_val.strip() not in ARTIFACT_STATUS_ENUM:
+            findings.append(Finding(
+                str(path), "artifact",
+                f"status '{status_val.strip()}' not in enum "
+                f"{sorted(ARTIFACT_STATUS_ENUM)}",
+            ))
+
+    updated_val = fm.get("updated")
+    if isinstance(updated_val, str) and updated_val.strip():
+        if not _ISO_DATE_RE.match(updated_val.strip()):
+            findings.append(Finding(
+                str(path), "artifact",
+                f"updated '{updated_val.strip()}' is not ISO YYYY-MM-DD",
+                severity="WARNING",
+            ))
+
+    return findings
+
+
+def _should_skip_artifact(path: Path) -> bool:
+    """Apply the skip list (templates, scratch fragments)."""
+    if path.name in ARTIFACT_SKIP_NAMES:
+        return True
+    if any(path.name.startswith(prefix) for prefix in ARTIFACT_SKIP_PREFIXES):
+        return True
+    return False
+
+
+def _walk_artifacts(base: Path) -> list[Finding]:
+    """Walk one in-scope tree, applying check_artifact to every non-skipped *.md."""
+    findings: list[Finding] = []
+    if not base.is_dir():
+        return findings
+    for p in sorted(base.rglob("*.md")):
+        if _should_skip_artifact(p):
+            continue
+        findings.extend(check_artifact(p))
+    return findings
+
+
 # ---------------------------------------------------------------------------- #
 # Walk + scan
 # ---------------------------------------------------------------------------- #
 
-def scan(repo_root: Path) -> list[Finding]:
+def scan(repo_root: Path, paths: list[Path] | None = None) -> list[Finding]:
+    """Scan for findings.
+
+    If `paths` is provided (non-empty), walk each path as an artifact tree
+    (SDD-FDC-001 contract) and ignore the default .github/ checkers. This is
+    the explicit-invocation mode used by R6 verification:
+        python schema_lint.py spec-driven-development/specs/ spec-driven-development/sprints/
+
+    If `paths` is None/empty, run the legacy SDD-006 walk (.github/agents,
+    .github/skills, .github/prompts) AND additionally walk the in-scope SDD
+    artifact trees rooted at `repo_root/spec-driven-development/{specs,sprints}`.
+    """
     findings: list[Finding] = []
+
+    if paths:
+        for base in paths:
+            findings.extend(_walk_artifacts(base))
+        return findings
 
     agents_dir = repo_root / ".github" / "agents"
     skills_dir = repo_root / ".github" / "skills"
@@ -220,6 +355,12 @@ def scan(repo_root: Path) -> list[Finding]:
     if prompts_dir.is_dir():
         for p in sorted(prompts_dir.rglob("*.prompt.md")):
             findings.extend(check_prompt(p))
+
+    # In-scope artifact trees (SDD-FDC-001 / R6). Silently skipped if absent
+    # (e.g. when scanning a fake-repo fixture in tests).
+    sdd_root = repo_root / "spec-driven-development"
+    findings.extend(_walk_artifacts(sdd_root / "specs"))
+    findings.extend(_walk_artifacts(sdd_root / "sprints"))
 
     return findings
 
@@ -257,24 +398,47 @@ def render_json(findings: list[Finding]) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="schema_lint.py",
-        description="Validate YAML frontmatter on agent/skill/prompt files (SDD-006).",
+        description="Validate YAML frontmatter on agent/skill/prompt files (SDD-006) "
+                    "and the SDD-FDC-001 filesystem data contract for specs/** + sprints/**.",
+    )
+    parser.add_argument(
+        "paths", nargs="*",
+        help="Optional positional paths to walk as artifact trees (SDD-FDC-001 mode). "
+             "When supplied, only these paths are scanned and the .github/ checkers "
+             "are skipped. Example: schema_lint.py specs/ sprints/",
     )
     parser.add_argument("--repo-root", default=str(DEFAULT_REPO_ROOT),
-                        help="Repository root (default: detected from script location).")
+                        help="Repository root (default: detected from script location). "
+                             "Ignored when positional paths are supplied.")
     parser.add_argument("--json", action="store_true",
                         help="Emit findings as JSON instead of human-readable text.")
     args = parser.parse_args(argv)
 
-    root = Path(args.repo_root).expanduser().resolve()
-    if not root.is_dir():
-        print(f"ERROR: repo root not found: {root}", file=sys.stderr)
-        return 2
+    explicit_paths: list[Path] = []
+    if args.paths:
+        for raw in args.paths:
+            p = Path(raw).expanduser().resolve()
+            if not p.exists():
+                print(f"ERROR: path not found: {p}", file=sys.stderr)
+                return 2
+            if not p.is_dir():
+                print(f"ERROR: path is not a directory: {p}", file=sys.stderr)
+                return 2
+            explicit_paths.append(p)
+        findings = scan(Path(args.repo_root).expanduser().resolve(), paths=explicit_paths)
+        scanned_root = Path(args.paths[0]).expanduser().resolve()
+    else:
+        root = Path(args.repo_root).expanduser().resolve()
+        if not root.is_dir():
+            print(f"ERROR: repo root not found: {root}", file=sys.stderr)
+            return 2
+        findings = scan(root)
+        scanned_root = root
 
-    findings = scan(root)
     if args.json:
         print(render_json(findings))
     else:
-        print(render_human(findings, root), end="")
+        print(render_human(findings, scanned_root), end="")
     return 1 if findings else 0
 
 

@@ -29,6 +29,14 @@ Prioritized backlog with RICE scoring. Managed by Principal Product Manager.
 
 Source: Scott Epperly meeting 2026-06-02 transcript; full triage report at `sprints/PI-4/triage-scott-feedback-2026-06-03.md`.
 
+### Sprint 5 Architect Audit Bundle (filed 2026-06-07; P1)
+
+| ID | Title | Priority | R | I | C | E | RICE | Sprint | Status | Notes |
+|----|-------|----------|---|---|---|---|------|--------|--------|-------|
+| SDD-027 | Host `.gitignore` protection -- blocks first real-host dispatch (bootstrap host-link must guarantee host `.gitignore` already ignores `.github/` or the install must add it) | P1 | H | H | H | S | -- | PI-5 Sprint 2 | Allocated to PI-5 Sprint 2 (overall Sprint 6) as carry-over alongside SDD-019/020 + PI-4 deferrals. | Article X amendment CANDIDATE. Owner direction 2026-06-07: handle as normal spec first; only escalate to Article X amendment if the spec proves the article must change. Friction Analysis NOT required up front. |
+
+Source: Sprint 5 Architect audit (YELLOW verdict, 2026-06-07); none blocking sprint close.
+
 ## P2 - Should Have
 
 | ID | Title | Priority | Reach | Impact | Confidence | Effort | RICE | Sprint | Status |
@@ -49,6 +57,15 @@ Source: Scott Epperly meeting 2026-06-02 transcript; full triage report at `spri
 | SDD-022 | ADO / GitHub Issues sync bridge -- `/taskstoissues` pattern (GitHub-first, ADO fast-follow) | P2 | H | M | M | L | -- | PI-5 Sprint 4 | Allocated to PI-5 Sprint 4 (= overall Sprint 8) 2026-06-06; CLARIFY; Scott named this the gap keeping him from adopting |
 | SDD-023 | First-class user gates as uniform construct -- declared approver per phase + ledger record + dashboard surface | P2 | M | M | H | M | -- | PI-5 Sprint 5 | Allocated to PI-5 Sprint 5 (= overall Sprint 9) 2026-06-06; CLARIFY (gate inventory pre-spec); synergistic with SDD-019 |
 
+### Sprint 5 Architect Audit Bundle (filed 2026-06-07; P2)
+
+| ID | Title | Priority | R | I | C | E | RICE | Sprint | Status |
+|----|-------|----------|---|---|---|---|------|--------|--------|
+| SDD-028 | Real-Windows junction integration test (or documented limitation) -- replace mocked `mklink` test with one that actually creates and traverses a junction on Windows | P2 | M | M | M | S | -- | PI-5 Sprint 2 | Allocated to PI-5 Sprint 2 as housekeeping if capacity permits. |
+| SDD-029 | Distinguish stale-symlink from real-directory conflict in `bootstrap.py host-link` -- separate error class + remediation hint when target is a broken link vs a populated dir | P2 | M | M | H | S | -- | PI-5 Sprint 2 | Allocated to PI-5 Sprint 2 as housekeeping if capacity permits. |
+
+Source: Sprint 5 Architect audit (YELLOW verdict, 2026-06-07); none blocking sprint close.
+
 ## P3 - Could Have
 
 | ID | Title | Priority | Reach | Impact | Confidence | Effort | RICE | Sprint | Status |
@@ -63,6 +80,15 @@ Source: Scott Epperly meeting 2026-06-02 transcript; full triage report at `spri
 |----|-------|----------|---|---|---|---|------|--------|--------|
 | SDD-024 | Map Microsoft self-improving skills paper against our skill mechanism -- 1-page memo | P3 | L | L | L | S | -- | Unscheduled | Triaged; single-task dispatch; not PI-bound (reconfirmed PI-5 plan 2026-06-06); needs paper citation confirmed first |
 | SDD-025 | Stakeholder-pressure defense pattern -- playbook invoking SDD-014 Friction Analysis template | P3 | M | M | M | S | -- | PI-5 Sprint 5 | Allocated to PI-5 Sprint 5 (= overall Sprint 9) 2026-06-06; unblocked by SDD-014 (shipped PI-4 Sprint 3 commit `85b39be`) |
+
+### Sprint 5 Architect Audit Bundle (filed 2026-06-07; P3)
+
+| ID | Title | Priority | R | I | C | E | RICE | Sprint | Status |
+|----|-------|----------|---|---|---|---|------|--------|--------|
+| SDD-030 | ADR-0011: cross-platform link strategy -- document the symlink-vs-junction-vs-copy decision tree and the Windows developer-mode/admin requirement | P3 | M | L | H | S | -- | Unscheduled | Unscheduled; revisit after PI-5 Sprint 2. |
+| SDD-031 | Automate O2 (skill body content) grep test -- harness that asserts loaded skill files contain expected anchor strings, replacing the manual O2 check | P3 | L | L | M | S | -- | Unscheduled | Unscheduled; revisit after PI-5 Sprint 2. |
+
+Source: Sprint 5 Architect audit (YELLOW verdict, 2026-06-07); none blocking sprint close.
 
 Notes:
 - Design spec pre-built at `specs/2026-05-13-fleet-bridge-dashboard/DESIGN.md`

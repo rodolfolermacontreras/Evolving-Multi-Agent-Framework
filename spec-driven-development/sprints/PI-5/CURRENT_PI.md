@@ -111,7 +111,7 @@ GitHub Actions bump).
 | Sprint | Overall | Title | Items | Size | Why this order |
 |--------|---------|-------|-------|------|----------------|
 | **PI-5 Sprint 1** | Sprint 5 | Brownfield Portability | SDD-016 + SDD-017 | M | Highest-impact brownfield finisher; unblocks every future second-project bootstrap; self-contained (no upstream blockers). |
-| **PI-5 Sprint 2** | Sprint 6 | Anti-Conflict Gates + Carry-Over | SDD-019 + SDD-020 + carry-over housekeeping | M | Biggest reduction in cross-feature context bleed; bundles well because dedup logic is the data SDD-019 needs to gate on. Pick up PI-4 carry-over (domain-skill annotations, GH Actions bump) as the small housekeeping shoulder. |
+| **PI-5 Sprint 2** | Sprint 6 | Anti-Conflict Gates + Carry-Over | SDD-019 + SDD-020 + SDD-027 + SDD-028 + SDD-029 + PI-4 carry-over housekeeping | M-L | Biggest reduction in cross-feature context bleed; bundles well because dedup logic is the data SDD-019 needs to gate on. Picks up the Sprint 5 Architect audit follow-ups (SDD-027 host `.gitignore` protection P1; SDD-028 + SDD-029 P2 housekeeping if capacity permits) alongside PI-4 carry-over (domain-skill annotations, GH Actions bump). |
 | **PI-5 Sprint 3** | Sprint 7 | UI Lifecycle Variant | SDD-018 | M | Stand-alone; depends on no other PI-5 item; needed before the next dashboard iteration. |
 | **PI-5 Sprint 4** | Sprint 8 | ADO/GitHub Bridge + Model Upgrade Discipline | SDD-022 + SDD-015 | M-L | Heaviest sprint; gates external-team adoption (SDD-022) and process maturity (SDD-015). Best done after the anti-conflict + UI gates land so the bridge maps a stable model. |
 | **PI-5 Sprint 5** | Sprint 9 | Self-Review + Stakeholder Defense + Uniform Gates | SDD-021 + SDD-023 + SDD-025 | M | All three are skills-and-process items that benefit from everything earlier in PI-5. SDD-023 (uniform gates) ships last so it can declare the gates the prior sprints have already invented. |
@@ -214,10 +214,20 @@ execution (no fleet split) consistent with the PI-4 Sprint 4 precedent for
 additive well-scoped CLI work.
 
 ### Sprint 2 -- Anti-Conflict Gates + Carry-Over (planned)
-**Items**: SDD-019, SDD-020, PI-4 carry-over (domain-skill annotations, GH
-Actions Node.js bump).
-**Goal**: Land the serial CLARIFY/SPEC gate plus the cross-feature dedup pass;
-ship the two PI-4 housekeeping items.
+**Items**: SDD-019, SDD-020, **SDD-027** (P1 host `.gitignore` protection;
+filed from Sprint 5 Architect audit 2026-06-07), SDD-028 + SDD-029 (P2
+audit housekeeping if capacity permits), PI-4 carry-over (domain-skill
+annotations, GH Actions Node.js bump).
+**Goal**: Land the serial CLARIFY/SPEC gate plus the cross-feature dedup
+pass; ship the host `.gitignore` protection that blocks the first real-host
+dispatch; ship the two PI-4 housekeeping items.
+**SDD-027 handling**: SDD-027 is an Article X amendment CANDIDATE. Owner
+direction 2026-06-07 (via EM): handle as a normal spec first; only escalate
+to an Article X amendment IF the spec proves the article must change.
+Friction Analysis NOT required up front. The CLARIFY round must explicitly
+decide whether the host-`.gitignore` rule fits within Article X as written
+or requires a constitutional amendment; only if the latter does the work
+branch into amendment ceremony.
 **Status**: PLANNED. Kickoff prompt to be authored at PI-5 Sprint 1 close.
 
 ### Sprint 3 -- UI Lifecycle Variant (planned)

@@ -3,7 +3,7 @@ id: feature-prompts-index
 type: index
 status: active
 owner: principal-executive-manager
-updated: 2026-06-05
+updated: 2026-06-07
 ---
 
 # Feature Prompts -- Index
@@ -59,6 +59,22 @@ review conditions closed.
 
 Prerequisite: **Sprint 4 must close DONE** before any Sprint 5 feature starts.
 Full test suite must be green and FDC must be merged to `master`.
+
+### Sprint 6 -- PI-5 Sprint 2 / Anti-Conflict Gates + Carry-Over (SDD-019 + SDD-020 + SDD-027)
+
+| Order | File | Owner | Status |
+|-------|------|-------|--------|
+| 0 | [SPRINT-06-KICKOFF.prompt.md](SPRINT-06-KICKOFF.prompt.md) | Principal Executive Manager (lead) | READY (gated on Sprint 5 close + audit backlog + spec scaffolds) |
+| 1 | [F-06-sprint6-clarify.prompt.md](F-06-sprint6-clarify.prompt.md) | Principal Product Manager + Principal Architect | READY (gated on SPRINT-06 kickoff prereqs) |
+| 2 | [F-07-sprint6-plan-tasks.prompt.md](F-07-sprint6-plan-tasks.prompt.md) | Principal Architect + Principal Software Developer | READY (gated on F-06) |
+| 3 | [F-08-sprint6-implement.prompt.md](F-08-sprint6-implement.prompt.md) | Principal Software Developer + workers | READY (gated on F-07) |
+
+Prerequisite: **Sprint 5 must close DONE** (commit `3cb7dea`), the BACKLOG
+audit follow-ups SDD-027..031 must be filed (commit `17e7cc0`), and the three
+Sprint 6 spec dirs must be scaffolded with CLARIFY questions (commit
+`d08cd73`). F-06, F-07, F-08 run sequentially in three fresh sessions. SDD-019
+is a constitutional-amendment candidate; SDD-027 is an Article X amendment
+candidate (handled as a normal spec first per owner direction 2026-06-07).
 
 ---
 

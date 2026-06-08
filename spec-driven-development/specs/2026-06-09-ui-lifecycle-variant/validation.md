@@ -180,17 +180,17 @@ is verified.
 
 ## Manual Checks
 
-- [ ] **M-1** -- Owner reads ADR-014 before any constitution edit.
+- [x] **M-1** -- Owner reads ADR-014 before any constitution edit.
   The constitution edit to add Article XII is a separate Level-2
   gate per Article VIII (analogous to ADR-013 / Article XI rollout
   in Sprint 6). F-11 does NOT touch `constitution/principles.md`;
   the owner's separate `git commit` adding Article XII text is the
   Level-2 acceptance event.
-  **OWNER ASYNC** -- to be checked before / during Article XII landing.
-- [ ] **M-2** -- Owner reviews the wording of the proposed Article
+  Ratified by owner via Executive Manager at Sprint 7 close 2026-06-08 (commit 55b05cb).
+- [x] **M-2** -- Owner reviews the wording of the proposed Article
   XII text inside ADR-014 for tone consistency with Articles X and
   XI (terse, declarative, machine-checkable where possible).
-  **OWNER ASYNC** -- to be checked before / during Article XII landing.
+  Ratified by owner via Executive Manager at Sprint 7 close 2026-06-08 (commit 55b05cb).
 - [x] **M-3** -- After F-11 close, owner spot-checks the
   state-dashboard demo migration: open
   `specs/2026-05-16-state-dashboard/validation.md` in a browser /

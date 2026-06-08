@@ -6,14 +6,14 @@ last_amended: 2026-06-08
 
 # Framework Principles
 
-Eleven binding articles. They define how the **framework itself** works -- the rules
+Twelve binding articles. They define how the **framework itself** works -- the rules
 that any host project adopting SDD inherits. All agents (Principals and workers)
 must honor these. Exceptions require a Level 2 decision and an ADR entry.
 
 These are framework-level rules. The host project's own engineering principles
 (coding conventions, testing baselines, security rules tied to its stack) live in
 a separate `principles.md` *inside the host project's adapted constitution*. When
-a host project bootstraps SDD, it inherits these ten framework articles and adds
+a host project bootstraps SDD, it inherits these twelve framework articles and adds
 its own host-level articles on top.
 
 ---
@@ -206,12 +206,12 @@ trade-offs are otherwise balanced.
 
 ## Host Project Articles
 
-A host project that adopts SDD inherits these ten framework articles and
+A host project that adopts SDD inherits these twelve framework articles and
 adds its own articles capturing host-specific rules: coding conventions tied
 to its language/framework, security rules tied to its data sensitivity,
 testing baselines tied to its current state, deployment rules tied to its
 infrastructure. Host articles are numbered starting from H1 to distinguish
-them from framework articles (I-X).
+them from framework articles (I-XII).
 
 The Day-to-Day Agent host project's articles -- the original nine that lived
 in this file before generalization -- are an example of host articles. They

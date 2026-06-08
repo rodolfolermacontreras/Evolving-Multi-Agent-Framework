@@ -1,12 +1,12 @@
 ---
-version: '1.1.0'
+version: '1.2.0'
 ratified: 2026-05-12
-last_amended: 2026-06-03
+last_amended: 2026-06-07
 ---
 
 # Framework Principles
 
-Ten binding articles. They define how the **framework itself** works -- the rules
+Eleven binding articles. They define how the **framework itself** works -- the rules
 that any host project adopting SDD inherits. All agents (Principals and workers)
 must honor these. Exceptions require a Level 2 decision and an ADR entry.
 
@@ -136,6 +136,20 @@ spec-compliance reviewer. This codifies the convergent finding from Spec-Kit
 (`/checklist` unit tests for requirements), the DeepLearning.AI SDD course
 (Validation Scorecard), and sc-spec (`validation.md` with Definition of Done):
 validation criteria belong before implementation, not after.
+
+## Article XI: Cross-Feature Serial Gate at CLARIFY and SPEC
+
+At most one feature may occupy the CLARIFY phase at any moment, and at most
+one feature may occupy the SPEC phase at any moment. The framework enforces
+two independent per-phase locks at the repo level. The gate prevents
+inter-feature context contamination that Article VII's one-feature-one-session
+rule cannot catch -- Article VII binds the session, Article XI binds the repo.
+Lock state derives from artifact frontmatter (clarification status != done;
+spec.md status == draft), reusing SDD-FDC-001 as the substrate. Hard refusal
+applies to automated `fleet.py` dispatch; advisory warnings apply to
+interactive slash commands. Override requires `fleet.py lock force-release`
+with a mandatory `--reason` flag and a ledger-audited row. Phases outside
+CLARIFY and SPEC remain parallelizable.
 
 ---
 

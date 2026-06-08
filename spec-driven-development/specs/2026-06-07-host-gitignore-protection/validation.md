@@ -10,9 +10,10 @@ feature: 2026-06-07-host-gitignore-protection
 # Validation Contract: Host `.gitignore` Protection (SDD-027)
 
 - Spec ID: SDD-027
-- Status: ACTIVE -- contract populated at /spec finalization 2026-06-07. Locks at /tasks.
-- Rule (when locked): zero unchecked REQUIRED items before implementation is
-  considered complete.
+- Status: LOCKED at /tasks 2026-06-07
+- Rule: zero unchecked REQUIRED items before implementation is
+  considered complete. REQUIRED items cannot be loosened after lock
+  without an explicit decision recorded here (Article X).
 
 ---
 
@@ -42,5 +43,5 @@ feature: 2026-06-07-host-gitignore-protection
   answers recorded; required items trace to specific questions.
 - No constitutional amendment needed (Q1). Article X misreading corrected.
   No R0 row for "ADR + amendment shipped" -- not applicable.
-- Lock the contract at /tasks; do not loosen REQUIRED items after lock
-  without an explicit decision recorded here.
+- Contract LOCKED at /tasks 2026-06-07. Do not loosen REQUIRED items after
+  lock without an explicit decision recorded here.

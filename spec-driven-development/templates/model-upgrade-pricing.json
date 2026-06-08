@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "currency": "USD",
+  "source_notes": "Owner-editable placeholder pricing assumptions for deterministic local comparison. Replace with cited provider pricing before a real Level-2 submission.",
+  "models": {
+    "old": {
+      "input_per_1m": 1.0,
+      "output_per_1m": 5.0
+    },
+    "new": {
+      "input_per_1m": 2.0,
+      "output_per_1m": 8.0
+    }
+  },
+  "fixed_costs": {
+    "one_time": 0.0,
+    "monthly": 0.0
+  }
+}

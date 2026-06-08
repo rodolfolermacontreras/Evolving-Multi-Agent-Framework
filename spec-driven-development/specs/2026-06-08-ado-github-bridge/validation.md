@@ -1,7 +1,7 @@
 ---
 id: SDD-20260608ADOGHBRIDGE-validation
 type: validation
-status: active
+status: done
 owner: principal-architect
 updated: 2026-06-08
 feature: 2026-06-08-ado-github-bridge
@@ -18,22 +18,22 @@ feature: 2026-06-08-ado-github-bridge
 
 ## Required Items (locked for F-14)
 
-- [ ] V-1. Task parser reads `tasks.md` as the authoritative local source and extracts task ID, title, status, description, file scope, acceptance criteria references, and verification references. Covers AC-1 / R1 / R7.
-- [ ] V-2. Dry-run GitHub sync renders deterministic issue payloads, performs no network write, and exits 0 for a valid spec directory. Covers AC-2 / R2 / R3.
-- [ ] V-3. Apply-mode GitHub sync requires `GITHUB_TOKEN` or `GH_TOKEN`, constructs GitHub REST requests through stdlib `urllib.*`, and fails before writes when tokens are missing. Covers AC-3 / R2 / R6 / R8.
-- [ ] V-4. Per-spec-dir `issue-map.json` is written as deterministic JSON with schema version, spec ID, provider, repository, task ID, remote ID, URL, `last_synced_at`, `last_seen_remote_status`, and sync fingerprint. Covers AC-4 / R5.
-- [ ] V-5. Re-running sync against an existing mapping is idempotent: unchanged tasks do not duplicate issues, and changed generated body sections update only the generated region. Covers AC-5 / R5 / R7.
-- [ ] V-6. Remote/local status conflicts produce a non-mutating conflict report with task ID, local status, remote status, remote URL, conflict type, and recommended owner action; command exits non-zero and does not mutate `tasks.md`. Covers AC-6 / R1 / R4.
-- [ ] V-7. No implicit sync triggers exist: no commit hook, no dashboard-triggered write, no webhook listener, and no background daemon. Covers AC-7 / R3.
-- [ ] V-8. No credentials or token fragments are committed, stored in `issue-map.json`, written to conflict reports, or printed in command output. Covers AC-3 / R6.
-- [ ] V-9. Provider boundary includes GitHub live provider and ADO-compatible provider/test double shape without requiring live ADO execution. Covers AC-9 / R2.
-- [ ] V-10. Generated issue fields are limited to title, generated body, labels, status, source links, and task ID; no assignee, milestone, or dependency graph fields are emitted. Covers AC-8 / R7.
-- [ ] V-11. `.github/prompts/taskstoissues.prompt.md` exists and documents explicit `/taskstoissues` usage, dry-run default, apply-mode requirements, conflict handling, and no implicit writes. Covers AC-7 / R3 / R11.
-- [ ] V-12. Import scan/test proves no third-party tracker or HTTP libraries are imported: no `requests`, `httpx`, `PyGithub`, `github`, `azure-devops`, or ADO SDK. Covers AC-10 / R8.
-- [ ] V-13. Path guard tests prove generated sync state is written only in framework-owned spec directories and never into host application files. Covers AC-11 / R9.
-- [ ] V-14. CLI follows `docs/CLI-PATTERN.md`: argparse, `main(argv)`, pathlib, deterministic exit codes, and stderr for expected failures. Covers R10.
-- [ ] V-15. `python spec-driven-development/cli/schema_lint.py` exits 0 after F-14 implementation. Covers AC-12 / R12.
-- [ ] V-16. Full pytest suite exits 0 after F-14 implementation, with test count at or above the Sprint 8 baseline plus new SDD-022 tests. Covers AC-12 / R12.
+- [x] V-1. Task parser reads `tasks.md` as the authoritative local source and extracts task ID, title, status, description, file scope, acceptance criteria references, and verification references. Covers AC-1 / R1 / R7.
+- [x] V-2. Dry-run GitHub sync renders deterministic issue payloads, performs no network write, and exits 0 for a valid spec directory. Covers AC-2 / R2 / R3.
+- [x] V-3. Apply-mode GitHub sync requires `GITHUB_TOKEN` or `GH_TOKEN`, constructs GitHub REST requests through stdlib `urllib.*`, and fails before writes when tokens are missing. Covers AC-3 / R2 / R6 / R8.
+- [x] V-4. Per-spec-dir `issue-map.json` is written as deterministic JSON with schema version, spec ID, provider, repository, task ID, remote ID, URL, `last_synced_at`, `last_seen_remote_status`, and sync fingerprint. Covers AC-4 / R5.
+- [x] V-5. Re-running sync against an existing mapping is idempotent: unchanged tasks do not duplicate issues, and changed generated body sections update only the generated region. Covers AC-5 / R5 / R7.
+- [x] V-6. Remote/local status conflicts produce a non-mutating conflict report with task ID, local status, remote status, remote URL, conflict type, and recommended owner action; command exits non-zero and does not mutate `tasks.md`. Covers AC-6 / R1 / R4.
+- [x] V-7. No implicit sync triggers exist: no commit hook, no dashboard-triggered write, no webhook listener, and no background daemon. Covers AC-7 / R3.
+- [x] V-8. No credentials or token fragments are committed, stored in `issue-map.json`, written to conflict reports, or printed in command output. Covers AC-3 / R6.
+- [x] V-9. Provider boundary includes GitHub live provider and ADO-compatible provider/test double shape without requiring live ADO execution. Covers AC-9 / R2.
+- [x] V-10. Generated issue fields are limited to title, generated body, labels, status, source links, and task ID; no assignee, milestone, or dependency graph fields are emitted. Covers AC-8 / R7.
+- [x] V-11. `.github/prompts/taskstoissues.prompt.md` exists and documents explicit `/taskstoissues` usage, dry-run default, apply-mode requirements, conflict handling, and no implicit writes. Covers AC-7 / R3 / R11.
+- [x] V-12. Import scan/test proves no third-party tracker or HTTP libraries are imported: no `requests`, `httpx`, `PyGithub`, `github`, `azure-devops`, or ADO SDK. Covers AC-10 / R8.
+- [x] V-13. Path guard tests prove generated sync state is written only in framework-owned spec directories and never into host application files. Covers AC-11 / R9.
+- [x] V-14. CLI follows `docs/CLI-PATTERN.md`: argparse, `main(argv)`, pathlib, deterministic exit codes, and stderr for expected failures. Covers R10.
+- [x] V-15. `python spec-driven-development/cli/schema_lint.py` exits 0 after F-14 implementation. Covers AC-12 / R12.
+- [x] V-16. Full pytest suite exits 0 after F-14 implementation, with test count at or above the Sprint 8 baseline plus new SDD-022 tests. Covers AC-12 / R12.
 
 ---
 
@@ -41,7 +41,7 @@ feature: 2026-06-08-ado-github-bridge
 
 - [ ] O-1. Optional live GitHub smoke test using a safe owner-provided token and disposable issue target; skip cleanly when no token/repo is provided.
 - [ ] O-2. Human-readable Markdown sync report summarizing created, updated, unchanged, and conflicted tasks.
-- [ ] O-3. ADO dry-run fixture demonstrates equivalent payload shape for Work Item creation without live ADO network calls.
+- [x] O-3. ADO dry-run fixture demonstrates equivalent payload shape for Work Item creation without live ADO network calls.
 
 ---
 
@@ -109,3 +109,5 @@ feature: 2026-06-08-ado-github-bridge
 - If the owner changes Q-I and requests a third-party dependency, F-12
   must stop and route a Level-2 dependency brief before this contract
   can be locked.
+
+

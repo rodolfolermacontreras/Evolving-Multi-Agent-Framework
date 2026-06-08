@@ -498,3 +498,40 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 - Validation: 12/12 REQUIRED defined and locked for F-14; 0/12 checked because implementation has not run yet.
 - Notes: CLARIFY closed Q-J through Q-O using Sprint 8 defaults. Actual repo state corrected the kickoff assumption: `docs/MODEL-UPGRADE-PROTOCOL.md` does not exist yet and `decision-policy.md` does not reference it yet. F-13 therefore locks F-14 work to create the protocol, fixture-backed stdlib A/B harness, pricing/quality evidence, and ADR-backed constitution cross-reference. F-13 did not edit `constitution/**`.
 - Next: F-14 can start after this commit. Caveat: F-14 must not edit `constitution/decision-policy.md` until ADR-016 is accepted or the owner grants an explicit waiver; if that approval is unavailable, F-14 must stop as OWNER-ATTENTION rather than marking SDD-015 done.
+
+### F-14 -- sdd-022-implement-plus-sdd-015-qa -- OWNER-ATTENTION / BLOCKED
+
+- Date: 2026-06-08
+- Owner: Principal Software Developer
+- Commits: this commit (final SHA reported by `git log`)
+- Files changed: 19 F-14-owned paths
+  - `.github/prompts/taskstoissues.prompt.md`
+  - `spec-driven-development/cli/taskstoissues.py`
+  - `spec-driven-development/cli/test_taskstoissues.py`
+  - `spec-driven-development/cli/model_upgrade.py`
+  - `spec-driven-development/cli/test_model_upgrade.py`
+  - `spec-driven-development/docs/MODEL-UPGRADE-PROTOCOL.md`
+  - `spec-driven-development/docs/ADR/016-model-upgrade-protocol-cross-reference.md`
+  - `spec-driven-development/templates/model-upgrade-workload.json`
+  - `spec-driven-development/templates/model-upgrade-pricing.json`
+  - `spec-driven-development/specs/2026-06-08-ado-github-bridge/spec.md`
+  - `spec-driven-development/specs/2026-06-08-ado-github-bridge/plan.md`
+  - `spec-driven-development/specs/2026-06-08-ado-github-bridge/tasks.md`
+  - `spec-driven-development/specs/2026-06-08-ado-github-bridge/validation.md`
+  - `spec-driven-development/specs/2026-06-08-model-upgrade-discipline/spec.md`
+  - `spec-driven-development/specs/2026-06-08-model-upgrade-discipline/plan.md`
+  - `spec-driven-development/specs/2026-06-08-model-upgrade-discipline/tasks.md`
+  - `spec-driven-development/specs/2026-06-08-model-upgrade-discipline/validation.md`
+  - `spec-driven-development/backlog/BACKLOG.md`
+  - `spec-driven-development/exec/sprint-progress.md`
+- Tests: 305 -> 331 (+26), 2 skipped
+  - `python -m pytest spec-driven-development/cli/test_taskstoissues.py -v --tb=short` -> 15 passed
+  - `python -m pytest spec-driven-development/cli/test_model_upgrade.py -v --tb=short` -> 11 passed
+  - `python spec-driven-development/cli/schema_lint.py` -> PASS, Schema lint clean
+  - `python -m pytest spec-driven-development/ --tb=no -q` -> 331 passed, 2 skipped
+- Validation:
+  - SDD-022: 16/16 REQUIRED checked; 1/3 OPTIONAL checked (O-3 ADO dry-run provider/test shape). O-1 live GitHub smoke skipped because no owner-provided safe token/repo was supplied; O-2 Markdown sync report not implemented.
+  - SDD-015: 11/12 REQUIRED checked; V-9 remains unchecked and BLOCKED. ADR-016 is drafted as `status: draft` / `Status: proposed`, but no accepted ADR or explicit owner waiver exists, so `constitution/decision-policy.md` was not edited.
+- Notes: SDD-022 is implementation-complete as a stdlib-only `/taskstoissues` CLI with dry-run default, injectable no-network tests, GitHub `urllib.*` provider boundary, ADO dry-run provider shape, per-spec-dir `issue-map.json`, conflict-report behavior, and prompt wrapper. SDD-015 protocol, fixtures, no-network A/B harness, tests, and ADR-016 draft are complete, but the locked contract requires the decision-policy cross-reference and the governance stop condition prevents that edit until owner approval lands. Existing unrelated SDD-035/Azure-decommission dirty work was preserved and not staged.
+- Owner approval needed: accept `spec-driven-development/docs/ADR/016-model-upgrade-protocol-cross-reference.md` or record an explicit owner waiver authorizing the `spec-driven-development/constitution/decision-policy.md` cross-reference to `docs/MODEL-UPGRADE-PROTOCOL.md`.
+- Next: F-15 must NOT start until the owner approval above is recorded and SDD-015 V-9 is closed; Sprint 8 remains open.

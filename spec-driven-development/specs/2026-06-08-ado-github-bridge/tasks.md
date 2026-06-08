@@ -1,7 +1,7 @@
 ---
 id: SDD-20260608ADOGHBRIDGE-tasks
 type: tasks
-status: active
+status: done
 owner: principal-software-developer
 updated: 2026-06-08
 feature: 2026-06-08-ado-github-bridge
@@ -45,7 +45,7 @@ feature: 2026-06-08-ado-github-bridge
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: M
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/cli/taskstoissues.py`, `spec-driven-development/cli/test_taskstoissues.py`
 **Files Blocked**: `constitution/**`, `spec-driven-development/ledger/**`, `spec-driven-development/cli/fleet.py`, `spec-driven-development/cli/state_builder.py`
 **Depends on**: NONE
@@ -75,7 +75,7 @@ python -m pytest spec-driven-development/cli/test_taskstoissues.py -k "parser or
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: M
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/cli/taskstoissues.py`, `spec-driven-development/cli/test_taskstoissues.py`
 **Files Blocked**: `constitution/**`, `spec-driven-development/ledger/**`, host project application files
 **Depends on**: T-022-01
@@ -105,7 +105,7 @@ python -m pytest spec-driven-development/cli/test_taskstoissues.py -k "render or
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: M
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/cli/taskstoissues.py`, `spec-driven-development/cli/test_taskstoissues.py`
 **Files Blocked**: `constitution/**`, `.github/prompts/taskstoissues.prompt.md`
 **Depends on**: T-022-02
@@ -136,7 +136,7 @@ python -m pytest spec-driven-development/cli/test_taskstoissues.py -k "cli or dr
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: M
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/cli/taskstoissues.py`, `spec-driven-development/cli/test_taskstoissues.py`
 **Files Blocked**: `spec-driven-development/ledger/schema.sql`, `spec-driven-development/ledger/**`
 **Depends on**: T-022-03
@@ -166,7 +166,7 @@ python -m pytest spec-driven-development/cli/test_taskstoissues.py -k "mapping o
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: L
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/cli/taskstoissues.py`, `spec-driven-development/cli/test_taskstoissues.py`
 **Files Blocked**: dependency manifests, `constitution/**`
 **Depends on**: T-022-04
@@ -196,7 +196,7 @@ python -m pytest spec-driven-development/cli/test_taskstoissues.py -k "github or
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: M
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/cli/taskstoissues.py`, `spec-driven-development/cli/test_taskstoissues.py`
 **Files Blocked**: `spec-driven-development/ledger/**`, dependency manifests
 **Depends on**: T-022-05
@@ -226,7 +226,7 @@ python -m pytest spec-driven-development/cli/test_taskstoissues.py -k "provider 
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: M
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/cli/taskstoissues.py`, `spec-driven-development/cli/test_taskstoissues.py`
 **Files Blocked**: target `tasks.md` mutation, `constitution/**`
 **Depends on**: T-022-06
@@ -256,7 +256,7 @@ python -m pytest spec-driven-development/cli/test_taskstoissues.py -k "conflict"
 **Type**: [P] parallelizable after provider CLI contract stabilizes
 **Execution**: [AFK] autonomous
 **Size**: S
-**Status**: pending
+**Status**: done
 **Files**: `.github/prompts/taskstoissues.prompt.md`
 **Files Blocked**: `spec-driven-development/cli/taskstoissues.py`, `constitution/**`
 **Depends on**: T-022-03
@@ -286,7 +286,7 @@ python spec-driven-development/cli/schema_lint.py
 **Type**: [P] parallelizable after T-022-05
 **Execution**: [AFK] autonomous
 **Size**: S
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/cli/test_taskstoissues.py`
 **Files Blocked**: dependency manifests, host project application files
 **Depends on**: T-022-05
@@ -315,7 +315,7 @@ python -m pytest spec-driven-development/cli/test_taskstoissues.py -k "import or
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: S
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/specs/2026-06-08-ado-github-bridge/validation.md`, `spec-driven-development/specs/2026-06-08-ado-github-bridge/spec.md`, `spec-driven-development/specs/2026-06-08-ado-github-bridge/tasks.md`
 **Files Blocked**: F-13 SDD-015 artifacts unless F-14 explicitly owns joint close-out
 **Depends on**: T-022-07, T-022-08, T-022-09

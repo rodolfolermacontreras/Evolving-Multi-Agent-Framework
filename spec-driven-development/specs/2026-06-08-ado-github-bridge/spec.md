@@ -1,7 +1,7 @@
 ---
 id: SDD-20260608ADOGHBRIDGE-spec
 type: spec
-status: active
+status: done
 owner: principal-product-manager
 updated: 2026-06-08
 feature: 2026-06-08-ado-github-bridge

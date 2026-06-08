@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "source_notes": "Representative no-network workload derived from recent Sprint 7 and Sprint 8 artifact shapes.",
+  "scenarios": [
+    {
+      "id": "clarify-sdd-018",
+      "kind": "clarify",
+      "title": "UI Lifecycle Variant clarification",
+      "source_artifacts": ["spec-driven-development/specs/2026-06-09-ui-lifecycle-variant/clarify.md"],
+      "prompt": "Ask one decision-quality clarification question at a time and recommend a default."
+    },
+    {
+      "id": "spec-sdd-022",
+      "kind": "spec",
+      "title": "ADO/GitHub bridge spec synthesis",
+      "source_artifacts": ["spec-driven-development/specs/2026-06-08-ado-github-bridge/spec.md"],
+      "prompt": "Write goals, non-goals, requirements, acceptance criteria, and traceability for an issue-sync bridge."
+    },
+    {
+      "id": "plan-tasks-sdd-015",
+      "kind": "plan-tasks",
+      "title": "Model upgrade plan and tasks",
+      "source_artifacts": ["spec-driven-development/specs/2026-06-08-model-upgrade-discipline/plan.md", "spec-driven-development/specs/2026-06-08-model-upgrade-discipline/tasks.md"],
+      "prompt": "Decompose the approved model-upgrade protocol plan into atomic implementation tasks."
+    },
+    {
+      "id": "implement-report-sdd-018",
+      "kind": "implement-report",
+      "title": "Implementation close report",
+      "source_artifacts": ["spec-driven-development/exec/sprint-progress.md"],
+      "prompt": "Summarize implementation evidence, tests, validation counts, files changed, and owner attention items."
+    },
+    {
+      "id": "review-report-sdd-032",
+      "kind": "review-report",
+      "title": "Spec compliance and quality review",
+      "source_artifacts": ["spec-driven-development/specs/2026-06-09-sprint-6-completion/validation.md"],
+      "prompt": "Review whether an implementation matches the locked validation contract and identify residual risk."
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 ---
 id: SDD-20260608MODELUPGRADE-plan
 type: plan
-status: active
+status: blocked
 owner: principal-architect
 updated: 2026-06-08
 feature: 2026-06-08-model-upgrade-discipline

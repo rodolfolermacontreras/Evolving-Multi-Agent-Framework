@@ -1,7 +1,7 @@
 ---
 id: SDD-20260608MODELUPGRADE-spec
 type: spec
-status: active
+status: blocked
 owner: principal-product-manager
 updated: 2026-06-08
 feature: 2026-06-08-model-upgrade-discipline

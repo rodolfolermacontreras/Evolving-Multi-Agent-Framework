@@ -1,7 +1,7 @@
 ---
 id: SDD-20260608MODELUPGRADE-tasks
 type: tasks
-status: active
+status: blocked
 owner: principal-software-developer
 updated: 2026-06-08
 feature: 2026-06-08-model-upgrade-discipline
@@ -45,7 +45,7 @@ feature: 2026-06-08-model-upgrade-discipline
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: M
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/docs/MODEL-UPGRADE-PROTOCOL.md`
 **Files Blocked**: `constitution/**`, dependency manifests, live model configuration
 **Depends on**: NONE
@@ -76,7 +76,7 @@ Select-String -Path spec-driven-development/docs/MODEL-UPGRADE-PROTOCOL.md -Patt
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: S
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/templates/model-upgrade-workload.json`, `spec-driven-development/templates/model-upgrade-pricing.json`
 **Files Blocked**: `spec-driven-development/cli/model_upgrade.py`, live model configuration
 **Depends on**: T-015-01
@@ -107,7 +107,7 @@ python -m json.tool spec-driven-development/templates/model-upgrade-pricing.json
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: M
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/cli/model_upgrade.py`, `spec-driven-development/cli/test_model_upgrade.py`
 **Files Blocked**: dependency manifests, `constitution/**`
 **Depends on**: T-015-02
@@ -138,7 +138,7 @@ python -m pytest spec-driven-development/cli/test_model_upgrade.py -k "branch or
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: L
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/cli/model_upgrade.py`, `spec-driven-development/cli/test_model_upgrade.py`
 **Files Blocked**: live model APIs, third-party libraries
 **Depends on**: T-015-03
@@ -169,7 +169,7 @@ python -m pytest spec-driven-development/cli/test_model_upgrade.py -k "compare o
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: S
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/cli/test_model_upgrade.py`
 **Files Blocked**: dependency manifests
 **Depends on**: T-015-04
@@ -198,7 +198,7 @@ python -m pytest spec-driven-development/cli/test_model_upgrade.py -k "import or
 **Type**: [S] sequential, HITL-gated
 **Execution**: [HITL] owner/EM approval required before constitution edit
 **Size**: S
-**Status**: pending
+**Status**: blocked
 **Files**: `spec-driven-development/docs/ADR/016-model-upgrade-protocol-cross-reference.md`, `spec-driven-development/constitution/decision-policy.md`
 **Files Blocked**: `spec-driven-development/constitution/principles.md`
 **Depends on**: T-015-01
@@ -229,7 +229,7 @@ Select-String -Path spec-driven-development/docs/ADR/016-model-upgrade-protocol-
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous unless T-015-06 is blocked
 **Size**: S
-**Status**: pending
+**Status**: blocked
 **Files**: `spec-driven-development/specs/2026-06-08-model-upgrade-discipline/validation.md`, `spec-driven-development/specs/2026-06-08-model-upgrade-discipline/spec.md`, `spec-driven-development/specs/2026-06-08-model-upgrade-discipline/tasks.md`
 **Files Blocked**: unrelated spec dirs, SDD-035 files
 **Depends on**: T-015-01, T-015-02, T-015-03, T-015-04, T-015-05, T-015-06
@@ -262,3 +262,4 @@ python -m pytest spec-driven-development/ --tb=no -q
 - T-015-03 through T-015-05 share `cli/model_upgrade.py` and should be handled sequentially.
 - T-015-06 is the only HITL task. It must not be skipped because Sprint 8 success criteria require the decision-policy cross-reference.
 - T-015-07 cannot close if T-015-06 is blocked.
+

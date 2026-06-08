@@ -11,3 +11,4 @@ invoked with `--emit-logs` (default ON). Seeded at SDD-032 close
 | timestamp_utc | scope | candidates | overlaps | exit |
 |---------------|-------|------------|----------|------|
 | 2026-06-09T00:00:00+00:00 | seed | 0 | 0 | 0 |
+| 2026-06-08T15:06:06+00:00 | all | 60 | 6 | 0 |

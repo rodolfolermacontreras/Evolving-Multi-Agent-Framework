@@ -463,3 +463,21 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 - Validation: NOT LOCKED. `validation.md` remains `status: draft` because Q-A through Q-H are owner decisions. Q-I is answered by owner dispatch constraint: stdlib `urllib.*`, no third-party dependencies, no constitution edits.
 - Notes: F-12 pass 1 scaffolded SDD-022 from scratch and surfaced all Q-A through Q-I in `clarify.md` with PM + Architect recommendations. SPEC/PLAN/TASKS are deliberately blocked scaffolds; no implementation scope is locked. Dedup scan found only the expected SDD-022 backlog self-match. Article V preserved; no host-project pollution; no F-13 work performed.
 - Next: OWNER-ATTENTION -- owner answers Q-A through Q-H, then F-12 pass 2 can finalize `spec.md`, lock `validation.md`, author `plan.md` and `tasks.md`, and hand off to the remaining Sprint 8 sequence.
+
+### F-12 -- sdd-022-clarify-spec-plan-tasks -- DONE
+
+- Date: 2026-06-08
+- Owner: Principal Product Manager + Principal Architect
+- Commits: <pending-sha for F-12 pass 2 commit>
+- Files changed: 6
+  - spec-driven-development/specs/2026-06-08-ado-github-bridge/clarify.md
+  - spec-driven-development/specs/2026-06-08-ado-github-bridge/spec.md
+  - spec-driven-development/specs/2026-06-08-ado-github-bridge/validation.md
+  - spec-driven-development/specs/2026-06-08-ado-github-bridge/plan.md
+  - spec-driven-development/specs/2026-06-08-ado-github-bridge/tasks.md
+  - spec-driven-development/exec/sprint-progress.md (this block)
+- Tests: 305 -> 305 (docs/artifacts only; no code changes; full pytest not run in F-12 pass 2)
+- Validation: SDD-022 validation contract LOCKED for F-14 with 16 REQUIRED + 3 OPTIONAL. No REQUIRED item is deferred or loosened. F-14 owns checking V-1..V-16 after implementation evidence exists.
+- CLARIFY outcomes: owner approved Q-A through Q-H defaults with "aproved defaults"; Q-I remained resolved by dispatch constraint. Final decisions: `tasks.md` authoritative; GitHub Issues live round-trip v1; ADO adapter/test fixture fast-follow; explicit `/taskstoissues` only; `tasks.md` wins conflicts; per-spec-dir `issue-map.json`; env-var token auth with dry-run default; sync title/body/labels/status/source links only; stdlib `urllib.*` and `json` only.
+- Notes: F-12 pass 2 closed CLARIFY, finalized the spec with R1..R12 and AC-1..AC-12, locked validation V-1..V-16, authored an implementation-oriented plan, and decomposed 10 atomic tasks T-022-01..T-022-10. No Article V amendment, ADR, ledger schema migration, constitution edit, host-project write, or F-13 work was performed.
+- Next: F-13 may start in a fresh isolated session after this commit. F-14 caveat: live GitHub write validation needs a safe owner/operator token and disposable issue target; automated tests must remain no-network and credential-free.

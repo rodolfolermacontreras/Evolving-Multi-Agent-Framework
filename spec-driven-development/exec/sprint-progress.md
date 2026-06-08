@@ -603,3 +603,22 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 - Notes: CLARIFY closed Q-A through Q-E. The gate model defines gate ID, gate type, blocking scope, approver, evidence type, evidence reference, status, and next action. `validation.md` is authoritative; spec frontmatter, ledger events, and executive dashboards are summary/derived surfaces; no v1 `gates.md` is introduced. Missing REQUIRED gates block the downstream transition named by their blocking scope and block any close claim that depends on it.
 - Owner/Level-2 approvals needed before implementation: constitution edits, ledger schema migrations, new dependencies, M365 permission changes, production-branch/push behavior changes, or external write behavior changes all require explicit owner approval and ADR/Friction Analysis as applicable.
 - Next: F-17 may start in a fresh isolated session and should cite SDD-023 Gate Vocabulary for self-review gate findings.
+
+### F-17 -- end-of-session-self-review -- DONE
+
+- Date: 2026-06-08
+- Owner: Principal Architect + Principal Product Manager
+- Commits: <pending-sha>
+- Files changed: 6
+  - spec-driven-development/specs/2026-06-08-end-of-session-self-review/clarification-log.md
+  - spec-driven-development/specs/2026-06-08-end-of-session-self-review/spec.md
+  - spec-driven-development/specs/2026-06-08-end-of-session-self-review/validation.md
+  - spec-driven-development/specs/2026-06-08-end-of-session-self-review/plan.md
+  - spec-driven-development/specs/2026-06-08-end-of-session-self-review/tasks.md
+  - spec-driven-development/exec/sprint-progress.md
+- Tests: 331 -> 331 (docs/spec artifacts only; full pytest not run in F-17)
+- Schema lint: `python spec-driven-development/cli/schema_lint.py` -> PASS, Schema lint clean
+- Validation: SDD-021 validation contract LOCKED for F-19 with 12 REQUIRED + 3 manual HITL checks + 3 optional items. 0/12 REQUIRED checked because implementation has not run yet. No REQUIRED item is deferred or loosened.
+- Notes: CLARIFY closed Q-F through Q-I. The self-review loop is mandatory at feature handoff/close and sprint close, optional for material friction or manual request, and transcript-independent by default. Durable changes route through `lesson-capture`, `/evolve`, PM triage, `/constitution`, or approved implementation tasks; self-review does not silently edit agents, skills, prompts, templates, or constitution files. Gate-related findings reuse the SDD-023 fields and evidence taxonomy.
+- Owner/Level-2 approvals needed before implementation: constitution edits, ledger schema migrations, new dependencies, M365 permission changes, production-branch/push behavior changes, external write behavior changes, or direct self-review mutation of agent/skill behavior all require explicit owner approval and ADR/Friction Analysis as applicable.
+- Next: F-18 should define SDD-025 stakeholder-pressure defense and reuse SDD-023 gate vocabulary plus SDD-014 Friction Analysis routing.

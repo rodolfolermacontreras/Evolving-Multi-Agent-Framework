@@ -1,7 +1,7 @@
 ---
 id: ADR-014
 type: spec
-status: draft
+status: done
 owner: principal-architect
 updated: 2026-06-08
 feature: 2026-06-09-ui-lifecycle-variant
@@ -10,8 +10,8 @@ feature: 2026-06-09-ui-lifecycle-variant
 # ADR-014: UI Lifecycle Variant -- Article XII
 
 - Date: 2026-06-08
-- Status: **proposed** (NOT accepted; awaits owner Level-2 acceptance
-  per Article VIII, analogous to ADR-013 / Article XI rollout)
+- Status: **accepted**
+- Accepted: 2026-06-08 by Rodolfo Lerma via Executive Manager. Constitution edit landed in the same commit (Article XII added to principles.md; version 1.2.0 -> 1.3.0).
 - Authors: Principal Architect + Principal Product Manager (jointly,
   in F-10 pass 2)
 

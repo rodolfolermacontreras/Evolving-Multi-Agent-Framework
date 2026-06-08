@@ -612,7 +612,7 @@ class StateDashboardDemoMigration(unittest.TestCase):
 # ----------------------------------------------------------------------- #
 
 class ADR014ExistsAndShapeChecks(unittest.TestCase):
-    """ADR-014 exists, status `proposed`, includes proposed Article XII text."""
+    """ADR-014 exists, status `accepted`, includes proposed Article XII text."""
 
     ADR_PATH = (REPO_ROOT / "spec-driven-development" / "docs" / "ADR"
                 / "014-ui-lifecycle-variant.md")
@@ -621,15 +621,15 @@ class ADR014ExistsAndShapeChecks(unittest.TestCase):
         self.assertTrue(self.ADR_PATH.is_file(),
                         f"ADR-014 missing at {self.ADR_PATH}")
 
-    def test_adr014_status_is_proposed(self):
+    def test_adr014_status_is_accepted(self):
         text = self.ADR_PATH.read_text(encoding="utf-8").lower()
         # Top-of-body status line (not the SDD-FDC-001 frontmatter status,
-        # which is the `draft` carrier per the ADR-013 precedent). The ADR
-        # uses Markdown bold around the word, so accept either `proposed`
-        # or `**proposed**` after the `status:` token.
+        # which flipped to `done` at owner ratification 2026-06-08). The ADR
+        # uses Markdown bold around the word, so accept either `accepted`
+        # or `**accepted**` after the `status:` token.
         self.assertTrue(
-            "status: proposed" in text or "status: **proposed**" in text,
-            "ADR-014 must carry top status: proposed until owner ratification",
+            "status: accepted" in text or "status: **accepted**" in text,
+            "ADR-014 must carry top status: accepted after owner ratification",
         )
 
     def test_adr014_carries_proposed_article_xii_text(self):

@@ -1,7 +1,7 @@
 ---
-version: '1.2.0'
+version: '1.3.0'
 ratified: 2026-05-12
-last_amended: 2026-06-07
+last_amended: 2026-06-08
 ---
 
 # Framework Principles
@@ -150,6 +150,42 @@ applies to automated `fleet.py` dispatch; advisory warnings apply to
 interactive slash commands. Override requires `fleet.py lock force-release`
 with a mandatory `--reason` flag and a ledger-audited row. Phases outside
 CLARIFY and SPEC remain parallelizable.
+
+## Article XII: UI Lifecycle Variant of the Validation Contract
+
+A spec dir MAY opt into the UI Lifecycle Variant of Article X by
+declaring `ui-variant: true` in its `spec.md` frontmatter. The variant
+applies only to that spec dir; it does NOT propagate to siblings,
+parents, or path-pattern matches. Variant spec dirs follow these
+amendments to Article X:
+
+1. **Lock timing is preserved.** `validation.md` is still LOCKED at
+   `/tasks` time. The variant does not loosen the lock event.
+2. **Append-only delta mechanism replaces the no-loosening clause.**
+   After lock, variant spec dirs MAY append entries to a
+   `## Delta Entries` section in `validation.md`. Each entry is a
+   level-3 sub-section with mandatory fields `timestamp` (ISO 8601
+   UTC), `author`, `rationale`, and `item-type` (closed enum
+   `{add, wontfix, re-check, retroactive-demo}`). Existing locked
+   items are not edited; deltas are append-only and themselves
+   become part of the locked contract the moment they are committed.
+3. **Required-completeness rule is preserved.** Zero unchecked
+   REQUIRED items before implementation is considered complete --
+   for both base items AND `item-type: add` delta entries.
+   `item-type: wontfix` entries annotate without removing; the
+   underlying REQUIRED item remains in the contract unless an
+   explicit `re-check` supersedes it.
+4. **Forward-only migration.** Pre-existing locked contracts are
+   not retroactively eligible to adopt the variant. The single
+   sanctioned exception is the SDD-018 proof case
+   (`specs/2026-05-16-state-dashboard/`), tagged
+   `item-type: retroactive-demo` and enforced by a hard-coded
+   `schema_lint` allow-list.
+
+`cli/schema_lint.py` enforces this article. Delta-originated lint
+findings are prefixed `[delta]`. Authoring guidance lives in
+`docs/UI-LIFECYCLE-VARIANT.md`. The variant is documented in
+ADR-014.
 
 ---
 

@@ -24,8 +24,8 @@ Prioritized backlog with RICE scoring. Managed by Principal Product Manager.
 | SDD-016 | `.github/` symlink portability trick -- host-integration-symlink skill + bootstrap.py extension | P1 | H | H | H | M | -- | PI-5 Sprint 1 | **DONE** 2026-06-06 commit `30482d5` (host-link subcommand + tests; 200 -> 213) |
 | SDD-017 | Hire `dev-env-manager` worker -- worktree, symlink, branch hygiene, env bootstrap | P1 | M | H | H | S | -- | PI-5 Sprint 1 | **DONE** 2026-06-06 commit `30482d5` (dev-env-manager-general rostered with host-integration-symlink skill) |
 | SDD-018 | UI development lifecycle variant -- relaxed Article X with validation.md delta entries | P1 | M | H | M | M | -- | PI-5 Sprint 3 | Allocated to PI-5 Sprint 3 (= overall Sprint 7) 2026-06-06; CLARIFY (ADR vs separate command) gates SPEC |
-| SDD-019 | Serial gate on CLARIFY/SPEC (repo-wide) -- constitutional amendment; fleet.py enforcement | P1 | H | H | M | M | -- | PI-5 Sprint 2 | Allocated to PI-5 Sprint 2 (= overall Sprint 6) 2026-06-06; bundled with SDD-020; CLARIFY-heavy |
-| SDD-020 | Cross-feature deduplication pass at /triage and /clarify -- pre-spec overlap scan | P1 | M | H | H | S | -- | PI-5 Sprint 2 | Allocated to PI-5 Sprint 2 (= overall Sprint 6) 2026-06-06; bundled with SDD-019 |
+| SDD-019 | Serial gate on CLARIFY/SPEC (repo-wide) -- constitutional amendment; fleet.py enforcement | P1 | H | H | M | M | -- | PI-5 Sprint 2 | **DONE** 2026-06-07 commits `524872b` (fleet.py lock scanner + gate), `0449805` (Article XI); 2/11 REQUIRED deferred (R7 queue, R8 grandfather) to Sprint 7 |
+| SDD-020 | Cross-feature deduplication pass at /triage and /clarify -- pre-spec overlap scan | P1 | M | H | H | S | -- | PI-5 Sprint 2 | **DONE** 2026-06-07 commit `8eb564d` (cli/dedup.py + tests); 2/10 REQUIRED deferred (R6 log writers, R8 prompt hooks) to Sprint 7 |
 
 Source: Scott Epperly meeting 2026-06-02 transcript; full triage report at `sprints/PI-4/triage-scott-feedback-2026-06-03.md`.
 
@@ -33,7 +33,7 @@ Source: Scott Epperly meeting 2026-06-02 transcript; full triage report at `spri
 
 | ID | Title | Priority | R | I | C | E | RICE | Sprint | Status | Notes |
 |----|-------|----------|---|---|---|---|------|--------|--------|-------|
-| SDD-027 | Host `.gitignore` protection -- blocks first real-host dispatch (bootstrap host-link must guarantee host `.gitignore` already ignores `.github/` or the install must add it) | P1 | H | H | H | S | -- | PI-5 Sprint 2 | Allocated to PI-5 Sprint 2 (overall Sprint 6) as carry-over alongside SDD-019/020 + PI-4 deferrals. | Article X amendment CANDIDATE. Owner direction 2026-06-07: handle as normal spec first; only escalate to Article X amendment if the spec proves the article must change. Friction Analysis NOT required up front. |
+| SDD-027 | Host `.gitignore` protection -- blocks first real-host dispatch (bootstrap host-link must guarantee host `.gitignore` already ignores `.github/` or the install must add it) | P1 | H | H | H | S | -- | PI-5 Sprint 2 | **DONE** 2026-06-07 commit `302bee5` (host .gitignore protection); 1/12 REQUIRED deferred (R12 HOST-INTEGRATION.md docs) to Sprint 7. No Article X amendment needed -- Article X misreading corrected (see ADR-013 context). |
 
 Source: Sprint 5 Architect audit (YELLOW verdict, 2026-06-07); none blocking sprint close.
 
@@ -61,8 +61,8 @@ Source: Sprint 5 Architect audit (YELLOW verdict, 2026-06-07); none blocking spr
 
 | ID | Title | Priority | R | I | C | E | RICE | Sprint | Status |
 |----|-------|----------|---|---|---|---|------|--------|--------|
-| SDD-028 | Real-Windows junction integration test (or documented limitation) -- replace mocked `mklink` test with one that actually creates and traverses a junction on Windows | P2 | M | M | M | S | -- | PI-5 Sprint 2 | Allocated to PI-5 Sprint 2 as housekeeping if capacity permits. |
-| SDD-029 | Distinguish stale-symlink from real-directory conflict in `bootstrap.py host-link` -- separate error class + remediation hint when target is a broken link vs a populated dir | P2 | M | M | H | S | -- | PI-5 Sprint 2 | Allocated to PI-5 Sprint 2 as housekeeping if capacity permits. |
+| SDD-028 | Real-Windows junction integration test (or documented limitation) -- replace mocked `mklink` test with one that actually creates and traverses a junction on Windows | P2 | M | M | M | S | -- | PI-5 Sprint 2 | **DONE** 2026-06-07 commit `4a8c03c` (documented limitation + platform-conditional skip) |
+| SDD-029 | Distinguish stale-symlink from real-directory conflict in `bootstrap.py host-link` -- separate error class + remediation hint when target is a broken link vs a populated dir | P2 | M | M | H | S | -- | PI-5 Sprint 2 | **DONE** 2026-06-07 commit `4a8c03c` (stale-symlink vs real-directory distinction + tests) |
 
 Source: Sprint 5 Architect audit (YELLOW verdict, 2026-06-07); none blocking sprint close.
 

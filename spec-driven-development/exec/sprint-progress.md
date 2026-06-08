@@ -210,3 +210,68 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 - Notes: Sprint 5 shipped the brownfield-portability bundle that unblocks every future second-project bootstrap. `bootstrap.py host-link` is cross-platform (POSIX symlink + Windows junction fallback), dry-run-by-default, abort-on-conflict-by-default with explicit `--backup` / `--force` opt-ins. The dev-env-manager-general worker is rostered with its host-integration-symlink skill pack. HOST-INTEGRATION.md provides the host operator with an end-to-end walkthrough including the three CI/Actions mitigation options. The sprint ran as a consolidated single-session execution (owner directive 2026-06-06) rather than the default Article VII three-session split -- the tight coupling between F-03 (PI plan that names the spec dir), F-04 (spec the implementation depends on), and F-05 (implementation that tests the spec) justified the departure. TDD discipline held: tests authored before code, schema_lint clean throughout, no validation loosening.
 - Next: PI-5 Sprint 2 = SDD-019 + SDD-020 + PI-4 carry-over housekeeping. Kickoff prompt not yet authored -- owner to request from EM (or author directly when ready to start Sprint 6).
 - Lesson candidate (PI-5 retrospective): the consolidated-session pattern worked for tightly-coupled brownfield-portability work where every artifact is small. It may NOT scale to larger sprints with cross-cutting CLI extensions; the next consolidated-session decision should be made per-sprint, not as a new default.
+
+---
+
+## Sprint 6 -- PI-5 Sprint 2 / Anti-Conflict Gates + Carry-Over
+
+- Sprint kickoff: [../feature-prompts/SPRINT-06-KICKOFF.prompt.md](../feature-prompts/SPRINT-06-KICKOFF.prompt.md)
+- Prerequisite: Sprint 5 closed DONE. Full suite green at 213. Spec dirs scaffolded at `d08cd73`.
+- Sequence: F-06 (CLARIFY + spec finalization) -> F-07 (plan + tasks + ADR) -> F-08 (implement + QA + retro)
+- Owner: Principal Executive Manager (lead); PM + Architect for F-06; Architect + SW Dev for F-07; SW Dev + workers for F-08.
+
+### F-06 -- sprint6-clarify -- DONE
+
+- Date: 2026-06-07
+- Owner: Principal Architect + Principal Product Manager (via EM-dispatched subagent)
+- Commits: `93aadf3`, `718221a`, `a0ebe08`
+- Files changed: 9 (3 clarify.md + 3 spec.md + 3 validation.md across 3 spec dirs)
+- Tests: 213 -> 213 (doc-only; no code changes in F-06)
+- Notes: All 23 CLARIFY questions answered. Two L2 escalations surfaced to owner: (1) SDD-019 Q5 = new Article XI, not Article VIII (numbering error corrected); (2) SDD-027 Q1 = Article X misreading corrected, no amendment needed. Owner approved 1A + 2A. All 3 specs APPROVED, all 3 validation contracts ACTIVE.
+- Next: F-07
+
+### F-07 -- sprint6-plan-tasks -- DONE
+
+- Date: 2026-06-07
+- Owner: Principal Software Developer (via EM-dispatched subagent)
+- Commits: `ebf740d` (ADR-013), `1c0454b`, `7d9a206`, `d922a5b`
+- Files changed: 10 (1 ADR + 3 plan.md + 3 tasks.md + 3 validation.md lock updates)
+- Tests: 213 -> 213 (doc-only)
+- Notes: ADR-013 drafted (Article XI constitutional amendment). 27 tasks defined across 3 specs (7 for SDD-019, 9 for SDD-020, 11 for SDD-027 including SDD-028/029 pull-ins). All 3 validation contracts LOCKED.
+- Next: F-08
+
+### F-08 -- sprint6-implement -- DONE
+
+- Date: 2026-06-07
+- Owner: Principal Software Developer (via EM-dispatched subagent; no fleet split)
+- Commits: `8eb564d`, `524872b`, `0449805`, `302bee5`, `4a8c03c`, `e112fde`, `649fbf4`, `89e630f`
+- Files changed: ~25 (cli/dedup.py new, cli/test_dedup.py new, cli/fleet.py extended, cli/test_fleet.py extended, cli/bootstrap.py extended, cli/test_bootstrap.py extended, cli/host_gitignore_manifest.json new, constitution/principles.md amended, 9 spec-dir status updates, exec/ state regen)
+- Tests: 213 -> 258 (+45; 22 dedup + 9 serial-gate + 13 gitignore + 4 SDD-028/029; 2 platform-conditional skips)
+- Validation: SDD-019 9/11 REQUIRED, SDD-020 8/10 REQUIRED, SDD-027 11/12 REQUIRED. 5 REQUIRED items deferred to Sprint 7 (see below).
+- Notes: Implementation order: SDD-020 first (no constitutional risk) -> SDD-019 (lock scanner + gate + Article XI) -> SDD-027 (gitignore protection) -> SDD-028/029 (P2 housekeeping). Article XI committed after ADR. 1 pre-existing test flake (state_builder date boundary) unrelated to Sprint 6.
+- Next: Sprint 6 close block below.
+
+### Sprint 6 -- CLOSED
+
+- Date: 2026-06-07
+- Owner: Principal Executive Manager (lead); PM + Architect owned F-06; Architect + SW Dev owned F-07; SW Dev + workers owned F-08
+- Features completed: F-06, F-07, F-08
+- Commits: `2c3e45a`, `93aadf3`, `718221a`, `a0ebe08`, `ebf740d`, `1c0454b`, `7d9a206`, `d922a5b`, `8eb564d`, `524872b`, `0449805`, `302bee5`, `4a8c03c`, `e112fde`, `649fbf4`, `89e630f`
+- Tests: 213 -> 258 (+45)
+- Validation: SDD-019 9/11 REQUIRED, SDD-020 8/10 REQUIRED, SDD-027 11/12 REQUIRED
+- ADRs: ADR-013 (serial CLARIFY/SPEC gate, Article XI)
+- PI-5 status: ACTIVE; Sprint 2 closed; 3 sprints remaining (Sprint 3 = SDD-018 UI Lifecycle Variant)
+- SDD-019: DONE (core shipped; R7 priority queue + R8 grandfather deferred)
+- SDD-020: DONE (core shipped; R6 log writers + R8 prompt hooks deferred)
+- SDD-027: DONE (core shipped; R12 HOST-INTEGRATION.md docs deferred)
+- SDD-028: DONE (documented limitation + platform-conditional skip)
+- SDD-029: DONE (stale-symlink vs real-directory distinction + tests)
+- PI-4 carry-over (domain-skill annotations, GH Actions Node.js bump): carried forward -- not pulled into Sprint 6 due to capacity
+- Deferred REQUIRED items (5 total, carry to Sprint 7 as P2):
+  - SDD-019 R7: priority-weighted FIFO queue ordering
+  - SDD-019 R8: grandfather migration for existing open features
+  - SDD-020 R6: triple-destination log writers (ledger + spec-dir + DEDUP-LOG)
+  - SDD-020 R8: /triage and /clarify prompt hook integration
+  - SDD-027 R12: HOST-INTEGRATION.md documentation update
+- Notes: Sprint 6 was the highest-CLARIFY-load sprint in PI-5 (23 questions across 3 specs). The EM-routed consolidated execution pattern (owner directive "get this done, route tasks") worked for the strategic scope: 3 specs through the full lifecycle in one session, 16 commits, 45 new tests, 1 ADR, 1 constitutional amendment (Article XI). The most impactful finding was the Article X misreading -- all three scaffolded spec dirs and the kickoff prompt referenced "Article X (Host Integration)" but Article X is actually "Validation Is a Pre-Implementation Contract." The Architect caught this in pre-CLARIFY analysis; the owner confirmed no amendment needed. Five REQUIRED validation items deferred as last-mile housekeeping; all core functionality shipped. The dedup CLI (cli/dedup.py) and the serial gate (fleet.py lock scanner + pre-dispatch check) are independently composable as planned.
+- Next: PI-5 Sprint 3 = UI Lifecycle Variant (SDD-018). Kickoff prompt: not yet authored -- owner to request from EM when ready to start Sprint 7.

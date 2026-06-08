@@ -9,7 +9,7 @@ sprint: PI-5
 
 # PI-5: Brownfield Adoption + Anti-Conflict + Stakeholder Discipline
 
-- Status: **Active** (Sprint 1 CLOSED 2026-06-06; 4 sprints remaining)
+- Status: **Active** (Sprint 1 CLOSED 2026-06-06, Sprint 2 CLOSED 2026-06-07; 3 sprints remaining)
 - Theme: Make the framework safely adoptable by other teams, harden the gates that prevent two features from colliding, and finish the discipline tools surfaced by the Scott Feedback Bundle.
 - Started: 2026-06-06
 - Owner: principal-executive-manager
@@ -213,11 +213,57 @@ state-regen), 200 -> 213 tests, zero contract loosening.
 execution (no fleet split) consistent with the PI-4 Sprint 4 precedent for
 additive well-scoped CLI work.
 
-### Sprint 2 -- Anti-Conflict Gates + Carry-Over (planned)
-**Items**: SDD-019, SDD-020, **SDD-027** (P1 host `.gitignore` protection;
-filed from Sprint 5 Architect audit 2026-06-07), SDD-028 + SDD-029 (P2
-audit housekeeping if capacity permits), PI-4 carry-over (domain-skill
-annotations, GH Actions Node.js bump).
+### Sprint 2 -- Anti-Conflict Gates + Carry-Over -- CLOSED 2026-06-07
+**Status**: **DONE** (consolidated execution per owner directive 2026-06-07)
+**Closed**: 2026-06-07
+**Spec dirs**:
+- `specs/2026-06-07-serial-clarify-spec-gate/` (SDD-019)
+- `specs/2026-06-07-cross-feature-dedup/` (SDD-020)
+- `specs/2026-06-07-host-gitignore-protection/` (SDD-027)
+**Sprint kickoff**: [`../../feature-prompts/SPRINT-06-KICKOFF.prompt.md`](../../feature-prompts/SPRINT-06-KICKOFF.prompt.md)
+**Sprint chain (chronological, on master)**:
+- `2c3e45a` chore: pre-Sprint-6 exec/ state refresh
+- `93aadf3` spec(serial-gate): SDD-019 CLARIFY closed + spec finalized
+- `718221a` spec(dedup): SDD-020 CLARIFY closed + spec finalized
+- `a0ebe08` spec(gitignore): SDD-027 CLARIFY closed + spec finalized
+- `ebf740d` docs(adr): ADR-013 serial CLARIFY/SPEC gate (Article XI)
+- `1c0454b` plan(serial-gate): SDD-019 plan + tasks + validation locked
+- `7d9a206` plan(dedup): SDD-020 plan + tasks + validation locked
+- `d922a5b` plan(gitignore): SDD-027 plan + tasks + validation locked
+- `8eb564d` feat(dedup): SDD-020 implement cli/dedup.py + tests
+- `524872b` feat(serial-gate): SDD-019 implement lock scanner + gate + subcommands
+- `0449805` feat(constitution): add Article XI -- serial gate (ADR-013)
+- `302bee5` feat(gitignore): SDD-027 implement host .gitignore protection
+- `4a8c03c` fix(bootstrap): SDD-028 junction test + SDD-029 stale-symlink distinction
+- `e112fde` spec(sprint-6): check validation contracts
+- `649fbf4` close(sprint-6): mark all spec artifacts done
+- `89e630f` chore: regenerate exec/ state -- Sprint 6 close
+**Tests**: 213 -> 258 (+45 net; +22 dedup, +9 serial gate, +13 gitignore, +4 SDD-028/029; 2 skipped platform-conditional).
+**Validation**: SDD-019 9/11 REQUIRED checked (R7 queue, R8 grandfather deferred); SDD-020 8/10 REQUIRED checked (R6 log writers, R8 prompt hooks deferred); SDD-027 11/12 REQUIRED checked (R12 docs deferred). 5 REQUIRED items carry to Sprint 7 as P2 housekeeping.
+**ADRs**: ADR-013 (serial CLARIFY/SPEC gate, Article XI).
+**SDD-019**: DONE (core: lock scanner, gate check, force-release; deferred: priority queue, grandfather migration)
+**SDD-020**: DONE (core: three-layer heuristic, tiered action, CLI; deferred: log writers, prompt hooks)
+**SDD-027**: DONE (core: gitignore detection, mode flag, manifest; deferred: HOST-INTEGRATION.md update)
+**SDD-028**: DONE (documented Windows junction limitation + platform-conditional skip)
+**SDD-029**: DONE (stale-symlink vs real-directory distinction + tests)
+**PI-4 carry-over**: domain-skill annotations and GH Actions Node.js bump NOT pulled in -- carried to Sprint 7 or later.
+**Retro (one paragraph)**: Sprint 6 ran as a consolidated EM-routed execution
+(owner directive 2026-06-07 "get this done, route tasks to the right agent"),
+departing from the default Article VII three-session split. The EM routed the
+Architect for read-only CLARIFY analysis (all 23 questions), escalated two L2
+constitutional decisions to the owner (SDD-019 Article XI = new article not
+Article VII extension; SDD-027 Article X misreading corrected = no amendment
+needed), then dispatched F-06 (spec finalization), F-07 (plan + tasks + ADR),
+and F-08 (implementation) sequentially through principal subagents. The
+highest-impact finding was the Article X misreading: the kickoff prompt and
+three scaffolded spec dirs all referenced "Article X (Host Integration)" but
+Article X is actually "Validation Is a Pre-Implementation Contract." The
+Architect caught this in analysis; the owner confirmed no amendment needed.
+Five REQUIRED validation items (2 from SDD-019, 2 from SDD-020, 1 from
+SDD-027) are deferred as Sprint 7 P2 carry-over -- all are last-mile items
+(queue ordering, grandfather migration, log writers, prompt hooks, docs) while
+core functionality shipped for all three features. Net: 16 commits, 213 -> 258
+tests, 1 ADR, 1 constitutional amendment (Article XI, principles.md 1.2.0).
 **Goal**: Land the serial CLARIFY/SPEC gate plus the cross-feature dedup
 pass; ship the host `.gitignore` protection that blocks the first real-host
 dispatch; ship the two PI-4 housekeeping items.

@@ -19,21 +19,21 @@ feature: 2026-06-07-cross-feature-dedup
 
 ## Required Items (locked at /tasks)
 
-- [ ] R1. Scan covers `backlog/BACKLOG.md` + `IDEAS.md` + open spec dirs; excludes done/archived (Q1). Test: fixture with mixed done/open specs; only open specs reported as candidates.
-- [ ] R2. Three-layer heuristic fires correctly -- HARD on exact frontmatter `id` collision, SOFT on fuzzy title (SequenceMatcher ratio >= 0.8), ADVISORY on keyword Jaccard >= threshold (Q2). Test: representative inputs per layer + negative controls that do NOT fire.
-- [ ] R3. `cli/dedup.py` is standalone, runnable, stdlib-only, `main(argv)` signature (Q3). Test: subprocess invocation succeeds; no import dependency on `fleet.py`.
-- [ ] R4. HARD blocks triage/clarify; SOFT prompts owner; ADVISORY warns and proceeds (Q4). Test: fixture per tier, assert correct exit code and output.
-- [ ] R5. Independent of SDD-019 serial gate; no import dependency on `fleet.py`, no lock check (Q5). Test: dedup runs without fleet.py lock state present.
-- [ ] R6. Dedup log written to all three destinations: ledger row + per-spec-dir `dedup-scan.md` + rolling `backlog/DEDUP-LOG.md` (Q6). Test: verify all three artifacts after a scan.
-- [ ] R7. Empty corpus emits explicit "no corpus to dedup against; 0 candidates scanned" notice, not silent skip (Q7). Test: empty BACKLOG fixture.
-- [ ] R8. `/triage` and `/clarify` prompts reference the dedup pass. Test: grep prompt files for dedup invocation.
-- [ ] R9. Full test suite passes (>= 213 baseline, no regression).
-- [ ] R10. `schema_lint` stays clean.
+- [x] R1. Scan covers `backlog/BACKLOG.md` + `IDEAS.md` + open spec dirs; excludes done/archived (Q1). Test: TestLoadCorpusBacklog, TestLoadCorpusOpenSpecs, TestLoadCorpusIdeas.
+- [x] R2. Three-layer heuristic fires correctly -- HARD on exact frontmatter `id` collision, SOFT on fuzzy title (SequenceMatcher ratio >= 0.8), ADVISORY on keyword Jaccard >= threshold (Q2). Test: TestLayer1HardExactId, TestLayer2SoftFuzzy, TestLayer3AdvisoryJaccard + negative controls.
+- [x] R3. `cli/dedup.py` is standalone, runnable, stdlib-only, `main(argv)` signature (Q3). Test: TestStdlibOnly, TestMainSignature, TestIndependentOfFleet.
+- [x] R4. HARD blocks triage/clarify; SOFT prompts owner; ADVISORY warns and proceeds (Q4). Test: TestTieredHardExits1, TestTieredCleanExits0, TestTieredSoftNoPrompt, TestTieredAdvisoryExits0.
+- [x] R5. Independent of SDD-019 serial gate; no import dependency on `fleet.py`, no lock check (Q5). Test: TestIndependentOfFleet.
+- [ ] R6. Dedup log written to all three destinations: ledger row + per-spec-dir `dedup-scan.md` + rolling `backlog/DEDUP-LOG.md` (Q6). DEFERRED: log writers stubbed for v1; implemented as CLI scan only. Carry to Sprint 7.
+- [x] R7. Empty corpus emits explicit "no corpus to dedup against; 0 candidates scanned" notice, not silent skip (Q7). Test: TestEmptyCorpusNotice.
+- [ ] R8. `/triage` and `/clarify` prompts reference the dedup pass. DEFERRED: prompt integration requires prompt file edits. Carry to Sprint 7.
+- [x] R9. Full test suite passes (>= 213 baseline, no regression). 258 passed.
+- [x] R10. `schema_lint` stays clean. Verified exit 0.
 
 ## Optional / Best-Effort Items
 
 - [ ] O1. Dashboard surface lists recent dedup decisions or pending overlap flags.
-- [ ] O2. CLI supports `--format json|table` mirroring SDD-FDC-001 `count` convention.
+- [x] O2. CLI supports `--format json|table` mirroring SDD-FDC-001 `count` convention. Test: TestCLIScanJsonFormat.
 
 ## Notes
 

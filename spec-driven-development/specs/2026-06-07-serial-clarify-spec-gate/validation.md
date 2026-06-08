@@ -19,17 +19,17 @@ feature: 2026-06-07-serial-clarify-spec-gate
 
 ## Required Items (locked at /tasks)
 
-- [ ] R1. `fleet.py` dispatching a second CLARIFY while another feature holds the lock exits non-zero naming the lock holder (Q1, Q3). Test: mock two features, dispatch second, assert exit 1 + message naming holder.
-- [ ] R2. Two independent per-phase locks (one CLARIFY, one SPEC) allow features in different phases to coexist (Q1). Test: Feature A in CLARIFY + Feature B in SPEC both proceed without conflict.
-- [ ] R3. Lock state derived from frontmatter -- clarification status != done = CLARIFY lock held, spec.md status == draft = SPEC lock held (Q2). Test: create fixture spec dirs with various frontmatter states, assert lock detection matches expected state.
-- [ ] R4. `fleet.py lock force-release <feature> --reason "..."` writes ledger row with mandatory --reason (Q4). Test: force-release + verify ledger row content (event_type, feature, reason, timestamp).
-- [ ] R5. Article XI added to `constitution/principles.md`; version 1.2.0; `schema_lint` accepts (Q5). Test: schema_lint clean after amendment.
-- [ ] R6. Intra-feature parallel workers proceed; inter-feature same-phase workers blocked (Q6). Test: dispatch N workers for lock-holding feature succeeds; dispatch 1 worker for non-holding feature in same phase refused.
-- [ ] R7. Queue releases in priority-weighted FIFO order (Q7). Test: 3 features queue for CLARIFY lock; highest-priority released first; same-priority breaks by FIFO timestamp.
-- [ ] R8. Existing open features at enforcement turn-on are grandfathered (Q8). Test: fixture with pre-existing open spec dirs; gate does not retroactively block them.
-- [ ] R9. `/plan`, `/tasks`, `/implement`, `/qa`, `/retro` dispatch is NOT gated (Q9). Test: dispatch for post-SPEC phases proceeds regardless of lock state.
-- [ ] R10. Full test suite passes (>= 213 baseline, no regression).
-- [ ] R11. `schema_lint` stays clean.
+- [x] R1. `fleet.py` dispatching a second CLARIFY while another feature holds the lock exits non-zero naming the lock holder (Q1, Q3). Test: TestSerialGateBlocks.test_gate_blocks_second_clarify.
+- [x] R2. Two independent per-phase locks (one CLARIFY, one SPEC) allow features in different phases to coexist (Q1). Test: TestScanLockState.test_scan_lock_state_both.
+- [x] R3. Lock state derived from frontmatter -- clarification status != done = CLARIFY lock held, spec.md status == draft = SPEC lock held (Q2). Test: TestScanLockState (4 tests).
+- [x] R4. `fleet.py lock force-release <feature> --reason "..."` writes ledger row with mandatory --reason (Q4). Test: TestLockForceRelease.test_lock_force_release.
+- [x] R5. Article XI added to `constitution/principles.md`; version 1.2.0; `schema_lint` accepts (Q5). Verified: version 1.2.0, schema_lint exit 0.
+- [x] R6. Intra-feature parallel workers proceed; inter-feature same-phase workers blocked (Q6). Test: TestSerialGateBlocks.test_gate_allows_same_feature + test_gate_blocks_second_clarify.
+- [ ] R7. Queue releases in priority-weighted FIFO order (Q7). DEFERRED: queue management requires backlog priority integration. V1 uses first-found semantics. Carry to Sprint 7.
+- [ ] R8. Existing open features at enforcement turn-on are grandfathered (Q8). DEFERRED: grandfathering requires migration logic. V1 treats all open features uniformly. Carry to Sprint 7.
+- [x] R9. `/plan`, `/tasks`, `/implement`, `/qa`, `/retro` dispatch is NOT gated (Q9). Test: TestSerialGateBlocks.test_gate_allows_post_spec.
+- [x] R10. Full test suite passes (>= 213 baseline, no regression). 258 passed.
+- [x] R11. `schema_lint` stays clean. Verified exit 0.
 
 ## Optional / Best-Effort Items
 

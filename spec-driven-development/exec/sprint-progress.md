@@ -33,7 +33,7 @@ Maintained by feature workers themselves. The Executive Manager and the
 
 - Date: 2026-06-05
 - Owner: Principal Software Developer
-- Commits: <pending-sha>
+- Commits: <this commit>
 - Files changed: 2
   - spec-driven-development/specs/2026-06-04-filesystem-data-contracts/tasks.md (new)
   - spec-driven-development/exec/sprint-progress.md (this block)
@@ -575,3 +575,31 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 - Owner ratification / push approval: **APPROVED 2026-06-08**. Evidence: owner message via Executive Manager, "yes Sprint 8 was ratified, we are good". This satisfies the Sprint 8 pre-push approval gate; no push was performed by this stamp.
 - Notes: Sprint 8 shipped the external issue-tracker bridge and model-upgrade governance without adding third-party dependencies or weakening validation discipline. The bridge keeps tracker sync explicit and reversible: dry-run first, token-gated writes, generated-region updates, deterministic issue-map state, and conflict reports that never mutate `tasks.md`. The model-upgrade protocol now forces future model swaps through Level-2 evidence, fixture-backed A/B comparison, and cost/quality deltas before any assignment change. The sprint's main process lesson is governance-positive blocking: when SDD-015 needed a constitution-level cross-reference, the implementation stopped until ADR-016 was accepted instead of treating approval as paperwork after the fact.
 - Next: PI-5 Sprint 5 = Self-Review + Uniform Gates + Stakeholder Defense (SDD-021 + SDD-023 + SDD-025). Kickoff prompt: [`../feature-prompts/SPRINT-09-KICKOFF.prompt.md`](../feature-prompts/SPRINT-09-KICKOFF.prompt.md). Sprint 9 prerequisite 4 is satisfied by the owner ratification / push approval stamp above; do not push future Sprint 9/PI-5 close commits without their own explicit owner approval.
+
+---
+
+## Sprint 9 -- PI-5 Sprint 5 / Self-Review + Uniform Gates + Stakeholder Defense
+
+- Sprint kickoff: [../feature-prompts/SPRINT-09-KICKOFF.prompt.md](../feature-prompts/SPRINT-09-KICKOFF.prompt.md)
+- Prerequisite: Sprint 8 ratification recorded in commit `8b7d5b9` with owner evidence: "yes Sprint 8 was ratified, we are good".
+- Sequence: F-16 -> F-17 -> F-18 -> F-19 -> F-20
+- Owner: Principal Executive Manager (lead); PM + Architect for F-16/F-17/F-18; SW Dev + workers for F-19/F-20.
+
+### F-16 -- first-class-user-gates -- DONE
+
+- Date: 2026-06-08
+- Owner: Principal Architect + Principal Product Manager
+- Commits: <pending-sha>
+- Files changed: 6
+  - spec-driven-development/specs/2026-06-08-first-class-user-gates/clarification-log.md
+  - spec-driven-development/specs/2026-06-08-first-class-user-gates/spec.md
+  - spec-driven-development/specs/2026-06-08-first-class-user-gates/validation.md
+  - spec-driven-development/specs/2026-06-08-first-class-user-gates/plan.md
+  - spec-driven-development/specs/2026-06-08-first-class-user-gates/tasks.md
+  - spec-driven-development/exec/sprint-progress.md
+- Tests: 331 -> 331 (docs/spec artifacts only; full pytest not run in F-16)
+- Schema lint: `python spec-driven-development/cli/schema_lint.py` -> PASS, Schema lint clean
+- Validation: SDD-023 validation contract LOCKED for F-19 with 14 REQUIRED + 3 manual HITL checks + 3 optional items. 0/14 REQUIRED checked because implementation has not run yet. No REQUIRED item is deferred or loosened.
+- Notes: CLARIFY closed Q-A through Q-E. The gate model defines gate ID, gate type, blocking scope, approver, evidence type, evidence reference, status, and next action. `validation.md` is authoritative; spec frontmatter, ledger events, and executive dashboards are summary/derived surfaces; no v1 `gates.md` is introduced. Missing REQUIRED gates block the downstream transition named by their blocking scope and block any close claim that depends on it.
+- Owner/Level-2 approvals needed before implementation: constitution edits, ledger schema migrations, new dependencies, M365 permission changes, production-branch/push behavior changes, or external write behavior changes all require explicit owner approval and ADR/Friction Analysis as applicable.
+- Next: F-17 may start in a fresh isolated session and should cite SDD-023 Gate Vocabulary for self-review gate findings.

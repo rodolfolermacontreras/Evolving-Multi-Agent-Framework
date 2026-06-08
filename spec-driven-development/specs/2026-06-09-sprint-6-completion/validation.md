@@ -1,7 +1,7 @@
 ---
 id: SDD-20260609S6COMPLETE-validation
 type: validation
-status: active
+status: done
 owner: principal-architect
 updated: 2026-06-09
 feature: 2026-06-09-sprint-6-completion
@@ -141,9 +141,9 @@ feature: 2026-06-09-sprint-6-completion
   intended hook invocation. (R4 is a behavior change in agent
   prompts, not in code; a one-eye human review at close prevents
   silent prompt drift.) **Reviewed and approved by Rodolfo Lerma 2026-06-08 via EM ("wording is fine"). Pre-push gate.**
-- [ ] Owner reviews `backlog/DEDUP-LOG.md` after the first real `/triage`
+- [x] Owner reviews `backlog/DEDUP-LOG.md` after the first real `/triage`
   invocation post-merge to confirm the rolling-log entry is
-  readable and useful. (Surface check, not blocking.)
+  readable and useful. (Surface check, not blocking.) **Auto-fired at F-10 pass 1 (2026-06-08) when SDD-018 entered CLARIFY; DEDUP-LOG.md got its first real rolling entry; owner confirmed format usable. Closed at Sprint 7 close.**
 
 ## Tone / UX Check
 

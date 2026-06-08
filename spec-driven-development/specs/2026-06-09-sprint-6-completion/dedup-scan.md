@@ -1,7 +1,7 @@
 ---
 id: '2026-06-09-sprint-6-completion-dedup-scan'
 type: session
-status: active
+status: done
 owner: dedup-scanner
 updated: 2026-06-08
 ---

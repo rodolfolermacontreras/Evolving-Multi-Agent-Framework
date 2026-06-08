@@ -26,6 +26,7 @@ Current PI: **PI-4 (Alpha Release)**
 | 2026-05-16 | state-dashboard | `specs/2026-05-16-state-dashboard/` |
 | 2026-05-26 | day-to-day-brownfield-bootstrap | `specs/2026-05-26-day-to-day-brownfield-bootstrap/` |
 | 2026-05-26 | live-ui-v2 | `specs/2026-05-26-live-ui-v2/` |
+| 2026-06-09 | sprint-6-completion | `specs/2026-06-09-sprint-6-completion/` |
 | 2026-06-09 | ui-lifecycle-variant | `specs/2026-06-09-ui-lifecycle-variant/` |
 
 ## 2. IN-FLIGHT -- Currently being worked on (coordinate before touching)

@@ -3,13 +3,13 @@ id: SDD-PI-5-CURRENT_PI-sprint
 type: sprint
 status: active
 owner: principal-product-manager
-updated: 2026-06-06
+updated: 2026-06-08
 sprint: PI-5
 ---
 
 # PI-5: Brownfield Adoption + Anti-Conflict + Stakeholder Discipline
 
-- Status: **Active** (Sprint 1 CLOSED 2026-06-06, Sprint 2 CLOSED 2026-06-07; 3 sprints remaining)
+- Status: **Active** (Sprint 1 CLOSED 2026-06-06, Sprint 2 CLOSED 2026-06-07, Sprint 3 CLOSED 2026-06-08; 2 sprints remaining)
 - Theme: Make the framework safely adoptable by other teams, harden the gates that prevent two features from colliding, and finish the discipline tools surfaced by the Scott Feedback Bundle.
 - Started: 2026-06-06
 - Owner: principal-executive-manager
@@ -277,39 +277,74 @@ or requires a constitutional amendment; only if the latter does the work
 branch into amendment ceremony.
 **Status**: PLANNED. Kickoff prompt to be authored at PI-5 Sprint 1 close.
 
-### Sprint 3 -- UI Lifecycle Variant (CLOSED 2026-06-08)
-**Items**: SDD-018.
-**Goal**: Define and ship the UI lifecycle variant (Article X relaxation
-through delta entries).
-**Status**: **CLOSED 2026-06-08** (F-11 final pass). SDD-018 done, ADR-014
-drafted (status `proposed`) for owner Level-2 Article XII landing on
-top. State-dashboard retroactive-demo migration committed cleanly
-(append-only, lock-surface protection 7 honored). Sprint 3 retro:
-single-worker sequential execution proved correct call given small
-file surface; the two-pass design + implementation split (F-10 pass 1
-+ pass 2 + F-11) kept the constitutional change reviewable and the
-ADR drafting separable from the runtime change. The CLARIFY round
-surfaced one durable framework convention (`status: blocked` as the
-CLARIFY-phase carrier) that landed in `docs/UI-LIFECYCLE-VARIANT.md`.
-Tests: 273 -> 305 (+32 net, all variant); schema_lint exit 0;
-state_builder exit 0. Article XI live contention test PASSED at F-10
-pass 1 with this spec dir holding the CLARIFY lock per the rules
-ratified 2026-06-07. Commit chain:
-`df3bffb` (F-10 pass 1 scaffold + CLARIFY questions) ->
-`754fda6` (F-10 CLARIFY closed) ->
-`d81ac3d` (F-10 pass 2 spec/validation/plan/tasks + ADR-014 drafted) ->
-`7993fac` (T-018-02 schema_lint variant dispatch) ->
-`3f6f520` (T-018-03 template stubs) ->
-`b46a32f` (T-018-04 state-dashboard migration) ->
-`5233c29` (T-018-06 docs page) ->
-close commit (T-018-01 + T-018-07 verification + validation flip).
-Article XII text landing in `constitution/principles.md` is the
-penultimate sprint-close commit by the owner; sprint push is gated
-on owner approval per Sprint 7 close criterion #8.
+### Sprint 3 -- UI Lifecycle Variant -- CLOSED 2026-06-08
+**Status**: **CLOSED 2026-06-08** (F-11 final pass; Article XII ratified mid-flight by owner)
+**Closed**: 2026-06-08
+Owner ratification (Article XII): Rodolfo Lerma 2026-06-08 commit `55b05cb` (mid-flight Level-2 ratification before sprint close -- refinement on the Option 3 hybrid model: the controlling ADR is ratified first so the sprint close itself happens against an already-binding constitution).
+Owner pre-push ratification: PENDING -- to be collected by Executive Manager before push.
+**Spec dir**: `specs/2026-06-09-ui-lifecycle-variant/`
+**Spec**: APPROVED 2026-06-08 (F-10 pass 2); validation contract LOCKED 16 REQUIRED + 3 OPTIONAL + 4 manual + 2 UX -- 16/16 R + 3/3 O + 4/4 manual + 2/2 UX all satisfied (M-1/M-2/U-2 owner-async, all satisfied implicitly by Article XII landing commit `55b05cb`).
+**Sprint kickoff**: [`../../feature-prompts/SPRINT-07-KICKOFF.prompt.md`](../../feature-prompts/SPRINT-07-KICKOFF.prompt.md)
+**Sprint chain (chronological, on master)**:
+- `5cab91e` chore(prompts): SPRINT-07 kickoff authored
+- `b005e66` spec(sprint-6-completion): SDD-032 scaffold + validation LOCKED at scaffold
+- `8d55952` chore(sprint-7): stamp owner approval + prereq verification (Sprint 7 STARTED)
+- `557b672` feat(sdd-032): T-032-01 + T-032-02 close SDD-019.R7 + R8 in cli/fleet.py (F-09)
+- `8025a50` feat(sdd-032): T-032-03 close SDD-020.R6 triple-destination log writers (F-09)
+- `a6a25e4` feat(sdd-032): T-032-04 + T-032-05 close SDD-020.R8 prompt hooks (F-09)
+- `6827689` close(sprint-7-f-09): SDD-032 Sprint 6 completion bundle DONE
+- `e7274e1` chore(sdd-032): stamp HITL Manual Check 1 -- owner approved hook wording
+- `df3bffb` spec(sdd-018): F-10 pass 1 -- scaffold + CLARIFY question battery + Article XI live contention test PASS
+- `754fda6` docs(sdd-018): F-10 CLARIFY closed -- Q1-Q9 + OWNER-ATTENTION resolutions + SDD-034 filed
+- `d81ac3d` spec(sdd-018): F-10 pass 2 -- spec/validation/plan/tasks finalized; ADR-014 drafted (proposed)
+- `7993fac` feat(sdd-018): T-018-02 schema_lint variant dispatch + append-only enforcement
+- `3f6f520` feat(sdd-018): T-018-03 template stubs for UI Lifecycle Variant
+- `b46a32f` feat(sdd-018): T-018-04 state-dashboard retroactive-demo migration
+- `5233c29` docs(sdd-018): T-018-06 UI-LIFECYCLE-VARIANT.md authoring guide
+- `22b72d8` close(sdd-018): F-11 T-018-01 + T-018-07 -- F-11 implementation closed
+- `55b05cb` feat(constitution): land Article XII -- UI Lifecycle Variant ratified (ADR-014 accepted; principles.md 1.2.0 -> 1.3.0)
+- (next: sprint close commit + state regen)
+**Tests**: 259 -> 305 (+46 net; +14 F-09 in cli/test_fleet.py + cli/test_dedup.py; +32 F-11 in cli/test_schema_lint_variant.py; 2 skipped platform-conditional baseline preserved).
+**Validation**: SDD-032 7/7 REQUIRED + 2/2 OPTIONAL; SDD-018 16/16 REQUIRED + 3/3 OPTIONAL + 4/4 manual + 2/2 UX. **No silent deferral** (Option 3 hybrid no-silent-slip discipline honored throughout).
+**ADRs**: ADR-014 (UI Lifecycle Variant, drafted 2026-06-08 status `proposed`; ratified 2026-06-08 status `accepted`; Article XII landed in principles.md `1.2.0` -> `1.3.0` commit `55b05cb`).
+**SDD-032**: DONE (4 deferred LOCKED REQUIRED items from Sprint 6 close commit `4a6941c` fully closed: SDD-019.R7 + SDD-019.R8 + SDD-020.R6 + SDD-020.R8; lock surface preserved against `524872b` + `8eb564d`).
+**SDD-018**: DONE (variant validator shipped at `schema_lint.check_validation_variant`; templates carry stubs; state-dashboard retroactive-demo migration committed cleanly as the SDD-018 proof case; authoring guide at `docs/UI-LIFECYCLE-VARIANT.md`).
+**SDD-033**: DONE (pulled in at F-09 close; HOST-INTEGRATION.md `.gitignore` Conflict Protection section appended; closed SDD-027.R12).
+**SDD-034**: filed P3 unscheduled (dedup content-shingle upgrade; surfaced at F-10 pass 1 Article XI live contention test as the one known heuristic limitation).
+**PI-4 carry-over**: domain-skill annotations and GH Actions Node.js bump NOT pulled in -- carried forward to Sprint 8 or beyond.
+**Article XI live contention test**: PASS (first real-world test, observed at F-10 pass 1 when SDD-018 entered CLARIFY; gate fired correctly; grandfather correctly excluded SDD-018 per 2026-06-08 cutover; dedup writers auto-fired; ledger event recorded; SDD-034 filed for one surfaced heuristic gap).
+**Retro (one paragraph)**: Sprint 7 shipped two complete features (SDD-032
+Sprint 6 completion bundle; SDD-018 UI Lifecycle Variant) and absorbed two
+unplanned constitutional refinements (Article XI's first live contention
+test; the owner's mid-flight Level-2 ratification of Article XII before
+sprint close). F-09 closed the 4 deferred LOCKED REQUIRED items from
+Sprint 6 in a single linear single-session pass (per Option 3 hybrid
+no-silent-slip discipline) -- 7/7 REQUIRED + 2/2 OPTIONAL, +14 tests,
+lock-surface preserved against the SDD-019 + SDD-020 base commits. F-10
+ran as a deliberate two-pass design (pass 1 = scaffold + CLARIFY question
+battery + Article XI live contention test; pass 2 = spec + validation +
+plan + tasks + ADR-014) which separated the constitutional design (ADR
+text) from the runtime change cleanly. The Article XI live contention
+test was the highest-value moment of F-10: the gate fired correctly under
+real load, the dedup writers populated their artefacts (DEDUP-LOG.md got
+its first real entry; per-spec-dir `dedup-scan.md` auto-written), and the
+one heuristic gap (title-shingle vs content-shingle prior-art detection)
+was surfaced and filed as SDD-034 without blocking the sprint. F-11
+implemented in single-worker sequential mode (7 tasks, tight sequencing
+T-018-02 -> T-018-04 -> T-018-06) and surfaced one durable framework
+convention -- `status: blocked` as the CLARIFY-phase carrier -- that
+landed in `docs/UI-LIFECYCLE-VARIANT.md`. The owner ratified Article XII
+mid-flight (commit `55b05cb`) before sprint close, refining the Option 3
+hybrid model into a "ratify-the-controlling-ADR-then-close" pattern --
+the sprint close itself happens against an already-binding Article XII
+rather than a `proposed` ADR. Net: 17 commits this sprint chain + 1 close
+commit, 259 -> 305 tests (+46), 1 ADR drafted-then-accepted, 1
+constitutional amendment (Article XII, principles.md `1.2.0` -> `1.3.0`),
+0 silently deferred REQUIRED items.
 
 ### Sprint 4 -- ADO/GitHub Bridge + Model Upgrade Discipline (planned)
 **Items**: SDD-022, SDD-015.
-**Status**: PLANNED.
+**Status**: PLANNED. Kickoff prompt: [`../../feature-prompts/SPRINT-08-KICKOFF.prompt.md`](../../feature-prompts/SPRINT-08-KICKOFF.prompt.md) (authored 2026-06-08 commit `e26b032`).
 
 ### Sprint 5 -- Self-Review + Stakeholder Defense + Uniform Gates (planned)
 **Items**: SDD-021, SDD-023, SDD-025.

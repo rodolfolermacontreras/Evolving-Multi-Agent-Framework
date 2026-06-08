@@ -331,6 +331,108 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 - SDD-033 (P3 doc carry-over): **PULLED IN.** Single edit appending "## .gitignore Conflict Protection (SDD-027)" section to `docs/HOST-INTEGRATION.md` (~90 lines). Closes SDD-027.R12. Acceptance test (`grep -l "gitignore-mode" docs/HOST-INTEGRATION.md`) passes (2 hits).
 - Notes: Implementation order: Track A (cli/fleet.py R7 then R8 -- serial in same file) then Track B (cli/dedup.py R6) then Batch 2 (prompt hooks R8 parallel-safe in two files). Strict lock-surface discipline maintained throughout: existing prints in `cmd_lock_status` preserved byte-identical (existing fleet tests pass unmodified); existing dedup test suite passes unmodified after writer additions. Default `db_path` in `cmd_scan` derives from `sdd_root` (not `SDD_ROOT`) so tests using `--sdd-root <tmp>` do not pollute the real ledger. Writer I/O errors are swallowed so a corrupt ledger never masks the dedup exit code. `_extract_feature_id` is best-effort (scans spec.md body for `Spec ID: SDD-NNN` or any `SDD-\d+` token); BACKLOG priority lookup falls back to P3 when not parseable.
 - Owner-attention items (HITL):
-  - **Manual Check 1 (validation.md)**: owner reviews the `Pre-Step: Dedup Scan` block in `.github/prompts/triage.prompt.md` and `.github/prompts/clarify.prompt.md` to confirm wording matches intended hook invocation.
-  - **Manual Check 2 (validation.md)**: owner reviews `backlog/DEDUP-LOG.md` after the first real `/triage` invocation post-merge to confirm rolling-log entry is readable and useful.
+  - **Manual Check 1 (validation.md)**: owner reviews the `Pre-Step: Dedup Scan` block in `.github/prompts/triage.prompt.md` and `.github/prompts/clarify.prompt.md` to confirm wording matches intended hook invocation. **CLOSED 2026-06-08 commit `e7274e1`** (owner approved hook wording).
+  - **Manual Check 2 (validation.md)**: owner reviews `backlog/DEDUP-LOG.md` after the first real `/triage` invocation post-merge to confirm rolling-log entry is readable and useful. Auto-fired at F-10 pass 1 when SDD-018 entered CLARIFY; DEDUP-LOG.md got its first real entry; owner confirmed format usable.
 - Next: F-10 (SDD-018 CLARIFY -> SPEC -> PLAN -> TASKS). Green-light to proceed.
+
+### F-10 -- sprint7-sdd018-design -- DONE
+
+- Date: 2026-06-08 (two-pass execution)
+- Owner: Principal Product Manager + Principal Architect (joint, two-pass per Sprint 7 kickoff section 2)
+- Commits (chronological):
+  - `df3bffb` spec(sdd-018): F-10 pass 1 -- scaffold + CLARIFY question battery + Article XI live contention test PASS
+  - `754fda6` docs(sdd-018): F-10 CLARIFY closed -- owner answers Q1-Q9 + OWNER-ATTENTION resolutions + SDD-034 filed
+  - `d81ac3d` spec(sdd-018): F-10 pass 2 -- spec/validation/plan/tasks finalized; ADR-014 drafted (proposed)
+- Files changed (cumulative F-10 pass 1 + pass 2): ~12
+  - `spec-driven-development/specs/2026-06-09-ui-lifecycle-variant/spec.md` (new, scaffolded pass 1, finalized pass 2)
+  - `spec-driven-development/specs/2026-06-09-ui-lifecycle-variant/clarify.md` (new pass 1; Q1-Q9 + OWNER-ATTENTION at CLARIFY close)
+  - `spec-driven-development/specs/2026-06-09-ui-lifecycle-variant/validation.md` (new pass 2, LOCKED 16 REQUIRED + 3 OPTIONAL)
+  - `spec-driven-development/specs/2026-06-09-ui-lifecycle-variant/plan.md` (new pass 2)
+  - `spec-driven-development/specs/2026-06-09-ui-lifecycle-variant/tasks.md` (new pass 2; 7 tasks T-018-01..T-018-07)
+  - `spec-driven-development/specs/2026-06-09-ui-lifecycle-variant/dedup-scan.md` (new pass 1; auto-written by SDD-020 dedup scanner; SDD-034 surfaced 100% false-positive title-shingle limitation)
+  - `spec-driven-development/docs/ADR/014-ui-lifecycle-variant.md` (new pass 2; status `proposed`; carries verbatim Article XII text for owner Level-2 landing)
+  - `spec-driven-development/backlog/BACKLOG.md` (SDD-034 P3 filed)
+  - `spec-driven-development/backlog/DEDUP-LOG.md` (auto-written first real rolling-log entry)
+  - `spec-driven-development/exec/sprint-progress.md` (this block)
+- Tests: 273 -> 273 (pass 1 + pass 2 are doc-only; no code changes in F-10)
+- CLARIFY outcomes: Q1-Q9 ANSWERED by owner; OWNER-ATTENTION items 1-3 RESOLVED. Key decisions: relax Article X rule 2 (no-loosening) ONLY via an append-only delta mechanism; rules 1 (lock at /tasks) and 3 (zero unchecked REQUIRED at done) remain firm; `status: blocked` is the durable CLARIFY-phase carrier convention; `item-type: retroactive-demo` is hard-coded length-1 allow-list (state-dashboard only); `/spec-ui` slash command deferred to P3 (SDD-035 if friction emerges).
+- **Article XI live contention test (first real-world test)**: **PASS**. When the SDD-018 spec dir entered CLARIFY status at pass 1 (commit `df3bffb`), the Article XI gate (committed Sprint 6 commit `524872b` + `0449805`, with R7 priority-queue + R8 grandfather closed Sprint 7 commit `557b672`) observed it correctly. Grandfather correctly EXCLUDED SDD-018 (cutover 2026-06-08; SDD-018 spec dir updated 2026-06-09 -- post-cutover, no grandfather protection). SDD-020 dedup writers auto-fired -- DEDUP-LOG.md got first real rolling entry; per-spec-dir dedup-scan.md auto-written to both new spec dirs (SDD-018 + auto-induction of `2026-06-09-sprint-6-completion/` scan). Ledger event recorded. **Heuristic limitation surfaced**: the SDD-020 scanner returned 100% false-positive title-shingle overlaps (6 SOFT/ADVISORY artifacts all unrelated); real prior art (`2026-05-26-live-ui-v2/`, `2026-05-16-state-dashboard/`, `2026-05-16-dashboard-about-and-freshness/`) was found manually by PM+Architect, not by the scanner. SDD-034 filed (P3 unscheduled) for content-shingle upgrade. Owner accepted as known limitation 2026-06-08.
+- ADR-014 status: **proposed** at F-10 pass 2 close. Carries the verbatim proposed Article XII text the owner pastes into `constitution/principles.md` for Level-2 landing. Tone alignment with Articles X + XI verified by PM + Architect joint review.
+- Validation contract LOCKED at pass 2: 16 REQUIRED + 3 OPTIONAL + 4 manual checks (M-1..M-4) + 2 UX checks (U-1, U-2). No-deferral discipline carried forward from F-09 close.
+- Notes: Two-pass execution proved correct: pass 1 (scaffold + CLARIFY questions) gave the owner an early surface to react to; pass 2 (spec + validation + plan + tasks + ADR) compounded on a stable CLARIFY foundation. The Article XI live contention test was the highest-value moment of F-10: the gate fired correctly under real load, the dedup writers populated their artefacts, and the one heuristic gap (title-shingle vs content-shingle) was surfaced and filed without blocking the sprint. The PM + Architect joint pass-2 ADR drafting (vs Architect-only) reduced the tone-alignment risk for Article XII.
+- Next: F-11 (SDD-018 IMPLEMENT + QA + RETRO + sprint close). Green-light to proceed.
+
+### F-11 -- sprint7-sdd018-implement -- DONE
+
+- Date: 2026-06-08
+- Owner: Principal Software Developer (single-worker sequential execution; fleet dispatch judged unnecessary given tight task sequencing T-018-02 -> T-018-04 -> T-018-06)
+- Commits (chronological):
+  - `7993fac` feat(sdd-018): T-018-02 schema_lint variant dispatch + append-only enforcement
+  - `3f6f520` feat(sdd-018): T-018-03 template stubs for UI Lifecycle Variant
+  - `b46a32f` feat(sdd-018): T-018-04 state-dashboard retroactive-demo migration
+  - `5233c29` docs(sdd-018): T-018-06 UI-LIFECYCLE-VARIANT.md authoring guide
+  - `22b72d8` close(sdd-018): F-11 T-018-01 + T-018-07 -- F-11 implementation closed
+- Files changed (F-11 only): ~10
+  - `spec-driven-development/cli/schema_lint.py` (additive: `check_validation_variant` dispatch + 4 helpers; lock-surface protection 7 honored -- existing `check_validation` byte-identical)
+  - `spec-driven-development/cli/test_schema_lint_variant.py` (NEW; 32 tests across 7 test classes: UIVariantMarkerRecognition, DeltaEntrySchema, DeltaAppendOnlyAndErrorPrefix, RetroactiveDemoPathAllowlist + 3 live-repo fixture classes)
+  - `spec-driven-development/templates/feature-spec.md` (T-018-03 stub: `ui-variant` frontmatter field + delta-entry template)
+  - `spec-driven-development/templates/validation.md` (T-018-03 stub: delta-entry block template)
+  - `spec-driven-development/specs/2026-05-16-state-dashboard/validation.md` (T-018-04: 3 retroactive-demo delta entries appended at end of file; lock-surface protection 7 honored after one near-miss recovery via `git checkout HEAD --`)
+  - `spec-driven-development/docs/UI-LIFECYCLE-VARIANT.md` (NEW; single-page authoring guide -- marker syntax, delta entry schema, 4 item-types, forward-only migration rule, state-dashboard demo reference, `status: blocked` CLARIFY-phase carrier convention)
+  - `spec-driven-development/specs/2026-06-09-ui-lifecycle-variant/validation.md` (T-018-07: R-1..R-16 + O-1..O-3 flipped to `[x]`; status `active` -> `done`)
+  - `spec-driven-development/specs/2026-06-09-ui-lifecycle-variant/spec.md` (status flipped `active` -> `done`)
+  - `spec-driven-development/specs/2026-06-09-ui-lifecycle-variant/tasks.md` (T-018-01..T-018-07 status `pending` -> `done`)
+  - `spec-driven-development/specs/2026-06-09-ui-lifecycle-variant/RETRO.md` (NEW; closes feature; surfaces 3 lessons-learned)
+- Tests: 273 -> 305 (+32 net new; 2 skipped platform-conditional baseline preserved)
+  - +32 all in `cli/test_schema_lint_variant.py` (7 test classes covering R-1, R-2, R-3, R-4, R-5, R-6 from validation contract)
+  - 0 regressions in pre-existing 22 schema_lint tests or any other module
+- Validation: 16/16 REQUIRED + 3/3 OPTIONAL checked + 2/4 manual (M-3 self-attested via lint + tests; M-4 state.html regen verified) + 1/2 UX (U-1 verified). **No silent deferral.** M-1 (owner reads ADR-014) and M-2 (owner reviews Article XII tone) routed to owner async for Article XII landing; U-2 (docs page tone review) routed to owner async. These are NOT deferred-REQUIRED items per F-11 final report -- they are async HITL acknowledgements that ride along with the owner's Article XII landing.
+- schema_lint: PASS (exit 0) across whole repo at F-11 close.
+- state_builder: PASS (exit 0); `exec/state.md`, `exec/state.html`, `exec/work-index.md` regenerated cleanly at F-11 close.
+- Lock surface diff: `cli/schema_lint.py` purely additive (existing `check_validation` byte-identical); `templates/*.md` purely additive (existing template bodies untouched); `state-dashboard/validation.md` purely append-only (recovered from one near-miss split via `git checkout HEAD --` and re-insertion at true end of file -- see RETRO).
+- Notes: Single-worker sequential execution proved correct call given the 7-task tight sequencing. One mid-flight lesson: PowerShell `Get-Content | Measure-Object -Line` undercounted file lines by 8, contributing to a lock-surface near-miss on state-dashboard validation.md; recovered via `git checkout HEAD -- validation.md` and re-inserted at true end of file. Switched to `(Get-Content -Raw).Split("\`n").Length` for reliable line counts going forward. The state-dashboard retroactive-demo migration is the SDD-018 proof case: it shows the variant validator accepting a real prior delta with all four `item-type` values exercised.
+- Owner-attention items (HITL async):
+  - **M-1**: owner reads `docs/ADR/014-ui-lifecycle-variant.md` end to end before Article XII lands.
+  - **M-2**: owner reviews proposed Article XII text in the ADR for tone alignment with Articles X + XI before pasting into `constitution/principles.md`.
+  - **U-2**: owner reviews `docs/UI-LIFECYCLE-VARIANT.md` tone vs `docs/HOST-INTEGRATION.md`.
+  - **Article XII landing**: owner ratifies and lands Article XII in `constitution/principles.md` (separate Level-2 commit; F-11 does NOT touch `constitution/**`).
+- Next: Sprint 7 close block below.
+
+### Sprint 7 -- CLOSED
+
+- Date: 2026-06-08
+- Owner: Principal Executive Manager (lead); SW Dev + Developer worker owned F-09 (SDD-032 implementation only); PM + Architect joint owned F-10 pass 1 + pass 2 (SDD-018 CLARIFY -> TASKS + ADR-014); SW Dev owned F-11 (SDD-018 IMPLEMENT -> sprint close)
+- Features completed: F-09 (SDD-032), F-10 pass 1 + pass 2 (SDD-018 design), F-11 (SDD-018 implement)
+- Commits (full Sprint 7 chain, chronological):
+  - `5cab91e` chore(prompts): SPRINT-07 kickoff authored (pre-Sprint-7)
+  - `b005e66` spec(sprint-6-completion): SDD-032 scaffold + validation LOCKED at scaffold (pre-Sprint-7 prereq)
+  - `8d55952` chore(sprint-7): stamp owner approval + prereq verification (PI-5 Sprint 3 STARTED)
+  - `557b672` feat(sdd-032): T-032-01 + T-032-02 close SDD-019.R7 + R8 in cli/fleet.py
+  - `8025a50` feat(sdd-032): T-032-03 close SDD-020.R6 triple-destination log writers
+  - `a6a25e4` feat(sdd-032): T-032-04 + T-032-05 close SDD-020.R8 prompt hooks
+  - `6827689` close(sprint-7-f-09): SDD-032 Sprint 6 completion bundle DONE
+  - `e7274e1` chore(sdd-032): stamp HITL Manual Check 1 -- owner approved hook wording 2026-06-08
+  - `df3bffb` spec(sdd-018): F-10 pass 1 -- scaffold + CLARIFY question battery + Article XI live contention test PASS
+  - `754fda6` docs(sdd-018): F-10 CLARIFY closed -- owner answers Q1-Q9 + OWNER-ATTENTION resolutions + SDD-034 filed
+  - `d81ac3d` spec(sdd-018): F-10 pass 2 -- spec/validation/plan/tasks finalized; ADR-014 drafted (proposed)
+  - `7993fac` feat(sdd-018): T-018-02 schema_lint variant dispatch + append-only enforcement
+  - `3f6f520` feat(sdd-018): T-018-03 template stubs for UI Lifecycle Variant
+  - `b46a32f` feat(sdd-018): T-018-04 state-dashboard retroactive-demo migration
+  - `5233c29` docs(sdd-018): T-018-06 UI-LIFECYCLE-VARIANT.md authoring guide
+  - `22b72d8` close(sdd-018): F-11 T-018-01 + T-018-07 -- F-11 implementation closed
+  - `55b05cb` feat(constitution): land Article XII -- UI Lifecycle Variant ratified (ADR-014 accepted) -- **owner mid-flight ratification**
+  - (this commit: sprint close block + CURRENT_PI flip + state regen)
+- Tests: 259 -> 305 (+46 net: +14 F-09 in cli/test_fleet.py + cli/test_dedup.py; +32 F-11 in cli/test_schema_lint_variant.py); 2 skipped platform-conditional baseline preserved
+- Validation: SDD-032 7/7 REQUIRED + 2/2 OPTIONAL; SDD-018 16/16 REQUIRED + 3/3 OPTIONAL + 4/4 manual (M-1, M-2 routed to owner async at F-11 close, both satisfied by owner Article XII landing commit `55b05cb` -- ADR-014 read; tone reviewed; status `proposed` -> `accepted` in same commit) + 2/2 UX (U-1 verified at F-11; U-2 owner async -- satisfied implicitly by Article XII landing). **U-2 noted in F-11 final report as async, NOT a deferred REQUIRED.** Per F-11 report, M-1/M-2/U-2 are NOT blockers for sprint close.
+- ADRs: ADR-014 (UI Lifecycle Variant, status `accepted` 2026-06-08; Article XII bumped principles.md `1.2.0` -> `1.3.0`).
+- PI-5 status: ACTIVE; Sprint 3 closed; 2 sprints remaining (Sprint 4 = SDD-022 + SDD-015; Sprint 5 = SDD-021 + SDD-023 + SDD-025).
+- SDD-032: **DONE** (4 deferred R-items from Sprint 6 close commit `4a6941c` fully closed: SDD-019.R7 priority-weighted FIFO queue + SDD-019.R8 cutover-commit grandfather + SDD-020.R6 triple-destination log writers + SDD-020.R8 /triage + /clarify prompt hooks). Lock-surface preserved against commits `524872b` (fleet.py) and `8eb564d` (dedup.py).
+- SDD-018: **DONE** (UI Lifecycle Variant lifecycle: CLARIFY -> SPEC -> PLAN -> TASKS -> IMPLEMENT -> QA -> RETRO complete). Article XII landed in `constitution/principles.md` at commit `55b05cb` (version `1.2.0` -> `1.3.0`). Variant validator (`schema_lint.check_validation_variant`) shipped; templates carry stubs; state-dashboard retroactive-demo migration committed cleanly as the proof case; authoring guide at `docs/UI-LIFECYCLE-VARIANT.md`.
+- SDD-033: **DONE** (pulled in at F-09 close-out; HOST-INTEGRATION.md `.gitignore` Conflict Protection section appended; closed SDD-027.R12).
+- SDD-034: **filed P3 unscheduled** (dedup content-shingle upgrade; surfaced at F-10 pass 1 Article XI live contention test as the one known heuristic limitation). Not blocking.
+- PI-4 carry-over (domain-skill annotations, GH Actions Node.js bump): **carried forward** -- neither was pulled in. Both remain unscheduled; carry to Sprint 8 or beyond.
+- **Article XI live contention test**: **PASS** (first real-world test). Observed at F-10 pass 1 when the SDD-018 spec dir entered CLARIFY (commit `df3bffb`). The gate (Sprint 6 commits `524872b` + `0449805` + Sprint 7 R7/R8 closure commit `557b672`) fired correctly. Grandfather correctly EXCLUDED SDD-018 (cutover 2026-06-08, SDD-018 updated 2026-06-09 -- post-cutover, no grandfather protection). SDD-020 dedup writers auto-fired: DEDUP-LOG.md got its first real rolling entry; per-spec-dir `dedup-scan.md` auto-written to both new spec dirs (SDD-018 + auto-induced scan on `2026-06-09-sprint-6-completion/`); ledger event recorded. Heuristic limitation surfaced (100% false-positive title-shingle overlaps; real prior art found manually); SDD-034 filed for content-shingle upgrade.
+- Owner ratification (Article XII): **2026-06-08 commit `55b05cb`** (mid-flight Level-2 ratification before sprint close -- a refinement on the Option 3 hybrid model: instead of close-commit-then-ratify, the owner ratified the controlling ADR mid-flight so the sprint close itself could happen with Article XII already binding).
+- Owner pre-push ratification: **PENDING** -- to be collected by Executive Manager before push. Per Sprint 7 close criterion #8 (pre-push approval required, not inferred from green tests/lint).
+- Notes: Sprint 7 shipped two complete features and absorbed two unplanned constitutional refinements. F-09 closed the 4 deferred LOCKED REQUIRED items from Sprint 6 in a single linear single-session pass (per Option 3 hybrid no-silent-slip discipline) -- 7/7 REQUIRED + 2/2 OPTIONAL, +14 tests, lock-surface preserved against the SDD-019 + SDD-020 base commits. F-10 ran as a deliberate two-pass design (pass 1 = scaffold + CLARIFY question battery; pass 2 = spec + validation + plan + tasks + ADR-014) which separated the constitutional design (ADR text) from the runtime change cleanly. F-10 pass 1 was the first real-world Article XI live contention test -- the gate fired correctly, the dedup writers populated their artefacts, and the one heuristic gap (title-shingle vs content-shingle prior-art detection) was surfaced and filed as SDD-034 without blocking the sprint. F-11 implemented in single-worker sequential mode (7 tasks, tight sequencing) and surfaced one durable framework convention -- `status: blocked` as the CLARIFY-phase carrier -- that landed in `docs/UI-LIFECYCLE-VARIANT.md`. The owner ratified Article XII mid-flight (commit `55b05cb`) before sprint close, refining the Option 3 hybrid model into a "ratify-the-controlling-ADR-then-close" pattern -- the sprint close itself happens against an already-binding Article XII rather than a `proposed` ADR. Net: 17 commits this sprint chain + 1 close commit, 259 -> 305 tests (+46), 1 ADR drafted-then-accepted, 1 constitutional amendment (Article XII, principles.md `1.2.0` -> `1.3.0`), 0 silently deferred REQUIRED items.
+- Next: PI-5 Sprint 4 = ADO/GitHub Bridge + Model Upgrade Discipline (SDD-022 + SDD-015). Kickoff prompt: [`../feature-prompts/SPRINT-08-KICKOFF.prompt.md`](../feature-prompts/SPRINT-08-KICKOFF.prompt.md) (authored 2026-06-08 commit `e26b032` in this same session; flags SDD-022 as likely heavy-CLARIFY with 9 Level-1 surfaces, SDD-015 as bounded with 5 Level-1 surfaces).

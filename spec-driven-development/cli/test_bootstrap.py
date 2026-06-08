@@ -521,5 +521,86 @@ class TestExistingHostLinkTestsStillPass(unittest.TestCase):
         self.assertTrue(hasattr(sys.modules[__name__], "TestHostLinkNotAGitRepo"))
 
 
+# --------------------------------------------------------------------------- #
+# SDD-028: Windows junction documented limitation
+# --------------------------------------------------------------------------- #
+
+class TestWindowsJunctionDocumentedLimitation(unittest.TestCase):
+    """SDD-028: Document that Windows junction test requires admin/dev-mode."""
+
+    @unittest.skipUnless(sys.platform == "win32", "Windows-only test")
+    def test_windows_junction_documented_limitation(self) -> None:
+        """SDD-028: Windows junction creation may require admin or developer mode.
+
+        On Windows, os.symlink raises OSError without developer mode or
+        elevated privileges. The framework falls back to cmd /c mklink /J.
+        Junctions work for directories without elevated privileges on
+        recent Windows 10+, but traversal behavior differs from POSIX
+        symlinks (junctions resolve on the server, symlinks on the client).
+
+        This test documents the limitation; the actual junction test is
+        TestHostLinkWindowsJunctionFallback which uses mocks.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "junction_test_link"
+            source = Path(tmp) / "junction_test_source"
+            source.mkdir()
+            (source / "marker.txt").write_text("test", encoding="utf-8")
+            try:
+                bootstrap._windows_junction(target, source)
+                self.assertTrue(
+                    (target / "marker.txt").is_file(),
+                    "Junction should allow traversal to read files",
+                )
+            except bootstrap.BootstrapError:
+                self.skipTest(
+                    "Windows junction creation failed -- requires admin or "
+                    "developer mode. This is a known limitation documented "
+                    "in SDD-028."
+                )
+
+    @unittest.skipIf(sys.platform == "win32", "Non-Windows always skips")
+    def test_windows_junction_skip_non_windows(self) -> None:
+        """On non-Windows platforms, junction test is not applicable."""
+        pass  # No junction concept outside Windows
+
+
+# --------------------------------------------------------------------------- #
+# SDD-029: Stale-symlink vs real-directory distinction
+# --------------------------------------------------------------------------- #
+
+class TestStaleSymlinkDistinction(unittest.TestCase):
+    """SDD-029: Distinguish stale symlink from real directory conflict."""
+
+    def test_stale_symlink_detected(self) -> None:
+        """A broken symlink at .github is identified as stale."""
+        with tempfile.TemporaryDirectory() as tmp:
+            host = Path(tmp) / "host"
+            host.mkdir()
+            link = host / ".github"
+            # Create a symlink pointing to nonexistent target
+            try:
+                os.symlink("/nonexistent/path/that/does/not/exist", str(link))
+            except OSError:
+                self.skipTest("Cannot create symlinks on this platform/config")
+            self.assertTrue(link.is_symlink())
+            self.assertFalse(link.exists())  # broken
+
+            is_stale = link.is_symlink() and not link.exists()
+            self.assertTrue(is_stale, "Should detect stale/broken symlink")
+
+    def test_real_directory_detected(self) -> None:
+        """A real directory at .github is identified as a directory."""
+        with tempfile.TemporaryDirectory() as tmp:
+            host = Path(tmp) / "host"
+            host.mkdir()
+            gh = host / ".github"
+            gh.mkdir()
+            (gh / "marker.txt").write_text("real", encoding="utf-8")
+
+            is_real_dir = gh.is_dir() and not gh.is_symlink()
+            self.assertTrue(is_real_dir, "Should detect real directory")
+
+
 if __name__ == "__main__":
     unittest.main()

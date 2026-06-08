@@ -664,14 +664,26 @@ def handle_existing_github(link_path: Path, mode: str) -> str | None:
     mode in {"abort", "backup", "force"}.
 
     - "abort": raise BootstrapError naming --backup and --force.
+      Distinguishes stale symlinks from real directories (SDD-029).
     - "backup": move link_path to .github.bak.<timestamp>; return the backup path.
     - "force": recursively remove link_path; return None.
     """
     if mode == "abort":
-        fail(
-            f"Host .github/ already exists at {link_path}",
-            "Re-run with --backup to move it aside, or --force to overwrite (destructive).",
-        )
+        if link_path.is_symlink() and not link_path.exists():
+            fail(
+                f"Stale symlink at {link_path} (target no longer exists).",
+                "Remove the broken symlink and re-run: del or rm the link, then retry.",
+            )
+        elif link_path.is_dir() and not link_path.is_symlink():
+            fail(
+                f"Directory already exists at {link_path}.",
+                "Re-run with --backup to move it aside, or --force to overwrite (destructive).",
+            )
+        else:
+            fail(
+                f"Host .github/ already exists at {link_path}",
+                "Re-run with --backup to move it aside, or --force to overwrite (destructive).",
+            )
     if mode == "backup":
         backup = link_path.parent / f".github.bak.{_timestamp()}"
         shutil.move(str(link_path), str(backup))

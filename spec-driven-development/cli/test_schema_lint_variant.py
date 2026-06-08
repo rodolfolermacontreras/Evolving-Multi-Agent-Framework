@@ -622,12 +622,15 @@ class ADR014ExistsAndShapeChecks(unittest.TestCase):
                         f"ADR-014 missing at {self.ADR_PATH}")
 
     def test_adr014_status_is_proposed(self):
-        text = self.ADR_PATH.read_text(encoding="utf-8")
-        # Top-of-body status line (not the frontmatter status, which is the
-        # carrier `draft` per the ADR-013 precedent recorded in the spec).
-        self.assertIn("status: proposed", text.lower(),
-                      "ADR-014 must carry top status: proposed (lowercase) "
-                      "until owner ratification")
+        text = self.ADR_PATH.read_text(encoding="utf-8").lower()
+        # Top-of-body status line (not the SDD-FDC-001 frontmatter status,
+        # which is the `draft` carrier per the ADR-013 precedent). The ADR
+        # uses Markdown bold around the word, so accept either `proposed`
+        # or `**proposed**` after the `status:` token.
+        self.assertTrue(
+            "status: proposed" in text or "status: **proposed**" in text,
+            "ADR-014 must carry top status: proposed until owner ratification",
+        )
 
     def test_adr014_carries_proposed_article_xii_text(self):
         text = self.ADR_PATH.read_text(encoding="utf-8")

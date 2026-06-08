@@ -30,6 +30,9 @@ PI progress: 4/6 commitments complete (67%)
 | friction-analysis-template | REVIEW | done | Status: done but RETRO missing |
 | filesystem-data-contracts | REVIEW | done | Status: done but RETRO missing |
 | symlink-portability | REVIEW | done | Status: done but RETRO missing |
+| cross-feature-dedup | REVIEW | done | Status: done but RETRO missing |
+| host-gitignore-protection | REVIEW | done | Status: done but RETRO missing |
+| serial-clarify-spec-gate | REVIEW | done | Status: done but RETRO missing |
 
 ## Sprint Plan
 

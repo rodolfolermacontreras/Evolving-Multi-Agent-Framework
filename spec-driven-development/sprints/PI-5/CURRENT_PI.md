@@ -343,7 +343,7 @@ constitutional amendment (Article XII, principles.md `1.2.0` -> `1.3.0`),
 0 silently deferred REQUIRED items.
 
 ### Sprint 4 -- ADO/GitHub Bridge + Model Upgrade Discipline -- CLOSED 2026-06-08
-**Status**: **CLOSED 2026-06-08** (F-15 local close; owner approval required before push remains pending)
+**Status**: **CLOSED 2026-06-08** (F-15 close ratified by owner; push approval granted 2026-06-08)
 **Closed**: 2026-06-08
 **Spec dirs**:
 - `specs/2026-06-08-ado-github-bridge/` (SDD-022)
@@ -365,11 +365,12 @@ constitutional amendment (Article XII, principles.md `1.2.0` -> `1.3.0`),
 **SDD-034**: carried forward. The content-shingle dedup upgrade was not pulled into Sprint 8; the Sprint 7 heuristic limitation remains visible and non-blocking.
 **PI-4 carry-over**: domain-skill annotations and GitHub Actions Node.js bump carried forward. The dirty workflow/Azure work present during F-15 was unrelated and intentionally preserved, not staged.
 **Article XI live contention observation**: No new CLARIFY/SPEC contention was observed during F-15. Sprint 8 reused the Sprint 7 lesson: required validation deferral is prohibited, and any governance blocker must stop the feature until owner approval is recorded. ADR-016 followed that pattern before SDD-015 closed.
+**Owner ratification / push approval**: APPROVED 2026-06-08. Evidence: owner message via Executive Manager, "yes Sprint 8 was ratified, we are good". This satisfies Sprint 9 hard prerequisite 4; no push was performed by this stamp.
 **Retro (one paragraph)**: Sprint 8 proved the framework can ship an external-system bridge without weakening Article V: `/taskstoissues` stayed stdlib-only, no-network tests carried the default validation path, GitHub live writes are explicitly token-gated, and ADO remains a clean fast-follow provider shape instead of an untested SDK dependency. The model-upgrade work exposed a healthy governance stop: F-14 initially blocked on SDD-015 V-9, then resumed only after the owner accepted ADR-016, so the constitution cross-reference landed with approval rather than as a silent process shortcut. The sprint also reinforced a close discipline for future sprints: local close can be recorded when tests, schema lint, validation, backlog, state regeneration, and kickoff authoring are complete, but push remains gated on explicit owner approval. Net: 6 implementation/planning commits before F-15, 305 -> 331 tests, 1 accepted ADR, 0 silently deferred REQUIRED items, PI-5 remains active with Sprint 5 still to run.
 
 ### Sprint 5 -- Self-Review + Stakeholder Defense + Uniform Gates (planned)
 **Items**: SDD-021, SDD-023, SDD-025.
-**Status**: READY TO KICK OFF after owner approval/push decision for Sprint 8 close. Kickoff prompt: [`../../feature-prompts/SPRINT-09-KICKOFF.prompt.md`](../../feature-prompts/SPRINT-09-KICKOFF.prompt.md).
+**Status**: READY TO KICK OFF after Sprint 8 owner ratification / push approval recorded 2026-06-08. Kickoff prompt: [`../../feature-prompts/SPRINT-09-KICKOFF.prompt.md`](../../feature-prompts/SPRINT-09-KICKOFF.prompt.md).
 
 ---
 

@@ -21,7 +21,9 @@ import argparse
 import difflib
 import json
 import re
+import sqlite3
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 # Framework layout ---------------------------------------------------------- #
@@ -279,6 +281,179 @@ def handle_overlaps(
 
 
 # --------------------------------------------------------------------------- #
+# SDD-020.R6 -- triple-destination log writers (SDD-032 / 2026-06-09)
+#
+# Three thin writers fire from cmd_scan when --emit-logs is set (default).
+# Log artifact schemas (frozen; reused by downstream dashboard consumers):
+#
+#   1. Ledger rows (sqlite3 -> ledger/fleet.db.dispatches):
+#      - one row per scan with task_id="DEDUP-SCAN-RUN",
+#        notes='{"scope":..., "candidate_count":N, "overlap_count":M, "exit":X}'
+#      - one row per overlap with task_id="DEDUP-OVERLAP-FLAGGED",
+#        notes='{"tier":..., "score":..., "corpus_title":..., "candidate_title":...}'
+#      Both use agent_id="dedup-scanner", agent_role="scanner", pi="N/A".
+#
+#   2. Per-spec dedup-scan.md (one file per candidate spec dir flagged):
+#      - frontmatter: id, type=session, status=active, owner=dedup-scanner, updated
+#      - body: "# Dedup Scan" + one bulleted overlap entry per flagged overlap
+#
+#   3. Rolling backlog/DEDUP-LOG.md (single file; appended one line per scan):
+#      - header (first call only): "# Dedup Scan Log" + pipe-delimited columns
+#      - line format: "| ISO-DATETIME | scope | candidate_count | overlap_count | exit |"
+# --------------------------------------------------------------------------- #
+
+
+_DEDUP_SCANNER_AGENT = ("dedup-scanner", "scanner")
+_DEDUP_LOG_HEADER = (
+    "# Dedup Scan Log\n"
+    "\n"
+    "Rolling log of cross-feature deduplication scans (SDD-020.R6).\n"
+    "One line per `cli/dedup.py scan` invocation.\n"
+    "\n"
+    "| timestamp_utc | scope | candidates | overlaps | exit |\n"
+    "|---------------|-------|------------|----------|------|\n"
+)
+
+
+def _utc_now_iso() -> str:
+    """Return current UTC time as ISO-8601 string (no microseconds)."""
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+
+def _write_ledger_rows(
+    db_path: Path,
+    scan_run: dict,
+    overlaps: list[tuple[str, dict, dict, float]],
+) -> int:
+    """Insert one DEDUP-SCAN-RUN row + N DEDUP-OVERLAP-FLAGGED rows.
+
+    *scan_run* keys: scope, candidate_count, overlap_count, exit_code.
+    Returns the number of rows inserted (1 + len(overlaps)).
+    Silent on missing DB file (returns 0); writes nothing if the schema
+    is not present.
+    """
+    if not db_path.is_file():
+        return 0
+    inserted = 0
+    now = _utc_now_iso()
+    agent_id, agent_role = _DEDUP_SCANNER_AGENT
+    try:
+        with sqlite3.connect(db_path) as conn:
+            scan_notes = json.dumps({
+                "scope": scan_run.get("scope", ""),
+                "candidate_count": int(scan_run.get("candidate_count", 0)),
+                "overlap_count": int(scan_run.get("overlap_count", 0)),
+                "exit": int(scan_run.get("exit_code", 0)),
+            })
+            conn.execute(
+                "INSERT INTO dispatches "
+                "(dispatched_at, pi, sprint, feature_dir, task_id, task_title, "
+                " agent_id, agent_role, outcome, outcome_at, notes) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    now, "N/A", None, None,
+                    "DEDUP-SCAN-RUN",
+                    f"Dedup scan ({scan_run.get('scope', '?')})",
+                    agent_id, agent_role,
+                    "success", now, scan_notes,
+                ),
+            )
+            inserted += 1
+            for tier, corpus_entry, candidate, score in overlaps:
+                ov_notes = json.dumps({
+                    "tier": tier,
+                    "score": round(score, 4),
+                    "corpus_title": corpus_entry.get("title", ""),
+                    "corpus_source": corpus_entry.get("source", ""),
+                    "candidate_title": candidate.get("title", ""),
+                    "candidate_source": candidate.get("source", ""),
+                })
+                conn.execute(
+                    "INSERT INTO dispatches "
+                    "(dispatched_at, pi, sprint, feature_dir, task_id, task_title, "
+                    " agent_id, agent_role, outcome, outcome_at, notes) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    (
+                        now, "N/A", None, None,
+                        "DEDUP-OVERLAP-FLAGGED",
+                        f"[{tier}] {candidate.get('title', '?')}",
+                        agent_id, agent_role,
+                        "success", now, ov_notes,
+                    ),
+                )
+                inserted += 1
+            conn.commit()
+    except sqlite3.DatabaseError:
+        # Corrupt or schema-missing DB -- skip silently rather than break a scan.
+        return 0
+    return inserted
+
+
+def _write_per_spec_dedup_scan(
+    spec_dir: Path,
+    overlaps_for_dir: list[tuple[str, dict, dict, float]],
+) -> Path | None:
+    """Write dedup-scan.md inside *spec_dir* summarizing the flagged overlaps.
+
+    Skipped when *spec_dir* does not exist (pure-backlog scans). Returns the
+    written path or None.
+    """
+    if not spec_dir.is_dir():
+        return None
+    if not overlaps_for_dir:
+        return None
+    now = _utc_now_iso()
+    today = now.split("T", 1)[0]
+    out = spec_dir / "dedup-scan.md"
+    lines = [
+        "---",
+        f"id: '{spec_dir.name}-dedup-scan'",
+        "type: session",
+        "status: active",
+        "owner: dedup-scanner",
+        f"updated: {today}",
+        "---",
+        "",
+        "# Dedup Scan",
+        "",
+        f"Generated by `cli/dedup.py scan` at {now}.",
+        "",
+        "## Flagged Overlaps",
+        "",
+    ]
+    for tier, corpus_entry, candidate, score in overlaps_for_dir:
+        lines.append(
+            f"- [{tier}] score={score:.2f} -- "
+            f"candidate `{candidate.get('title', '?')}` "
+            f"vs corpus `{corpus_entry.get('title', '?')}` "
+            f"(source: {corpus_entry.get('source', '?')})"
+        )
+    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return out
+
+
+def _append_rolling_log(log_path: Path, scan_summary: dict) -> Path:
+    """Append a one-line row to *log_path* (creates with header if missing).
+
+    *scan_summary* keys: scope, candidate_count, overlap_count, exit_code.
+    """
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    is_new = not log_path.is_file()
+    if is_new:
+        log_path.write_text(_DEDUP_LOG_HEADER, encoding="utf-8")
+    now = _utc_now_iso()
+    line = (
+        f"| {now} | {scan_summary.get('scope', '?')} | "
+        f"{int(scan_summary.get('candidate_count', 0))} | "
+        f"{int(scan_summary.get('overlap_count', 0))} | "
+        f"{int(scan_summary.get('exit_code', 0))} |\n"
+    )
+    with log_path.open("a", encoding="utf-8") as fh:
+        fh.write(line)
+    return log_path
+
+
+# --------------------------------------------------------------------------- #
 # CLI
 # --------------------------------------------------------------------------- #
 
@@ -318,6 +493,26 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "--sdd-root",
         default=None,
         help="Override SDD root directory (for testing).",
+    )
+    # SDD-020.R6 (SDD-032) -- log writers gate. Default ON to match the
+    # contract; tests and CI paths can opt out with --no-emit-logs.
+    p_scan.add_argument(
+        "--emit-logs",
+        dest="emit_logs",
+        action="store_true",
+        default=True,
+        help="Write ledger row + per-spec dedup-scan.md + rolling log (default).",
+    )
+    p_scan.add_argument(
+        "--no-emit-logs",
+        dest="emit_logs",
+        action="store_false",
+        help="Suppress all three log artifacts (used by test fixtures).",
+    )
+    p_scan.add_argument(
+        "--db",
+        default=None,
+        help="Path to fleet.db (default: ledger/fleet.db). Used with --emit-logs.",
     )
 
     return parser.parse_args(argv)
@@ -377,7 +572,54 @@ def cmd_scan(args: argparse.Namespace) -> int:
         else:
             print(f"Scanned {len(corpus)} entries; 0 overlaps found.")
 
-    return handle_overlaps(all_overlaps, no_prompt=args.no_prompt)
+    exit_code = handle_overlaps(all_overlaps, no_prompt=args.no_prompt)
+
+    # SDD-020.R6 (SDD-032) -- triple-destination log writers.
+    # All three writes are guarded by --emit-logs (default True). Failures here
+    # MUST NOT mask the dedup exit code; writers swallow their own I/O errors.
+    if getattr(args, "emit_logs", True):
+        scan_summary = {
+            "scope": args.scope,
+            "candidate_count": len(corpus),
+            "overlap_count": len(all_overlaps),
+            "exit_code": exit_code,
+        }
+        # (a) ledger row(s)
+        db_path = Path(args.db) if getattr(args, "db", None) else (
+            sdd_root / "ledger" / "fleet.db"
+        )
+        try:
+            _write_ledger_rows(db_path, scan_summary, all_overlaps)
+        except OSError:
+            pass
+        # (b) per-spec dedup-scan.md (group overlaps by candidate spec dir)
+        per_dir: dict[Path, list[tuple[str, dict, dict, float]]] = {}
+        for overlap in all_overlaps:
+            _tier, _ce, cand, _s = overlap
+            cand_src = cand.get("source", "")
+            if not cand_src:
+                continue
+            cand_path = Path(cand_src)
+            # spec-bound when path lives under sdd_root/specs/<feature>/spec.md
+            try:
+                rel = cand_path.relative_to(sdd_root / "specs")
+            except ValueError:
+                continue
+            spec_feature = sdd_root / "specs" / rel.parts[0]
+            per_dir.setdefault(spec_feature, []).append(overlap)
+        for spec_feature, dir_overlaps in per_dir.items():
+            try:
+                _write_per_spec_dedup_scan(spec_feature, dir_overlaps)
+            except OSError:
+                pass
+        # (c) rolling log
+        log_path = sdd_root / "backlog" / "DEDUP-LOG.md"
+        try:
+            _append_rolling_log(log_path, scan_summary)
+        except OSError:
+            pass
+
+    return exit_code
 
 
 def main(argv: list[str] | None = None) -> int:

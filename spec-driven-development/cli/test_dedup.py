@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import ast
 import json
+import sqlite3
 import sys
 import tempfile
 import textwrap
@@ -18,6 +19,8 @@ from pathlib import Path
 
 THIS = Path(__file__).resolve()
 CLI_DIR = THIS.parent
+SDD_ROOT = THIS.parents[1]
+SCHEMA = SDD_ROOT / "ledger" / "schema.sql"
 sys.path.insert(0, str(CLI_DIR))
 
 import dedup  # noqa: E402
@@ -372,6 +375,173 @@ class TestCLIScanJsonFormat(unittest.TestCase):
             self.assertEqual(rc, 0)
             data = json.loads(buf.getvalue())
             self.assertIsInstance(data, list)
+
+
+# --------------------------------------------------------------------------- #
+# SDD-020.R6 -- triple-destination log writers (SDD-032 / R3)
+# --------------------------------------------------------------------------- #
+
+
+def _init_ledger_db(tmp: Path) -> Path:
+    """Create an empty fleet.db under tmp using the real schema."""
+    db = tmp / "fleet.db"
+    with sqlite3.connect(db) as conn:
+        conn.executescript(SCHEMA.read_text(encoding="utf-8"))
+        conn.commit()
+    return db
+
+
+def _stub_overlap(
+    candidate_source: str = "<cli-candidate>",
+    tier: str = "HARD",
+    score: float = 1.0,
+) -> tuple[str, dict, dict, float]:
+    return (
+        tier,
+        {"title": "Corpus Item", "source": "backlog/BACKLOG.md", "id": "SDD-001"},
+        {"title": "Candidate Item", "source": candidate_source, "id": "SDD-001"},
+        score,
+    )
+
+
+class TestDedupLogWriters(unittest.TestCase):
+    """SDD-020.R6 (SDD-032 R3): triple-destination log writers."""
+
+    def test_ledger_rows_written(self) -> None:
+        """One DEDUP-SCAN-RUN row + N DEDUP-OVERLAP-FLAGGED rows inserted."""
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+            db = _init_ledger_db(Path(tmp))
+            overlaps = [_stub_overlap(), _stub_overlap(tier="SOFT", score=0.85)]
+            inserted = dedup._write_ledger_rows(
+                db,
+                {"scope": "all", "candidate_count": 5, "overlap_count": 2, "exit_code": 1},
+                overlaps,
+            )
+            self.assertEqual(inserted, 3)  # 1 scan-run + 2 overlap-flagged
+            with sqlite3.connect(db) as conn:
+                conn.row_factory = sqlite3.Row
+                rows = list(conn.execute(
+                    "SELECT task_id, agent_id, agent_role, notes FROM dispatches "
+                    "ORDER BY id"
+                ))
+            self.assertEqual(rows[0]["task_id"], "DEDUP-SCAN-RUN")
+            self.assertEqual(rows[0]["agent_id"], "dedup-scanner")
+            self.assertEqual(rows[0]["agent_role"], "scanner")
+            scan_notes = json.loads(rows[0]["notes"])
+            self.assertEqual(scan_notes["scope"], "all")
+            self.assertEqual(scan_notes["overlap_count"], 2)
+            self.assertEqual(scan_notes["exit"], 1)
+            self.assertEqual(rows[1]["task_id"], "DEDUP-OVERLAP-FLAGGED")
+            self.assertEqual(rows[2]["task_id"], "DEDUP-OVERLAP-FLAGGED")
+            ov_notes = json.loads(rows[1]["notes"])
+            self.assertIn("tier", ov_notes)
+            self.assertIn("score", ov_notes)
+            # Missing DB silently no-ops (returns 0) rather than crashing.
+            missing = Path(tmp) / "nonexistent.db"
+            self.assertEqual(
+                dedup._write_ledger_rows(
+                    missing,
+                    {"scope": "all", "candidate_count": 0, "overlap_count": 0, "exit_code": 0},
+                    [],
+                ),
+                0,
+            )
+
+    def test_per_spec_file_written(self) -> None:
+        """dedup-scan.md is written inside the candidate spec dir with valid frontmatter."""
+        with tempfile.TemporaryDirectory() as tmp:
+            spec_dir = Path(tmp) / "spec-1"
+            spec_dir.mkdir()
+            overlaps = [_stub_overlap(candidate_source=str(spec_dir / "spec.md"))]
+            out = dedup._write_per_spec_dedup_scan(spec_dir, overlaps)
+            self.assertIsNotNone(out)
+            self.assertTrue(out.is_file())
+            content = out.read_text(encoding="utf-8")
+            self.assertIn("---", content)
+            self.assertIn("type: session", content)
+            self.assertIn("status: active", content)
+            self.assertIn("owner: dedup-scanner", content)
+            self.assertIn("# Dedup Scan", content)
+            self.assertIn("[HARD]", content)
+            self.assertIn("Candidate Item", content)
+            # Missing dir -> None (silent no-op for pure-backlog scans)
+            self.assertIsNone(
+                dedup._write_per_spec_dedup_scan(Path(tmp) / "no-such", overlaps)
+            )
+            # Empty overlap list -> None (nothing to flag)
+            empty_dir = Path(tmp) / "spec-2"
+            empty_dir.mkdir()
+            self.assertIsNone(dedup._write_per_spec_dedup_scan(empty_dir, []))
+
+    def test_rolling_log_appended(self) -> None:
+        """First call creates header + line; second call appends only the line."""
+        with tempfile.TemporaryDirectory() as tmp:
+            log_path = Path(tmp) / "backlog" / "DEDUP-LOG.md"
+            summary = {"scope": "all", "candidate_count": 3, "overlap_count": 1, "exit_code": 0}
+            dedup._append_rolling_log(log_path, summary)
+            self.assertTrue(log_path.is_file())
+            first = log_path.read_text(encoding="utf-8")
+            self.assertIn("# Dedup Scan Log", first)
+            self.assertIn("| timestamp_utc | scope | candidates | overlaps | exit |", first)
+            first_lines = first.count("\n")
+            # Second call appends one more row, no duplicated header.
+            dedup._append_rolling_log(log_path, summary)
+            second = log_path.read_text(encoding="utf-8")
+            self.assertEqual(second.count("# Dedup Scan Log"), 1)
+            self.assertGreater(second.count("\n"), first_lines)
+
+    def test_no_emit_logs_flag(self) -> None:
+        """--no-emit-logs suppresses all three writes; scan still exits cleanly."""
+        with tempfile.TemporaryDirectory() as tmp:
+            sdd = make_sdd(Path(tmp))
+            write_backlog(sdd, [("SDD-001", "Widget factory")])
+            buf = StringIO()
+            with redirect_stdout(buf):
+                rc = dedup.main([
+                    "scan",
+                    "--sdd-root", str(sdd),
+                    "--scope", "backlog",
+                    "--no-emit-logs",
+                ])
+            self.assertEqual(rc, 0)
+            self.assertFalse((sdd / "backlog" / "DEDUP-LOG.md").is_file())
+            self.assertFalse((sdd / "ledger" / "fleet.db").is_file())
+
+
+# --------------------------------------------------------------------------- #
+# SDD-020.R8 -- prompt hooks at /triage + /clarify (SDD-032 / R4)
+# --------------------------------------------------------------------------- #
+
+
+_PROMPTS_DIR = SDD_ROOT.parents[0] / ".github" / "prompts"
+_TRIAGE_PROMPT = _PROMPTS_DIR / "triage.prompt.md"
+_CLARIFY_PROMPT = _PROMPTS_DIR / "clarify.prompt.md"
+
+
+class TestPromptHooks(unittest.TestCase):
+    """SDD-020.R8 (SDD-032 R4): dedup invocation wired into /triage + /clarify."""
+
+    def test_triage_invokes_dedup(self) -> None:
+        """triage.prompt.md contains the literal dedup-scan invocation."""
+        self.assertTrue(_TRIAGE_PROMPT.is_file(),
+                        f"prompt file missing: {_TRIAGE_PROMPT}")
+        content = _TRIAGE_PROMPT.read_text(encoding="utf-8").lower()
+        self.assertIn("cli/dedup.py scan", content)
+
+    def test_clarify_invokes_dedup(self) -> None:
+        """clarify.prompt.md contains the literal dedup-scan invocation."""
+        self.assertTrue(_CLARIFY_PROMPT.is_file(),
+                        f"prompt file missing: {_CLARIFY_PROMPT}")
+        content = _CLARIFY_PROMPT.read_text(encoding="utf-8").lower()
+        self.assertIn("cli/dedup.py scan", content)
+
+    def test_tier_action_guidance_present(self) -> None:
+        """Both prompts document HARD / SOFT / ADVISORY tier-action responses."""
+        for prompt in (_TRIAGE_PROMPT, _CLARIFY_PROMPT):
+            content = prompt.read_text(encoding="utf-8").lower()
+            for tier in ("hard", "soft", "advisory"):
+                self.assertIn(tier, content,
+                              f"tier keyword '{tier}' missing from {prompt.name}")
 
 
 if __name__ == "__main__":

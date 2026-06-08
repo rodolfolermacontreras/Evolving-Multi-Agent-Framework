@@ -33,7 +33,9 @@ PI progress: 4/6 commitments complete (67%)
 | cross-feature-dedup | REVIEW | done | Status: done but RETRO missing |
 | host-gitignore-protection | REVIEW | done | Status: done but RETRO missing |
 | serial-clarify-spec-gate | REVIEW | done | Status: done but RETRO missing |
-| azure-decommission | IMPLEMENT | active | validation 4% (1/23) |
+| ado-github-bridge | REVIEW | done | Status: done but RETRO missing |
+| azure-decommission | IMPLEMENT | active | validation 9% (2/23) |
+| model-upgrade-discipline | REVIEW | done | Status: done but RETRO missing |
 | sprint-6-completion | DONE | done | validation 100%, RETRO present |
 | ui-lifecycle-variant | DONE | done | Status: done, RETRO present |
 

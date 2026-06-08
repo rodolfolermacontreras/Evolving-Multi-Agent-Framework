@@ -555,3 +555,23 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 - Validation: SDD-022 16/16 REQUIRED checked; SDD-015 12/12 REQUIRED checked. No REQUIRED item was loosened or deferred.
 - Notes: ADR-016 acceptance unblocked SDD-015 V-9; `decision-policy.md` now references `docs/MODEL-UPGRADE-PROTOCOL.md` through the accepted governance path. Existing unrelated SDD-035/Azure/workflow dirty work remains outside F-14 and was not staged.
 - Next: F-15 may start. Sprint 8 remains open until F-15 completes and the sprint is explicitly closed.
+
+### Sprint 8 -- CLOSED
+
+- Date: 2026-06-08
+- Owner: Principal Executive Manager (lead); PM + Architect owned F-12 (SDD-022 CLARIFY -> TASKS); PM + Architect owned F-13 (SDD-015 CLARIFY -> TASKS); SW Dev + workers owned F-14 (joint implementation); SW Dev owned F-15 (sprint close + SPRINT-09 authoring)
+- Features completed: F-12, F-13, F-14, F-15
+- Commits: `df5a957`, `3d3fa89`, `c3ac624`, `0b47def`, `a2c1476`, `dbfe3c6`, F-15 close commit pending
+- Tests: 305 -> 331 (+26); F-15 rerun `python -m pytest spec-driven-development/ --tb=no -q` -> 331 passed, 2 skipped
+- Schema lint: `python spec-driven-development/cli/schema_lint.py` -> Schema lint clean
+- Validation: SDD-022 16/16 REQUIRED + 1/3 OPTIONAL; SDD-015 12/12 REQUIRED + 1/3 OPTIONAL + 1/2 manual. No REQUIRED item deferred.
+- ADRs: ADR-016 accepted 2026-06-08 before the `constitution/decision-policy.md` model-upgrade cross-reference landed.
+- PI-5 status: ACTIVE; Sprint 4 closed; 1 sprint remaining (Sprint 5 = SDD-021 + SDD-023 + SDD-025)
+- SDD-022: DONE (ADO/GitHub Issues sync bridge: `tasks.md` remains authoritative; sync is explicit on-demand with dry-run default; apply mode requires env-token auth; conflicts produce non-mutating reports; GitHub is live provider, ADO is dry-run/fast-follow provider shape)
+- SDD-015: DONE (model-upgrade discipline: `docs/MODEL-UPGRADE-PROTOCOL.md` + ADR-backed `decision-policy.md` cross-reference + no-network A/B harness + cost/quality delta capture)
+- SDD-034: carried forward; not pulled into Sprint 8 because primary SDD-022 + SDD-015 close criteria consumed capacity.
+- PI-4 carry-over (domain-skill annotations, GH Actions Node.js bump): carried forward; unrelated dirty workflow/Azure work was preserved and not staged.
+- Article XI live contention observation: no new F-15 contention. Sprint 8 preserved the Sprint 7 no-silent-deferral lesson: F-14 blocked on SDD-015 V-9 until ADR-016 acceptance was recorded, then closed with 12/12 REQUIRED.
+- Owner ratification / push approval: REQUIRED BEFORE PUSH; pending as of local F-15 close. The close is recorded locally only and must not be pushed until the owner explicitly approves via the EM.
+- Notes: Sprint 8 shipped the external issue-tracker bridge and model-upgrade governance without adding third-party dependencies or weakening validation discipline. The bridge keeps tracker sync explicit and reversible: dry-run first, token-gated writes, generated-region updates, deterministic issue-map state, and conflict reports that never mutate `tasks.md`. The model-upgrade protocol now forces future model swaps through Level-2 evidence, fixture-backed A/B comparison, and cost/quality deltas before any assignment change. The sprint's main process lesson is governance-positive blocking: when SDD-015 needed a constitution-level cross-reference, the implementation stopped until ADR-016 was accepted instead of treating approval as paperwork after the fact.
+- Next: PI-5 Sprint 5 = Self-Review + Uniform Gates + Stakeholder Defense (SDD-021 + SDD-023 + SDD-025). Kickoff prompt: [`../feature-prompts/SPRINT-09-KICKOFF.prompt.md`](../feature-prompts/SPRINT-09-KICKOFF.prompt.md). Do not start Sprint 9 until the owner resolves Sprint 8 pre-push approval.

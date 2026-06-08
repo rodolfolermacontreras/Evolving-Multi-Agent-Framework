@@ -9,7 +9,7 @@ sprint: PI-5
 
 # PI-5: Brownfield Adoption + Anti-Conflict + Stakeholder Discipline
 
-- Status: **Active** (Sprint 1 CLOSED 2026-06-06, Sprint 2 CLOSED 2026-06-07, Sprint 3 CLOSED 2026-06-08; 2 sprints remaining)
+- Status: **Active** (Sprint 1 CLOSED 2026-06-06, Sprint 2 CLOSED 2026-06-07, Sprint 3 CLOSED 2026-06-08, Sprint 4 CLOSED 2026-06-08; 1 sprint remaining)
 - Theme: Make the framework safely adoptable by other teams, harden the gates that prevent two features from colliding, and finish the discipline tools surfaced by the Scott Feedback Bundle.
 - Started: 2026-06-06
 - Owner: principal-executive-manager
@@ -342,13 +342,34 @@ commit, 259 -> 305 tests (+46), 1 ADR drafted-then-accepted, 1
 constitutional amendment (Article XII, principles.md `1.2.0` -> `1.3.0`),
 0 silently deferred REQUIRED items.
 
-### Sprint 4 -- ADO/GitHub Bridge + Model Upgrade Discipline (planned)
-**Items**: SDD-022, SDD-015.
-**Status**: PLANNED. Kickoff prompt: [`../../feature-prompts/SPRINT-08-KICKOFF.prompt.md`](../../feature-prompts/SPRINT-08-KICKOFF.prompt.md) (authored 2026-06-08 commit `e26b032`).
+### Sprint 4 -- ADO/GitHub Bridge + Model Upgrade Discipline -- CLOSED 2026-06-08
+**Status**: **CLOSED 2026-06-08** (F-15 local close; owner approval required before push remains pending)
+**Closed**: 2026-06-08
+**Spec dirs**:
+- `specs/2026-06-08-ado-github-bridge/` (SDD-022)
+- `specs/2026-06-08-model-upgrade-discipline/` (SDD-015)
+**Sprint kickoff**: [`../../feature-prompts/SPRINT-08-KICKOFF.prompt.md`](../../feature-prompts/SPRINT-08-KICKOFF.prompt.md) (authored 2026-06-08 commit `e26b032`)
+**Sprint chain (chronological, on master)**:
+- `df5a957` spec(sdd-022): scaffold ADO GitHub bridge clarify
+- `3d3fa89` spec(sdd-022): finalize ADO GitHub bridge plan
+- `c3ac624` spec(sdd-015): finalize model upgrade discipline plan
+- `0b47def` feat(sprint-8): implement F-14 sync and model-upgrade gates
+- `a2c1476` docs: accept ADR-016 governance unblock
+- `dbfe3c6` close(sprint-8-f-14): mark implementation done
+- (next: F-15 close commit + state regen, local only until owner pre-push approval)
+**Tests**: 305 -> 331 (+26 net; 2 skipped platform-conditional baseline preserved). F-15 verification: `python -m pytest spec-driven-development/ --tb=no -q` -> 331 passed, 2 skipped; `python spec-driven-development/cli/schema_lint.py` -> Schema lint clean.
+**Validation**: SDD-022 16/16 REQUIRED + 1/3 OPTIONAL; SDD-015 12/12 REQUIRED + 1/3 OPTIONAL + 1/2 manual. No REQUIRED item was deferred or loosened.
+**ADRs**: ADR-016 (Model Upgrade Protocol Cross-Reference, accepted 2026-06-08 before `constitution/decision-policy.md` edit).
+**SDD-022**: DONE (`/taskstoissues` stdlib CLI; `tasks.md` remains authoritative; explicit dry-run default; apply mode requires `GITHUB_TOKEN`/`GH_TOKEN`; generated-region idempotency; conflict reports are non-mutating; GitHub live provider plus ADO dry-run provider boundary).
+**SDD-015**: DONE (`docs/MODEL-UPGRADE-PROTOCOL.md`; no-network fixture-driven A/B compare CLI; pricing/workload fixtures; cost and quality delta reports; ADR-backed `decision-policy.md` cross-reference).
+**SDD-034**: carried forward. The content-shingle dedup upgrade was not pulled into Sprint 8; the Sprint 7 heuristic limitation remains visible and non-blocking.
+**PI-4 carry-over**: domain-skill annotations and GitHub Actions Node.js bump carried forward. The dirty workflow/Azure work present during F-15 was unrelated and intentionally preserved, not staged.
+**Article XI live contention observation**: No new CLARIFY/SPEC contention was observed during F-15. Sprint 8 reused the Sprint 7 lesson: required validation deferral is prohibited, and any governance blocker must stop the feature until owner approval is recorded. ADR-016 followed that pattern before SDD-015 closed.
+**Retro (one paragraph)**: Sprint 8 proved the framework can ship an external-system bridge without weakening Article V: `/taskstoissues` stayed stdlib-only, no-network tests carried the default validation path, GitHub live writes are explicitly token-gated, and ADO remains a clean fast-follow provider shape instead of an untested SDK dependency. The model-upgrade work exposed a healthy governance stop: F-14 initially blocked on SDD-015 V-9, then resumed only after the owner accepted ADR-016, so the constitution cross-reference landed with approval rather than as a silent process shortcut. The sprint also reinforced a close discipline for future sprints: local close can be recorded when tests, schema lint, validation, backlog, state regeneration, and kickoff authoring are complete, but push remains gated on explicit owner approval. Net: 6 implementation/planning commits before F-15, 305 -> 331 tests, 1 accepted ADR, 0 silently deferred REQUIRED items, PI-5 remains active with Sprint 5 still to run.
 
 ### Sprint 5 -- Self-Review + Stakeholder Defense + Uniform Gates (planned)
 **Items**: SDD-021, SDD-023, SDD-025.
-**Status**: PLANNED.
+**Status**: READY TO KICK OFF after owner approval/push decision for Sprint 8 close. Kickoff prompt: [`../../feature-prompts/SPRINT-09-KICKOFF.prompt.md`](../../feature-prompts/SPRINT-09-KICKOFF.prompt.md).
 
 ---
 

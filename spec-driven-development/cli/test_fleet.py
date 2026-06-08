@@ -393,5 +393,109 @@ class TestSerialGateBlocks(unittest.TestCase):
                 fleet.SDD_ROOT = original
 
 
+# --------------------------------------------------------------------------- #
+# SDD-019.R7 -- priority-weighted FIFO queue ordering (SDD-032)
+# --------------------------------------------------------------------------- #
+
+
+class TestQueueOrdering(unittest.TestCase):
+    """SDD-019.R7 (SDD-032 R1): priority-weighted FIFO queue."""
+
+    def test_priority_wins(self) -> None:
+        """Highest priority queued feature acquires next."""
+        entries = [
+            ("feat-c", "P3", "2026-06-01"),
+            ("feat-a", "P1", "2026-06-09"),  # latest timestamp but highest priority
+            ("feat-b", "P2", "2026-06-05"),
+        ]
+        ordered = fleet._compute_queue_order(entries)
+        self.assertEqual([e[0] for e in ordered], ["feat-a", "feat-b", "feat-c"])
+
+    def test_fifo_tiebreak(self) -> None:
+        """Equal priorities break ties by earliest updated timestamp (FIFO)."""
+        entries = [
+            ("feat-late", "P2", "2026-06-09"),
+            ("feat-mid", "P2", "2026-06-05"),
+            ("feat-early", "P2", "2026-06-01"),
+        ]
+        ordered = fleet._compute_queue_order(entries)
+        self.assertEqual([e[0] for e in ordered], ["feat-early", "feat-mid", "feat-late"])
+
+    def test_empty_queue(self) -> None:
+        """Empty input yields empty output (no acquirer)."""
+        self.assertEqual(fleet._compute_queue_order([]), [])
+
+    def test_priority_lookup_fallback(self) -> None:
+        """Unknown feature_id falls back to P3 (least-urgent default)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            backlog = Path(tmp) / "BACKLOG.md"
+            backlog.write_text(
+                "| ID | Title | Priority |\n"
+                "|----|-------|----------|\n"
+                "| SDD-100 | Known feature | P1 |\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(fleet._lookup_backlog_priority("SDD-100", backlog), "P1")
+            self.assertEqual(fleet._lookup_backlog_priority("SDD-999", backlog), "P3")
+            self.assertEqual(fleet._lookup_backlog_priority("", backlog), "P3")
+
+
+# --------------------------------------------------------------------------- #
+# SDD-019.R8 -- cutover-commit grandfather migration (SDD-032)
+# --------------------------------------------------------------------------- #
+
+
+def _grandfather_spec_dir(
+    parent: Path,
+    name: str,
+    updated: str,
+    *,
+    file: str = "clarify.md",
+    status: str = "active",
+) -> Path:
+    """Helper: create a spec dir with a single file carrying *updated* frontmatter."""
+    d = parent / name
+    d.mkdir(parents=True, exist_ok=True)
+    body = "# stub\n" if file == "spec.md" else ""
+    (d / file).write_text(
+        f"---\nid: '{name}-stub'\ntype: clarification\n"
+        f"status: {status}\nowner: pm\nupdated: {updated}\n---\n{body}",
+        encoding="utf-8",
+    )
+    return d
+
+
+class TestGrandfather(unittest.TestCase):
+    """SDD-019.R8 (SDD-032 R2): cutover-commit grandfather."""
+
+    def test_pre_cutover_not_blocked(self) -> None:
+        """Spec dir whose updated date is strictly older than cutover is grandfathered."""
+        with tempfile.TemporaryDirectory() as tmp:
+            sd = _grandfather_spec_dir(Path(tmp), "feat-old", "2026-06-01")
+            self.assertTrue(fleet._is_grandfathered(sd))
+            # Custom cutover honored
+            self.assertFalse(fleet._is_grandfathered(sd, cutover="2026-05-01"))
+
+    def test_post_cutover_blocked(self) -> None:
+        """Spec dir created on/after cutover is NOT grandfathered."""
+        with tempfile.TemporaryDirectory() as tmp:
+            sd_eq = _grandfather_spec_dir(Path(tmp), "feat-cutover", "2026-06-08")
+            self.assertFalse(fleet._is_grandfathered(sd_eq))
+            sd_new = _grandfather_spec_dir(Path(tmp), "feat-new", "2026-06-09")
+            self.assertFalse(fleet._is_grandfathered(sd_new))
+
+    def test_mixed_pre_and_post(self) -> None:
+        """Two spec dirs, one pre and one post -- grandfather is per-dir."""
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_p = Path(tmp)
+            sd_pre = _grandfather_spec_dir(tmp_p, "feat-pre", "2026-05-15")
+            sd_post = _grandfather_spec_dir(tmp_p, "feat-post", "2026-06-09")
+            self.assertTrue(fleet._is_grandfathered(sd_pre))
+            self.assertFalse(fleet._is_grandfathered(sd_post))
+            # Missing dir -> False (not an error)
+            missing = tmp_p / "feat-missing"
+            self.assertFalse(fleet._is_grandfathered(missing))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

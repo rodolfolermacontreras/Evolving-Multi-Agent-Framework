@@ -38,6 +38,12 @@ from ledger_cli import (  # noqa: E402
 DEFAULT_DB = _LEDGER_DIR / "fleet.db"
 ROSTER_PATH = SDD_ROOT / "roster" / "agents.json"
 
+# Article XI ratification cutover (SDD-019.R8 grandfather migration).
+# Spec dirs whose CLARIFY/SPEC frontmatter `updated` field is strictly older
+# than this date are treated as grandfathered lock holders and are not
+# retroactively blocked. See specs/2026-06-09-sprint-6-completion/.
+ARTICLE_XI_CUTOVER = "2026-06-08"
+
 
 # Exception ----------------------------------------------------------------- #
 
@@ -395,6 +401,103 @@ def _check_serial_gate(feature_dir: Path, phase: str | None = None) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------- #
+# SDD-019.R7 / R8 -- priority-weighted FIFO queue + grandfather migration
+# (SDD-032 / 2026-06-09-sprint-6-completion)
+# --------------------------------------------------------------------------- #
+
+
+_PRIORITY_RANK = {"P1": 1, "P2": 2, "P3": 3, "P4": 4}
+
+
+def _lookup_backlog_priority(feature_id: str, backlog_path: Path | None = None) -> str:
+    """Return the BACKLOG.md priority (`P1`/`P2`/`P3`/`P4`) for *feature_id*.
+
+    Scans `backlog/BACKLOG.md` for a markdown table row whose first cell starts
+    with *feature_id* (e.g. ``SDD-032``). Falls back to ``"P3"`` if not found
+    or unparseable (the least-urgent default, per plan.md "Risk Assessment").
+    """
+    if backlog_path is None:
+        backlog_path = SDD_ROOT / "backlog" / "BACKLOG.md"
+    if not feature_id or not backlog_path.is_file():
+        return "P3"
+    try:
+        text = backlog_path.read_text(encoding="utf-8")
+    except OSError:
+        return "P3"
+    fid = feature_id.strip()
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("|"):
+            continue
+        cells = [c.strip() for c in stripped.strip("|").split("|")]
+        if not cells or not cells[0]:
+            continue
+        # Match: first cell is exactly the feature_id, or starts with it followed
+        # by whitespace/punctuation (e.g. "SDD-032" vs "SDD-032-foo" -- only the
+        # exact-ID case wins).
+        first = cells[0]
+        if first == fid or first.startswith(fid + " ") or first.startswith(fid + ","):
+            # Priority is the 4th column in the standard backlog layout
+            # (| ID | Title | Priority | ... |). Find the first cell that matches
+            # P1/P2/P3/P4 in the row to be robust against minor schema drift.
+            for cell in cells[1:]:
+                token = cell.strip()
+                if token in _PRIORITY_RANK:
+                    return token
+            return "P3"
+    return "P3"
+
+
+def _compute_queue_order(
+    entries: list[tuple[str, str, str]],
+) -> list[tuple[str, str, str]]:
+    """Order queued features by priority then FIFO submission timestamp.
+
+    *entries* is a list of ``(feature_name, priority, updated)`` tuples where
+    *priority* is one of ``P1`` / ``P2`` / ``P3`` / ``P4`` (unknown -> P3) and
+    *updated* is an ISO-8601 date string (``YYYY-MM-DD``). Returns the same
+    list sorted so the next-to-acquire feature is first: highest priority
+    wins; equal-priority entries break ties by earliest *updated* (FIFO).
+    """
+    def _key(item: tuple[str, str, str]) -> tuple[int, str, str]:
+        feature, priority, updated = item
+        rank = _PRIORITY_RANK.get((priority or "").strip(), _PRIORITY_RANK["P3"])
+        return (rank, updated or "", feature)
+    return sorted(entries, key=_key)
+
+
+def _is_grandfathered(
+    spec_dir: Path,
+    cutover: str = ARTICLE_XI_CUTOVER,
+) -> bool:
+    """Return True if *spec_dir* predates the Article XI cutover.
+
+    Reads the ``updated`` frontmatter field from ``clarify.md`` and ``spec.md``
+    (whichever exist) and returns True if any value is strictly older than
+    *cutover* (``YYYY-MM-DD``). Grandfathered spec dirs are treated as
+    implicit lock holders by the scanner and are not retroactively blocked.
+    Spec dirs created on or after the cutover get normal lock treatment.
+    """
+    from schema_lint import parse_frontmatter  # noqa: E402 -- sibling import
+
+    if not spec_dir.is_dir():
+        return False
+    for name in ("clarify.md", "clarification-log.md", "spec.md"):
+        path = spec_dir / name
+        if not path.is_file():
+            continue
+        try:
+            fm = parse_frontmatter(path.read_text(encoding="utf-8"))
+        except OSError:
+            continue
+        updated = fm.get("updated", "").strip("'\" ").strip()
+        # Compare as ISO-8601 date strings (lexical sort matches calendar sort).
+        if updated and updated < cutover:
+            return True
+    return False
+
+
 def cmd_lock_status(args: argparse.Namespace) -> int:
     """Print current lock holders."""
     specs_root = Path(args.specs_root) if getattr(args, "specs_root", None) else SDD_ROOT / "specs"
@@ -403,7 +506,79 @@ def cmd_lock_status(args: argparse.Namespace) -> int:
     spec = state["spec_holder"]
     print(f"CLARIFY lock: {clarify or '(free)'}")
     print(f"SPEC lock:    {spec or '(free)'}")
+
+    # SDD-019.R7 + R8 -- additive surface (SDD-032 / O2 close).
+    # Existing prints above stay byte-identical; the queue + grandfather
+    # sections are appended after, never inline.
+    if specs_root.is_dir():
+        from schema_lint import parse_frontmatter  # noqa: E402 -- sibling
+
+        for phase, holder, status_check in (
+            ("CLARIFY", clarify, lambda s: bool(s) and s != "done"),
+            ("SPEC", spec, lambda s: s == "draft"),
+        ):
+            queued: list[tuple[str, str, str]] = []
+            for sd in sorted(specs_root.iterdir()):
+                if not sd.is_dir() or sd.name == holder:
+                    continue
+                fm: dict = {}
+                for name in (
+                    ("clarify.md", "clarification-log.md") if phase == "CLARIFY"
+                    else ("spec.md",)
+                ):
+                    p = sd / name
+                    if p.is_file():
+                        try:
+                            fm = parse_frontmatter(p.read_text(encoding="utf-8"))
+                        except OSError:
+                            fm = {}
+                        break
+                status = fm.get("status", "").strip("'\" ").lower()
+                if not status_check(status):
+                    continue
+                feature_id = _extract_feature_id(sd)
+                priority = _lookup_backlog_priority(feature_id) if feature_id else "P3"
+                updated = fm.get("updated", "").strip("'\" ").strip()
+                queued.append((sd.name, priority, updated))
+            if queued:
+                ordered = _compute_queue_order(queued)
+                print(f"{phase} queue:")
+                for feature, priority, updated in ordered:
+                    print(f"  - {feature} ({priority}, updated={updated or 'n/a'})")
+
+        grandfathered = [
+            sd.name for sd in sorted(specs_root.iterdir())
+            if sd.is_dir() and _is_grandfathered(sd)
+        ]
+        if grandfathered:
+            print("Grandfathered (pre-Article-XI; not retroactively blocked):")
+            for name in grandfathered:
+                print(f"  - {name}")
+
     return 0
+
+
+def _extract_feature_id(spec_dir: Path) -> str | None:
+    """Best-effort extraction of an SDD-NNN backlog ID from *spec_dir*.
+
+    Reads spec.md body text for a line containing ``Spec ID: SDD-NNN`` or
+    falls back to scanning for any ``SDD-\\d+`` token in the spec body.
+    Returns the matched token (e.g. ``SDD-032``) or None.
+    """
+    spec_md = spec_dir / "spec.md"
+    if not spec_md.is_file():
+        return None
+    try:
+        text = spec_md.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    m = re.search(r"Spec ID:\s*(SDD-\d+)", text)
+    if m:
+        return m.group(1)
+    m = re.search(r"\bSDD-\d{3}\b", text)
+    if m:
+        return m.group(0)
+    return None
 
 
 def cmd_lock_force_release(args: argparse.Namespace) -> int:

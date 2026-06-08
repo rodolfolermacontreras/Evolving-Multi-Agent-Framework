@@ -1,9 +1,9 @@
 ---
 id: SDD-20260609UIVARIANT-clarification
 type: clarification
-status: active
+status: done
 owner: principal-product-manager
-updated: 2026-06-09
+updated: 2026-06-08
 feature: 2026-06-09-ui-lifecycle-variant
 ---
 
@@ -11,13 +11,14 @@ feature: 2026-06-09-ui-lifecycle-variant
 
 - Date: 2026-06-09
 - Authors: Principal Product Manager + Principal Architect (jointly)
-- Status: ACTIVE -- awaiting owner answers
+- Status: **CLOSED 2026-06-08** -- all 9 answers recorded; pass 2 unblocked
 - Spec ID: SDD-018
 - Sprint: PI-5 / Sprint 3 (= overall Sprint 7), F-10 pass 1 of 2
 - Gating: /spec finalization, validation contract lock, /plan, ADR
-  drafting (if Q-F confirms), and any `constitution/` edit are ALL
-  blocked until these answers are recorded and the Executive Manager
-  commits this file.
+  drafting (Path B confirmed), and the constitution edit (Article XII,
+  separate Level-2 gate per Q6 answer) are now unblocked subject to
+  pass 2 execution and a separate owner approval before constitution
+  is edited.
 
 ---
 
@@ -82,8 +83,8 @@ trail.
 delta mechanism. Rules 1 and 3 stay firm. The delta is itself part of
 the contract -- every delta entry is locked the moment it's added.
 
-**Status**: OPEN
-**Answer**: (pending owner)
+**Status**: ANSWERED 2026-06-08 by Rodolfo Lerma via Executive Manager
+**Answer**: **ACCEPT joint recommendation.** Relax rule 2 only via an append-only delta mechanism. Rules 1 (lock at /tasks) and 3 (zero unchecked REQUIRED at done) stay firm. Every delta entry is itself part of the locked contract.
 
 ---
 
@@ -138,8 +139,8 @@ boolean string), plus an append-only `## Delta Entries` section in
 rationale + author + item-type + item-body fields). DEFER `/spec-ui`
 slash command to a P3 backlog item.**
 
-**Status**: OPEN
-**Answer**: (pending owner)
+**Status**: ANSWERED 2026-06-08 by Rodolfo Lerma via Executive Manager
+**Answer**: **ACCEPT joint recommendation.** Hybrid: `ui-variant: true` frontmatter marker on spec.md + append-only `## Delta Entries` section in validation.md. Defer `/spec-ui` slash command to P3 backlog item (EM to file as SDD-035 if/when friction surfaces).
 
 ---
 
@@ -170,8 +171,8 @@ patterns are not grep-able cleanly without knowing the pattern.
 marker in `spec.md` frontmatter.** Confirms the PI-5 risk register
 mitigation as written.
 
-**Status**: OPEN
-**Answer**: (pending owner)
+**Status**: ANSWERED 2026-06-08 by Rodolfo Lerma via Executive Manager
+**Answer**: **ACCEPT joint recommendation.** Per spec dir via `ui-variant: true` frontmatter marker. Confirms PI-5 risk register mitigation. No path-based auto-activation.
 
 ---
 
@@ -221,8 +222,8 @@ variant validator. Shared sub-validators stay single-implementation.
 Delta-related lint errors must be prefixed `[delta]` for author
 clarity.
 
-**Status**: OPEN
-**Answer**: (pending owner)
+**Status**: ANSWERED 2026-06-08 by Rodolfo Lerma via Executive Manager
+**Answer**: **ACCEPT joint recommendation.** Linter recognizes the marker and dispatches to a variant validator; shared sub-validators stay single-implementation; lint errors originating in delta validation are prefixed `[delta]`.
 
 ---
 
@@ -274,8 +275,8 @@ Architect votes C2 (cleanest demo). **Owner adjudicates.** Both are
 valid; the choice is risk-appetite: prove the variant under hardest
 case (PM) vs prove the variant via cleanest demo (Architect).
 
-**Status**: OPEN
-**Answer**: (pending owner)
+**Status**: ANSWERED 2026-06-08 by Rodolfo Lerma via Executive Manager
+**Answer**: **C2 -- `specs/2026-05-16-state-dashboard/` (Architect's pick) for now.** Owner direction (verbatim, 2026-06-08): "state dashboard for now then." Rationale on EM read: clean demo first inside Sprint 7 close window; C1 (live-ui-v2) remains a future stretch candidate but does NOT block Sprint 7 close. SDD-018 retroactive-demo migration targets C2 only.
 
 ---
 
@@ -328,8 +329,8 @@ ADR-014.** Conditional: if the owner amends any of Q1-Q4 such that the
 variant no longer touches `schema_lint`, the Architect re-evaluates
 and may downgrade to Path C.
 
-**Status**: OPEN
-**Answer**: (pending owner)
+**Status**: ANSWERED 2026-06-08 by Rodolfo Lerma via Executive Manager
+**Answer**: **ACCEPT joint recommendation: Path B.** New Article XII (UI Lifecycle Variant) sitting beside Article XI, accompanied by ADR-014. Q1-Q4 unchanged (schema_lint DOES change), so conditional downgrade to Path C does not trigger. ADR-014 drafted in F-10 pass 2; constitution/principles.md edit waits for owner approval after reading the ADR (Level-2 gate per Article VIII, analogous to ADR-013 / Article XI rollout in Sprint 6).
 
 ---
 
@@ -379,8 +380,8 @@ plan to label it explicitly as "the variant proof case."** This is a
 NON-BINDING directional answer for PI-6 PM planning -- the owner can
 override at PI-6 plan time.
 
-**Status**: OPEN
-**Answer**: (pending owner)
+**Status**: ANSWERED 2026-06-08 by Rodolfo Lerma via Executive Manager
+**Answer**: **ACCEPT joint recommendation.** F-beta (Sprint Burndown / Velocity widget in exec/state.html) as the first real UI feature exercising the variant. PI-6 plan to label it explicitly as "the variant proof case." NON-BINDING for PI-6 PM planning; owner may override at PI-6 plan time.
 
 ---
 
@@ -423,8 +424,8 @@ sanctioned exception, tagged with a distinctive delta-entry type
 (e.g. `item-type: retroactive-demo`) so it cannot be misread as a
 general back-port permission.
 
-**Status**: OPEN
-**Answer**: (pending owner)
+**Status**: ANSWERED 2026-06-08 by Rodolfo Lerma via Executive Manager
+**Answer**: **ACCEPT joint recommendation.** Forward-only. Q5 demo (state-dashboard) is the sole sanctioned exception, tagged `item-type: retroactive-demo` so schema_lint recognizes it as the SDD-018 proof case rather than a general back-port template. No other pre-existing locked validation.md may be back-ported to the variant.
 
 ---
 
@@ -458,8 +459,8 @@ spelling, no synonyms.
 **Joint recommendation**: **"delta"** as currently used. Locked
 consistently across all surfaces.
 
-**Status**: OPEN
-**Answer**: (pending owner)
+**Status**: ANSWERED 2026-06-08 by Rodolfo Lerma via Executive Manager
+**Answer**: **ACCEPT joint recommendation.** Name is **"delta"**, used consistently across templates/validation.md, schema_lint.py error messages (with `[delta]` prefix per Q4), the new docs page, ADR-014, and Article XII text. No synonyms permitted.
 
 ---
 
@@ -476,6 +477,32 @@ consistently across all surfaces.
   conditional clause).
 - The Executive Manager surfaces these answers; this CLARIFY round
   runs through the EM, not direct PM/Architect/owner contact.
+
+---
+
+## Owner-attention resolutions (recorded 2026-06-08)
+
+Three OWNER-ATTENTION items raised by F-10 pass 1 final report. Owner direction via Executive Manager 2026-06-08:
+
+1. **`status: clarify` enum gap** -- **ACCEPT `blocked` as the CLARIFY-phase carrier.** Do NOT amend the SDD-FDC-001 status enum. Current scaffold (spec.md `status: blocked` while clarify.md is `status: active`/now `done`) is the framework convention going forward. F-10 pass 2 will document this convention briefly in the new docs page and in Article XII text (one-line note).
+2. **Dedup heuristic title-shingle limitation** -- **ACCEPT as known limitation; file SDD-034 (P3) follow-up backlog item** to upgrade dedup to content-shingle for spec.md problem statements. Not blocking SDD-018. EM files SDD-034 as part of pass 2 commit; SDD-034 itself remains unscheduled.
+3. **fleet.db commit hygiene** -- **RESOLVED**: ledger event row committed alongside F-10 pass 1 at `df3bffb` to preserve audit trail. No further action.
+
+## CLARIFY answer summary (recorded 2026-06-08)
+
+| Q | Owner answer (short form) |
+|---|---|
+| Q1 | ACCEPT joint -- relax Article X rule 2 only; append-only delta mechanism |
+| Q2 | ACCEPT joint -- hybrid: `ui-variant: true` marker + `## Delta Entries` section; defer `/spec-ui` to P3 |
+| Q3 | ACCEPT joint -- per spec dir via frontmatter marker |
+| Q4 | ACCEPT joint -- linter recognizes marker, dispatches to variant validator, `[delta]` error prefix |
+| Q5 | **C2 (state-dashboard) -- Architect's pick adopted for Sprint 7 close window.** C1 (live-ui-v2) remains future stretch candidate. |
+| Q6 | ACCEPT joint -- **Path B: new Article XII + ADR-014.** Constitution edit waits for owner Level-2 approval after reading ADR-014. |
+| Q7 | ACCEPT joint -- F-beta (Sprint Burndown / Velocity widget) is first variant consumer; non-binding for PI-6 |
+| Q8 | ACCEPT joint -- forward-only; Q5 demo tagged `item-type: retroactive-demo` is sole exception |
+| Q9 | ACCEPT joint -- name is "delta", used consistently across all surfaces |
+
+**Pass 2 unblocked.** All 9 answers recorded; 3 owner-attention items resolved. F-10 pass 2 (PM + Architect joint) is authorized to finalize spec.md, lock validation.md, write plan.md + tasks.md, and draft ADR-014. The constitution edit (Article XII) remains a separate Level-2 gate -- F-10 pass 2 drafts ADR-014 only; the owner reads ADR-014 and approves the constitution edit in a separate step.
 
 ---
 

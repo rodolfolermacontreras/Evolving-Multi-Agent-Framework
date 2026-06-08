@@ -1,7 +1,7 @@
 ---
 id: SDD-20260607GITIGN-spec
 type: spec
-status: active
+status: done
 owner: principal-architect
 updated: 2026-06-07
 feature: 2026-06-07-host-gitignore-protection

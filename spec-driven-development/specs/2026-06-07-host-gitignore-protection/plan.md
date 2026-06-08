@@ -1,7 +1,7 @@
 ---
 id: SDD-20260607GITIGN-plan
 type: plan
-status: active
+status: done
 owner: principal-software-developer
 updated: 2026-06-07
 feature: 2026-06-07-host-gitignore-protection

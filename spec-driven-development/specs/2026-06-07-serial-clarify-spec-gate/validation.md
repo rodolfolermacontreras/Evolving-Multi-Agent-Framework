@@ -1,7 +1,7 @@
 ---
 id: SDD-20260607SERIAL-validation
 type: validation
-status: active
+status: done
 owner: principal-architect
 updated: 2026-06-07
 feature: 2026-06-07-serial-clarify-spec-gate

@@ -1,7 +1,7 @@
 ---
 id: SDD-20260607DEDUP-validation
 type: validation
-status: active
+status: done
 owner: principal-architect
 updated: 2026-06-07
 feature: 2026-06-07-cross-feature-dedup

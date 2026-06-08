@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -78,6 +79,54 @@ ARTIFACT_SKIP_PREFIXES = ("_",)
 
 # Best-effort ISO date pattern for the `updated` field.
 _ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+# ---------------------------------------------------------------------------- #
+# SDD-018 UI Lifecycle Variant (Article XII candidate; ADR-014)
+#
+# Opt-in via `ui-variant: true` on a spec dir's spec.md. Triggers a sibling
+# validator (check_validation_variant) that accepts a `## Delta Entries`
+# section in that spec dir's validation.md. All delta-originated findings
+# carry the `[delta]` prefix in both human and JSON output. Append-only
+# enforcement is always-on (parse-time heuristic + git-show comparison
+# against the last-committed file state). Non-variant spec dirs are
+# byte-identical to pre-SDD-018 lint output.
+# ---------------------------------------------------------------------------- #
+
+UI_VARIANT_MARKER_KEY = "ui-variant"
+
+DELTA_REQUIRED_FIELDS = ("timestamp", "author", "rationale", "item-type")
+
+DELTA_ITEM_TYPE_ENUM = {
+    "add",
+    "wontfix",
+    "re-check",
+    "retroactive-demo",
+}
+
+# Forward-only allow-list per AC-5/R-5: only this spec dir may use
+# `item-type: retroactive-demo`. Match by endswith() so the rule fires
+# correctly both in the real repo (path prefix `spec-driven-development/`)
+# and in test tempdirs (path prefix absent). Hard-coded length 1 per
+# clarify.md Q8.
+RETROACTIVE_DEMO_ALLOWLIST = (
+    "specs/2026-05-16-state-dashboard/",
+)
+
+DELTA_FINDING_KIND = "delta"
+DELTA_PREFIX = "[delta]"
+
+# ISO 8601 UTC: YYYY-MM-DDTHH:MMZ or YYYY-MM-DDTHH:MM:SSZ
+_ISO_TIMESTAMP_RE = re.compile(
+    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?Z$"
+)
+
+_DELTA_HEADING_RE = re.compile(
+    r"^###\s+Delta\s+DE-(\d{2,})(?:\s+--\s+(.*))?\s*$"
+)
+_DELTA_FIELD_RE = re.compile(
+    r"^-\s+([A-Za-z][\w-]*)\s*:\s*(.*?)\s*$"
+)
 
 
 # ---------------------------------------------------------------------------- #
@@ -294,6 +343,285 @@ def check_artifact(path: Path) -> list[Finding]:
     return findings
 
 
+# ---------------------------------------------------------------------------- #
+# SDD-018 UI Lifecycle Variant: marker recognition, delta-entry validator,
+# retroactive-demo allow-list, append-only enforcement.
+# ---------------------------------------------------------------------------- #
+
+def _spec_has_ui_variant(spec_dir: Path) -> bool:
+    """Return True iff `spec.md` in `spec_dir` carries `ui-variant: true`."""
+    spec_path = spec_dir / "spec.md"
+    if not spec_path.is_file():
+        return False
+    fm = parse_frontmatter(spec_path.read_text(encoding="utf-8", errors="replace"))
+    val = fm.get(UI_VARIANT_MARKER_KEY)
+    if not isinstance(val, str):
+        return False
+    return val.strip().lower() == "true"
+
+
+def _ui_variant_marker_shape_findings(spec_path: Path) -> list[Finding]:
+    """If `spec.md` has a `ui-variant` key, its value must be exactly
+    `true` or `false`. Anything else (`yes`, `1`, empty, etc.) is a
+    `[delta]` lint error. Absent key returns []."""
+    findings: list[Finding] = []
+    fm = parse_frontmatter(spec_path.read_text(encoding="utf-8", errors="replace"))
+    if UI_VARIANT_MARKER_KEY not in fm:
+        return findings
+    val = fm.get(UI_VARIANT_MARKER_KEY)
+    if not isinstance(val, str) or val.strip().lower() not in ("true", "false"):
+        shown = repr(val) if not isinstance(val, str) else f"'{val}'"
+        findings.append(Finding(
+            str(spec_path), DELTA_FINDING_KIND,
+            f"{DELTA_PREFIX} ui-variant marker must be 'true' or 'false'; "
+            f"saw {shown}",
+        ))
+    return findings
+
+
+def _parse_delta_entries(text: str) -> list[dict]:
+    """Extract delta entries from a `## Delta Entries` section.
+
+    Returns a list of dicts with keys: de_num (int), de_id (str like
+    `DE-01`), title (str), start_line (1-based int), raw_fields (dict
+    of `key -> value` from `- key: value` lines BEFORE the first body
+    line), body_present (bool).
+
+    Returns [] when the section is absent. Tolerates an empty section
+    (zero entries is a valid state per R-16 edge case).
+    """
+    lines = text.splitlines()
+
+    section_start = None
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if stripped == "## Delta Entries":
+            section_start = i + 1
+            break
+    if section_start is None:
+        return []
+
+    section_end = len(lines)
+    for i in range(section_start, len(lines)):
+        if lines[i].startswith("## ") and not lines[i].startswith("### "):
+            section_end = i
+            break
+
+    entries: list[dict] = []
+    i = section_start
+    while i < section_end:
+        m = _DELTA_HEADING_RE.match(lines[i])
+        if not m:
+            i += 1
+            continue
+        de_num_str = m.group(1)
+        title = (m.group(2) or "").strip()
+        de_num = int(de_num_str)
+
+        # Locate this entry's block
+        block_start = i + 1
+        block_end = section_end
+        for j in range(block_start, section_end):
+            if lines[j].startswith("### "):
+                block_end = j
+                break
+        block = lines[block_start:block_end]
+
+        entry: dict = {
+            "de_num": de_num,
+            "de_id": f"DE-{de_num_str.zfill(2)}",
+            "title": title,
+            "start_line": i + 1,
+            "raw_fields": {},
+            "body_present": False,
+        }
+        seen_body = False
+        for bl in block:
+            stripped = bl.strip()
+            if not stripped:
+                continue
+            field_match = _DELTA_FIELD_RE.match(bl)
+            if field_match and not seen_body:
+                key = field_match.group(1)
+                value = field_match.group(2)
+                entry["raw_fields"][key] = value
+            else:
+                seen_body = True
+                entry["body_present"] = True
+        entries.append(entry)
+        i = block_end
+
+    return entries
+
+
+def _check_delta_append_only(path: Path) -> list[Finding]:
+    """Append-only enforcement (AC-3/R-3): compare `path`'s current
+    content to its last-committed state via `git show HEAD:<rel>`. Any
+    DE-NN entry whose mandatory fields changed, or that was deleted
+    since the last commit, is a `[delta]` lint error.
+
+    If `path` is not inside a git work tree, or git is unavailable, or
+    the file is new (no prior commit), this check is silently skipped.
+    The parse-time monotonic/dup checks in `check_validation_variant`
+    catch in-memory shape violations independently.
+    """
+    findings: list[Finding] = []
+
+    # Locate git work tree root
+    repo_root = None
+    for parent in [path.parent] + list(path.parents):
+        if (parent / ".git").exists():
+            repo_root = parent
+            break
+    if repo_root is None:
+        return findings
+
+    try:
+        rel = path.relative_to(repo_root)
+    except ValueError:
+        return findings
+
+    try:
+        result = subprocess.run(
+            ["git", "show", f"HEAD:{rel.as_posix()}"],
+            cwd=str(repo_root),
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+        return findings
+
+    if result.returncode != 0:
+        # File is new (no HEAD version) or git ran into an error -- skip.
+        return findings
+
+    prior_text = result.stdout
+    current_text = path.read_text(encoding="utf-8", errors="replace")
+
+    prior_entries = _parse_delta_entries(prior_text)
+    current_entries = _parse_delta_entries(current_text)
+
+    prior_map = {e["de_id"]: e for e in prior_entries}
+    current_map = {e["de_id"]: e for e in current_entries}
+
+    for de_id, prior in prior_map.items():
+        if de_id not in current_map:
+            findings.append(Finding(
+                str(path), DELTA_FINDING_KIND,
+                f"{DELTA_PREFIX} {de_id} deleted (append-only violation: "
+                f"delta entries from prior commits MUST remain)",
+            ))
+            continue
+        current = current_map[de_id]
+        for required in DELTA_REQUIRED_FIELDS:
+            prior_val = prior["raw_fields"].get(required, "").strip()
+            current_val = current["raw_fields"].get(required, "").strip()
+            if prior_val and prior_val != current_val:
+                findings.append(Finding(
+                    str(path), DELTA_FINDING_KIND,
+                    f"{DELTA_PREFIX} {de_id} field '{required}' modified "
+                    f"(append-only violation: prior committed value "
+                    f"'{prior_val}', current '{current_val}')",
+                ))
+
+    return findings
+
+
+def _is_allowlisted_for_retroactive_demo(spec_dir_rel: str) -> bool:
+    """True if `spec_dir_rel` (posix-style, trailing `/`) matches the
+    hard-coded retroactive-demo allow-list (length 1; AC-5/R-5)."""
+    if not spec_dir_rel:
+        return False
+    return any(spec_dir_rel.endswith(allowed) for allowed in RETROACTIVE_DEMO_ALLOWLIST)
+
+
+def check_validation_variant(path: Path, spec_dir_rel: str = "") -> list[Finding]:
+    """Variant validator for `validation.md` in a `ui-variant: true` spec dir.
+
+    Runs the strict base contract via `check_artifact()` first, then layers
+    on variant-specific delta-entry checks. Findings originating in the
+    delta layer carry the `[delta]` prefix and the `delta` kind so they are
+    distinguishable in both human and JSON output (R-4).
+
+    `spec_dir_rel` is the spec dir's path relative to the repo root,
+    posix-style, with a trailing slash. Used for retroactive-demo
+    allow-list matching.
+    """
+    findings: list[Finding] = list(check_artifact(path))
+
+    text = path.read_text(encoding="utf-8", errors="replace")
+    entries = _parse_delta_entries(text)
+
+    seen_ids: set[str] = set()
+    last_num = 0
+
+    for entry in entries:
+        de_id = entry["de_id"]
+        de_num = entry["de_num"]
+
+        if de_id in seen_ids:
+            findings.append(Finding(
+                str(path), DELTA_FINDING_KIND,
+                f"{DELTA_PREFIX} {de_id} duplicated in this file "
+                f"(IDs MUST be unique)",
+            ))
+        seen_ids.add(de_id)
+
+        if de_num <= last_num:
+            findings.append(Finding(
+                str(path), DELTA_FINDING_KIND,
+                f"{DELTA_PREFIX} {de_id} not monotonically increasing "
+                f"(prior was DE-{last_num:02d})",
+            ))
+        if de_num > last_num:
+            last_num = de_num
+
+        # Mandatory field presence
+        for required in DELTA_REQUIRED_FIELDS:
+            val = entry["raw_fields"].get(required, "")
+            if not isinstance(val, str) or not val.strip():
+                findings.append(Finding(
+                    str(path), DELTA_FINDING_KIND,
+                    f"{DELTA_PREFIX} {de_id} missing mandatory field "
+                    f"'{required}'",
+                ))
+
+        # Timestamp shape (only if present)
+        ts = entry["raw_fields"].get("timestamp", "").strip()
+        if ts and not _ISO_TIMESTAMP_RE.match(ts):
+            findings.append(Finding(
+                str(path), DELTA_FINDING_KIND,
+                f"{DELTA_PREFIX} {de_id} timestamp '{ts}' is not ISO 8601 "
+                f"UTC (expected YYYY-MM-DDTHH:MMZ or "
+                f"YYYY-MM-DDTHH:MM:SSZ)",
+            ))
+
+        # item-type enum check (only if present and non-empty)
+        item_type = entry["raw_fields"].get("item-type", "").strip()
+        if item_type and item_type not in DELTA_ITEM_TYPE_ENUM:
+            findings.append(Finding(
+                str(path), DELTA_FINDING_KIND,
+                f"{DELTA_PREFIX} {de_id} item-type '{item_type}' not in "
+                f"enum {sorted(DELTA_ITEM_TYPE_ENUM)}",
+            ))
+
+        # Retroactive-demo allow-list (AC-5/R-5)
+        if item_type == "retroactive-demo":
+            if not _is_allowlisted_for_retroactive_demo(spec_dir_rel):
+                findings.append(Finding(
+                    str(path), DELTA_FINDING_KIND,
+                    f"{DELTA_PREFIX} {de_id} retroactive-demo permitted only "
+                    f"for SDD-018 proof case (spec dir '{spec_dir_rel}' not "
+                    f"in allow-list)",
+                ))
+
+    # Append-only enforcement against last-committed file state
+    findings.extend(_check_delta_append_only(path))
+
+    return findings
+
+
 def _should_skip_artifact(path: Path) -> bool:
     """Apply the skip list (templates, scratch fragments)."""
     if path.name in ARTIFACT_SKIP_NAMES:
@@ -304,15 +632,54 @@ def _should_skip_artifact(path: Path) -> bool:
 
 
 def _walk_artifacts(base: Path) -> list[Finding]:
-    """Walk one in-scope tree, applying check_artifact to every non-skipped *.md."""
+    """Walk one in-scope tree, applying check_artifact to every non-skipped *.md.
+
+    SDD-018: for spec dirs whose spec.md carries `ui-variant: true`, the
+    sibling `validation.md` is routed to `check_validation_variant` instead
+    of the strict `check_artifact`. The variant validator still applies the
+    full base contract internally; it only ADDS the delta-section checks.
+    Non-variant spec dirs are byte-identical to pre-SDD-018 behavior.
+    """
     findings: list[Finding] = []
     if not base.is_dir():
         return findings
+
+    # Precompute which spec dirs are ui-variant so the per-spec-dir
+    # dispatch decision happens exactly once (Authoring decision 2).
+    variant_spec_dirs: set[Path] = set()
+    for spec_path in sorted(base.rglob("spec.md")):
+        if _should_skip_artifact(spec_path):
+            continue
+        if _spec_has_ui_variant(spec_path.parent):
+            variant_spec_dirs.add(spec_path.parent.resolve())
+
     for p in sorted(base.rglob("*.md")):
         if _should_skip_artifact(p):
             continue
+        # Marker-shape check on every spec.md (always-on; fires on
+        # `ui-variant: yes` style typos even for non-variant spec dirs).
+        if p.name == "spec.md":
+            findings.extend(_ui_variant_marker_shape_findings(p))
+        # Variant dispatch: validation.md inside a variant spec dir
+        if p.name == "validation.md" and p.parent.resolve() in variant_spec_dirs:
+            spec_dir_rel = _spec_dir_relative_path(p.parent.resolve())
+            findings.extend(check_validation_variant(p, spec_dir_rel))
+            continue
         findings.extend(check_artifact(p))
     return findings
+
+
+def _spec_dir_relative_path(spec_dir: Path) -> str:
+    """Return the spec dir's path relative to the nearest `specs/` ancestor,
+    posix-style, with a trailing `/`. This anchors retroactive-demo
+    allow-list matching to the framework convention `specs/<name>/`
+    regardless of the absolute filesystem location (works in both the real
+    repo and test tempdirs)."""
+    parts = spec_dir.parts
+    if "specs" not in parts:
+        return ""
+    idx = parts.index("specs")
+    return "/".join(parts[idx:]) + "/"
 
 
 # ---------------------------------------------------------------------------- #

@@ -45,6 +45,15 @@ Source: Sprint 5 Architect audit (YELLOW verdict, 2026-06-07); none blocking spr
 
 Source: Owner ratification 2026-06-08 via Executive Manager routing (Option 3 hybrid; Level-2 decision; absorbs 5 deferred REQUIRED items from Sprint 6 close commit `4a6941c`).
 
+### Post-Sprint-7 Bundle (filed 2026-06-08)
+
+| ID | Title | Priority | R | I | C | E | RICE | Sprint | Status | Notes |
+|----|-------|----------|---|---|---|---|------|--------|--------|-------|
+| SDD-035 | Decommission Azure dashboard; concentrate UI investment locally | P1 | H | H | H | M | -- | Out-of-band 2026-06 (Phase A.3 scaffold pending) | Pending Level-2 approval; Architect scaffolds spec dir as Phase A.3 (LOCKED at scaffold per SDD-032 pattern) | Level-2 decision: REVERSES the 2026-05-16 cloud-deploy commitment that shipped SDD-007 (Azure Container Apps + Entra ID + scale-to-zero + OIDC CI/CD). Owner direction 2026-06-08 via EM: "Azure not sustainable, especially if we want to share this tool to others. Concentrate all efforts on local dashboard (UI)." Cost burn + governance ambiguity (cloud-vs-local source of truth) + portability blocker for team share. Requires teardown checklist, ADR documenting the reversal, docs purge (SDD-007 status -> DECOMMISSIONED, PROVISIONED.md retired, README + roadmap purge of Azure refs). NOT folded into Sprint 8 -- Sprint 8 already heavy with SDD-022 + SDD-015 (14 Level-1 surfaces per F-11 close report). |
+| SDD-036 | Local dashboard pattern import (lifecycle pipeline + 4-card docs + drag-to-reorder w/ safeguards) | P1 | H | H | M | L | -- | Unscheduled (PI-6 anchor candidate) | Unscheduled; CLARIFY-heavy (dependency-lock semantics + audit-trail schema + new frontmatter field design); sequencing precondition SDD-018 satisfied (DONE Sprint 7) | Imports the 3 highest-value patterns from Scott's WWIC Analyst Backlog UI per `docs/Scott_Example/UI_LEARNINGS_FROM_SCOTT.md`: (1) lifecycle status pipeline rendered horizontally on every feature card + sprint card mapping IDEA->BACKLOG->CLARIFY->SPEC->PLAN->TASKS->IMPLEMENT->REVIEW->DONE; (2) 4-card documentation row (Constitution / Spec / Sprint / ADRs) replacing scattered per-feature links; (3) drag-to-reorder backlog WITH SAFEGUARDS -- required audit-trail ledger row per drag (who/when/from-rank/to-rank/reason field) + dependency-lock (drag respects `depends_on` frontmatter; cycle-creating drags greyed-out with tooltip; force via Level-2 escalation only). Owner correction 2026-06-08: "leadership meetings happen without the PM; drag-to-reorder must be possible without ceremony -- the framework value-add is the audit trail, not blocking the human." Requires NEW `depends_on` frontmatter field in spec dir frontmatter -- schema_lint extension needed. PI-6 anchor candidate alongside SDD-037 + SDD-038 as dashboard reinvestment bundle. NOTE: ADO mirror model + per-row inline IDs (Scott patterns previously declined) BECOME RELEVANT after SDD-022 (Sprint 8) ships the ADO/GitHub Issues bridge -- PM must reconsider those two at SDD-022 close and decide whether to fold into SDD-036 v2 or carry to PI-6. |
+
+Source: Owner Q&A session via EM 2026-06-08 (Azure decommission Q1; Scott UI re-evaluation Q2; drag-to-reorder correction; SDD-039 timing). See `docs/TEAM-SHARE-ONEPAGER.md` (committed at `22b6d22`) for downstream context.
+
 ## P2 - Should Have
 
 | ID | Title | Priority | Reach | Impact | Confidence | Effort | RICE | Sprint | Status |
@@ -73,6 +82,15 @@ Source: Owner ratification 2026-06-08 via Executive Manager routing (Option 3 hy
 | SDD-029 | Distinguish stale-symlink from real-directory conflict in `bootstrap.py host-link` -- separate error class + remediation hint when target is a broken link vs a populated dir | P2 | M | M | H | S | -- | PI-5 Sprint 2 | **DONE** 2026-06-07 commit `4a8c03c` (stale-symlink vs real-directory distinction + tests) |
 
 Source: Sprint 5 Architect audit (YELLOW verdict, 2026-06-07); none blocking sprint close.
+
+### Post-Sprint-7 Bundle (filed 2026-06-08)
+
+| ID | Title | Priority | R | I | C | E | RICE | Sprint | Status | Notes |
+|----|-------|----------|---|---|---|---|------|--------|--------|-------|
+| SDD-037 | Local dashboard ledger visibility (Dispatches card + health pills) | P2 | M | M | H | S | -- | Unscheduled (PI-6; bundle with SDD-036) | Unscheduled; depends on SDD-036 lifecycle pipeline component existing (same dashboard surface); best bundled in one PI-6 sprint with SDD-036 | Adopts Scott's patterns 3+4: (a) Dispatches card surfacing fleet ledger contents per feature/sprint (agent, role, task, status, when) -- the ledger has more data than Scott but it's locked in SQLite and nobody opens it; this makes it human-readable in the dashboard; (b) Health pills strip in dashboard header (constitution semver consistency, skill frontmatter schema validity, ledger reachability, stale-tracker pills). Click-through to failure detail. Cheap; large reliability payoff. PI-6 anchor candidate alongside SDD-036 + SDD-038. |
+| SDD-039 | Article VII wording clarification -- fresh session OR subagent dispatch both satisfy isolation | P2 | M | M | H | XS | -- | Sprint 9 default; Sprint 8 carry-over IF capacity | Allocated to Sprint 9 as housekeeping shoulder alongside SDD-021/023/025; may ship out-of-band between Sprint 8 and Sprint 9 if quiet window opens | Owner observation 2026-06-08 via EM: "why I keep getting this request, to open another working session. The AGENT should be able to route the request to the right Principal, and they can also communicate with the Executive Manager or the workers. Why keep asking me to open a new session for each task, that is impractical." Root cause: current SPRINT-04..07 kickoff prompts and the Article VII corollary in `principles.md` say "fresh chat session" as a LITERAL requirement when the underlying principle is CONTEXT ISOLATION. Subagent dispatch satisfies context isolation equally (isolated context window, single-message return). Fix: amend `principles.md` Article VII corollary + amend all 4 kickoff prompts (SPRINT-04, 05, 06, 07) + new kickoff template wording to say "fresh chat session OR subagent dispatch -- both satisfy the context-isolation property." One-day fix; no code change; `principles.md` version bump 1.3.0 -> 1.4.0 (corollary wording change is content, qualifies as MINOR per semver). Owner direction 2026-06-08: "wait until Sprint 7 closes and route as normal" -- Sprint 7 closed at `4f81df6` + `0913583`. Sprint 8 already heavy with 14 Level-1 surfaces across SDD-022 + SDD-015 (per F-11 close report) -- PM must resist scope creep. |
+
+Source: Owner Q&A session via EM 2026-06-08 (Azure decommission Q1; Scott UI re-evaluation Q2; drag-to-reorder correction; SDD-039 timing). See `docs/TEAM-SHARE-ONEPAGER.md` (committed at `22b6d22`) for downstream context.
 
 ## P3 - Could Have
 
@@ -106,6 +124,14 @@ Source: Sprint 5 Architect audit (YELLOW verdict, 2026-06-07); none blocking spr
 | SDD-034 | Dedup heuristic upgrade -- content-shingle for spec.md problem statements (replaces title-shingle only) | P3 | L | M | M | M | -- | Unscheduled | Filed 2026-06-08 via Executive Manager. Surfaced by F-10 pass 1 Article XI live contention test: SDD-020 dedup scan returned 100% false-positive overlaps (6 SOFT/ADVISORY all title-shingle artifacts); real prior art (`2026-05-26-live-ui-v2/`, `2026-05-16-state-dashboard/`, `2026-05-16-dashboard-about-and-freshness/`) was found manually by PM+Architect, not the scanner. Upgrade dedup heuristic to also consider Problem Statement / Goal section content-shingles, not just titles. Not blocking SDD-018; the manual prior-art review is sufficient for now. | Cheap to spec; medium to implement. Pull into a future sprint with capacity. Accepted by owner as a known limitation 2026-06-08; filed for visibility. |
 
 Source: Owner ratification 2026-06-08 via Executive Manager routing (Option 3 hybrid; Level-2 decision; doc-only deferral from Sprint 6 close commit `4a6941c`).
+
+### Post-Sprint-7 Bundle (filed 2026-06-08)
+
+| ID | Title | Priority | R | I | C | E | RICE | Sprint | Status | Notes |
+|----|-------|----------|---|---|---|---|------|--------|--------|-------|
+| SDD-038 | Local dashboard aesthetic tokens (Scott-pattern-aligned, IDE-native) | P3 | M | L | H | S | -- | Unscheduled (PI-6 polish; ships after SDD-036 + SDD-037) | Unscheduled; P3 because aesthetic without structure is bikeshedding | Adopts Scott's pattern 5: monospace dark IDE-native aesthetic, near-zero chrome, color-as-information. Define OUR OWN color tokens for lifecycle states (one color per state, used consistently across dashboard + rendered Markdown views + agent UIs). Do NOT photocopy Scott's specific palette or token names. Adopt the principle of consistent state-colors across surfaces. |
+
+Source: Owner Q&A session via EM 2026-06-08 (Azure decommission Q1; Scott UI re-evaluation Q2; drag-to-reorder correction; SDD-039 timing). See `docs/TEAM-SHARE-ONEPAGER.md` (committed at `22b6d22`) for downstream context.
 
 Notes:
 - Design spec pre-built at `specs/2026-05-13-fleet-bridge-dashboard/DESIGN.md`

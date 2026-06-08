@@ -13,6 +13,15 @@ You are running the **Clarify** command for the Day-to-Day Agent SDD workflow.
 ## Goal
 Produce a compact clarification log that removes critical ambiguity before specification or planning.
 
+## Pre-Step: Dedup Scan (SDD-020.R8)
+
+Before asking clarification questions, run the cross-feature deduplication scan to surface prior art that may already answer the question:
+
+1. Run `python spec-driven-development/cli/dedup.py scan --scope all`.
+   - If **HARD** overlap (exact SDD-NNN ID collision): stop and report the duplicate ID to the owner; do not open clarification.
+   - If **SOFT** overlap (fuzzy title match): surface the candidate to the owner and wait for explicit direction before drafting questions.
+   - If **ADVISORY** overlap (keyword similarity): note it in the clarification log, append to `backlog/DEDUP-LOG.md`, and continue.
+
 ## Clarification Rules
 - Ask up to three formal questions before writing the log if major uncertainty remains.
 - Ask one question at a time during interactive use.

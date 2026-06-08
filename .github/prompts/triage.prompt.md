@@ -13,6 +13,15 @@ You are running the **Triage** command for the Day-to-Day Agent SDD workflow.
 ## Goal
 Take a new request, bug, idea, or improvement and classify it so the Product Manager can decide what happens next.
 
+## Pre-Step: Dedup Scan (SDD-020.R8)
+
+Before drafting the classification, run the cross-feature deduplication scan to surface prior art:
+
+1. Run `python spec-driven-development/cli/dedup.py scan --scope all`.
+   - If **HARD** overlap (exact SDD-NNN ID collision): stop and report the duplicate ID to the owner; do not proceed with triage.
+   - If **SOFT** overlap (fuzzy title match): surface the candidate to the owner and wait for explicit direction before proceeding.
+   - If **ADVISORY** overlap (keyword similarity): note it in the rationale, log via `backlog/DEDUP-LOG.md`, and continue.
+
 ## Required Outputs
 1. Priority: `P1`, `P2`, `P3`, or `P4`
 2. Execution flag: `AFK`, `HITL`, or `BLOCKED`

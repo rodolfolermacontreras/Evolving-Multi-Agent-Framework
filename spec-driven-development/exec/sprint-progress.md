@@ -436,3 +436,30 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 - Owner ratification: **Rodolfo Lerma 2026-06-08 via Executive Manager** (Level-2; retroactive ratification -- push preceded stamp per Sprint 6 Option 3 hybrid pattern). Article XII (commit `55b05cb`) and Sprint 7 close commit chain (ending `a802ef3`) both ratified.
 - Notes: Sprint 7 shipped two complete features and absorbed two unplanned constitutional refinements. F-09 closed the 4 deferred LOCKED REQUIRED items from Sprint 6 in a single linear single-session pass (per Option 3 hybrid no-silent-slip discipline) -- 7/7 REQUIRED + 2/2 OPTIONAL, +14 tests, lock-surface preserved against the SDD-019 + SDD-020 base commits. F-10 ran as a deliberate two-pass design (pass 1 = scaffold + CLARIFY question battery; pass 2 = spec + validation + plan + tasks + ADR-014) which separated the constitutional design (ADR text) from the runtime change cleanly. F-10 pass 1 was the first real-world Article XI live contention test -- the gate fired correctly, the dedup writers populated their artefacts, and the one heuristic gap (title-shingle vs content-shingle prior-art detection) was surfaced and filed as SDD-034 without blocking the sprint. F-11 implemented in single-worker sequential mode (7 tasks, tight sequencing) and surfaced one durable framework convention -- `status: blocked` as the CLARIFY-phase carrier -- that landed in `docs/UI-LIFECYCLE-VARIANT.md`. The owner ratified Article XII mid-flight (commit `55b05cb`) before sprint close, refining the Option 3 hybrid model into a "ratify-the-controlling-ADR-then-close" pattern -- the sprint close itself happens against an already-binding Article XII rather than a `proposed` ADR. Net: 17 commits this sprint chain + 1 close commit, 259 -> 305 tests (+46), 1 ADR drafted-then-accepted, 1 constitutional amendment (Article XII, principles.md `1.2.0` -> `1.3.0`), 0 silently deferred REQUIRED items.
 - Next: PI-5 Sprint 4 = ADO/GitHub Bridge + Model Upgrade Discipline (SDD-022 + SDD-015). Kickoff prompt: [`../feature-prompts/SPRINT-08-KICKOFF.prompt.md`](../feature-prompts/SPRINT-08-KICKOFF.prompt.md) (authored 2026-06-08 commit `e26b032` in this same session; flags SDD-022 as likely heavy-CLARIFY with 9 Level-1 surfaces, SDD-015 as bounded with 5 Level-1 surfaces).
+
+---
+
+## Sprint 8 -- PI-5 Sprint 4 / ADO-GitHub Bridge + Model Upgrade Discipline
+
+- Sprint kickoff: [../feature-prompts/SPRINT-08-KICKOFF.prompt.md](../feature-prompts/SPRINT-08-KICKOFF.prompt.md)
+- Prerequisite: Executive Manager verified HARD PREREQUISITE PASS 6/6 after retroactive Sprint 7 ratification commit `517eafe`; owner said "lets go".
+- Sequence: F-12 -> F-13 -> F-14 -> F-15
+- Owner: Principal Executive Manager (lead); PM + Architect for F-12 and F-13.
+
+### F-12 -- sdd-022-clarify -- BLOCKED / OWNER-ATTENTION
+
+- Date: 2026-06-08
+- Owner: Principal Product Manager + Principal Architect
+- Commits: <pending-sha>
+- Files changed: 7
+  - spec-driven-development/specs/2026-06-08-ado-github-bridge/clarify.md
+  - spec-driven-development/specs/2026-06-08-ado-github-bridge/spec.md
+  - spec-driven-development/specs/2026-06-08-ado-github-bridge/validation.md
+  - spec-driven-development/specs/2026-06-08-ado-github-bridge/plan.md
+  - spec-driven-development/specs/2026-06-08-ado-github-bridge/tasks.md
+  - spec-driven-development/specs/2026-06-08-ado-github-bridge/dedup-scan.md
+  - spec-driven-development/exec/sprint-progress.md
+- Tests: 305 -> 305 (docs-only; no code changes; full tests not run in F-12 pass 1)
+- Validation: NOT LOCKED. `validation.md` remains `status: draft` because Q-A through Q-H are owner decisions. Q-I is answered by owner dispatch constraint: stdlib `urllib.*`, no third-party dependencies, no constitution edits.
+- Notes: F-12 pass 1 scaffolded SDD-022 from scratch and surfaced all Q-A through Q-I in `clarify.md` with PM + Architect recommendations. SPEC/PLAN/TASKS are deliberately blocked scaffolds; no implementation scope is locked. Dedup scan found only the expected SDD-022 backlog self-match. Article V preserved; no host-project pollution; no F-13 work performed.
+- Next: OWNER-ATTENTION -- owner answers Q-A through Q-H, then F-12 pass 2 can finalize `spec.md`, lock `validation.md`, author `plan.md` and `tasks.md`, and hand off to the remaining Sprint 8 sequence.

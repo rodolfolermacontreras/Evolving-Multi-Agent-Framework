@@ -10,9 +10,10 @@ feature: 2026-06-07-cross-feature-dedup
 # Validation Contract: Cross-Feature Deduplication (SDD-020)
 
 - Spec ID: SDD-020
-- Status: ACTIVE -- contract populated at /spec finalization 2026-06-07. Locks at /tasks.
-- Rule (when locked): zero unchecked REQUIRED items before implementation is
-  considered complete.
+- Status: LOCKED at /tasks 2026-06-07
+- Rule: zero unchecked REQUIRED items before implementation is
+  considered complete. REQUIRED items cannot be loosened after lock
+  without an explicit decision recorded here (Article X).
 
 ---
 
@@ -40,5 +41,5 @@ feature: 2026-06-07-cross-feature-dedup
   answers recorded; required items trace to specific questions.
 - SDD-019 integration (R5) confirmed independent and composable --
   no dependency coupling, no shared lock state.
-- Lock the contract at /tasks; do not loosen REQUIRED items after lock
-  without an explicit decision recorded here.
+- Contract LOCKED at /tasks 2026-06-07. Do not loosen REQUIRED items after
+  lock without an explicit decision recorded here.

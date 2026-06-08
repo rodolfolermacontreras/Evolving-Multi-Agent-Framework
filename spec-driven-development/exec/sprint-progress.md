@@ -646,7 +646,7 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 
 - Date: 2026-06-08
 - Owner: Principal Software Developer
-- Commits: <pending-sha>
+- Commits: `7fd190e`
 - Files changed: 20
   - spec-driven-development/cli/schema_lint.py
   - spec-driven-development/cli/test_schema_lint.py

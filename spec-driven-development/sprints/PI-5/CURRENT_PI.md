@@ -356,7 +356,7 @@ constitutional amendment (Article XII, principles.md `1.2.0` -> `1.3.0`),
 - `0b47def` feat(sprint-8): implement F-14 sync and model-upgrade gates
 - `a2c1476` docs: accept ADR-016 governance unblock
 - `dbfe3c6` close(sprint-8-f-14): mark implementation done
-- (next: F-15 close commit + state regen, local only until owner pre-push approval)
+- `fd804a6` close(sprint-8): close F-15 and author Sprint 9 kickoff (local only until owner pre-push approval)
 **Tests**: 305 -> 331 (+26 net; 2 skipped platform-conditional baseline preserved). F-15 verification: `python -m pytest spec-driven-development/ --tb=no -q` -> 331 passed, 2 skipped; `python spec-driven-development/cli/schema_lint.py` -> Schema lint clean.
 **Validation**: SDD-022 16/16 REQUIRED + 1/3 OPTIONAL; SDD-015 12/12 REQUIRED + 1/3 OPTIONAL + 1/2 manual. No REQUIRED item was deferred or loosened.
 **ADRs**: ADR-016 (Model Upgrade Protocol Cross-Reference, accepted 2026-06-08 before `constitution/decision-policy.md` edit).

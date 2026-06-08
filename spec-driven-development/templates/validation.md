@@ -1,5 +1,30 @@
 # Validation Contract: {TITLE}
 
+<!--
+Optional: SDD-018 UI Lifecycle Variant `## Delta Entries` section.
+If your spec.md carries `ui-variant: true`, you may append a
+`## Delta Entries` section to record post-lock additions. Example:
+
+    ## Delta Entries
+
+    ### Delta DE-01 -- short title
+
+    - timestamp: 2026-MM-DDTHH:MMZ
+    - author: principal-{role}
+    - rationale: <one-sentence reason>
+    - item-type: add | wontfix | re-check | retroactive-demo
+
+    Free Markdown body for the new REQUIRED item, the wontfix note,
+    the re-check decision, or the retroactive-demo record.
+
+Rules: DE-NN IDs are zero-padded, monotonically increasing, never re-used.
+Entries are append-only (mutation or deletion fails `cli/schema_lint.py`).
+`item-type: retroactive-demo` is allow-listed to a single spec dir
+(SDD-018 proof case). See spec-driven-development/docs/UI-LIFECYCLE-VARIANT.md
+for full schema and operational guidance. Strict-mode (no marker) spec
+dirs are unaffected by this section.
+-->
+
 - Spec Reference: {SPEC_REFERENCE}
 - Contract Date: {DATE}
 - Author: {AUTHOR}

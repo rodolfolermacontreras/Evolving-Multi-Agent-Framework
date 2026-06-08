@@ -1,5 +1,18 @@
 # Feature Spec: {TITLE}
 
+<!--
+Optional: SDD-018 UI Lifecycle Variant marker.
+If this feature is iterative visual / UI work and you want the variant's
+post-lock delta mechanism, add the line below to your spec.md frontmatter:
+
+    ui-variant: true
+
+See spec-driven-development/docs/UI-LIFECYCLE-VARIANT.md for marker syntax,
+delta entry schema, item-type values, the forward-only migration rule, and
+the state-dashboard demo reference. Default (absent or `false`) keeps
+strict Article X behavior.
+-->
+
 - Date: {DATE}
 - Author: {AUTHOR}
 - Status: {STATUS}

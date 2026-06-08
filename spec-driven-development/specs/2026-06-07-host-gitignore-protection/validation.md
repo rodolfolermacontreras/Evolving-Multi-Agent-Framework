@@ -1,7 +1,7 @@
 ---
 id: SDD-20260607GITIGN-validation
 type: validation
-status: draft
+status: active
 owner: principal-architect
 updated: 2026-06-07
 feature: 2026-06-07-host-gitignore-protection
@@ -10,62 +10,37 @@ feature: 2026-06-07-host-gitignore-protection
 # Validation Contract: Host `.gitignore` Protection (SDD-027)
 
 - Spec ID: SDD-027
-- Status: SKELETON -- contract NOT locked. Locks at /tasks.
+- Status: ACTIVE -- contract populated at /spec finalization 2026-06-07. Locks at /tasks.
 - Rule (when locked): zero unchecked REQUIRED items before implementation is
   considered complete.
 
-> **DO NOT IMPLEMENT until this contract is locked.** All REQUIRED items
-> below are TODO placeholders pending CLARIFY answers. Each placeholder
-> names the CLARIFY question(s) it traces to.
-
 ---
 
-## Required Items (TODO -- locked at /tasks)
+## Required Items (locked at /tasks)
 
-- [ ] R1. TODO -- Article X fit per CLARIFY Q1. If the answer is
-  "amendment needed", an ADR + amendment ship in the same sprint; if
-  "fits as-is", the spec proceeds without constitutional change.
-- [ ] R2. TODO -- detection strategy per CLARIFY Q2 (static parse, live
-  git check, or both). Test: detector correctly identifies conflicts in
-  each representative `.gitignore` variant.
-- [ ] R3. TODO -- action-on-conflict policy per CLARIFY Q3 is honored.
-  Test: each mode (strict / prompt / warn / skip, or the chosen subset)
-  produces the agreed behavior on fixture conflicts.
-- [ ] R4. TODO -- opt-in vs opt-out default per CLARIFY Q4. Test:
-  default `host-link` invocation runs (or skips) the check per the
-  chosen default; the opt flag inverts it.
-- [ ] R5. TODO -- no-host-`.gitignore` behavior per CLARIFY Q5. Test:
-  fixture host with no `.gitignore` produces the agreed outcome
-  (refuse / create / proceed-with-warning).
-- [ ] R6. TODO -- framework path lists live in the form chosen at
-  CLARIFY Q6 (Python constant / JSON manifest / parsed markdown). Test:
-  manifest is loadable, schema-valid, and matches the actual framework
-  file layout.
-- [ ] R7. TODO -- non-git-host behavior per CLARIFY Q7. Test: fixture
-  with no `.git/` produces the agreed message.
-- [ ] R8. TODO -- existing `host-link` happy-path stays green. Test:
-  Sprint 5 baseline tests (test_bootstrap.py host-link cases) all pass
-  unchanged.
-- [ ] R9. TODO -- cross-platform: tests cover both Windows (junction)
-  and Linux/macOS (symlink) paths.
-- [ ] R10. TODO -- full existing test suite passes (no regression).
-  Sprint 5 baseline: 213 tests.
-- [ ] R11. TODO -- schema_lint stays clean.
-- [ ] R12. TODO -- `docs/HOST-INTEGRATION.md` documents the new check,
-  flags, modes, and remediation steps.
+- [ ] R1. No constitutional amendment shipped; no `constitution/` edits (Q1). Test: `git diff constitution/` is empty after implementation.
+- [ ] R2. Detection uses both static parse of host `.gitignore` and live `git check-ignore` (Q2). Test: fixture with `.gitignore` + global excludes; both methods report correctly.
+- [ ] R3. `--gitignore-mode strict|prompt|warn|skip` each produce correct behavior on fixture conflicts (Q3). Test: one fixture per mode.
+- [ ] R4. Check runs by default; `--no-gitignore-check` disables (Q4). Test: default invocation runs check; flag invocation skips it.
+- [ ] R5. Host with no `.gitignore` -> refuse with recommended content (Q5). Test: fixture host with no `.gitignore`.
+- [ ] R6. MUST-BE-IGNORED + MUST-BE-TRACKED in `cli/host_gitignore_manifest.json`, loadable, schema-valid (Q6). Test: load + validate + verify matches framework layout.
+- [ ] R7. Non-git host -> refuse (Q7). Test: fixture with no `.git/` directory.
+- [ ] R8. Existing `host-link` happy-path tests pass unchanged. Test: run Sprint 5 `test_bootstrap.py` host-link tests.
+- [ ] R9. Cross-platform: Windows junction + Linux symlink paths tested (mocked where needed).
+- [ ] R10. Full test suite passes (>= 213 baseline, no regression).
+- [ ] R11. `schema_lint` stays clean.
+- [ ] R12. `docs/HOST-INTEGRATION.md` documents check, flags, modes, remediation.
 
-## Optional / Best-Effort Items (TODO)
+## Optional / Best-Effort Items
 
-- [ ] O1. TODO -- dashboard surface flags hosts whose last `host-link`
-  install reported a conflict (if ledger captures install events).
-- [ ] O2. TODO -- machine-readable conflict report (`--format json`)
-  mirroring the SDD-FDC-001 `count` convention.
+- [ ] O1. Dashboard surface flags hosts whose last `host-link` install reported a conflict.
+- [ ] O2. Machine-readable conflict report (`--format json`) mirroring SDD-FDC-001 `count` convention.
 
 ## Notes
 
-- Contract is SKELETON. Required-item count and exact wording will change
-  at /spec finalization once CLARIFY answers land.
-- Q1 (Article X fit) may add an R0 row for "ADR + amendment shipped" if
-  the spec concludes amendment is required.
+- Contract populated at /spec finalization 2026-06-07. All 7 CLARIFY
+  answers recorded; required items trace to specific questions.
+- No constitutional amendment needed (Q1). Article X misreading corrected.
+  No R0 row for "ADR + amendment shipped" -- not applicable.
 - Lock the contract at /tasks; do not loosen REQUIRED items after lock
   without an explicit decision recorded here.

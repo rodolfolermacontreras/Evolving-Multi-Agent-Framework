@@ -1,7 +1,7 @@
 ---
 id: SDD-20260607GITIGN-spec
 type: spec
-status: draft
+status: active
 owner: principal-architect
 updated: 2026-06-07
 feature: 2026-06-07-host-gitignore-protection
@@ -10,19 +10,17 @@ feature: 2026-06-07-host-gitignore-protection
 # Feature Spec: Host `.gitignore` Protection for `bootstrap.py host-link` (Sprint 6)
 
 - Date: 2026-06-07
-- Author: Principal Architect (scaffold) / TBD owner at /spec finalization
-- Status: SKELETON -- CLARIFY pending (do NOT proceed to /plan until clarify.md answered)
+- Author: Principal Architect + Owner
+- Status: APPROVED
 - Priority: P1 (carry-over from Sprint 5 Architect audit, 2026-06-07)
 - Sprint: PI-5 / Sprint 2 (= overall Sprint 6)
 - Spec ID: SDD-027
 
-> **Article X amendment CANDIDATE per owner direction 2026-06-07 (via EM).**
-> Handle as a normal spec first; only escalate to an Article X amendment
-> IF the spec proves the article must change. Friction Analysis is NOT
-> required up front. The CLARIFY round must explicitly decide whether the
-> host-`.gitignore` rule fits within Article X as written or requires a
-> constitutional amendment; only if the latter does the work branch into
-> amendment ceremony.
+No constitutional amendment required. Article X is "Validation Is a
+Pre-Implementation Contract" and does not govern host integration. The
+kickoff prompt's "Article X amendment CANDIDATE" framing was based on a
+misreading. Ships as normal spec + ADR documenting the host-gitignore
+contract design.
 
 ---
 
@@ -66,109 +64,110 @@ that runs before the symlink is installed. The layer:
    or refuse install).
 
 The shape (detection strategy depth, exact path lists, action policy,
-opt-in vs opt-out) is **deliberately unresolved** at scaffold time. See
-`clarify.md`. The Proposed Solution will be expanded once CLARIFY closes.
+opt-in vs opt-out) has been resolved via CLARIFY (2026-06-07):
 
-Likely components, subject to CLARIFY:
-
-- A `_check_host_gitignore(host_repo: Path) -> GitignoreReport` function
-  in `cli/bootstrap.py` (or an extracted helper module).
-- Framework-side declaration of the MUST-BE-IGNORED and MUST-BE-TRACKED
-  lists (a manifest file, an in-code constant, or a hybrid).
-- Integration point: invoked from `host_link()` before the actual
-  symlink/junction call; behavior on conflict per CLARIFY Q3.
-- Documentation update in `docs/HOST-INTEGRATION.md`.
+- **Dual detection**: static parse of host `.gitignore` for readable diff
+  display + live `git check-ignore` for the authoritative answer (catches
+  global excludes, parent-dir `.gitignore` files, `core.excludesFile`).
+- **Mode flag**: `--gitignore-mode {strict|prompt|warn|skip}` with default
+  = `prompt`. Interactive for first-real-host dispatch; `strict` for CI.
+- **Opt-out default**: check runs by default; `--no-gitignore-check` to
+  disable.
+- **No-gitignore host**: refuse the install with recommended content.
+- **JSON manifest**: MUST-BE-IGNORED and MUST-BE-TRACKED lists in
+  `cli/host_gitignore_manifest.json`.
+- **Non-git host**: refuse (existing Sprint 5 behavior, no change).
+- **No constitutional amendment**: Article X misreading corrected.
 
 ## Acceptance Criteria
 
-> **TODO -- BLOCKED ON CLARIFY.** Each criterion MUST trace to a CLARIFY
-> answer (`See clarify.md Q-NN`). Draft outline:
->
-> 1. Given a host with no `.gitignore`, when `host-link` runs, then the
->    behavior matches CLARIFY Q5 (e.g., create a minimal `.gitignore`
->    with framework-required rules, OR refuse, OR proceed with warning).
-> 2. Given a host whose `.gitignore` is missing a MUST-BE-IGNORED rule,
->    when `host-link` runs, then the conflict is reported and the
->    action policy from CLARIFY Q3 is applied.
-> 3. Given a host whose `.gitignore` ignores a MUST-BE-TRACKED path,
->    when `host-link` runs, then the conflict is reported and resolved
->    per CLARIFY Q3.
-> 4. Given a clean host `.gitignore`, when `host-link` runs, then no
->    conflict is reported and the symlink install proceeds as today.
-> 5. ... (additional ACs once CLARIFY closes)
+- **AC-1**: No constitutional amendment; spec ships without `constitution/` edits. (Q1)
+- **AC-2**: Detection uses static parse of host `.gitignore` + live `git check-ignore` for authoritative answer. (Q2) Test: fixture conflicts detected by both methods.
+- **AC-3**: `--gitignore-mode {strict|prompt|warn|skip}` flag with default = `prompt`. Each mode produces correct behavior on fixture conflicts. (Q3)
+- **AC-4**: Check runs by default; `--no-gitignore-check` disables it. (Q4)
+- **AC-5**: Host with no `.gitignore` -> refuse with clear message listing minimal recommended content. (Q5)
+- **AC-6**: MUST-BE-IGNORED and MUST-BE-TRACKED lists in `cli/host_gitignore_manifest.json`; manifest loads, schema-valid, matches framework layout. (Q6)
+- **AC-7**: Non-git host -> refuse (existing Sprint 5 behavior, no change). (Q7)
+- **AC-8**: Existing `host-link` happy-path tests stay green.
+- **AC-9**: `docs/HOST-INTEGRATION.md` documents new check, flags, modes, and remediation steps.
+- **AC-10**: Full test suite passes (>= 213 baseline, no regression).
 
 ## Affected Modules
 
-> **TENTATIVE -- subject to CLARIFY answers.**
->
-> - Files (likely):
->   - `spec-driven-development/cli/bootstrap.py` (extend `host-link` subcommand)
->   - `spec-driven-development/cli/test_bootstrap.py` (new tests)
->   - `spec-driven-development/docs/HOST-INTEGRATION.md` (doc update)
->   - Possibly: `spec-driven-development/cli/common/host_gitignore.py` (extracted helper, if size warrants)
->   - Possibly: `spec-driven-development/cli/host_gitignore_manifest.json` (manifest, if CLARIFY Q2 chooses file form)
-> - Directories (read-only):
->   - `spec-driven-development/.github/` (source of MUST-BE-TRACKED list)
+- `cli/bootstrap.py` -- extend `host-link` subcommand with gitignore check
+- `cli/test_bootstrap.py` -- new tests for gitignore check, modes, edge cases
+- `cli/host_gitignore_manifest.json` -- new JSON manifest (MUST-BE-IGNORED + MUST-BE-TRACKED)
+- `docs/HOST-INTEGRATION.md` -- document new check, flags, modes, remediation
+- `docs/ADR/ADR-NNN-host-gitignore-protection.md` -- new (drafted in F-07)
 
 ## Data Model Changes
 
-> **TBD via CLARIFY.** Possible options:
->
-> - Hard-coded Python constants for MUST-BE-IGNORED and MUST-BE-TRACKED.
-> - JSON manifest under `cli/` versioned with the framework.
-> - Markdown spec under `docs/` parsed at runtime (least preferred).
+New file: `cli/host_gitignore_manifest.json` -- JSON manifest declaring
+MUST-BE-IGNORED and MUST-BE-TRACKED path lists. Schema:
+```json
+{
+  "must_be_ignored": ["pattern1", "pattern2"],
+  "must_be_tracked": ["pattern3", "pattern4"]
+}
+```
+No database or ledger schema changes. Bootstrap reads the manifest at
+runtime; no new state files.
 
 ## API Changes
 
-> **TBD via CLARIFY.** Likely additive flags on `host-link`:
->
-> - `--gitignore-mode {strict|prompt|warn|skip}` (per CLARIFY Q3).
-> - `--no-gitignore-check` opt-out (per CLARIFY Q4).
+- `bootstrap.py host-link` gains `--gitignore-mode {strict|prompt|warn|skip}` (default: `prompt`).
+- `bootstrap.py host-link` gains `--no-gitignore-check` opt-out flag.
+- Existing `host-link` flags and behavior unchanged when gitignore check passes.
 
 ## Test Strategy
 
-> **OUTLINE only.** Lock at /tasks.
->
-> - Unit: parse `.gitignore`, classify rules, detect conflicts, generate
->   remediation diff.
-> - Integration: end-to-end `host-link` against `tmp_path` "fake host"
->   directories with synthetic `.gitignore` variants (clean, missing
->   rules, over-aggressive, missing file).
-> - Regression: existing 213-test suite stays green; existing
->   `test_bootstrap.py` host-link tests stay green.
-> - Cross-platform: test on Windows (junction path) and Linux (symlink
->   path) since `host-link` is cross-platform.
+**OUTLINE -- lock at /tasks.**
+
+- Unit: parse `.gitignore`, classify rules, detect conflicts, generate
+  remediation diff, manifest loading and validation.
+- Integration: end-to-end `host-link` against `tmp_path` "fake host"
+  directories with synthetic `.gitignore` variants (clean, missing
+  rules, over-aggressive, missing file, no `.git/`).
+- Regression: existing 213-test suite stays green; existing
+  `test_bootstrap.py` host-link tests stay green.
+- Cross-platform: test on Windows (junction path) and Linux (symlink
+  path) since `host-link` is cross-platform.
 
 ## Validation Contract
 
 The binding validation contract lives in the sibling file `validation.md`.
-It is a SKELETON at scaffold time; required items will be drafted at /spec
-finalization and locked at /tasks. Implementation MUST NOT begin until the
+Required items have been drafted at /spec finalization (2026-06-07) and
+will be locked at /tasks (F-07). Implementation MUST NOT begin until the
 validation contract is locked and all REQUIRED items are explicitly listed.
 
 ## Traceability Matrix
 
-> **TODO -- populate at /spec finalization once CLARIFY closes.**
->
-> | Requirement | Acceptance Test | Module |
-> |-------------|-----------------|--------|
-> | TBD | TBD | TBD |
+| Requirement | Acceptance Criterion | Module |
+|-------------|---------------------|--------|
+| R1: No constitutional amendment | AC-1 | (none -- no constitution/ edits) |
+| R2: Dual detection | AC-2 | cli/bootstrap.py |
+| R3: Mode flag | AC-3 | cli/bootstrap.py |
+| R4: Opt-out default | AC-4 | cli/bootstrap.py |
+| R5: No-gitignore refuse | AC-5 | cli/bootstrap.py |
+| R6: JSON manifest | AC-6 | cli/host_gitignore_manifest.json |
+| R7: Non-git refuse | AC-7 | cli/bootstrap.py |
+| R8: Happy-path unchanged | AC-8 | cli/test_bootstrap.py |
+| R9: Docs updated | AC-9 | docs/HOST-INTEGRATION.md |
+| R10: No regression | AC-10 | cli/test_bootstrap.py |
 
 ## Open Questions
 
-See `clarify.md`. CLARIFY questions are the gate, not casual open notes.
+CLARIFY closed 2026-06-07. All 7 questions answered in `clarify.md`.
+No remaining open questions.
 
 ## Out of Scope
 
-> **TODO -- BLOCKED ON CLARIFY.** Tentative candidates:
->
-> - `.gitattributes` enforcement (`.gitignore` only for v1).
-> - Per-file LFS or large-file rules.
-> - Auto-PR-on-host to fix the host's `.gitignore` (manual or in-place
->   only for v1).
-> - Retroactive cleanup of already-committed framework files in the host
->   (out of scope for the install-time check; covered by a follow-up if
->   needed).
+- `.gitattributes` enforcement (`.gitignore` only for v1).
+- Per-file LFS or large-file rules.
+- Auto-PR-on-host to fix the host's `.gitignore` (manual or in-place only for v1).
+- Retroactive cleanup of already-committed framework files in the host (out of scope for install-time check; covered by follow-up if needed).
+- Multi-host / fleet-wide gitignore audit (per-host invocation only).
+- Constitutional amendment (Article X misreading corrected; no amendment needed).
 
 ## Cross-Feature Notes
 

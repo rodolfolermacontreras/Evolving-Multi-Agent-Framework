@@ -1,7 +1,7 @@
 ---
 id: SDD-20260607GITIGN-clarification
 type: clarification
-status: draft
+status: done
 owner: principal-architect
 updated: 2026-06-07
 feature: 2026-06-07-host-gitignore-protection
@@ -11,7 +11,7 @@ feature: 2026-06-07-host-gitignore-protection
 
 - Date: 2026-06-07
 - Drafted by: Principal Architect (scaffold session, EM context)
-- Status: AWAITING OWNER ANSWERS -- to be answered in fresh Sprint 6 implementation session per Article VII
+- Status: CLOSED 2026-06-07
 - Spec ID: SDD-027
 - Gating: /spec finalization is blocked until these answers are recorded.
 - Article X amendment posture: owner direction 2026-06-07 is "normal spec
@@ -53,7 +53,7 @@ Sprint 6 session. Initial reading suggests (a) -- the gitignore check is
 the *implementation* of a rule Article X already implies -- but the
 final call belongs to the owner after re-reading.
 
-Answer: TBD
+Answer: No amendment needed (option a equivalent). Article X is "Validation Is a Pre-Implementation Contract", NOT "Host Integration." The kickoff prompt's "Article X amendment CANDIDATE" framing was based on a misreading. There is no Host Integration article in the constitution. The host-gitignore protection rule is install-time CLI tooling behavior, not a framework principle. Ships as a normal spec + ADR documenting the contract design.
 
 ### Q2: Detection strategy -- depth and form
 
@@ -71,7 +71,7 @@ Recommended answer: (c). Static parse alone misses global excludes and
 parent-dir `.gitignore` files; live git check alone gives no readable
 diff for the remediation prompt. Both together = correct + explainable.
 
-Answer: TBD
+Answer: (c) both. Static parse of host `.gitignore` for the readable diff display + live `git check-ignore` (or subprocess equivalent) for the authoritative answer (catches global excludes, parent-dir `.gitignore` files, `core.excludesFile`). Both together = correct + explainable.
 
 ---
 
@@ -96,7 +96,7 @@ default for first-real-host dispatch (owner is present and learning the
 contract); `strict` for CI / scripted bootstrap; `warn` for opt-out of
 the gate while still surfacing the diff; `skip` for emergency override.
 
-Answer: TBD
+Answer: (e) mode flag `--gitignore-mode {strict|prompt|warn|skip}` with default = `prompt`. Interactive for first-real-host dispatch (owner present and learning the contract); `strict` for CI / scripted bootstrap; `warn` for opt-out of the gate while surfacing the diff; `skip` for emergency override.
 
 ### Q4: Opt-in vs opt-out -- new flag default
 
@@ -109,7 +109,7 @@ that first-real-host dispatch is blocked on the missing check; off-by-
 default would defeat the purpose. Provide the opt-out flag for
 emergencies.
 
-Answer: TBD
+Answer: (a) opt-out. Runs by default; `--no-gitignore-check` to disable. The whole reason this feature exists is that first-real-host dispatch is blocked on the missing check; off-by-default would defeat the purpose.
 
 ---
 
@@ -128,7 +128,7 @@ Recommended answer: (b) refuse. Creating files in the host as a side
 effect of `host-link` is a surprising action; refusing keeps the host
 in control of its own contents and surfaces the requirement explicitly.
 
-Answer: TBD
+Answer: (b) refuse. Refuse the install with a clear message: "host requires a `.gitignore`; here is the minimal recommended content: [list]". Creating files in the host as a side effect of `host-link` is surprising; refusing keeps the host in control.
 
 ### Q6: Framework-required path lists -- where do they live?
 
@@ -142,7 +142,7 @@ Recommended answer: (b) JSON manifest. Easier to extend without code
 review on every path addition; trivially diffable; testable as data.
 The bootstrap module reads it; docs reference it.
 
-Answer: TBD
+Answer: (b) JSON manifest at `cli/host_gitignore_manifest.json` versioned with the framework. Easier to extend without code review; trivially diffable; testable as data. `bootstrap.py` reads it; docs reference it.
 
 ---
 
@@ -160,7 +160,7 @@ Recommended answer: (a). Sprint 5's `host-link` already requires a git
 repo (it runs `git rev-parse`). No change to that contract; the
 gitignore check inherits the requirement transitively.
 
-Answer: TBD
+Answer: (a) keep Sprint 5 behavior. Refuse with existing message. `host-link` already requires a git repo via `git rev-parse`. Gitignore check inherits the requirement transitively. No change.
 
 ---
 

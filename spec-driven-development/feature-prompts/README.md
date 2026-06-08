@@ -3,7 +3,7 @@ id: feature-prompts-index
 type: index
 status: active
 owner: principal-executive-manager
-updated: 2026-06-07
+updated: 2026-06-09
 ---
 
 # Feature Prompts -- Index
@@ -75,6 +75,30 @@ Sprint 6 spec dirs must be scaffolded with CLARIFY questions (commit
 `d08cd73`). F-06, F-07, F-08 run sequentially in three fresh sessions. SDD-019
 is a constitutional-amendment candidate; SDD-027 is an Article X amendment
 candidate (handled as a normal spec first per owner direction 2026-06-07).
+
+### Sprint 7 -- PI-5 Sprint 3 / Sprint 6 Completion + UI Lifecycle Variant (SDD-032 + SDD-018)
+
+| Order | File | Owner | Status |
+|-------|------|-------|--------|
+| 0 | [SPRINT-07-KICKOFF.prompt.md](SPRINT-07-KICKOFF.prompt.md) | Principal Executive Manager (lead) | READY (gated on Sprint 6 close + ratification + SDD-032 scaffold) |
+| 1 | [F-09-sprint7-completion.prompt.md](F-09-sprint7-completion.prompt.md) | Principal Software Developer + Developer worker | READY (gated on SPRINT-07 kickoff prereqs) |
+| 2 | [F-10-sprint7-sdd018-design.prompt.md](F-10-sprint7-sdd018-design.prompt.md) | Principal Product Manager + Principal Architect | READY (gated on F-09 close) |
+| 3 | [F-11-sprint7-sdd018-implement.prompt.md](F-11-sprint7-sdd018-implement.prompt.md) | Principal Software Developer + workers | READY (gated on F-10 close) |
+
+Prerequisite: **Sprint 6 must close DONE** (close commit `4a6941c` plus
+owner ratification commit `6c70e30`, both 2026-06-08), the BACKLOG entries
+SDD-019/020/027 must read DONE-WITH-DEFERRED and SDD-032 (P1, F-09) +
+SDD-033 (P3, unscheduled) must be filed at commit `6c70e30`, and the
+SDD-032 spec dir at `specs/2026-06-09-sprint-6-completion/` must be
+scaffolded with all four artifacts LOCKED at scaffold (commit `b005e66`).
+F-09, F-10, F-11 run sequentially in three fresh sessions. F-09 is
+implementation-only (no CLARIFY -- spec already locked). F-10 scaffolds
+the SDD-018 spec dir from scratch and runs a heavy CLARIFY round; SDD-018
+may require an Article X amendment or a new Article XII (handled via F-10
+ADR drafting if confirmed). Per owner direction 2026-06-08 (Option 3
+hybrid), **no REQUIRED-item deferral is permitted from Sprint 7 close**,
+and Sprint 7 close requires **explicit owner approval before any close
+commit is pushed**.
 
 ---
 

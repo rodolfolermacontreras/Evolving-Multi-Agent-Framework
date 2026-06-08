@@ -136,11 +136,11 @@ feature: 2026-06-09-sprint-6-completion
 
 ## Manual Checks
 
-- [ ] Owner reviews the new lines added to `.github/prompts/triage.prompt.md`
+- [x] Owner reviews the new lines added to `.github/prompts/triage.prompt.md`
   and `.github/prompts/clarify.prompt.md` and confirms they match the
   intended hook invocation. (R4 is a behavior change in agent
   prompts, not in code; a one-eye human review at close prevents
-  silent prompt drift.)
+  silent prompt drift.) **Reviewed and approved by Rodolfo Lerma 2026-06-08 via EM ("wording is fine"). Pre-push gate.**
 - [ ] Owner reviews `backlog/DEDUP-LOG.md` after the first real `/triage`
   invocation post-merge to confirm the rolling-log entry is
   readable and useful. (Surface check, not blocking.)

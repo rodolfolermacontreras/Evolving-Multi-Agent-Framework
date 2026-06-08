@@ -153,6 +153,19 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         action="store_true",
         help="If <target>/.github already exists, recursively delete it before linking (destructive).",
     )
+    host_link.add_argument(
+        "--gitignore-mode",
+        choices=("strict", "prompt", "warn", "skip"),
+        default="prompt",
+        dest="gitignore_mode",
+        help="How to handle .gitignore conflicts (default: prompt).",
+    )
+    host_link.add_argument(
+        "--no-gitignore-check",
+        action="store_true",
+        dest="no_gitignore_check",
+        help="Disable .gitignore protection check entirely.",
+    )
     return parser.parse_args(argv)
 
 
@@ -699,6 +712,116 @@ def format_dry_run_report(target: Path, link_path: Path,
     return "\n".join(lines)
 
 
+# --------------------------------------------------------------------------- #
+# SDD-027: Host .gitignore protection
+# --------------------------------------------------------------------------- #
+
+_MANIFEST_PATH = Path(__file__).resolve().with_name("host_gitignore_manifest.json")
+
+
+def _load_gitignore_manifest(path: Path | None = None) -> dict:
+    """Load the host gitignore manifest JSON."""
+    manifest_path = path or _MANIFEST_PATH
+    if not manifest_path.is_file():
+        fail(
+            f"Gitignore manifest not found: {manifest_path}",
+            "Ensure host_gitignore_manifest.json exists alongside bootstrap.py.",
+        )
+    return json.loads(manifest_path.read_text(encoding="utf-8"))
+
+
+def _parse_host_gitignore(gitignore_path: Path) -> set[str]:
+    """Read host .gitignore, return set of non-comment, non-empty patterns."""
+    if not gitignore_path.is_file():
+        return set()
+    patterns: set[str] = set()
+    for line in gitignore_path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if stripped and not stripped.startswith("#"):
+            patterns.add(stripped)
+    return patterns
+
+
+def _check_gitignore_coverage(
+    host_root: Path,
+    manifest: dict,
+) -> tuple[list[str], list[str]]:
+    """Compare manifest against host's ignore rules.
+
+    Returns (missing_ignores, over_ignores).
+    - missing_ignores: must_be_ignored patterns not in host .gitignore
+    - over_ignores: must_be_tracked paths that git says are ignored
+    """
+    gitignore_patterns = _parse_host_gitignore(host_root / ".gitignore")
+
+    missing_ignores: list[str] = []
+    for pattern in manifest.get("must_be_ignored", []):
+        if pattern not in gitignore_patterns:
+            missing_ignores.append(pattern)
+
+    over_ignores: list[str] = []
+    for path in manifest.get("must_be_tracked", []):
+        try:
+            result = subprocess.run(
+                ["git", "-C", str(host_root), "check-ignore", "-q", path],
+                capture_output=True, text=True,
+            )
+            if result.returncode == 0:
+                # git says this path IS ignored -- that's a problem
+                over_ignores.append(path)
+        except OSError:
+            pass  # git not available; skip live check
+
+    return missing_ignores, over_ignores
+
+
+def _check_host_gitignore(
+    host_root: Path,
+    mode: str = "prompt",
+    manifest: dict | None = None,
+) -> bool:
+    """Check host .gitignore for SDD compatibility.
+
+    Returns True if OK to proceed, False if should abort.
+    """
+    if mode == "skip":
+        return True
+
+    gitignore_path = host_root / ".gitignore"
+    if not gitignore_path.is_file():
+        print("WARNING: No .gitignore found in host repository.", file=sys.stderr)
+        print("Recommended content:", file=sys.stderr)
+        if manifest is None:
+            manifest = _load_gitignore_manifest()
+        for pattern in manifest.get("must_be_ignored", []):
+            print(f"  {pattern}", file=sys.stderr)
+        if mode == "strict":
+            return False
+        return True
+
+    if manifest is None:
+        manifest = _load_gitignore_manifest()
+
+    missing, over = _check_gitignore_coverage(host_root, manifest)
+
+    if not missing and not over:
+        return True
+
+    if missing:
+        print("Missing .gitignore rules (must_be_ignored):", file=sys.stderr)
+        for pattern in missing:
+            print(f"  - {pattern}", file=sys.stderr)
+    if over:
+        print("Over-aggressive .gitignore rules (must_be_tracked paths are ignored):", file=sys.stderr)
+        for path in over:
+            print(f"  - {path}", file=sys.stderr)
+
+    if mode == "strict":
+        return False
+    # prompt and warn modes: report but proceed
+    return True
+
+
 def run_host_link(args: argparse.Namespace) -> None:
     """Dispatcher for `bootstrap.py host-link --target <host> [...]`."""
     target = validate_host_link_target(Path(args.target))
@@ -708,6 +831,19 @@ def run_host_link(args: argparse.Namespace) -> None:
             f"Framework .github/ not found at {framework_github}",
             "Run this script from an intact checkout of the framework repository.",
         )
+
+    # SDD-027: gitignore protection check
+    gitignore_mode = getattr(args, "gitignore_mode", "prompt")
+    no_gitignore_check = getattr(args, "no_gitignore_check", False)
+    if not no_gitignore_check and args.apply:
+        ok = _check_host_gitignore(target, mode=gitignore_mode)
+        if not ok:
+            print("ERROR: .gitignore check failed. Aborting host-link.", file=sys.stderr)
+            fail(
+                "Host .gitignore protection check failed.",
+                f"Fix the reported issues and re-run, or use --gitignore-mode skip to bypass.",
+            )
+
     link_path = target / ".github"
 
     existing = link_path.exists() or link_path.is_symlink()

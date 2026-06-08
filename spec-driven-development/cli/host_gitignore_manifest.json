@@ -1,0 +1,19 @@
+{
+  "must_be_ignored": [
+    "spec-driven-development/ledger/fleet.db",
+    "spec-driven-development/exec/state.html",
+    "spec-driven-development/exec/state.md",
+    "spec-driven-development/exec/work-index.md",
+    "spec-driven-development/sessions/SESSION-MEMORY.md",
+    "__pycache__/",
+    "*.pyc",
+    ".pytest_cache/"
+  ],
+  "must_be_tracked": [
+    ".github/agents/",
+    ".github/skills/",
+    ".github/prompts/",
+    ".github/instructions/",
+    ".github/copilot-instructions.md"
+  ]
+}

@@ -56,6 +56,8 @@ from schema_lint import (  # noqa: E402  -- module-bootstrap import per ADR-012
     ARTIFACT_STATUS_ENUM,
     ARTIFACT_SKIP_NAMES,
     ARTIFACT_SKIP_PREFIXES,
+    UserGate,
+    load_user_gates,
 )
 
 # ---------------------------------------------------------------------------- #
@@ -593,7 +595,8 @@ def derive_next_action(sdd_root: Path, pi: PIBlock | None, features: list[Featur
 
 def render_markdown(*, generated_date: str, pi: PIBlock | None, features: list[Feature],
                     backlog: list[BacklogItem], roster: dict, ledger: LedgerView,
-                    next_action: tuple[str, str, str | None]) -> str:
+                    next_action: tuple[str, str, str | None],
+                    user_gates: list[UserGate] | None = None) -> str:
     """Produce state.md in the canonical 7-section format required by SDD-002.
 
     Sections (in order):
@@ -674,6 +677,25 @@ def render_markdown(*, generated_date: str, pi: PIBlock | None, features: list[F
 
     # ---- 6. Blockers ------------------------------------------------------
     out += ["## Blockers", ""]
+    blocking_gates = active_user_gates(user_gates or [])
+    if blocking_gates:
+        out += [
+            "### Pending User Gates",
+            "",
+            "| Feature | Gate | Blocks | Evidence Need | Next Action |",
+            "|---------|------|--------|---------------|-------------|",
+        ]
+        for gate in blocking_gates:
+            out.append(
+                f"| {gate.feature} | {gate.gate_id} (`{gate.gate_type}`) | "
+                f"`{gate.blocking_scope}` | {gate.evidence_type or '-'} | "
+                f"{gate.next_action or '-'} |"
+            )
+        out += [
+            "",
+            "_Generated executive surfaces are visibility only; they are not approval evidence._",
+            "",
+        ]
     if not ledger.available:
         out += ["_fleet.db not initialized; no blockers known_", ""]
     elif not ledger.blockers:
@@ -1386,6 +1408,11 @@ def _next_what(features: list[Feature]) -> str:
     return "; then ".join(bits) if bits else "open the next backlog item"
 
 
+def active_user_gates(gates: list[UserGate]) -> list[UserGate]:
+    """Return user gates that currently block or require visible action."""
+    return [gate for gate in gates if gate.status in ("pending", "blocked")]
+
+
 def _agents_for_feature(roster: dict, feature: Feature, ledger: LedgerView) -> list[dict]:
     """Best-effort: which agents have been dispatched to this feature recently?"""
     if not ledger.recent:
@@ -2071,6 +2098,38 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
 {footer_html}
 </body></html>
 """
+
+
+def inject_user_gates_html(html_doc: str, user_gates: list[UserGate]) -> str:
+    """Inject pending user-gate visibility into the generated dashboard HTML.
+
+    Kept outside render_html because that function has an Article X footprint
+    lock from SDD-FDC-001.
+    """
+    blocking_gates = active_user_gates(user_gates)
+    if not blocking_gates:
+        return html_doc
+    gate_items = "".join(
+        f'<li><strong>{h(gate.feature)} / {h(gate.gate_id)}</strong> '
+        f'(<code>{h(gate.gate_type)}</code>) blocks '
+        f'<code>{h(gate.blocking_scope)}</code>; needs '
+        f'{h(gate.evidence_type or "approval evidence")}; next: '
+        f'{h(gate.next_action or "record approval evidence")}</li>'
+        for gate in blocking_gates
+    )
+    gates_html = (
+        f'<div class="next-action-card user-gates-card">'
+        f'<div class="label">Pending user gates</div>'
+        f'<ul>{gate_items}</ul>'
+        f'<div class="why">Generated dashboard state is visibility only, not approval evidence.</div>'
+        f'</div>'
+    )
+    marker = '<section class="zone-next" aria-labelledby="next-heading"><h2 id="next-heading">What Comes Next</h2>'
+    if marker not in html_doc:
+        return html_doc.replace('<main id="main" role="main" class="grid-v3">',
+                                '<main id="main" role="main" class="grid-v3">' + gates_html,
+                                1)
+    return html_doc.replace(marker, marker + gates_html, 1)
 # ---------------------------------------------------------------------------- #
 # Work index generator (for principal pre-work checks, IDEA 2026-06-03)
 # ---------------------------------------------------------------------------- #
@@ -2078,6 +2137,7 @@ def render_html(*, generated_at: str, pi: PIBlock | None, features: list[Feature
 def render_work_index(
     *, generated_date: str, features: list[Feature],
     backlog: list[BacklogItem], pi: PIBlock | None,
+    user_gates: list[UserGate] | None = None,
 ) -> str:
     """Render exec/work-index.md -- canonical reference for principals before
     authorizing new work. Lists DONE, IN-FLIGHT, and QUEUED items so principals
@@ -2130,6 +2190,26 @@ def render_work_index(
 
     lines += [
         "",
+        "## 2A. USER GATES -- Human approvals and blocked transitions",
+        "",
+    ]
+    blocking_gates = active_user_gates(user_gates or [])
+    if blocking_gates:
+        lines.append("| Feature | Gate | Blocks | Evidence Need | Next Action |")
+        lines.append("|---------|------|--------|---------------|-------------|")
+        for gate in blocking_gates:
+            lines.append(
+                f"| {gate.feature} | {gate.gate_id} (`{gate.gate_type}`) | "
+                f"`{gate.blocking_scope}` | {gate.evidence_type or '-'} | "
+                f"{gate.next_action or '-'} |"
+            )
+        lines.append("")
+        lines.append("Generated state is visibility only; approvals require durable SDD-023 evidence.")
+    else:
+        lines.append("_No pending or blocked user gates declared._")
+
+    lines += [
+        "",
         "## 3. QUEUED -- Backlog (next candidates for triage)",
         "",
     ]
@@ -2176,6 +2256,7 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
     pis = load_pis(sdd_root)
     pi = current_pi(pis, override=pi_override)
     features = load_features(sdd_root)
+    user_gates = load_user_gates(sdd_root)
     backlog = load_backlog(sdd_root)
     roster = load_roster(sdd_root)
     ledger = load_ledger(sdd_root)
@@ -2204,6 +2285,7 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
     md = render_markdown(
         generated_date=generated_date, pi=pi, features=features, backlog=backlog,
         roster=roster, ledger=ledger, next_action=next_action,
+        user_gates=user_gates,
     )
     htm = render_html(
         generated_at=generated_at, pi=pi, features=features, backlog=backlog,
@@ -2213,16 +2295,18 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
         sprint_table=sprint_table, current_sprint=current_sprint,
         sprint_goal=sprint_goal, decisions=decisions,
     )
+    htm = inject_user_gates_html(htm, user_gates)
 
     result = {
         "markdown_chars": len(md), "html_chars": len(htm),
         "features": len(features), "commits": len(commits),
         "dispatches": len(ledger.recent), "pi": pi.name if pi else None,
-        "html": htm, "markdown": md,
+        "html": htm, "markdown": md, "user_gates": len(user_gates),
     }
     # Work index for principal pre-work checks (IDEA 2026-06-03)
     work_index_md = render_work_index(
         generated_date=generated_date, features=features, backlog=backlog, pi=pi,
+        user_gates=user_gates,
     )
     result["work_index"] = work_index_md
     if write:

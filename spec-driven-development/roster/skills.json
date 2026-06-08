@@ -190,5 +190,17 @@
     "path": ".github/skills/operational/host-integration-symlink/SKILL.md",
     "category": "operational",
     "description": "Installs the framework's .github/ into a host repo via cross-platform symlink (Linux/macOS) or junction (Windows); handles conflict detection (abort/backup/force), platform fallback, and rollback. Loaded by dev-env-manager-general worker for SDD-016 host-link tasks."
+  },
+  {
+    "id": "session-self-review",
+    "path": ".github/skills/operational/session-self-review/SKILL.md",
+    "category": "operational",
+    "description": "Produces advisory end-of-session self-review records with SDD-023 gate findings and routes durable lessons through lesson-capture, /evolve, PM triage, /constitution, or approved tasks."
+  },
+  {
+    "id": "stakeholder-pressure-defense",
+    "path": ".github/skills/operational/stakeholder-pressure-defense/SKILL.md",
+    "category": "operational",
+    "description": "Classifies pressure against validation, approval, traceability, evidence, external-write, and Level-2 rules; cites SDD-023 gates and routes irreversible shortcuts through SDD-014 Friction Analysis."
   }
 ]

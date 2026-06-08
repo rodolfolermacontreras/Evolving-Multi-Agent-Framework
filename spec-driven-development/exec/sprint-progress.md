@@ -641,3 +641,40 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 - Notes: CLARIFY closed Q-J through Q-M. The pressure-defense model covers speed over validation, skipped owner approval, scope reduction without traceability, push-before-approval, unverified external claims, novelty/prestige pressure, external-write pressure, and silent validation exceptions. Approval pressure reuses SDD-023 gate fields and evidence taxonomy. Level-2 or irreversible shortcut pressure routes to the existing SDD-014 Friction Analysis template at `spec-driven-development/templates/level-2-decision.md`; the planned stakeholder response template is communication-only and does not replace the Level-2 brief. Repeated pressure lessons route through SDD-021 self-review promotion targets.
 - Owner/Level-2 approvals needed before implementation: constitution edits, ledger schema migrations, new dependencies, M365 permission changes, production-branch/push behavior changes, external write behavior changes, required-validation exceptions, or any pressure-defense path authorizing irreversible shortcuts require explicit owner approval and ADR/Friction Analysis as applicable.
 - Next: F-19 may implement SDD-023, SDD-021, and SDD-025. Recommended order: gate parser/enforcement first, self-review skill second, pressure-defense skill/template third, then validation closeout and full regression as required.
+
+### F-19 -- sprint9-implement-and-qa -- DONE
+
+- Date: 2026-06-08
+- Owner: Principal Software Developer
+- Commits: <pending-sha>
+- Files changed: 20
+  - spec-driven-development/cli/schema_lint.py
+  - spec-driven-development/cli/test_schema_lint.py
+  - spec-driven-development/cli/state_builder.py
+  - spec-driven-development/cli/test_state_builder.py
+  - .github/skills/operational/session-self-review/SKILL.md
+  - .github/skills/operational/stakeholder-pressure-defense/SKILL.md
+  - spec-driven-development/templates/stakeholder-pressure-response.md
+  - spec-driven-development/sprints/README.md
+  - spec-driven-development/roster/skills.json
+  - spec-driven-development/ledger/fleet.db
+  - spec-driven-development/specs/2026-06-08-first-class-user-gates/validation.md
+  - spec-driven-development/specs/2026-06-08-first-class-user-gates/tasks.md
+  - spec-driven-development/specs/2026-06-08-end-of-session-self-review/validation.md
+  - spec-driven-development/specs/2026-06-08-end-of-session-self-review/tasks.md
+  - spec-driven-development/specs/2026-06-08-stakeholder-pressure-defense/validation.md
+  - spec-driven-development/specs/2026-06-08-stakeholder-pressure-defense/tasks.md
+  - spec-driven-development/exec/state.md
+  - spec-driven-development/exec/state.html
+  - spec-driven-development/exec/work-index.md
+  - spec-driven-development/exec/sprint-progress.md
+- Tests: 331 -> 337 (+6), 2 skipped
+  - `python spec-driven-development/cli/schema_lint.py` -> PASS, Schema lint clean
+  - `python -m pytest spec-driven-development/ --tb=no -q` -> 337 passed, 2 skipped
+- Validation: SDD-023 14/14 REQUIRED + 3/3 manual; SDD-021 12/12 REQUIRED + 3/3 manual; SDD-025 13/13 REQUIRED + 3/3 manual. No REQUIRED item was deferred or loosened.
+- SDD-023: DONE. `validation.md` user-gate tables are now parseable and linted; `schema_lint.py` validates gate fields, gate/status/evidence enums, missing evidence for approved gates, no `gates.md` requirement, and invalid approval evidence. `state_builder.py` surfaces pending/blocked gates in generated `state.md`, `state.html`, and `work-index.md`. Existing ledger decision row 2 records the no-migration evidence path.
+- SDD-021: DONE. Added `.github/skills/operational/session-self-review/SKILL.md`; sprint-close guidance now records self-review findings or `none` in `sprints/README.md`. Gates `GATE-021-001` and `GATE-021-002` are not-triggered because no Level-2 implementation change or validation exception landed.
+- SDD-025: DONE. Added `.github/skills/operational/stakeholder-pressure-defense/SKILL.md` and `templates/stakeholder-pressure-response.md`. Level-2 pressure routes to SDD-014 `templates/level-2-decision.md`; repeated pressure lessons route through SDD-021 promotion targets. Gates `GATE-025-001`, `GATE-025-002`, and `GATE-025-003` are not-triggered for F-19 because no Level-2 implementation change, validation exception, push, or push recommendation landed.
+- Level-2/manual gates: no constitution edit, ledger schema migration, dependency, M365 permission change, production-branch behavior change, push behavior change, external-write behavior change, or SDD-014 template edit landed. No owner approval was required for F-19 implementation beyond the existing locked design contracts.
+- Notes: F-19 intentionally kept SDD-021/SDD-025 skill/template-first and kept SDD-023 enforcement inside existing stdlib CLI surfaces. Generated executive files were regenerated only through `python spec-driven-development/cli/state_builder.py`.
+- Next: F-20 should close Sprint 9 and produce PI-5 close-readiness, including owner approval request before any push.

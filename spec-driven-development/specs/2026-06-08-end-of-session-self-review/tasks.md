@@ -45,7 +45,7 @@ feature: 2026-06-08-end-of-session-self-review
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: S
-**Status**: pending
+**Status**: done
 **Files**: `.github/skills/operational/session-self-review/SKILL.md`
 **Files Blocked**: `spec-driven-development/constitution/**`, `spec-driven-development/ledger/**`
 **Depends on**: NONE
@@ -74,7 +74,7 @@ python spec-driven-development/cli/schema_lint.py
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: M
-**Status**: pending
+**Status**: done
 **Files**: `.github/skills/operational/session-self-review/SKILL.md`
 **Files Blocked**: NONE
 **Depends on**: T-021-01
@@ -103,7 +103,7 @@ Select-String -Path .github/skills/operational/session-self-review/SKILL.md -Pat
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: S
-**Status**: pending
+**Status**: done
 **Files**: `.github/skills/operational/session-self-review/SKILL.md`
 **Files Blocked**: NONE
 **Depends on**: T-021-02
@@ -132,7 +132,7 @@ Select-String -Path .github/skills/operational/session-self-review/SKILL.md -Pat
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: M
-**Status**: pending
+**Status**: done
 **Files**: `.github/skills/operational/session-self-review/SKILL.md`, `.github/skills/operational/lesson-capture/SKILL.md`, `.github/prompts/evolve.prompt.md`
 **Files Blocked**: `.github/agents/**`, `spec-driven-development/constitution/**`
 **Depends on**: T-021-03
@@ -161,7 +161,7 @@ Select-String -Path .github/skills/operational/session-self-review/SKILL.md,.git
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: S
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/sprints/README.md`, `spec-driven-development/templates/review.md` or nearest existing review template
 **Files Blocked**: NONE
 **Depends on**: T-021-04
@@ -190,7 +190,7 @@ Select-String -Path spec-driven-development/sprints/README.md -Pattern 'self-rev
 **Type**: [S] sequential, HITL-sensitive
 **Execution**: [HITL] owner/Architect approval required if trigger occurs
 **Size**: S
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/specs/2026-06-08-end-of-session-self-review/validation.md`
 **Files Blocked**: `spec-driven-development/constitution/**`, `spec-driven-development/ledger/**`, dependency manifests, external service configuration
 **Depends on**: T-021-05
@@ -219,7 +219,7 @@ git diff --name-only HEAD
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: S
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/specs/2026-06-08-end-of-session-self-review/validation.md`, `spec-driven-development/specs/2026-06-08-end-of-session-self-review/tasks.md`
 **Files Blocked**: NONE
 **Depends on**: T-021-06

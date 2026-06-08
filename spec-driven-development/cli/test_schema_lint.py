@@ -358,3 +358,82 @@ class ArtifactContractAcceptance(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
 
 
+# ----------------------------------------------------------------------- #
+# SDD-023: first-class user gate declarations
+# ----------------------------------------------------------------------- #
+
+GOOD_GATE_VALIDATION = """---
+id: SDD-GATE-validation
+type: validation
+status: active
+owner: principal-architect
+updated: 2026-06-08
+---
+
+# Validation
+
+## Required User Gates Declared By This Spec
+
+| gate_id | gate_type | blocking_scope | approver | evidence_type | evidence_ref | status | next_action |
+|---------|-----------|----------------|----------|---------------|--------------|--------|-------------|
+| GATE-001 | `push-approval` | `push` | owner | `owner-quote` |  | pending | Record owner approval before push. |
+"""
+
+class UserGateContractAcceptance(unittest.TestCase):
+    """SDD-023 gate parser and lint rules."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
+        self.spec_dir = Path(self._tmp.name) / "specs" / "2026-06-08-gate-fixture"
+        self.spec_dir.mkdir(parents=True)
+
+    def tearDown(self):
+        gc.collect()
+        self._tmp.cleanup()
+
+    def _write_validation(self, content: str = GOOD_GATE_VALIDATION) -> Path:
+        path = self.spec_dir / "validation.md"
+        path.write_text(content, encoding="utf-8")
+        return path
+
+    def test_gate_table_parses_from_validation_md_without_gates_md(self):
+        path = self._write_validation()
+
+        gates = schema_lint.parse_user_gates(path)
+        findings = schema_lint.check_user_gates(path)
+
+        self.assertEqual(findings, [])
+        self.assertEqual(len(gates), 1)
+        self.assertEqual(gates[0].gate_id, "GATE-001")
+        self.assertEqual(gates[0].gate_type, "push-approval")
+        self.assertFalse((self.spec_dir / "gates.md").exists())
+
+    def test_gate_invalid_status_fails(self):
+        path = self._write_validation(GOOD_GATE_VALIDATION.replace("pending", "waiting"))
+
+        findings = schema_lint.check_user_gates(path)
+
+        self.assertTrue(any("status 'waiting' not in enum" in f.issue for f in findings))
+
+    def test_gate_invalid_evidence_type_fails(self):
+        path = self._write_validation(GOOD_GATE_VALIDATION.replace("`owner-quote`", "`green-tests`"))
+
+        findings = schema_lint.check_user_gates(path)
+
+        self.assertTrue(any("invalid approval evidence source 'green-tests'" in f.issue for f in findings))
+
+    def test_gate_approved_without_evidence_ref_fails(self):
+        path = self._write_validation(GOOD_GATE_VALIDATION.replace("pending", "approved"))
+
+        findings = schema_lint.check_user_gates(path)
+
+        self.assertTrue(any("approved gate requires non-empty evidence_ref" in f.issue for f in findings))
+
+    def test_historical_validation_without_gate_section_passes(self):
+        path = self._write_validation(GOOD_ARTIFACT + "\n## Required Items\n\n- [ ] V-1. Example.\n")
+
+        findings = schema_lint.check_user_gates(path)
+
+        self.assertEqual(findings, [])
+
+

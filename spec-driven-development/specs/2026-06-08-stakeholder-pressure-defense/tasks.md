@@ -45,7 +45,7 @@ feature: 2026-06-08-stakeholder-pressure-defense
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: S
-**Status**: pending
+**Status**: done
 **Files**: `.github/skills/operational/stakeholder-pressure-defense/SKILL.md`
 **Files Blocked**: `spec-driven-development/constitution/**`, `spec-driven-development/templates/level-2-decision.md`
 **Depends on**: SDD-023 implementation artifact shape and SDD-021 self-review skill, if F-19 implements Sprint 9 sequentially
@@ -75,7 +75,7 @@ Select-String -Path .github/skills/operational/stakeholder-pressure-defense/SKIL
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: M
-**Status**: pending
+**Status**: done
 **Files**: `.github/skills/operational/stakeholder-pressure-defense/SKILL.md`
 **Files Blocked**: NONE
 **Depends on**: T-025-01
@@ -104,7 +104,7 @@ Select-String -Path .github/skills/operational/stakeholder-pressure-defense/SKIL
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous unless owner approval trigger occurs
 **Size**: S
-**Status**: pending
+**Status**: done
 **Files**: `.github/skills/operational/stakeholder-pressure-defense/SKILL.md`
 **Files Blocked**: `spec-driven-development/templates/level-2-decision.md`, `spec-driven-development/constitution/**`, `spec-driven-development/docs/ADR/**`
 **Depends on**: T-025-02
@@ -134,7 +134,7 @@ Select-String -Path .github/skills/operational/stakeholder-pressure-defense/SKIL
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: S
-**Status**: pending
+**Status**: done
 **Files**: `.github/skills/operational/stakeholder-pressure-defense/SKILL.md`
 **Files Blocked**: NONE
 **Depends on**: T-025-03
@@ -163,7 +163,7 @@ Select-String -Path .github/skills/operational/stakeholder-pressure-defense/SKIL
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: M
-**Status**: pending
+**Status**: done
 **Files**: `.github/skills/operational/stakeholder-pressure-defense/SKILL.md`
 **Files Blocked**: NONE
 **Depends on**: T-025-04
@@ -192,7 +192,7 @@ Select-String -Path .github/skills/operational/stakeholder-pressure-defense/SKIL
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: S
-**Status**: pending
+**Status**: done
 **Files**: `.github/skills/operational/stakeholder-pressure-defense/SKILL.md`, `.github/skills/operational/session-self-review/SKILL.md`
 **Files Blocked**: `.github/agents/**`, `spec-driven-development/constitution/**`
 **Depends on**: T-025-05 and SDD-021 implementation artifact if available
@@ -221,7 +221,7 @@ Select-String -Path .github/skills/operational/stakeholder-pressure-defense/SKIL
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: M
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/templates/stakeholder-pressure-response.md`
 **Files Blocked**: `spec-driven-development/templates/level-2-decision.md`
 **Depends on**: T-025-05
@@ -250,7 +250,7 @@ Select-String -Path spec-driven-development/templates/stakeholder-pressure-respo
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous with HITL stop if approval trigger occurs
 **Size**: S
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/specs/2026-06-08-stakeholder-pressure-defense/validation.md`, `spec-driven-development/specs/2026-06-08-stakeholder-pressure-defense/tasks.md`
 **Files Blocked**: `spec-driven-development/constitution/**`, `spec-driven-development/ledger/**`, dependency manifests, external service configuration
 **Depends on**: T-025-06, T-025-07

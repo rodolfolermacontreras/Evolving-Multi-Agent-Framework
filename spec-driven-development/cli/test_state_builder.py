@@ -235,6 +235,38 @@ class TestFullBuild:
         assert "## Fleet" in state_md
         assert "## Recently Completed" in state_md
         assert "## Blockers" in state_md
+
+    def test_full_build_surfaces_pending_user_gates(self, tmp_path: Path) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        gate_feature = sdd / "specs" / "2026-05-16-state-builder"
+        (gate_feature / "validation.md").write_text(
+            "---\n"
+            "id: SDD-GATE-validation\n"
+            "type: validation\n"
+            "status: active\n"
+            "owner: principal-architect\n"
+            "updated: 2026-06-08\n"
+            "---\n\n"
+            "# Validation\n\n"
+            "## Required User Gates Declared By This Spec\n\n"
+            "| gate_id | gate_type | blocking_scope | approver | evidence_type | evidence_ref | status | next_action |\n"
+            "|---------|-----------|----------------|----------|---------------|--------------|--------|-------------|\n"
+            "| GATE-001 | `push-approval` | `push` | owner | `owner-quote` |  | pending | Record owner approval before push. |\n",
+            encoding="utf-8",
+        )
+
+        result = main(["--sdd-root", str(sdd)])
+
+        assert result == 0
+        state_md = (sdd / "exec" / "state.md").read_text(encoding="utf-8")
+        state_html = (sdd / "exec" / "state.html").read_text(encoding="utf-8")
+        work_index = (sdd / "exec" / "work-index.md").read_text(encoding="utf-8")
+        assert "Pending User Gates" in state_md
+        assert "GATE-001" in state_md
+        assert "push-approval" in state_html
+        assert "Generated dashboard state is visibility only, not approval evidence" in state_html
+        assert "USER GATES" in work_index
+        assert "Record owner approval before push" in work_index
         assert "Milestones" in state_md
 
 

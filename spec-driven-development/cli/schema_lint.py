@@ -116,6 +116,97 @@ RETROACTIVE_DEMO_ALLOWLIST = (
 DELTA_FINDING_KIND = "delta"
 DELTA_PREFIX = "[delta]"
 
+
+# ---------------------------------------------------------------------------- #
+# SDD-023 First-Class User Gates
+#
+# Gate declarations live in validation.md under
+# `## Required User Gates Declared By This Spec`. The section is optional for
+# historical specs, but when present it must use the SDD-023 vocabulary.
+# ---------------------------------------------------------------------------- #
+
+GATE_SECTION_HEADING = "Required User Gates Declared By This Spec"
+
+GATE_REQUIRED_FIELDS = (
+    "gate_id",
+    "gate_type",
+    "blocking_scope",
+    "approver",
+    "evidence_type",
+    "evidence_ref",
+    "status",
+    "next_action",
+)
+
+GATE_TYPE_ENUM = {
+    "clarify-owner-answer",
+    "adr-acceptance",
+    "constitution-edit",
+    "level-2-decision",
+    "external-write",
+    "model-upgrade",
+    "required-validation-exception",
+    "sprint-close",
+    "push-approval",
+    "pi-close",
+}
+
+GATE_STATUS_ENUM = {
+    "pending",
+    "approved",
+    "blocked",
+    "not-triggered",
+    "superseded",
+}
+
+GATE_EVIDENCE_TYPE_ENUM = {
+    "owner-quote",
+    "em-synthesis",
+    "accepted-adr",
+    "commit-stamp",
+    "issue-comment",
+    "cli-record",
+}
+
+GATE_BLOCKING_SCOPE_ENUM = {
+    "clarify-close",
+    "adr-dependent-edit",
+    "constitution-edit",
+    "feature-close",
+    "external-write",
+    "model-upgrade",
+    "sprint-close",
+    "push",
+    "pi-close",
+}
+
+GATE_INVALID_EVIDENCE_SOURCES = {
+    "green-tests",
+    "schema-lint-success",
+    "elapsed-time",
+    "agent-confidence",
+    "silence",
+    "generated-dashboard-state",
+    "dashboard-generation",
+    "generated-executive-surfaces",
+}
+
+_GATE_EVIDENCE_TOKEN_RE = re.compile(r"`?([a-z0-9]+(?:-[a-z0-9]+)+)`?")
+
+
+@dataclass(frozen=True)
+class UserGate:
+    path: str
+    feature: str
+    gate_id: str
+    gate_type: str
+    blocking_scope: str
+    approver: str
+    evidence_type: str
+    evidence_ref: str
+    status: str
+    next_action: str
+
 # ISO 8601 UTC: YYYY-MM-DDTHH:MMZ or YYYY-MM-DDTHH:MM:SSZ
 _ISO_TIMESTAMP_RE = re.compile(
     r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?Z$"
@@ -341,6 +432,161 @@ def check_artifact(path: Path) -> list[Finding]:
             ))
 
     return findings
+
+
+def _normalize_gate_header(header: str) -> str:
+    cleaned = header.strip().strip("`").lower()
+    cleaned = re.sub(r"[^a-z0-9]+", "_", cleaned).strip("_")
+    aliases = {
+        "gate_id": "gate_id",
+        "gate_type": "gate_type",
+        "blocking_scope": "blocking_scope",
+        "default_approver": "approver",
+        "approver": "approver",
+        "required_evidence": "evidence_type",
+        "evidence_type": "evidence_type",
+        "evidence_ref": "evidence_ref",
+        "evidence_reference": "evidence_ref",
+        "status": "status",
+        "next_action": "next_action",
+    }
+    return aliases.get(cleaned, cleaned)
+
+
+def _clean_gate_cell(value: str) -> str:
+    return value.strip().strip("`").strip()
+
+
+def _extract_gate_section_table(text: str) -> tuple[list[str], list[list[str]]]:
+    lines = text.splitlines()
+    start = None
+    heading_re = re.compile(rf"^##\s+{re.escape(GATE_SECTION_HEADING)}\s*$")
+    for idx, line in enumerate(lines):
+        if heading_re.match(line.strip()):
+            start = idx + 1
+            break
+    if start is None:
+        return [], []
+
+    section_end = len(lines)
+    for idx in range(start, len(lines)):
+        if lines[idx].startswith("## "):
+            section_end = idx
+            break
+
+    table_lines = [line.strip() for line in lines[start:section_end] if line.strip().startswith("|")]
+    if len(table_lines) < 2:
+        return [], []
+
+    header_cells = [_normalize_gate_header(cell) for cell in table_lines[0].strip("|").split("|")]
+    body_rows: list[list[str]] = []
+    for row in table_lines[2:]:
+        cells = [_clean_gate_cell(cell) for cell in row.strip("|").split("|")]
+        if len(cells) < len(header_cells):
+            cells.extend([""] * (len(header_cells) - len(cells)))
+        body_rows.append(cells[:len(header_cells)])
+    return header_cells, body_rows
+
+
+def _gate_evidence_tokens(raw: str) -> list[str]:
+    return _GATE_EVIDENCE_TOKEN_RE.findall(raw.lower())
+
+
+def parse_user_gates(path: Path) -> list[UserGate]:
+    """Parse SDD-023 user gates from a validation.md file.
+
+    Historical validation files without the gate section return []. The parser
+    accepts the canonical SDD-023 field names and the F-16 inventory aliases so
+    state generation can read both while lint enforces the canonical shape.
+    """
+    text = path.read_text(encoding="utf-8", errors="replace")
+    headers, rows = _extract_gate_section_table(text)
+    if not headers:
+        return []
+
+    gates: list[UserGate] = []
+    feature = path.parent.name
+    for cells in rows:
+        row = {header: cells[idx] for idx, header in enumerate(headers)}
+        raw_evidence = row.get("evidence_type", "")
+        evidence_tokens = _gate_evidence_tokens(raw_evidence)
+        evidence_type = ", ".join(evidence_tokens) if evidence_tokens else raw_evidence.strip()
+        gates.append(UserGate(
+            path=str(path),
+            feature=feature,
+            gate_id=row.get("gate_id", "").strip(),
+            gate_type=row.get("gate_type", "").strip().strip("`"),
+            blocking_scope=row.get("blocking_scope", "").strip().strip("`"),
+            approver=row.get("approver", "").strip(),
+            evidence_type=evidence_type,
+            evidence_ref=row.get("evidence_ref", "").strip(),
+            status=row.get("status", "").strip().strip("`").lower(),
+            next_action=row.get("next_action", "").strip(),
+        ))
+    return gates
+
+
+def check_user_gates(path: Path) -> list[Finding]:
+    """Validate SDD-023 user-gate declarations in a validation.md file."""
+    findings: list[Finding] = []
+    text = path.read_text(encoding="utf-8", errors="replace")
+    headers, rows = _extract_gate_section_table(text)
+    if not headers:
+        return findings
+
+    missing_columns = [field_name for field_name in GATE_REQUIRED_FIELDS if field_name not in headers]
+    for field_name in missing_columns:
+        findings.append(Finding(str(path), "gate", f"gate table missing '{field_name}' column"))
+
+    for row_idx, cells in enumerate(rows, start=1):
+        row = {header: cells[idx] for idx, header in enumerate(headers)}
+        gate_label = row.get("gate_id", f"row {row_idx}") or f"row {row_idx}"
+
+        for field_name in GATE_REQUIRED_FIELDS:
+            if field_name in ("evidence_ref",):
+                continue
+            if field_name in headers and not row.get(field_name, "").strip():
+                findings.append(Finding(str(path), "gate", f"{gate_label} missing '{field_name}'"))
+
+        gate_type = row.get("gate_type", "").strip().strip("`")
+        if gate_type and gate_type not in GATE_TYPE_ENUM:
+            findings.append(Finding(str(path), "gate", f"{gate_label} gate_type '{gate_type}' not in enum {sorted(GATE_TYPE_ENUM)}"))
+
+        blocking_scope = row.get("blocking_scope", "").strip().strip("`")
+        if blocking_scope and blocking_scope not in GATE_BLOCKING_SCOPE_ENUM:
+            findings.append(Finding(str(path), "gate", f"{gate_label} blocking_scope '{blocking_scope}' not in enum {sorted(GATE_BLOCKING_SCOPE_ENUM)}"))
+
+        status = row.get("status", "").strip().strip("`").lower()
+        if status and status not in GATE_STATUS_ENUM:
+            findings.append(Finding(str(path), "gate", f"{gate_label} status '{status}' not in enum {sorted(GATE_STATUS_ENUM)}"))
+
+        evidence_tokens = _gate_evidence_tokens(row.get("evidence_type", ""))
+        if not evidence_tokens and row.get("evidence_type", "").strip():
+            evidence_tokens = [row.get("evidence_type", "").strip().strip("`").lower()]
+        for evidence_type in evidence_tokens:
+            if evidence_type in GATE_INVALID_EVIDENCE_SOURCES:
+                findings.append(Finding(str(path), "gate", f"{gate_label} invalid approval evidence source '{evidence_type}'"))
+            elif evidence_type not in GATE_EVIDENCE_TYPE_ENUM:
+                findings.append(Finding(str(path), "gate", f"{gate_label} evidence_type '{evidence_type}' not in enum {sorted(GATE_EVIDENCE_TYPE_ENUM)}"))
+
+        evidence_ref = row.get("evidence_ref", "").strip()
+        if status == "approved" and not evidence_ref:
+            findings.append(Finding(str(path), "gate", f"{gate_label} approved gate requires non-empty evidence_ref"))
+        if status in ("pending", "blocked") and "next_action" in headers and not row.get("next_action", "").strip():
+            findings.append(Finding(str(path), "gate", f"{gate_label} {status} gate requires next_action"))
+
+    return findings
+
+
+def load_user_gates(sdd_root: Path) -> list[UserGate]:
+    """Return all user gates declared in spec validation files."""
+    specs_dir = sdd_root / "specs"
+    if not specs_dir.is_dir():
+        return []
+    gates: list[UserGate] = []
+    for validation_path in sorted(specs_dir.glob("*/validation.md")):
+        gates.extend(parse_user_gates(validation_path))
+    return gates
 
 
 # ---------------------------------------------------------------------------- #
@@ -664,8 +910,11 @@ def _walk_artifacts(base: Path) -> list[Finding]:
         if p.name == "validation.md" and p.parent.resolve() in variant_spec_dirs:
             spec_dir_rel = _spec_dir_relative_path(p.parent.resolve())
             findings.extend(check_validation_variant(p, spec_dir_rel))
+            findings.extend(check_user_gates(p))
             continue
         findings.extend(check_artifact(p))
+        if p.name == "validation.md":
+            findings.extend(check_user_gates(p))
     return findings
 
 

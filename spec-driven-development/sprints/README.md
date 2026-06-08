@@ -27,3 +27,7 @@ Use `lessons-template.md` when starting a new PI:
 4. Append new lessons as tagged candidates, most-recent first.
 
 Run `/evolve` to curate open candidates into SHIP, DEFER, or DISCARD decisions. `/evolve` drafts framework changes with provenance; it does not auto-commit them.
+
+## Self-review summary
+
+Sprint close and retro artifacts should include a compact self-review summary or explicitly record `none`. Use the `session-self-review` skill at feature handoff, feature DONE, feature BLOCKED, OWNER-ATTENTION, sprint close, or friction-detected moments. Promote reusable findings through `lesson-capture` and `/evolve`; do not silently mutate agents, skills, prompts, templates, or constitution files from a self-review.

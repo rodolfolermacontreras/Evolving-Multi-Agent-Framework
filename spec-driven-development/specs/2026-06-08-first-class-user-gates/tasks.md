@@ -46,7 +46,7 @@ feature: 2026-06-08-first-class-user-gates
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: S
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/specs/2026-06-08-first-class-user-gates/spec.md`, `spec-driven-development/specs/2026-06-08-first-class-user-gates/validation.md`
 **Files Blocked**: `spec-driven-development/constitution/**`, `spec-driven-development/ledger/**`
 **Depends on**: NONE
@@ -76,7 +76,7 @@ Select-String -Path spec-driven-development/specs/2026-06-08-first-class-user-ga
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: M
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/cli/schema_lint.py`, `spec-driven-development/cli/test_schema_lint.py`
 **Files Blocked**: `spec-driven-development/cli/state_builder.py`, `spec-driven-development/ledger/**`, `spec-driven-development/constitution/**`
 **Depends on**: T-023-01
@@ -106,7 +106,7 @@ python -m pytest spec-driven-development/cli/test_schema_lint.py -k "gate" -v --
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: L
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/cli/schema_lint.py`, `spec-driven-development/cli/test_schema_lint.py`
 **Files Blocked**: `spec-driven-development/cli/state_builder.py`, `spec-driven-development/constitution/**`
 **Depends on**: T-023-02
@@ -138,7 +138,7 @@ python spec-driven-development/cli/schema_lint.py
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: S
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/cli/test_schema_lint.py`
 **Files Blocked**: `spec-driven-development/specs/**/gates.md`
 **Depends on**: T-023-03
@@ -167,7 +167,7 @@ python -m pytest spec-driven-development/cli/test_schema_lint.py -k "gate" -v --
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: L
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/cli/state_builder.py`, `spec-driven-development/cli/test_state_builder.py`, `spec-driven-development/exec/state.md`, `spec-driven-development/exec/state.html`, `spec-driven-development/exec/work-index.md`
 **Files Blocked**: `spec-driven-development/constitution/**`
 **Depends on**: T-023-04
@@ -198,7 +198,7 @@ python spec-driven-development/cli/state_builder.py
 **Type**: [S] sequential, HITL-sensitive
 **Execution**: [HITL] owner/Architect approval required if schema migration is needed
 **Size**: M
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/ledger/**` or existing ledger-event caller files, `spec-driven-development/docs/ADR/**` if needed
 **Files Blocked**: `spec-driven-development/constitution/**`
 **Depends on**: T-023-05
@@ -227,7 +227,7 @@ python -m pytest spec-driven-development/ledger spec-driven-development/cli -k "
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: S
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/specs/2026-06-08-first-class-user-gates/validation.md`, `spec-driven-development/specs/2026-06-08-first-class-user-gates/tasks.md`
 **Files Blocked**: NONE
 **Depends on**: T-023-06
@@ -258,7 +258,7 @@ python -m pytest spec-driven-development/ --tb=no -q
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous
 **Size**: S
-**Status**: pending
+**Status**: done
 **Files**: `spec-driven-development/specs/2026-06-08-first-class-user-gates/tasks.md`, future SDD-021/SDD-025 artifacts when their sessions run
 **Files Blocked**: NONE
 **Depends on**: T-023-07

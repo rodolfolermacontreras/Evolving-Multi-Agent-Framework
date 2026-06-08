@@ -34,8 +34,11 @@ PI progress: 4/6 commitments complete (67%)
 | host-gitignore-protection | REVIEW | done | Status: done but RETRO missing |
 | serial-clarify-spec-gate | REVIEW | done | Status: done but RETRO missing |
 | ado-github-bridge | REVIEW | done | Status: done but RETRO missing |
-| azure-decommission | IMPLEMENT | active | validation 9% (2/23) |
+| azure-decommission | IMPLEMENT | active | validation 17% (4/23) |
+| end-of-session-self-review | REVIEW | active | validation 83% (15/18) |
+| first-class-user-gates | REVIEW | active | validation 85% (17/20) |
 | model-upgrade-discipline | REVIEW | done | Status: done but RETRO missing |
+| stakeholder-pressure-defense | REVIEW | active | validation 84% (16/19) |
 | sprint-6-completion | DONE | done | validation 100%, RETRO present |
 | ui-lifecycle-variant | DONE | done | Status: done, RETRO present |
 
@@ -101,7 +104,7 @@ PI progress: 4/6 commitments complete (67%)
 - Generic workers: 5
 - Specialists: 1
 - Total agents: 12
-- Skills: 32 across 5 categories
+- Skills: 34 across 5 categories
 
 ## Recently Completed
 
@@ -119,6 +122,23 @@ PI progress: 4/6 commitments complete (67%)
 | 2026-05-16T20:35:56Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-05-16-retro-closure | Write RETRO.md for fleet-cli feature (SDD-003). | developer-general |
 
 ## Blockers
+
+### Pending User Gates
+
+| Feature | Gate | Blocks | Evidence Need | Next Action |
+|---------|------|--------|---------------|-------------|
+| 2026-06-08-first-class-user-gates | GATE-001 (`clarify-owner-answer`) | `clarify-close` | owner-quote, em-synthesis | Record owner answer evidence before CLARIFY close. |
+| 2026-06-08-first-class-user-gates | GATE-002 (`adr-acceptance`) | `adr-dependent-edit` | accepted-adr, owner-quote | Record accepted ADR or owner evidence before ADR-dependent edits. |
+| 2026-06-08-first-class-user-gates | GATE-003 (`constitution-edit`) | `constitution-edit` | accepted-adr, owner-quote | Record ADR plus owner evidence before constitution edits. |
+| 2026-06-08-first-class-user-gates | GATE-004 (`level-2-decision`) | `feature-close` | owner-quote, accepted-adr, commit-stamp | Record Level-2 approval evidence before the affected feature close. |
+| 2026-06-08-first-class-user-gates | GATE-005 (`external-write`) | `external-write` | owner-quote, issue-comment, cli-record | Record approval evidence before external writes. |
+| 2026-06-08-first-class-user-gates | GATE-006 (`model-upgrade`) | `model-upgrade` | owner-quote, accepted-adr, cli-record | Record model-upgrade approval before model assignment changes. |
+| 2026-06-08-first-class-user-gates | GATE-007 (`required-validation-exception`) | `feature-close` | owner-quote, commit-stamp | Keep REQUIRED items unchecked unless owner-approved exception evidence exists. |
+| 2026-06-08-first-class-user-gates | GATE-008 (`sprint-close`) | `sprint-close` | owner-quote, em-synthesis, commit-stamp | Record sprint close approval before claiming sprint CLOSED. |
+| 2026-06-08-first-class-user-gates | GATE-009 (`push-approval`) | `push` | owner-quote, commit-stamp | Record explicit owner approval before push. |
+| 2026-06-08-first-class-user-gates | GATE-010 (`pi-close`) | `pi-close` | owner-quote | Record owner approval before PI close. |
+
+_Generated executive surfaces are visibility only; they are not approval evidence._
 
 _none -- no dispatches without outcome older than 24h_
 

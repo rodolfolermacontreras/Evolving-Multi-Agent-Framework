@@ -1,7 +1,7 @@
 ---
 id: SDD-20260607SERIAL-clarification
 type: clarification
-status: draft
+status: done
 owner: principal-architect
 updated: 2026-06-07
 feature: 2026-06-07-serial-clarify-spec-gate
@@ -11,7 +11,7 @@ feature: 2026-06-07-serial-clarify-spec-gate
 
 - Date: 2026-06-07
 - Drafted by: Principal Architect (scaffold session, EM context)
-- Status: AWAITING OWNER ANSWERS -- to be answered in fresh Sprint 6 implementation session per Article VII
+- Status: CLOSED 2026-06-07
 - Spec ID: SDD-019
 - Gating: /spec finalization, ADR drafting, and any `constitution/` edit are
   ALL blocked until these answers are recorded and reviewed.
@@ -48,7 +48,7 @@ per-repo" but the BACKLOG entry says "Serial gate on CLARIFY/SPEC
 Recommended answer: (a) per-phase. Two independent locks (one for CLARIFY,
 one for SPEC), each holding exactly one feature.
 
-Answer: TBD
+Answer: (a) per-phase. Two independent locks (one for CLARIFY, one for SPEC), each holding exactly one feature. Per-phase preserves throughput (a feature finishing CLARIFY frees the slot before its SPEC starts).
 
 ### Q2: Scope of "CLARIFY" and "SPEC" phases
 
@@ -64,7 +64,7 @@ source of truth. Lock = (any clarification file with status != done) OR
 (any spec.md with status == draft). This makes the existing filesystem
 data contract (SDD-FDC-001) the lock substrate; no new state to maintain.
 
-Answer: TBD
+Answer: (a) frontmatter status. Lock holder derived from artifact frontmatter. Lock = (any clarification file with status != done) for CLARIFY lock, OR (any spec.md with status == draft) for SPEC lock. Reuses SDD-FDC-001 as the lock substrate; no new state to maintain.
 
 ---
 
@@ -86,7 +86,7 @@ Recommended answer: (c) hybrid. Hard refusal in automated dispatch (no
 human in the loop to override safely); advisory in slash commands (owner
 is present and can make the override call).
 
-Answer: TBD
+Answer: (c) hybrid. Hard refusal in `fleet.py` (automated dispatch exits non-zero naming the lock holder); advisory warning in interactive slash commands (owner is present and can override). Matches existing pattern: automated paths fail closed, interactive paths inform.
 
 ### Q4: Override path -- who, how, with what audit trail?
 
@@ -102,7 +102,7 @@ Recommended answer: (a) explicit force-release subcommand with mandatory
 `--reason`, ledger-audited. Avoids silent bypass and gives the dashboard
 something to show.
 
-Answer: TBD
+Answer: (a) `fleet.py lock force-release <feature> --reason "..."` -- writes a ledger row (event_type `lock_force_released`); subsequent dispatch proceeds. Explicit, audited, scriptable; avoids silent bypass.
 
 ---
 
@@ -126,7 +126,7 @@ is about *inter-feature* discipline at the repo level. Conflating them
 muddies both. New Article keeps each rule focused and independently
 amendable.
 
-Answer: TBD
+Answer: New Article XI -- "Cross-Feature Serial Gate at CLARIFY and SPEC". The scaffold's option (b) text said "Article VIII (new)" but Article VIII already exists (Constitution Immutability). The framework has 10 articles (I-X). A new article is Article XI. MINOR version bump 1.1.0 -> 1.2.0 on principles.md. ADR drafted in F-07, constitution edit in F-08 after owner approval.
 
 ### Q6: Batch semantics under multi-worker dispatch
 
@@ -143,7 +143,7 @@ Recommended answer: (c). The lock is about cross-feature contamination,
 not intra-feature parallelism. Within the lock holder, parallel workers
 are fine because they share the same feature context.
 
-Answer: TBD
+Answer: (c) unlimited workers within the lock holder; zero workers for any other feature in the same phase. The lock prevents cross-feature contamination, not intra-feature parallelism.
 
 ### Q7: Queue policy -- FIFO, priority-weighted, or manual?
 
@@ -156,7 +156,7 @@ ordering rule decides who gets the lock next when A releases?
 Recommended answer: (b) priority-weighted with FIFO as tiebreak. Aligns
 with how the PM already prioritizes the backlog; no new ordering concept.
 
-Answer: TBD
+Answer: (b) priority-weighted, FIFO tiebreak. Aligns with PM's existing RICE-based backlog ordering. No new ordering concept.
 
 ---
 
@@ -176,7 +176,7 @@ SPEC. What is the migration story?
 Recommended answer: (a) grandfather. Simplest, lowest-risk, and the
 serial gate's value is forward-looking, not retroactive.
 
-Answer: TBD
+Answer: (a) grandfather. Everything currently open at enforcement turn-on is grandfathered. Lock applies only to new CLARIFY/SPEC starts after the cutover commit.
 
 ### Q9: What is NOT serialized?
 
@@ -190,7 +190,7 @@ Confirm these stay parallelizable. Confirm any other carve-outs.
 Recommended answer: All of the above stay parallel. No carve-outs beyond
 this list.
 
-Answer: TBD
+Answer: Confirmed as listed. /triage, /plan, /tasks, /implement, /qa, /retro, and <3-file bug fixes all stay parallelizable. No additional carve-outs.
 
 ---
 

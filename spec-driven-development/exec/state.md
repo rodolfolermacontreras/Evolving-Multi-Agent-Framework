@@ -3,7 +3,7 @@
 Generated date: 2026-06-08
 Current PI: PI-4 (Alpha Release)
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
-Active focus: Close out 'principal-agent-hygiene' (currently in REVIEW)
+Active focus: Finish implementation of 'ui-lifecycle-variant'
 
 PI progress: 4/6 commitments complete (67%)
 
@@ -33,7 +33,8 @@ PI progress: 4/6 commitments complete (67%)
 | cross-feature-dedup | REVIEW | done | Status: done but RETRO missing |
 | host-gitignore-protection | REVIEW | done | Status: done but RETRO missing |
 | serial-clarify-spec-gate | REVIEW | done | Status: done but RETRO missing |
-| sprint-6-completion | REVIEW | active | validation 88% (14/16) |
+| sprint-6-completion | REVIEW | active | validation 94% (15/16) |
+| ui-lifecycle-variant | IMPLEMENT | active | validation 0% (0/25) |
 
 ## Sprint Plan
 
@@ -103,10 +104,16 @@ PI progress: 4/6 commitments complete (67%)
 
 | When | Feature | Task | Agent |
 |------|---------|------|-------|
+| 2026-06-08T15:06:06+00:00 | None | Dedup scan (all) | dedup-scanner |
+| 2026-06-08T15:06:06+00:00 | None | [SOFT] Cross-feature deduplication pass at triage and clarify | dedup-scanner |
+| 2026-06-08T15:06:06+00:00 | None | [SOFT] Map Microsoft self-improving skills paper against our skill mechanism | dedup-scanner |
+| 2026-06-08T15:06:06+00:00 | None | [SOFT] Model upgrades as Level-2 decisions with regression-test branch | dedup-scanner |
+| 2026-06-08T15:06:06+00:00 | None | [SOFT] Mandatory Friction Analysis section in Level-2 decision template | dedup-scanner |
+| 2026-06-08T15:06:06+00:00 | None | [ADVISORY] Feature Spec: Sprint 6 Completion Bundle (SDD-032) | dedup-scanner |
+| 2026-06-08T15:06:06+00:00 | None | [ADVISORY] Feature Spec: UI Lifecycle Variant (SDD-018) | dedup-scanner |
 | 2026-05-16T20:35:57Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-05-16-retro-closure | Write RETRO.md for qa-cli feature (SDD-004). | developer-general |
 | 2026-05-16T20:35:57Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-05-16-retro-closure | Write RETRO.md for retro-cli feature (SDD-005). | developer-general |
 | 2026-05-16T20:35:56Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-05-16-retro-closure | Write RETRO.md for fleet-cli feature (SDD-003). | developer-general |
-| 2026-05-16T19:15:41Z | spec-driven-development/specs/2026-05-16-fleet | Ship fleet.py v0.1 (SDD-003) | developer-general |
 
 ## Blockers
 

@@ -12,6 +12,7 @@ id: SDD-STATEDASH-spec
 type: spec
 owner: principal-architect
 updated: 2026-06-06
+ui-variant: true
 ---
 
 # Feature Spec -- State Dashboard v0.1

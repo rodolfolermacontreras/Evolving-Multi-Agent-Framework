@@ -51,3 +51,27 @@ This file mirrors the validation contract from `spec.md` so the generator can de
 - Auto-detection of current PI works via `(current)` marker in roadmap.md `## PI-N:` headers.
 - Stage detection uses validation.md checkbox ratio: 0-79% = IMPLEMENT, 80-99% = REVIEW, 100% + RETRO = DONE.
 - `state.md` is now machine-generated; human-curated color (Active focus, etc.) moves to the EM's chat response, not the file.
+
+## Delta Entries
+
+### Delta DE-01 -- static-to-live pivot
+
+- timestamp: 2026-06-08T00:00:00Z
+- author: principal-software-developer
+- rationale: SDD-018 proof case -- retroactively migrate the v0.2 static->live pivot into the variant's append-only delta schema. Article X variant ratified 2026-06-08 via SDD-018 CLARIFY closed (commit 754fda6).
+- item-type: retroactive-demo
+
+This entry retroactively records the v0.1 -> v0.2 pivot already documented
+in the `## v0.2 additions (2026-05-16, post user UX feedback)` subsection
+above and in this spec dir's `RETRO.md` "v0.2 Addendum". The pivot moved
+the dashboard from a one-shot static HTML generator to a live
+ThreadingHTTPServer with per-request rebuild, auto-refresh, kanban
+visual polish, and operator-friendly UX. All resulting REQUIRED items
+landed as additional `[x]` checkboxes in the v0.2 additions subsection;
+no pre-pivot v0.1 REQUIRED item was loosened or deleted.
+
+Canonical source for the pivot decision and resulting REQUIRED items:
+the `## v0.2 additions` subsection in this same file. This delta entry
+is the SDD-018 sanctioned representation of that historical event under
+the new variant; the original subsection remains as the historical
+narrative. No new behavior is implied or required.

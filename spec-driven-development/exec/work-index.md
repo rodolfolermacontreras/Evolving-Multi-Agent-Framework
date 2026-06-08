@@ -34,6 +34,7 @@ Current PI: **PI-4 (Alpha Release)**
 | 2026-05-13 | fleet-bridge-dashboard | CLARIFY | `specs/2026-05-13-fleet-bridge-dashboard/` |
 | 2026-05-16 | cloud-dashboard | CLARIFY | `specs/2026-05-16-cloud-dashboard/` |
 | 2026-05-16 | retro-closure | TASKS | `specs/2026-05-16-retro-closure/` |
+| 2026-06-09 | ui-lifecycle-variant | IMPLEMENT | `specs/2026-06-09-ui-lifecycle-variant/` |
 
 ## 3. QUEUED -- Backlog (next candidates for triage)
 

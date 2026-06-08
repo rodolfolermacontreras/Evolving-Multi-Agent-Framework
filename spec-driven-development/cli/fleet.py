@@ -21,6 +21,10 @@ _LEDGER_DIR = SDD_ROOT / "ledger"
 if str(_LEDGER_DIR) not in sys.path:
     sys.path.insert(0, str(_LEDGER_DIR))
 
+_CLI_DIR = SDD_ROOT / "cli"
+if str(_CLI_DIR) not in sys.path:
+    sys.path.insert(0, str(_CLI_DIR))
+
 from ledger_cli import (  # noqa: E402
     OUTCOMES,
     connect_initialized,
@@ -281,6 +285,160 @@ def cmd_status(args: argparse.Namespace) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------- #
+# Lock-state scanner (SDD-019) -- serial gate at CLARIFY and SPEC
+# --------------------------------------------------------------------------- #
+
+def _scan_lock_state(specs_root: Path) -> dict:
+    """Walk specs/ and derive lock holders from frontmatter.
+
+    Returns {"clarify_holder": feature_name | None,
+             "spec_holder": feature_name | None}.
+    """
+    from schema_lint import parse_frontmatter  # noqa: E402 -- sibling import
+
+    clarify_holder: str | None = None
+    spec_holder: str | None = None
+
+    if not specs_root.is_dir():
+        return {"clarify_holder": None, "spec_holder": None}
+
+    for spec_dir in sorted(specs_root.iterdir()):
+        if not spec_dir.is_dir():
+            continue
+        feature_name = spec_dir.name
+
+        # Check clarify lock: clarify.md or clarification-log.md status != done
+        if clarify_holder is None:
+            for clarify_name in ("clarify.md", "clarification-log.md"):
+                clarify_path = spec_dir / clarify_name
+                if clarify_path.is_file():
+                    text = clarify_path.read_text(encoding="utf-8")
+                    fm = parse_frontmatter(text)
+                    status = fm.get("status", "").strip("'\"" ).lower()
+                    if status and status != "done":
+                        clarify_holder = feature_name
+                    break  # only check first found
+
+        # Check spec lock: spec.md status == draft
+        if spec_holder is None:
+            spec_path = spec_dir / "spec.md"
+            if spec_path.is_file():
+                text = spec_path.read_text(encoding="utf-8")
+                fm = parse_frontmatter(text)
+                status = fm.get("status", "").strip("'\"" ).lower()
+                if status == "draft":
+                    spec_holder = feature_name
+
+    return {"clarify_holder": clarify_holder, "spec_holder": spec_holder}
+
+
+def _check_serial_gate(feature_dir: Path, phase: str | None = None) -> int:
+    """Pre-dispatch serial gate check.
+
+    Returns 0 if dispatch is allowed, 1 if blocked.
+    *phase* may be inferred from the feature's frontmatter or passed explicitly.
+    """
+    specs_root = SDD_ROOT / "specs"
+    if not specs_root.is_dir():
+        return 0
+
+    feature_name = feature_dir.resolve().name
+
+    # Infer phase from feature dir frontmatter if not given
+    if phase is None:
+        for clarify_name in ("clarify.md", "clarification-log.md"):
+            clarify_path = feature_dir / clarify_name
+            if clarify_path.is_file():
+                from schema_lint import parse_frontmatter
+                fm = parse_frontmatter(clarify_path.read_text(encoding="utf-8"))
+                status = fm.get("status", "").strip("'\"").lower()
+                if status and status != "done":
+                    phase = "clarify"
+                    break
+        if phase is None:
+            spec_path = feature_dir / "spec.md"
+            if spec_path.is_file():
+                from schema_lint import parse_frontmatter
+                fm = parse_frontmatter(spec_path.read_text(encoding="utf-8"))
+                status = fm.get("status", "").strip("'\"").lower()
+                if status == "draft":
+                    phase = "spec"
+
+    # Post-SPEC phases are not gated
+    if phase not in ("clarify", "spec"):
+        return 0
+
+    lock_state = _scan_lock_state(specs_root)
+
+    if phase == "clarify":
+        holder = lock_state["clarify_holder"]
+        if holder and holder != feature_name:
+            print(
+                f"ERROR: CLARIFY lock held by '{holder}'. "
+                f"Feature '{feature_name}' cannot enter CLARIFY concurrently. "
+                f"Use `fleet.py lock force-release {holder} --reason ...` to override.",
+                file=sys.stderr,
+            )
+            return 1
+    elif phase == "spec":
+        holder = lock_state["spec_holder"]
+        if holder and holder != feature_name:
+            print(
+                f"ERROR: SPEC lock held by '{holder}'. "
+                f"Feature '{feature_name}' cannot enter SPEC concurrently. "
+                f"Use `fleet.py lock force-release {holder} --reason ...` to override.",
+                file=sys.stderr,
+            )
+            return 1
+
+    return 0
+
+
+def cmd_lock_status(args: argparse.Namespace) -> int:
+    """Print current lock holders."""
+    specs_root = Path(args.specs_root) if getattr(args, "specs_root", None) else SDD_ROOT / "specs"
+    state = _scan_lock_state(specs_root)
+    clarify = state["clarify_holder"]
+    spec = state["spec_holder"]
+    print(f"CLARIFY lock: {clarify or '(free)'}")
+    print(f"SPEC lock:    {spec or '(free)'}")
+    return 0
+
+
+def cmd_lock_force_release(args: argparse.Namespace) -> int:
+    """Force-release a lock for a feature with a mandatory reason."""
+    db_path = Path(args.db) if args.db else DEFAULT_DB
+    feature = args.feature
+    reason = args.reason
+
+    if not reason or not reason.strip():
+        print("ERROR: --reason is mandatory for force-release.", file=sys.stderr)
+        return 1
+
+    # Write ledger row
+    try:
+        values = {
+            "dispatched_at": utc_now(),
+            "pi": "N/A",
+            "sprint": None,
+            "feature_dir": feature,
+            "task_id": "LOCK-FORCE-RELEASE",
+            "task_title": f"Force-release lock for {feature}",
+            "agent_id": "human",
+            "agent_role": "operator",
+            "outcome": "success",
+            "outcome_at": utc_now(),
+            "notes": f"force-release reason: {reason}",
+        }
+        record_dispatch(db_path, values)
+    except Exception as exc:
+        print(f"WARNING: Could not write ledger row: {exc}", file=sys.stderr)
+
+    print(f"Lock force-released for '{feature}'. Reason: {reason}")
+    return 0
+
+
 # CLI parser ---------------------------------------------------------------- #
 
 
@@ -317,6 +475,20 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     p_stat.add_argument("--pi", default=None, help="Filter by program increment.")
     p_stat.add_argument("--db", default=None, help="Path to fleet.db.")
 
+    # lock (SDD-019)
+    p_lock = sub.add_parser("lock", help="Serial gate lock management (SDD-019).")
+    lock_sub = p_lock.add_subparsers(dest="lock_command", required=True)
+
+    lock_sub.add_parser("status", help="Show current CLARIFY/SPEC lock holders.")
+
+    p_force = lock_sub.add_parser(
+        "force-release",
+        help="Force-release a lock with mandatory --reason.",
+    )
+    p_force.add_argument("feature", help="Feature name to release lock for.")
+    p_force.add_argument("--reason", required=True, help="Mandatory reason for force-release.")
+    p_force.add_argument("--db", default=None, help="Path to fleet.db.")
+
     return parser.parse_args(argv)
 
 
@@ -328,6 +500,16 @@ def main(argv: list[str] | None = None) -> int:
         "mark": cmd_mark,
         "status": cmd_status,
     }
+    if args.command == "lock":
+        lock_handlers = {
+            "status": cmd_lock_status,
+            "force-release": cmd_lock_force_release,
+        }
+        try:
+            return lock_handlers[args.lock_command](args)
+        except FleetError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
     try:
         return handlers[args.command](args)
     except FleetError as exc:

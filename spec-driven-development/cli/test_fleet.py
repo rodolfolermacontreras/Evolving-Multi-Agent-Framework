@@ -220,7 +220,7 @@ class TestFleetCLI(unittest.TestCase):
         """AC9: only stdlib + local ledger modules imported at runtime."""
         tree = ast.parse(FLEET_PY.read_text(encoding="utf-8"))
         stdlib = set(sys.stdlib_module_names)
-        local_ok = {"ledger_cli", "init_ledger", "fleet"}
+        local_ok = {"ledger_cli", "init_ledger", "fleet", "schema_lint"}
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
                 for alias in node.names:
@@ -237,6 +237,160 @@ class TestFleetCLI(unittest.TestCase):
                     top in stdlib or top in local_ok,
                     f"non-stdlib/non-local import: {node.module}",
                 )
+
+
+# --------------------------------------------------------------------------- #
+# SDD-019: Serial Gate Tests
+# --------------------------------------------------------------------------- #
+
+
+def make_spec_dir(parent: Path, name: str, clarify_status: str | None = None,
+                  spec_status: str | None = None) -> Path:
+    """Create a spec dir with optional clarify.md and spec.md frontmatter."""
+    d = parent / name
+    d.mkdir(parents=True, exist_ok=True)
+    if clarify_status is not None:
+        (d / "clarify.md").write_text(
+            f"---\nid: '{name}-clarify'\ntype: clarification\n"
+            f"status: {clarify_status}\nowner: pm\nupdated: 2026-06-07\n---\n",
+            encoding="utf-8",
+        )
+    if spec_status is not None:
+        (d / "spec.md").write_text(
+            f"---\nid: '{name}-spec'\ntype: spec\n"
+            f"status: {spec_status}\nowner: arch\nupdated: 2026-06-07\n---\n"
+            f"# {name}\n",
+            encoding="utf-8",
+        )
+    return d
+
+
+class TestScanLockState(unittest.TestCase):
+    """SDD-019 R3: lock state derived from frontmatter."""
+
+    def test_scan_lock_state_clarify(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            specs = Path(tmp) / "specs"
+            specs.mkdir()
+            make_spec_dir(specs, "feat-a", clarify_status="draft", spec_status="done")
+            state = fleet._scan_lock_state(specs)
+            self.assertEqual(state["clarify_holder"], "feat-a")
+
+    def test_scan_lock_state_spec(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            specs = Path(tmp) / "specs"
+            specs.mkdir()
+            make_spec_dir(specs, "feat-b", clarify_status="done", spec_status="draft")
+            state = fleet._scan_lock_state(specs)
+            self.assertEqual(state["spec_holder"], "feat-b")
+            self.assertIsNone(state["clarify_holder"])
+
+    def test_scan_lock_state_none(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            specs = Path(tmp) / "specs"
+            specs.mkdir()
+            make_spec_dir(specs, "feat-c", clarify_status="done", spec_status="done")
+            state = fleet._scan_lock_state(specs)
+            self.assertIsNone(state["clarify_holder"])
+            self.assertIsNone(state["spec_holder"])
+
+    def test_scan_lock_state_both(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            specs = Path(tmp) / "specs"
+            specs.mkdir()
+            make_spec_dir(specs, "feat-x", clarify_status="active")
+            make_spec_dir(specs, "feat-y", spec_status="draft")
+            state = fleet._scan_lock_state(specs)
+            self.assertEqual(state["clarify_holder"], "feat-x")
+            self.assertEqual(state["spec_holder"], "feat-y")
+
+
+class TestLockStatusSubcommand(unittest.TestCase):
+    """SDD-019 R1: lock status subcommand runs cleanly."""
+
+    def test_lock_status_subcommand(self) -> None:
+        buf = StringIO()
+        with redirect_stdout(buf):
+            rc = fleet.main(["lock", "status"])
+        self.assertEqual(rc, 0)
+        out = buf.getvalue()
+        self.assertIn("CLARIFY lock:", out)
+        self.assertIn("SPEC lock:", out)
+
+
+class TestLockForceRelease(unittest.TestCase):
+    """SDD-019 R4: force-release writes ledger row."""
+
+    def test_lock_force_release(self) -> None:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+            db = Path(tmp) / "fleet.db"
+            with sqlite3.connect(db) as conn:
+                conn.executescript(SCHEMA.read_text(encoding="utf-8"))
+            buf = StringIO()
+            with redirect_stdout(buf):
+                rc = fleet.main([
+                    "lock", "force-release", "test-feature",
+                    "--reason", "testing force release",
+                    "--db", str(db),
+                ])
+            self.assertEqual(rc, 0)
+            self.assertIn("force-released", buf.getvalue())
+            with sqlite3.connect(db) as conn:
+                rows = conn.execute("SELECT * FROM dispatches WHERE task_id='LOCK-FORCE-RELEASE'").fetchall()
+            self.assertEqual(len(rows), 1)
+
+
+class TestSerialGateBlocks(unittest.TestCase):
+    """SDD-019 R1/R6: gate blocks second feature in same phase."""
+
+    def test_gate_blocks_second_clarify(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            specs = Path(tmp) / "specs"
+            specs.mkdir()
+            make_spec_dir(specs, "feat-a", clarify_status="active")
+            feat_b = make_spec_dir(specs, "feat-b", clarify_status="active")
+
+            # Monkey-patch SDD_ROOT for this test
+            original = fleet.SDD_ROOT
+            try:
+                fleet.SDD_ROOT = Path(tmp)
+                buf = StringIO()
+                with redirect_stderr(buf):
+                    rc = fleet._check_serial_gate(feat_b, phase="clarify")
+                self.assertEqual(rc, 1)
+                self.assertIn("feat-a", buf.getvalue())
+            finally:
+                fleet.SDD_ROOT = original
+
+    def test_gate_allows_post_spec(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            specs = Path(tmp) / "specs"
+            specs.mkdir()
+            make_spec_dir(specs, "feat-a", clarify_status="active")
+            feat_b = make_spec_dir(specs, "feat-b", clarify_status="done", spec_status="active")
+
+            original = fleet.SDD_ROOT
+            try:
+                fleet.SDD_ROOT = Path(tmp)
+                rc = fleet._check_serial_gate(feat_b, phase="implement")
+                self.assertEqual(rc, 0)
+            finally:
+                fleet.SDD_ROOT = original
+
+    def test_gate_allows_same_feature(self) -> None:
+        """R6: intra-feature parallel workers proceed."""
+        with tempfile.TemporaryDirectory() as tmp:
+            specs = Path(tmp) / "specs"
+            specs.mkdir()
+            feat_a = make_spec_dir(specs, "feat-a", clarify_status="active")
+
+            original = fleet.SDD_ROOT
+            try:
+                fleet.SDD_ROOT = Path(tmp)
+                rc = fleet._check_serial_gate(feat_a, phase="clarify")
+                self.assertEqual(rc, 0)
+            finally:
+                fleet.SDD_ROOT = original
 
 
 if __name__ == "__main__":

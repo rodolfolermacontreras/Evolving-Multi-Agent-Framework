@@ -3,7 +3,7 @@
 Generated date: 2026-06-08
 Current PI: PI-4 (Alpha Release)
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
-Active focus: Close out 'principal-agent-hygiene' (currently in REVIEW)
+Active focus: Finish implementation of 'azure-decommission'
 
 PI progress: 4/6 commitments complete (67%)
 
@@ -33,6 +33,7 @@ PI progress: 4/6 commitments complete (67%)
 | cross-feature-dedup | REVIEW | done | Status: done but RETRO missing |
 | host-gitignore-protection | REVIEW | done | Status: done but RETRO missing |
 | serial-clarify-spec-gate | REVIEW | done | Status: done but RETRO missing |
+| azure-decommission | IMPLEMENT | active | validation 4% (1/23) |
 | sprint-6-completion | DONE | done | validation 100%, RETRO present |
 | ui-lifecycle-variant | DONE | done | Status: done, RETRO present |
 

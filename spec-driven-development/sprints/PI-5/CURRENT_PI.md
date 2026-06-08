@@ -281,7 +281,7 @@ branch into amendment ceremony.
 **Status**: **CLOSED 2026-06-08** (F-11 final pass; Article XII ratified mid-flight by owner)
 **Closed**: 2026-06-08
 Owner ratification (Article XII): Rodolfo Lerma 2026-06-08 commit `55b05cb` (mid-flight Level-2 ratification before sprint close -- refinement on the Option 3 hybrid model: the controlling ADR is ratified first so the sprint close itself happens against an already-binding constitution).
-Owner pre-push ratification: PENDING -- to be collected by Executive Manager before push.
+Owner ratification: Rodolfo Lerma 2026-06-08 via Executive Manager (Level-2; retroactive ratification -- push preceded stamp per Sprint 6 Option 3 hybrid pattern). Article XII (commit `55b05cb`) and Sprint 7 close commit chain (ending `a802ef3`) both ratified.
 **Spec dir**: `specs/2026-06-09-ui-lifecycle-variant/`
 **Spec**: APPROVED 2026-06-08 (F-10 pass 2); validation contract LOCKED 16 REQUIRED + 3 OPTIONAL + 4 manual + 2 UX -- 16/16 R + 3/3 O + 4/4 manual + 2/2 UX all satisfied (M-1/M-2/U-2 owner-async, all satisfied implicitly by Article XII landing commit `55b05cb`).
 **Sprint kickoff**: [`../../feature-prompts/SPRINT-07-KICKOFF.prompt.md`](../../feature-prompts/SPRINT-07-KICKOFF.prompt.md)

@@ -3,7 +3,7 @@
 Generated date: 2026-06-08
 Current PI: PI-4 (Alpha Release)
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
-Active focus: Finish implementation of 'ui-lifecycle-variant'
+Active focus: Close out 'principal-agent-hygiene' (currently in REVIEW)
 
 PI progress: 4/6 commitments complete (67%)
 
@@ -34,7 +34,7 @@ PI progress: 4/6 commitments complete (67%)
 | host-gitignore-protection | REVIEW | done | Status: done but RETRO missing |
 | serial-clarify-spec-gate | REVIEW | done | Status: done but RETRO missing |
 | sprint-6-completion | REVIEW | active | validation 94% (15/16) |
-| ui-lifecycle-variant | IMPLEMENT | active | validation 0% (0/25) |
+| ui-lifecycle-variant | DONE | done | Status: done, RETRO present |
 
 ## Sprint Plan
 

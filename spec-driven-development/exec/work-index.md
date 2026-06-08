@@ -26,6 +26,7 @@ Current PI: **PI-4 (Alpha Release)**
 | 2026-05-16 | state-dashboard | `specs/2026-05-16-state-dashboard/` |
 | 2026-05-26 | day-to-day-brownfield-bootstrap | `specs/2026-05-26-day-to-day-brownfield-bootstrap/` |
 | 2026-05-26 | live-ui-v2 | `specs/2026-05-26-live-ui-v2/` |
+| 2026-06-09 | ui-lifecycle-variant | `specs/2026-06-09-ui-lifecycle-variant/` |
 
 ## 2. IN-FLIGHT -- Currently being worked on (coordinate before touching)
 
@@ -34,7 +35,6 @@ Current PI: **PI-4 (Alpha Release)**
 | 2026-05-13 | fleet-bridge-dashboard | CLARIFY | `specs/2026-05-13-fleet-bridge-dashboard/` |
 | 2026-05-16 | cloud-dashboard | CLARIFY | `specs/2026-05-16-cloud-dashboard/` |
 | 2026-05-16 | retro-closure | TASKS | `specs/2026-05-16-retro-closure/` |
-| 2026-06-09 | ui-lifecycle-variant | IMPLEMENT | `specs/2026-06-09-ui-lifecycle-variant/` |
 
 ## 3. QUEUED -- Backlog (next candidates for triage)
 

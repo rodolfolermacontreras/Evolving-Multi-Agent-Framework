@@ -1,7 +1,7 @@
 ---
 id: SDD-20260609UIVARIANT-spec
 type: spec
-status: active
+status: done
 owner: principal-architect
 updated: 2026-06-08
 feature: 2026-06-09-ui-lifecycle-variant

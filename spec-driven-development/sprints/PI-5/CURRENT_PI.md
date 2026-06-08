@@ -277,11 +277,35 @@ or requires a constitutional amendment; only if the latter does the work
 branch into amendment ceremony.
 **Status**: PLANNED. Kickoff prompt to be authored at PI-5 Sprint 1 close.
 
-### Sprint 3 -- UI Lifecycle Variant (planned)
+### Sprint 3 -- UI Lifecycle Variant (CLOSED 2026-06-08)
 **Items**: SDD-018.
 **Goal**: Define and ship the UI lifecycle variant (Article X relaxation
 through delta entries).
-**Status**: PLANNED.
+**Status**: **CLOSED 2026-06-08** (F-11 final pass). SDD-018 done, ADR-014
+drafted (status `proposed`) for owner Level-2 Article XII landing on
+top. State-dashboard retroactive-demo migration committed cleanly
+(append-only, lock-surface protection 7 honored). Sprint 3 retro:
+single-worker sequential execution proved correct call given small
+file surface; the two-pass design + implementation split (F-10 pass 1
++ pass 2 + F-11) kept the constitutional change reviewable and the
+ADR drafting separable from the runtime change. The CLARIFY round
+surfaced one durable framework convention (`status: blocked` as the
+CLARIFY-phase carrier) that landed in `docs/UI-LIFECYCLE-VARIANT.md`.
+Tests: 273 -> 305 (+32 net, all variant); schema_lint exit 0;
+state_builder exit 0. Article XI live contention test PASSED at F-10
+pass 1 with this spec dir holding the CLARIFY lock per the rules
+ratified 2026-06-07. Commit chain:
+`df3bffb` (F-10 pass 1 scaffold + CLARIFY questions) ->
+`754fda6` (F-10 CLARIFY closed) ->
+`d81ac3d` (F-10 pass 2 spec/validation/plan/tasks + ADR-014 drafted) ->
+`7993fac` (T-018-02 schema_lint variant dispatch) ->
+`3f6f520` (T-018-03 template stubs) ->
+`b46a32f` (T-018-04 state-dashboard migration) ->
+`5233c29` (T-018-06 docs page) ->
+close commit (T-018-01 + T-018-07 verification + validation flip).
+Article XII text landing in `constitution/principles.md` is the
+penultimate sprint-close commit by the owner; sprint push is gated
+on owner approval per Sprint 7 close criterion #8.
 
 ### Sprint 4 -- ADO/GitHub Bridge + Model Upgrade Discipline (planned)
 **Items**: SDD-022, SDD-015.

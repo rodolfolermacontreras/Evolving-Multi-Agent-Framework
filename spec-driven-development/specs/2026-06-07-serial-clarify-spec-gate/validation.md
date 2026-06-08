@@ -10,9 +10,10 @@ feature: 2026-06-07-serial-clarify-spec-gate
 # Validation Contract: Serial Gate on CLARIFY/SPEC (SDD-019)
 
 - Spec ID: SDD-019
-- Status: ACTIVE -- contract populated at /spec finalization 2026-06-07. Locks at /tasks.
-- Rule (when locked): zero unchecked REQUIRED items before implementation is
-  considered complete.
+- Status: LOCKED at /tasks 2026-06-07
+- Rule: zero unchecked REQUIRED items before implementation is
+  considered complete. REQUIRED items cannot be loosened after lock
+  without an explicit decision recorded here (Article X).
 
 ---
 
@@ -40,6 +41,6 @@ feature: 2026-06-07-serial-clarify-spec-gate
 - Contract populated at /spec finalization 2026-06-07. All 9 CLARIFY
   answers recorded; required items trace to specific questions.
 - ADR (separate file) must accompany this validation contract before any
-  `constitution/` edit. ADR drafting happens in F-07.
-- Lock the contract at /tasks; do not loosen REQUIRED items after lock
-  without an explicit decision recorded here.
+  `constitution/` edit. ADR-013 committed in F-07.
+- Contract LOCKED at /tasks 2026-06-07. Do not loosen REQUIRED items after
+  lock without an explicit decision recorded here.

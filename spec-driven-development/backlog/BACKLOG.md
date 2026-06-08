@@ -24,8 +24,8 @@ Prioritized backlog with RICE scoring. Managed by Principal Product Manager.
 | SDD-016 | `.github/` symlink portability trick -- host-integration-symlink skill + bootstrap.py extension | P1 | H | H | H | M | -- | PI-5 Sprint 1 | **DONE** 2026-06-06 commit `30482d5` (host-link subcommand + tests; 200 -> 213) |
 | SDD-017 | Hire `dev-env-manager` worker -- worktree, symlink, branch hygiene, env bootstrap | P1 | M | H | H | S | -- | PI-5 Sprint 1 | **DONE** 2026-06-06 commit `30482d5` (dev-env-manager-general rostered with host-integration-symlink skill) |
 | SDD-018 | UI development lifecycle variant -- relaxed Article X with validation.md delta entries | P1 | M | H | M | M | -- | PI-5 Sprint 3 | Allocated to PI-5 Sprint 3 (= overall Sprint 7) 2026-06-06; CLARIFY (ADR vs separate command) gates SPEC |
-| SDD-019 | Serial gate on CLARIFY/SPEC (repo-wide) -- constitutional amendment; fleet.py enforcement | P1 | H | H | M | M | -- | PI-5 Sprint 2 | **DONE-WITH-DEFERRED** 2026-06-08 commits `1c0454b` (plan), `524872b` (implementation). R7 (queue) + R8 (grandfather) carried to SDD-032 (Sprint 6 completion bundle, Sprint 7 F-09). Article XI ratified in principles.md 1.2.0; ADR-013 committed. |
-| SDD-020 | Cross-feature deduplication pass at /triage and /clarify -- pre-spec overlap scan | P1 | M | H | H | S | -- | PI-5 Sprint 2 | **DONE-WITH-DEFERRED** 2026-06-08 commits `7d9a206` (plan), `8eb564d` (implementation). R6 (log writers) + R8 (prompt hooks) carried to SDD-032. Core cli/dedup.py + 3-layer heuristic shipped; feature is INVOKABLE-BUT-NOT-WIRED until R6/R8 ship in Sprint 7 F-09. |
+| SDD-019 | Serial gate on CLARIFY/SPEC (repo-wide) -- constitutional amendment; fleet.py enforcement | P1 | H | H | M | M | -- | PI-5 Sprint 2 | **DONE** 2026-06-09 (Sprint 7 F-09 completion). Core: commits `1c0454b` (plan), `524872b` (implementation). R7 (priority-weighted FIFO queue) + R8 (cutover-commit grandfather) closed in Sprint 7 F-09 via SDD-032 commit `557b672`. Article XI ratified in principles.md 1.2.0; ADR-013 committed. |
+| SDD-020 | Cross-feature deduplication pass at /triage and /clarify -- pre-spec overlap scan | P1 | M | H | H | S | -- | PI-5 Sprint 2 | **DONE** 2026-06-09 (Sprint 7 F-09 completion). Core: commits `7d9a206` (plan), `8eb564d` (implementation). R6 (triple-destination log writers) closed via SDD-032 commit `8025a50`; R8 (/triage + /clarify prompt hooks) closed via SDD-032 commit `a6a25e4`. cli/dedup.py + 3-layer heuristic + log writers + prompt-hook wiring fully shipped. |
 
 Source: Scott Epperly meeting 2026-06-02 transcript; full triage report at `sprints/PI-4/triage-scott-feedback-2026-06-03.md`.
 
@@ -33,7 +33,7 @@ Source: Scott Epperly meeting 2026-06-02 transcript; full triage report at `spri
 
 | ID | Title | Priority | R | I | C | E | RICE | Sprint | Status | Notes |
 |----|-------|----------|---|---|---|---|------|--------|--------|-------|
-| SDD-027 | Host `.gitignore` protection -- blocks first real-host dispatch (bootstrap host-link must guarantee host `.gitignore` already ignores `.github/` or the install must add it) | P1 | H | H | H | S | -- | PI-5 Sprint 2 | **DONE-WITH-DEFERRED** 2026-06-08 commits `d922a5b` (plan), `302bee5` (implementation). R12 (HOST-INTEGRATION.md docs) carried to SDD-033 (P3, unscheduled). Core protection layer + all 4 modes shipped. |
+| SDD-027 | Host `.gitignore` protection -- blocks first real-host dispatch (bootstrap host-link must guarantee host `.gitignore` already ignores `.github/` or the install must add it) | P1 | H | H | H | S | -- | PI-5 Sprint 2 | **DONE** 2026-06-09 (Sprint 7 F-09 pull-in). Core: commits `d922a5b` (plan), `302bee5` (implementation). R12 (HOST-INTEGRATION.md docs) closed via SDD-033 in SDD-032 close commit. Core protection layer + all 4 modes shipped. |
 
 Source: Sprint 5 Architect audit (YELLOW verdict, 2026-06-07); none blocking sprint close.
 
@@ -41,7 +41,7 @@ Source: Sprint 5 Architect audit (YELLOW verdict, 2026-06-07); none blocking spr
 
 | ID | Title | Priority | R | I | C | E | RICE | Sprint | Status | Notes |
 |----|-------|----------|---|---|---|---|------|--------|--------|-------|
-| SDD-032 | Sprint 6 completion bundle: SDD-019 R7/R8 + SDD-020 R6/R8 | P1 | H | H | H | S | -- | PI-5 Sprint 3 | Allocated to PI-5 Sprint 3 as F-09 (first feature; gates SDD-018). Spec dir scaffolded under `specs/2026-06-09-sprint-6-completion/`. Implementation only -- no CLARIFY round needed. | Completes 4 LOCKED REQUIRED validation items deferred from Sprint 6 close (commit `4a6941c`, 2026-06-08). Pre-approved by owner 2026-06-08 as Option 3 hybrid ratification. CLARIFY + spec answers already final in parent spec dirs (`specs/2026-06-07-serial-clarify-spec-gate/`, `specs/2026-06-07-cross-feature-dedup/`); SDD-032 spec dir reuses them and adds only the implementation tasks + validation lift. Without SDD-020 R6 (log writers) and R8 (prompt hooks), SDD-020 ships dead -- /triage and /clarify never invoke the dedup scanner. Without SDD-019 R7 (queue) and R8 (grandfather), Article XI behavior is incomplete. |
+| SDD-032 | Sprint 6 completion bundle: SDD-019 R7/R8 + SDD-020 R6/R8 | P1 | H | H | H | S | -- | PI-5 Sprint 3 | **DONE** 2026-06-09 (Sprint 7 F-09 close). Spec dir `specs/2026-06-09-sprint-6-completion/`. Commit chain: `557b672` (T-032-01/02 fleet.py R7/R8) -> `8025a50` (T-032-03 dedup.py R6) -> `a6a25e4` (T-032-04/05 prompt hooks R8) -> close commit. 7/7 REQUIRED + 2/2 OPTIONAL checked; no deferral. 259 -> 273 tests; schema_lint clean. | All 4 LOCKED REQUIRED items from Sprint 6 close commit `4a6941c` closed in single implementation pass per Option 3 hybrid ratification. Both gates (Article XI queue/grandfather + dedup log writers + prompt hooks) now fully operational ahead of SDD-018 (Sprint 7 F-10). |
 
 Source: Owner ratification 2026-06-08 via Executive Manager routing (Option 3 hybrid; Level-2 decision; absorbs 5 deferred REQUIRED items from Sprint 6 close commit `4a6941c`).
 
@@ -102,7 +102,7 @@ Source: Sprint 5 Architect audit (YELLOW verdict, 2026-06-07); none blocking spr
 
 | ID | Title | Priority | R | I | C | E | RICE | Sprint | Status | Notes |
 |----|-------|----------|---|---|---|---|------|--------|--------|-------|
-| SDD-033 | SDD-027 R12: HOST-INTEGRATION.md docs refresh for host `.gitignore` protection | P3 | L | L | H | XS | -- | Unscheduled | Unscheduled; pull into next sprint with capacity. | Doc-only deferral from Sprint 6. Documents the `--gitignore-mode` flag, manifest-driven validation, and four mode behaviors (strict/prompt/warn/skip) for host operators. Cheap; can ship as housekeeping in any future sprint. |
+| SDD-033 | SDD-027 R12: HOST-INTEGRATION.md docs refresh for host `.gitignore` protection | P3 | L | L | H | XS | -- | PI-5 Sprint 3 | **DONE** 2026-06-09 (Sprint 7 F-09 pull-in). Closed in SDD-032 close commit. Documented `--gitignore-mode` flag, four modes (strict/prompt/warn/skip), `--no-gitignore-check`, manifest file (`cli/host_gitignore_manifest.json`), and full remediation procedure. | Doc-only deferral from Sprint 6; pulled into F-09 with remaining capacity per task brief option. |
 
 Source: Owner ratification 2026-06-08 via Executive Manager routing (Option 3 hybrid; Level-2 decision; doc-only deferral from Sprint 6 close commit `4a6941c`).
 

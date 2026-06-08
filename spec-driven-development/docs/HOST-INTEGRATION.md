@@ -172,6 +172,94 @@ this host. Wait for the v2 iteration or open an issue.
 
 ---
 
+## `.gitignore` Conflict Protection (SDD-027)
+
+`host-link` runs a pre-flight check against the host's root `.gitignore`
+to prevent two failure modes that would surface only AFTER the link is
+live:
+
+- **Framework runtime files leaking into the host's git history.** Files
+  like `spec-driven-development/ledger/fleet.db`, `exec/state.md`, and
+  `__pycache__/` are byproducts of framework execution; they must not be
+  tracked by the host.
+- **Framework agent / skill / prompt files being silently ignored.** The
+  host's `.github/agents/`, `.github/skills/`, `.github/prompts/`,
+  `.github/instructions/`, and `copilot-instructions.md` MUST be tracked
+  or Copilot Chat will silently lose them.
+
+The check is driven by a manifest at
+`spec-driven-development/cli/host_gitignore_manifest.json` containing two
+arrays:
+
+- `must_be_ignored` -- paths that the host's `.gitignore` MUST cover
+  (exact match or glob).
+- `must_be_tracked` -- paths that the host's `.gitignore` MUST NOT
+  block.
+
+### `--gitignore-mode` flag
+
+`host-link --gitignore-mode <mode>` controls how the check responds.
+Default mode is `prompt`.
+
+| Mode | Behavior on conflict |
+|------|---------------------|
+| `strict` | Abort immediately with a non-zero exit code. Use in CI / dev-env-manager automation. |
+| `prompt` (default) | Print findings, ask the operator to acknowledge before proceeding. Use in interactive installs. |
+| `warn` | Print findings, continue anyway. Use when you have already manually validated the host. |
+| `skip` | Skip the check entirely. Equivalent to `--no-gitignore-check`. |
+
+### `--no-gitignore-check` opt-out
+
+For environments where the protection check is provably redundant (e.g. a
+fresh host repo with no `.gitignore` yet, or a vendored offline install),
+pass `--no-gitignore-check`. The flag disables the layer entirely; it
+does NOT silently downgrade to `warn`.
+
+### Remediation when the check fires
+
+If `host-link` reports a `must_be_ignored` entry the host is failing to
+ignore, edit the host's root `.gitignore` to add the missing pattern:
+
+```gitignore
+# Evolving Multi-Agent Framework runtime artifacts (SDD-027)
+spec-driven-development/ledger/fleet.db
+spec-driven-development/exec/state.html
+spec-driven-development/exec/state.md
+spec-driven-development/exec/work-index.md
+spec-driven-development/sessions/SESSION-MEMORY.md
+__pycache__/
+*.pyc
+.pytest_cache/
+```
+
+If the check reports a `must_be_tracked` entry the host's `.gitignore` is
+covering, REMOVE the offending pattern (or carve a `!` exception):
+
+```gitignore
+# Host ignores everything under .github except the framework's stuff
+.github/*
+!.github/agents/
+!.github/skills/
+!.github/prompts/
+!.github/instructions/
+!.github/copilot-instructions.md
+```
+
+Re-run `host-link` (still in dry-run) and confirm the check passes
+before adding `--apply`.
+
+### Choosing the right mode
+
+| Situation | Recommended mode |
+|-----------|------------------|
+| First-time interactive install | `prompt` (default) |
+| Repeat install / dev-env-manager bootstrap | `strict` |
+| Vendored offline install where no `.gitignore` exists | `--no-gitignore-check` |
+| You have manually validated the host but cannot edit its `.gitignore` | `warn` |
+| Smoke test only; will not commit to host yet | `skip` |
+
+---
+
 ## Rollback
 
 ### To remove the link entirely

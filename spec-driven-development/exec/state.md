@@ -33,6 +33,7 @@ PI progress: 4/6 commitments complete (67%)
 | cross-feature-dedup | REVIEW | done | Status: done but RETRO missing |
 | host-gitignore-protection | REVIEW | done | Status: done but RETRO missing |
 | serial-clarify-spec-gate | REVIEW | done | Status: done but RETRO missing |
+| sprint-6-completion | REVIEW | active | validation 88% (14/16) |
 
 ## Sprint Plan
 

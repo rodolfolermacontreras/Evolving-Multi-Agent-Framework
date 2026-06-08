@@ -30,7 +30,7 @@ feature: 2026-06-07-host-gitignore-protection
 - [x] R9. Cross-platform: Windows junction + Linux symlink paths tested (mocked where needed). Test: TestWindowsJunctionDocumentedLimitation (SDD-028), TestStaleSymlinkDistinction (SDD-029).
 - [x] R10. Full test suite passes (>= 213 baseline, no regression). 258 passed.
 - [x] R11. `schema_lint` stays clean. Verified exit 0.
-- [ ] R12. `docs/HOST-INTEGRATION.md` documents check, flags, modes, remediation. DEFERRED: doc update carry to Sprint 7.
+- [x] R12. `docs/HOST-INTEGRATION.md` documents check, flags, modes, remediation. CLOSED 2026-06-09 by SDD-033 (Sprint 7 F-09 pull-in).
 
 ## Optional / Best-Effort Items
 

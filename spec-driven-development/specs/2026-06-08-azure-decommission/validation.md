@@ -88,7 +88,7 @@ feature: 2026-06-08-azure-decommission
   returns not-found. Verification screenshot committed.
   Task: T-035-05 (sub-step HITL). **Gated on R10 and R4.**
 
-- [ ] **R4 -- GitHub Actions workflows scanned and repaired.**
+- [x] **R4 -- GitHub Actions workflows scanned and repaired.**
   T-035-03 enumerates every workflow file under `.github/workflows/`
   that consumes the OIDC trust or references the Azure deployment
   (search for keywords `azure/login`, `azure-credentials`,
@@ -101,6 +101,16 @@ feature: 2026-06-08-azure-decommission
   contains Azure-deployment dependencies. Tasks: T-035-03, T-035-04.
   **Must complete before R3 (so OIDC removal does not silently break
   active pipelines).**
+
+  Evidence 2026-06-08: T-035-03 scan found one workflow,
+  `.github/workflows/deploy-dashboard.yml`, and it was entirely Azure
+  deployment-specific (`azure/login`, ACR build, `az containerapp
+  update`, `rg-bridge-dashboard`, `state-dashboard`). T-035-04 deleted
+  the obsolete workflow and repurposed
+  `spec-driven-development/cli/test_deploy_workflow.py` to assert the
+  Azure dashboard deploy workflow remains retired. Scan report committed
+  at `workflow-scan-report.md`. Post-repair grep under
+  `.github/workflows/` returns no Azure deployment keyword matches.
 
 - [ ] **R5 -- PROVISIONED.md retired to docs/archive/.**
   `specs/2026-05-16-cloud-dashboard/PROVISIONED.md` is copied to
@@ -144,7 +154,7 @@ feature: 2026-06-08-azure-decommission
   (priority, RICE, original title) to retain historical record.
   Task: T-035-07.
 
-- [ ] **R9 -- state_builder.py cloud-aware code-path review (additive
+- [x] **R9 -- state_builder.py cloud-aware code-path review (additive
   removal only).** `cli/state_builder.py` is reviewed for cloud-aware
   code paths (Entra ID auth headers / cookies, OIDC-specific URL
   handling, container-specific environment variables like
@@ -159,6 +169,13 @@ feature: 2026-06-08-azure-decommission
   is satisfied by a written note in the close-commit body stating
   "R9: no cloud-aware code paths found in state_builder.py; no
   changes needed." Task: T-035-06.
+
+  Evidence 2026-06-08: focused scan for Entra Easy Auth headers,
+  `CONTAINER_APP_*`, `WEBSITES_PORT`, `WEBSITE_HOSTNAME`, hard-coded
+  Azure URLs, and `AZURE` returned zero matches in `state_builder.py`.
+  Generic `port` matches were reviewed and are local `serve --port`
+  HTTP-server plumbing only. No code changes were required; see
+  `state-builder-cloud-review.md`.
 
 - [x] **R10 -- ADR-015 drafted, owner-approved, committed.**
   `spec-driven-development/docs/ADR/015-azure-dashboard-decommission.md`

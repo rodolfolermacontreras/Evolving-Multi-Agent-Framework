@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
-"""Tests for .github/workflows/deploy-dashboard.yml (SDD-009, T-003).
+"""Regression checks for SDD-035 Azure dashboard workflow retirement.
 
-Validates V-6, V-7, V-8 from the validation contract.
-
-Parser choice: stdlib-only minimal YAML handling. The workflow file is simple
-enough that we read it as text and parse key assertions via substring checks
-and a lightweight line-by-line parser. No third-party YAML library is used,
-consistent with the project's stdlib-only constraint (LESSON-001).
+The original SDD-009 tests validated `.github/workflows/deploy-dashboard.yml`.
+SDD-035 decommissions that Azure deployment path, so the regression contract now
+asserts that no active GitHub Actions workflow can deploy the dashboard to Azure.
 """
 
 from __future__ import annotations
@@ -14,98 +11,50 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-import pytest
-
 # Ensure the cli package is importable
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 # Resolve the workflow file relative to the repo root
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-_WORKFLOW_PATH = _REPO_ROOT / ".github" / "workflows" / "deploy-dashboard.yml"
+_WORKFLOW_DIR = _REPO_ROOT / ".github" / "workflows"
+_DEPLOY_WORKFLOW_PATH = _WORKFLOW_DIR / "deploy-dashboard.yml"
 
 
-def _read_workflow() -> str:
-    """Read the workflow file content; skip test if file does not exist."""
-    if not _WORKFLOW_PATH.is_file():
-        pytest.skip(f"Workflow file not found at {_WORKFLOW_PATH}")
-    return _WORKFLOW_PATH.read_text(encoding="utf-8")
+AZURE_DEPLOY_KEYWORDS = [
+    "azure/login",
+    "azure-credentials",
+    "AZURE_CLIENT_ID",
+    "AZURE_TENANT_ID",
+    "AZURE_SUBSCRIPTION_ID",
+    "containerapp",
+    "rg-bridge-dashboard",
+    "state-dashboard",
+    "ca24921a026cacr",
+    "azurecontainerapps",
+]
 
 
-class TestDeployWorkflowOIDC:
-    """V-6: workflow declares OIDC-only auth with no client secrets."""
-
-    def test_deploy_workflow_oidc_only(self) -> None:
-        content = _read_workflow()
-
-        # Must declare id-token: write for OIDC federation
-        assert "id-token: write" in content
-
-        # Must NOT contain any client-secret references
-        forbidden = [
-            "client-secret",
-            "client_secret",
-            "AZURE_CLIENT_SECRET",
-            "ARM_CLIENT_SECRET",
-            "password:",
-        ]
-        for pattern in forbidden:
-            assert pattern not in content, (
-                f"Workflow must not contain '{pattern}' (OIDC-only per ADR-009)"
-            )
-
-        # azure/login step must reference client-id, tenant-id, subscription-id
-        assert "client-id:" in content
-        assert "tenant-id:" in content
-        assert "subscription-id:" in content
+def _workflow_files() -> list[Path]:
+    if not _WORKFLOW_DIR.exists():
+        return []
+    return [path for path in _WORKFLOW_DIR.glob("*.yml") if path.is_file()]
 
 
-class TestDeployWorkflowTriggers:
-    """V-7: workflow triggers cover state.md path and required branches."""
+class TestAzureDashboardWorkflowRetired:
+    """SDD-035: the Azure dashboard deploy workflow remains retired."""
 
-    def test_deploy_workflow_triggers_cover_state_md(self) -> None:
-        content = _read_workflow()
+    def test_deploy_dashboard_workflow_removed(self) -> None:
+        assert not _DEPLOY_WORKFLOW_PATH.exists()
 
-        # Must declare workflow_dispatch
-        assert "workflow_dispatch" in content
-
-        # Must trigger on push to master
-        assert "master" in content
-
-        # If paths filter is present, it must include these critical paths
-        if "paths:" in content:
-            required_paths = [
-                "spec-driven-development/exec/state.md",
-                "spec-driven-development/cli/state_builder.py",
-                ".github/workflows/deploy-dashboard.yml",
-                "Dockerfile",
-            ]
-            for p in required_paths:
-                assert p in content, (
-                    f"Workflow paths filter must include '{p}'"
+    def test_no_workflow_contains_azure_dashboard_deploy_keywords(self) -> None:
+        for workflow_path in _workflow_files():
+            content = workflow_path.read_text(encoding="utf-8")
+            for keyword in AZURE_DEPLOY_KEYWORDS:
+                assert keyword not in content, (
+                    f"{workflow_path} still contains retired Azure deploy "
+                    f"keyword '{keyword}'"
                 )
 
-
-class TestDeployWorkflowYAMLParses:
-    """V-8: workflow YAML parses cleanly (smoke test)."""
-
-    def test_deploy_workflow_yaml_parses(self) -> None:
-        content = _read_workflow()
-
-        # Minimal structural check: top-level keys must be present
-        assert "name:" in content
-        assert "on:" in content
-        assert "jobs:" in content
-
-        # Must have a job definition
-        lines = content.splitlines()
-        has_job = any(
-            line.strip().endswith(":") and not line.startswith(" " * 4)
-            for line in lines
-            if "jobs:" not in line and line.strip()
-        )
-        # The file should parse without obvious YAML errors
-        # (balanced quotes, no tabs for indentation)
-        for i, line in enumerate(lines, 1):
-            assert "\t" not in line, (
-                f"Line {i}: YAML must use spaces, not tabs"
-            )
+    def test_workflow_directory_has_no_retired_dashboard_deploy_yaml(self) -> None:
+        workflow_names = {path.name for path in _workflow_files()}
+        assert "deploy-dashboard.yml" not in workflow_names

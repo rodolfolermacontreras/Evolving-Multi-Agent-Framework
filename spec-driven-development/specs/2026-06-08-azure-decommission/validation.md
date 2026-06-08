@@ -40,7 +40,7 @@ feature: 2026-06-08-azure-decommission
 
 ## Required Items (LOCKED at scaffold 2026-06-08)
 
-- [ ] **R1 -- Azure resource inventory + repo grep manifest committed.**
+- [x] **R1 -- Azure resource inventory + repo grep manifest committed.**
   Before any teardown, T-035-01 produces
   `specs/2026-06-08-azure-decommission/azure-resource-inventory.json`
   containing the complete configuration of every Azure resource under
@@ -52,6 +52,20 @@ feature: 2026-06-08-azure-decommission
   and every reference to an Azure resource name from the inventory.
   Both files are committed before T-035-02 ADR drafting begins.
   Task: T-035-01.
+
+  Evidence 2026-06-08: `azure-resource-inventory.json` generated from
+  read-only Azure CLI calls in subscription
+  `05e7b074-305c-48d8-9bd0-ce5305cd027c` and tenant
+  `c6d3fc52-e612-4f5e-947c-9f16c3e5ccbb`; resource list contains 4
+  resources (`workspace-rgbridgedashboardEkLi`,
+  `cae-bridge-dashboard`, `ca24921a026cacr`, `state-dashboard`),
+  Entra app and service principal both resolve as `Bridge Dashboard
+  Auth`, and Azure-side federated credentials list is empty. ARM
+  export emitted a warning that
+  `Microsoft.OperationalInsights/workspaces/dataSources` was not
+  exported; the Log Analytics
+  workspace itself is present in `resource_list`. `repo-references.md`
+  records 232 `git grep` rows for the live URL/resource-name pattern.
 
 - [ ] **R2 -- All Azure resources deleted (verifiable).**
   After T-035-05 completes, the following are verifiably absent:
@@ -146,7 +160,7 @@ feature: 2026-06-08-azure-decommission
   "R9: no cloud-aware code paths found in state_builder.py; no
   changes needed." Task: T-035-06.
 
-- [ ] **R10 -- ADR-015 drafted, owner-approved, committed.**
+- [x] **R10 -- ADR-015 drafted, owner-approved, committed.**
   `spec-driven-development/docs/ADR/015-azure-dashboard-decommission.md`
   is drafted in T-035-02 per the ADR template at
   `docs/ADR/TEMPLATE.md`. The ADR documents: (a) the decision (reverse
@@ -160,6 +174,12 @@ feature: 2026-06-08-azure-decommission
   recorded inline in the ADR (e.g. "Approved by Rodolfo Lerma
   2026-06-DD via <channel>") and is the gate that unlocks R2 / R3 /
   R4. Task: T-035-02. **This is the Level-2 gate.**
+
+  Evidence 2026-06-08: ADR-015 drafted at
+  `spec-driven-development/docs/ADR/015-azure-dashboard-decommission.md`
+  and approved by Rodolfo Lerma via VS Code Copilot EM approval prompt.
+  Substantive ADR status is `accepted`; G1 is OPEN. No R2 / R3 / R4 /
+  teardown task was started in the T-035-02 session.
 
 - [ ] **R11 -- Test suite preserves 305 baseline; schema_lint clean.**
   After all R1..R10 close, `python -m pytest spec-driven-development/

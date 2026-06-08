@@ -622,3 +622,22 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 - Notes: CLARIFY closed Q-F through Q-I. The self-review loop is mandatory at feature handoff/close and sprint close, optional for material friction or manual request, and transcript-independent by default. Durable changes route through `lesson-capture`, `/evolve`, PM triage, `/constitution`, or approved implementation tasks; self-review does not silently edit agents, skills, prompts, templates, or constitution files. Gate-related findings reuse the SDD-023 fields and evidence taxonomy.
 - Owner/Level-2 approvals needed before implementation: constitution edits, ledger schema migrations, new dependencies, M365 permission changes, production-branch/push behavior changes, external write behavior changes, or direct self-review mutation of agent/skill behavior all require explicit owner approval and ADR/Friction Analysis as applicable.
 - Next: F-18 should define SDD-025 stakeholder-pressure defense and reuse SDD-023 gate vocabulary plus SDD-014 Friction Analysis routing.
+
+### F-18 -- stakeholder-pressure-defense -- DONE
+
+- Date: 2026-06-08
+- Owner: Principal Architect + Principal Product Manager
+- Commits: <pending-sha>
+- Files changed: 6
+  - spec-driven-development/specs/2026-06-08-stakeholder-pressure-defense/clarification-log.md
+  - spec-driven-development/specs/2026-06-08-stakeholder-pressure-defense/spec.md
+  - spec-driven-development/specs/2026-06-08-stakeholder-pressure-defense/validation.md
+  - spec-driven-development/specs/2026-06-08-stakeholder-pressure-defense/plan.md
+  - spec-driven-development/specs/2026-06-08-stakeholder-pressure-defense/tasks.md
+  - spec-driven-development/exec/sprint-progress.md
+- Tests: 331 -> 331 (docs/spec artifacts only; full pytest not run in F-18)
+- Schema lint: `python spec-driven-development/cli/schema_lint.py` -> PASS, Schema lint clean
+- Validation: SDD-025 validation contract LOCKED for F-19 with 13 REQUIRED + 3 manual HITL checks + 3 optional items. 0/13 REQUIRED checked because implementation has not run yet. No REQUIRED item is deferred or loosened.
+- Notes: CLARIFY closed Q-J through Q-M. The pressure-defense model covers speed over validation, skipped owner approval, scope reduction without traceability, push-before-approval, unverified external claims, novelty/prestige pressure, external-write pressure, and silent validation exceptions. Approval pressure reuses SDD-023 gate fields and evidence taxonomy. Level-2 or irreversible shortcut pressure routes to the existing SDD-014 Friction Analysis template at `spec-driven-development/templates/level-2-decision.md`; the planned stakeholder response template is communication-only and does not replace the Level-2 brief. Repeated pressure lessons route through SDD-021 self-review promotion targets.
+- Owner/Level-2 approvals needed before implementation: constitution edits, ledger schema migrations, new dependencies, M365 permission changes, production-branch/push behavior changes, external write behavior changes, required-validation exceptions, or any pressure-defense path authorizing irreversible shortcuts require explicit owner approval and ADR/Friction Analysis as applicable.
+- Next: F-19 may implement SDD-023, SDD-021, and SDD-025. Recommended order: gate parser/enforcement first, self-review skill second, pressure-defense skill/template third, then validation closeout and full regression as required.

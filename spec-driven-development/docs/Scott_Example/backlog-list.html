@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>WWIC Analyst Backlog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0e15;
+    --bg-elev: #11151f;
+    --bg-row-hover: #161b27;
+    --border: #1c2230;
+    --border-strong: #2a3144;
+    --text: #d8dee9;
+    --text-dim: #8892a6;
+    --text-mute: #5a6578;
+    --accent-id: #6cc5ee;
+    --accent-link: #6cc5ee;
+    --tag-feature-bd: #b88a3a;
+    --tag-feature-fg: #d9a350;
+    --tag-intake-bd: #b06a26;
+    --tag-intake-bg: #2a1d10;
+    --tag-intake-fg: #e0944a;
+    --tag-indev-bg: #6b1f5a;
+    --tag-indev-fg: #ffb3ec;
+    --tag-indev-bd: #b53a96;
+    --pill-valid-bg: #133a23;
+    --pill-valid-fg: #5fd38a;
+    --btn-primary: #2563eb;
+    --btn-primary-hover: #1d4ed8;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- Top bar ---- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 22px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar h1 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+  .topbar .sub {
+    font-size: 11px;
+    color: var(--text-mute);
+    margin-top: 2px;
+  }
+  .topbar .title-block { min-width: 320px; }
+  .topbar .path {
+    font-size: 12px;
+    color: var(--text-dim);
+    padding-left: 18px;
+    border-left: 1px solid var(--border-strong);
+    margin-left: 6px;
+    flex: 1;
+  }
+  .topbar .actions { display: flex; gap: 8px; align-items: center; }
+  .btn {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 120ms, border-color 120ms;
+  }
+  .btn:hover { background: var(--bg-row-hover); border-color: #3a445c; }
+  .btn-primary {
+    background: var(--btn-primary);
+    border-color: var(--btn-primary);
+    color: #fff;
+    font-weight: 600;
+  }
+  .btn-primary:hover { background: var(--btn-primary-hover); border-color: var(--btn-primary-hover); }
+
+  /* ---- Layout ---- */
+  .layout { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 50px); }
+
+  /* ---- Sidebar ---- */
+  .sidebar {
+    border-right: 1px solid var(--border);
+    padding: 18px 14px;
+    overflow: auto;
+  }
+  .sidebar h2 {
+    margin: 0 0 10px;
+    font-size: 13px;
+    font-weight: 700;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+  }
+  .sidebar h3 {
+    margin: 14px 0 6px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-mute);
+    font-weight: 600;
+  }
+  .sb-item {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 8px;
+    padding: 5px 6px;
+    font-size: 11.5px;
+    border-radius: 3px;
+    cursor: pointer;
+    color: var(--text-dim);
+  }
+  .sb-item:hover { background: var(--bg-row-hover); color: var(--text); }
+  .sb-item .sb-id { color: var(--accent-id); }
+  .sb-item .sb-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ---- Main ---- */
+  .main { padding: 16px 22px 40px; min-width: 0; }
+
+  /* ---- Filter row ---- */
+  .filters {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .search {
+    flex: 1;
+    min-width: 280px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    padding: 7px 11px;
+    border-radius: 4px;
+    font: inherit;
+    font-size: 12px;
+  }
+  .search::placeholder { color: var(--text-mute); }
+  .filter-group { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-dim); }
+  .filter-group select {
+    background: var(--bg-elev);
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+    padding: 5px 8px;
+    border-radius: 4px;
+    min-width: 70px;
+  }
+  .filter-group label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+
+  /* ---- Meta row ---- */
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 4px 0 10px;
+    font-size: 11.5px;
+    color: var(--text-mute);
+  }
+  .pill {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+  }
+  .pill-valid { background: var(--pill-valid-bg); color: var(--pill-valid-fg); }
+
+  /* ---- Table ---- */
+  table.backlog {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  table.backlog thead th {
+    text-align: left;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-mute);
+    font-weight: 600;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border-strong);
+  }
+  table.backlog tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 100ms;
+  }
+  table.backlog tbody tr:hover { background: var(--bg-row-hover); }
+  table.backlog td {
+    padding: 9px 10px;
+    vertical-align: top;
+  }
+  table.backlog td.handle { width: 22px; color: var(--text-mute); cursor: grab; user-select: none; }
+  table.backlog td.id { width: 96px; }
+  table.backlog td.id a {
+    color: var(--accent-id);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  table.backlog td.id a:hover { text-decoration: underline; }
+  table.backlog td.type { width: 80px; }
+  table.backlog td.status { width: 130px; }
+  table.backlog td.p { width: 32px; text-align: center; color: var(--text); }
+  table.backlog td.area { width: 60px; color: var(--text-mute); }
+  table.backlog td.docs { width: 200px; font-size: 11px; color: var(--text-mute); }
+  table.backlog td.ado { width: 70px; color: var(--text-mute); font-size: 11px; }
+  table.backlog td.updated { width: 90px; color: var(--text-mute); font-size: 11px; }
+
+  /* ---- Tags ---- */
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    line-height: 1.4;
+  }
+  .tag-feature {
+    border: 1px solid var(--tag-feature-bd);
+    color: var(--tag-feature-fg);
+    background: transparent;
+  }
+  .tag-intake {
+    background: var(--tag-intake-bg);
+    color: var(--tag-intake-fg);
+    border: 1px solid var(--tag-intake-bd);
+  }
+  .tag-indev {
+    background: var(--tag-indev-bg);
+    color: var(--tag-indev-fg);
+    border: 1px solid var(--tag-indev-bd);
+    box-shadow: 0 0 12px -4px rgba(181, 58, 150, 0.7);
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="title-block">
+    <h1>WWIC Analyst Backlog</h1>
+    <div class="sub">JSON source of truth · ADO is a downstream mirror</div>
+  </div>
+  <div class="path">/docs/backlog/backlog.json</div>
+  <div class="actions">
+    <button class="btn">Reload</button>
+    <button class="btn">Settings</button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <h2>Backlog</h2>
+    <h3>Top Items</h3>
+    <div class="sb-item"><span class="sb-id">WI-39937</span><span class="sb-title">Add FY26 Performanc...</span></div>
+    <div class="sb-item"><span class="sb-id">WI-39941</span><span class="sb-title">Add Soroush HTML re...</span></div>
+    <div class="sb-item"><span class="sb-id">WI-39938</span><span class="sb-title">Add core WWICLake ...</span></div>
+    <div class="sb-item"><span class="sb-id">WI-39939</span><span class="sb-title">Automate refreshing of...</span></div>
+    <div class="sb-item"><span class="sb-id">WI-39940</span><span class="sb-title">Report on WWIC Anal...</span></div>
+    <div class="sb-item"><span class="sb-id">WI-40216</span><span class="sb-title">Auto-update WWIC An...</span></div>
+    <div class="sb-item"><span class="sb-id">WI-40310</span><span class="sb-title">[WWIC Analyst] Updat...</span></div>
+    <div class="sb-item"><span class="sb-id">BL-tmp-001</span><span class="sb-title">Publish JSON Sche...</span></div>
+    <div class="sb-item"><span class="sb-id">BL-tmp-002</span><span class="sb-title">Playbook hygiene: r...</span></div>
+    <div class="sb-item"><span class="sb-id">BL-tmp-003</span><span class="sb-title">Resolve FY26 Powe...</span></div>
+    <div class="sb-item"><span class="sb-id">BL-tmp-004</span><span class="sb-title">Move the wwic_anal...</span></div>
+    <div class="sb-item"><span class="sb-id">BL-tmp-005</span><span class="sb-title">Add playbook-comp...</span></div>
+    <div class="sb-item"><span class="sb-id">BL-tmp-006</span><span class="sb-title">Build column and m...</span></div>
+    <div class="sb-item"><span class="sb-id">BL-tmp-007</span><span class="sb-title">Materialize dimensio...</span></div>
+    <div class="sb-item"><span class="sb-id">BL-tmp-008</span><span class="sb-title">Unify acronym table...</span></div>
+    <div class="sb-item"><span class="sb-id">BL-tmp-009</span><span class="sb-title">Snapshot cadence a...</span></div>
+    <div class="sb-item"><span class="sb-id">BL-tmp-010</span><span class="sb-title">Composite-key recip...</span></div>
+    <div class="sb-item"><span class="sb-id">BL-tmp-011</span><span class="sb-title">Centralize model an...</span></div>
+    <div class="sb-item"><span class="sb-id">BL-tmp-012</span><span class="sb-title">Pitfalls / anti-pattern...</span></div>
+    <div class="sb-item"><span class="sb-id">BL-tmp-013</span><span class="sb-title">Display-folder tree a...</span></div>
+  </aside>
+
+  <main class="main">
+
+    <div class="filters">
+      <input class="search" placeholder="Search id, title, description, area..." />
+      <div class="filter-group">Status <select><option>All</option></select></div>
+      <div class="filter-group">Type <select><option>All</option></select></div>
+      <div class="filter-group">Area <select><option>All</option></select></div>
+      <label class="filter-group"><input type="checkbox" /> blockedOnOwner only</label>
+      <label class="filter-group"><input type="checkbox" checked /> Hide Done</label>
+      <button class="btn btn-primary">+ New Item</button>
+    </div>
+
+    <div class="meta-row">
+      <div>33 of 34 item(s) · drag rows to reorder</div>
+      <span class="pill pill-valid">valid</span>
+    </div>
+
+    <table class="backlog">
+      <thead>
+        <tr>
+          <th></th>
+          <th>ID</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>P</th>
+          <th>Area</th>
+          <th>Title</th>
+          <th>Docs</th>
+          <th>ADO</th>
+          <th>Updated</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="backlog-detail.html">WI-39937</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-indev">In Development</span></td>
+          <td class="p">2</td>
+          <td class="area"></td>
+          <td>Add FY26 Performance Projection model to knowledge store</td>
+          <td class="docs">1 story, 1 spec, 1 sprint, 3 commit</td>
+          <td class="ado">39937</td>
+          <td class="updated">2026-06-02</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">WI-39941</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">2</td>
+          <td class="area"></td>
+          <td>Add Soroush HTML report to Payline output</td>
+          <td class="docs"></td>
+          <td class="ado">39941</td>
+          <td class="updated">2026-06-02</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">WI-39938</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">2</td>
+          <td class="area"></td>
+          <td>Add core WWICLake Kusto tables to knowledge store</td>
+          <td class="docs"></td>
+          <td class="ado">39938</td>
+          <td class="updated">2026-06-02</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">WI-39939</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">2</td>
+          <td class="area"></td>
+          <td>Automate refreshing of knowledge store streams</td>
+          <td class="docs"></td>
+          <td class="ado">39939</td>
+          <td class="updated">2026-06-02</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">WI-39940</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">2</td>
+          <td class="area"></td>
+          <td>Report on WWIC Analyst usage</td>
+          <td class="docs"></td>
+          <td class="ado">39940</td>
+          <td class="updated">2026-06-02</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">WI-40216</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">2</td>
+          <td class="area"></td>
+          <td>Auto-update WWIC Analyst extension and bundled assets with minimal user friction</td>
+          <td class="docs"></td>
+          <td class="ado">40216</td>
+          <td class="updated">2026-06-02</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">WI-40310</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">3</td>
+          <td class="area"></td>
+          <td>[WWIC Analyst] Update Knowledge Curator agent for shared-corpus workflow, runtime registration, and dimension-value sourcing</td>
+          <td class="docs"></td>
+          <td class="ado">40310</td>
+          <td class="updated">2026-06-03</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">BL-tmp-001</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">1</td>
+          <td class="area"></td>
+          <td>Publish JSON Schemas for the two knowledge-corpus frontmatter dialects</td>
+          <td class="docs"></td>
+          <td class="ado"></td>
+          <td class="updated">2026-06-04</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">BL-tmp-002</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">1</td>
+          <td class="area"></td>
+          <td>Playbook hygiene: regenerate README, finish Recipe 12, document review_status convention</td>
+          <td class="docs"></td>
+          <td class="ado"></td>
+          <td class="updated">2026-06-04</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">BL-tmp-003</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">1</td>
+          <td class="area"></td>
+          <td>Resolve FY26 Power BI workspace and dataset IDs and promote to model frontmatter</td>
+          <td class="docs"></td>
+          <td class="ado"></td>
+          <td class="updated">2026-06-04</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">BL-tmp-004</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">1</td>
+          <td class="area"></td>
+          <td>Move the wwic_analyst_runtime API reference out of the agent prompt into the corpus</td>
+          <td class="docs"></td>
+          <td class="ado"></td>
+          <td class="updated">2026-06-04</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">BL-tmp-005</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">1</td>
+          <td class="area"></td>
+          <td>Add playbook-companion links to every model README</td>
+          <td class="docs"></td>
+          <td class="ado"></td>
+          <td class="updated">2026-06-04</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">BL-tmp-006</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">2</td>
+          <td class="area"></td>
+          <td>Build column and measure inverted indices into the catalog DuckDB</td>
+          <td class="docs"></td>
+          <td class="ado"></td>
+          <td class="updated">2026-06-04</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">BL-tmp-007</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">2</td>
+          <td class="area"></td>
+          <td>Materialize dimension-value enumerations as a DuckDB side-table</td>
+          <td class="docs"></td>
+          <td class="ado"></td>
+          <td class="updated">2026-06-04</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">BL-tmp-008</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">2</td>
+          <td class="area"></td>
+          <td>Unify acronym tables with declared precedence</td>
+          <td class="docs"></td>
+          <td class="ado"></td>
+          <td class="updated">2026-06-04</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">BL-tmp-009</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">2</td>
+          <td class="area"></td>
+          <td>Snapshot cadence and version registry as a DuckDB table</td>
+          <td class="docs"></td>
+          <td class="ado"></td>
+          <td class="updated">2026-06-04</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">BL-tmp-010</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">2</td>
+          <td class="area"></td>
+          <td>Composite-key recipe library as a DuckDB table</td>
+          <td class="docs"></td>
+          <td class="ado"></td>
+          <td class="updated">2026-06-04</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">BL-tmp-011</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">2</td>
+          <td class="area"></td>
+          <td>Centralize model and cube connection metadata into a single lookup</td>
+          <td class="docs"></td>
+          <td class="ado"></td>
+          <td class="updated">2026-06-04</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">BL-tmp-012</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">2</td>
+          <td class="area"></td>
+          <td>Pitfalls / anti-patterns rule table to enable query linting</td>
+          <td class="docs"></td>
+          <td class="ado"></td>
+          <td class="updated">2026-06-04</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">BL-tmp-013</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">2</td>
+          <td class="area"></td>
+          <td>Display-folder tree artifact for PBI and SSAS models</td>
+          <td class="docs"></td>
+          <td class="ado"></td>
+          <td class="updated">2026-06-04</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">BL-tmp-014</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">2</td>
+          <td class="area"></td>
+          <td>Result-cache layer (warm cache) for repeating analyst queries</td>
+          <td class="docs"></td>
+          <td class="ado"></td>
+          <td class="updated">2026-06-04</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">BL-tmp-015</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">2</td>
+          <td class="area"></td>
+          <td>Author DAX, MDX, and model-selection playbooks</td>
+          <td class="docs"></td>
+          <td class="ado"></td>
+          <td class="updated">2026-06-04</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">BL-tmp-016</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">2</td>
+          <td class="area"></td>
+          <td>Author secondary workflow playbooks (snapshot strategy, notebook authoring, cross-year reconciliation)</td>
+          <td class="docs"></td>
+          <td class="ado"></td>
+          <td class="updated">2026-06-04</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">BL-tmp-017</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">2</td>
+          <td class="area"></td>
+          <td>Author business-semantic companions for ProxySafe, RLS, ParticipationKey, and ITA proration</td>
+          <td class="docs"></td>
+          <td class="ado"></td>
+          <td class="updated">2026-06-04</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">BL-tmp-018</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">2</td>
+          <td class="area"></td>
+          <td>Author business-terminology docs (PRACR, CSA plans, MQA, Contests)</td>
+          <td class="docs"></td>
+          <td class="ado"></td>
+          <td class="updated">2026-06-04</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">BL-tmp-019</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">2</td>
+          <td class="area"></td>
+          <td>FY26 PBI model documentation infill (operations, hierarchies, linguistic metadata, dimensions)</td>
+          <td class="docs"></td>
+          <td class="ado"></td>
+          <td class="updated">2026-06-04</td>
+        </tr>
+        <tr>
+          <td class="handle">::</td>
+          <td class="id"><a href="#">BL-tmp-020</a></td>
+          <td class="type"><span class="tag tag-feature">feature</span></td>
+          <td class="status"><span class="tag tag-intake">Intake</span></td>
+          <td class="p">2</td>
+          <td class="area"></td>
+          <td>SSAS cube documentation infill (calc members, KPIs, perspectives, second-cube, split monoliths, ...)</td>
+          <td class="docs"></td>
+          <td class="ado"></td>
+          <td class="updated">2026-06-04</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </main>
+</div>
+
+</body>
+</html>

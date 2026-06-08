@@ -86,6 +86,10 @@ approval links back to the brief as evidence. A worked example for
 ADR-0008 (Cloud-Security Architect hire) lives at
 `spec-driven-development/templates/level-2-decision-EXAMPLE.md`.
 
+Model-upgrade proposals covered by `spec-driven-development/docs/MODEL-UPGRADE-PROTOCOL.md`
+are a specialized Level 2 path. They MUST still use the Friction Analysis brief
+above before any in-scope model assignment change lands.
+
 Level 0 and Level 1 decisions are not required to use this template.
 
 ---

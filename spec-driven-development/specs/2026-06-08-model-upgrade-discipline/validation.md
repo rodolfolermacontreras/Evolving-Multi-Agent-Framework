@@ -26,7 +26,7 @@ feature: 2026-06-08-model-upgrade-discipline
 - [x] V-6. `templates/model-upgrade-pricing.json` exists and the CLI cost report calculates one-time, recurring, per-run, old-model, new-model, and delta cost values from committed inputs only. Covers AC-6 / R6.
 - [x] V-7. Quality-delta output includes validation/test pass, spec-quality checklist score, commit/report quality delta, aggregate recommendation, and an owner-approval marker for ambiguous quality wins. Covers AC-7 / R7.
 - [x] V-8. The protocol documents the rejection path: failed A/B, unclear cost benefit, or ambiguous quality without owner approval keeps the upgrade branch unmerged and records `reject` or `owner-review`. Covers R2 / R3 / R7.
-- [ ] V-9. `decision-policy.md` references `docs/MODEL-UPGRADE-PROTOCOL.md`; because this is a constitution edit, `docs/ADR/016-model-upgrade-protocol-cross-reference.md` is accepted or an explicit owner waiver is recorded before the edit lands. Covers AC-8 / R9.
+- [x] V-9. `decision-policy.md` references `docs/MODEL-UPGRADE-PROTOCOL.md`; because this is a constitution edit, `docs/ADR/016-model-upgrade-protocol-cross-reference.md` is accepted or an explicit owner waiver is recorded before the edit lands. Covers AC-8 / R9.
 - [x] V-10. Import scan/test proves no third-party model, HTTP, benchmark, or data-analysis libraries are imported by `cli/model_upgrade.py`; stdlib-only Article V is preserved. Covers AC-9 / R10.
 - [x] V-11. `python spec-driven-development/cli/schema_lint.py` exits 0 after F-14 implementation. Covers AC-10 / R11.
 - [x] V-12. Full pytest suite exits 0 after F-14 implementation, with test count at or above the Sprint 8 baseline plus new SDD-015 tests. Covers AC-10 / R11.
@@ -36,7 +36,7 @@ feature: 2026-06-08-model-upgrade-discipline
 ## Manual / HITL Checks
 
 - [ ] M-1. Owner or EM records approval for the first real model-upgrade proposal that uses this protocol before any model assignment changes land.
-- [ ] M-2. Owner approval or ADR acceptance is recorded before `decision-policy.md` is edited in F-14.
+- [x] M-2. Owner approval or ADR acceptance is recorded before `decision-policy.md` is edited in F-14.
 
 Manual checks are not optional if their triggering condition occurs. M-2 is triggered by the Sprint 8 success criterion that `decision-policy.md` references the protocol.
 

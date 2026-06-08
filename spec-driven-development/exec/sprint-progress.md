@@ -535,3 +535,12 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 - Notes: SDD-022 is implementation-complete as a stdlib-only `/taskstoissues` CLI with dry-run default, injectable no-network tests, GitHub `urllib.*` provider boundary, ADO dry-run provider shape, per-spec-dir `issue-map.json`, conflict-report behavior, and prompt wrapper. SDD-015 protocol, fixtures, no-network A/B harness, tests, and ADR-016 draft are complete, but the locked contract requires the decision-policy cross-reference and the governance stop condition prevents that edit until owner approval lands. Existing unrelated SDD-035/Azure-decommission dirty work was preserved and not staged.
 - Owner approval needed: accept `spec-driven-development/docs/ADR/016-model-upgrade-protocol-cross-reference.md` or record an explicit owner waiver authorizing the `spec-driven-development/constitution/decision-policy.md` cross-reference to `docs/MODEL-UPGRADE-PROTOCOL.md`.
 - Next: F-15 must NOT start until the owner approval above is recorded and SDD-015 V-9 is closed; Sprint 8 remains open.
+
+### F-14 -- SDD-015 governance unblock -- DONE
+
+- Date: 2026-06-08
+- Owner decision: Rodolfo Lerma explicitly accepted ADR-016 via Executive Manager request: "accept ADR-016".
+- Files changed: ADR-016 accepted; `constitution/decision-policy.md` now references `docs/MODEL-UPGRADE-PROTOCOL.md` as a specialized Level 2 path that still MUST use the existing Friction Analysis brief.
+- Validation: SDD-015 V-9 is checked; M-2 is checked; T-015-06 is done. No SDD-022 artifacts were edited.
+- Validation commands: `python spec-driven-development/cli/schema_lint.py` -> PASS, Schema lint clean; `python -m pytest spec-driven-development/ --tb=no -q` -> 331 passed, 2 skipped.
+- Next: commit only the governance-unblock files. F-15 remains gated until this unblock commit lands.

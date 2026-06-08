@@ -198,7 +198,7 @@ python -m pytest spec-driven-development/cli/test_model_upgrade.py -k "import or
 **Type**: [S] sequential, HITL-gated
 **Execution**: [HITL] owner/EM approval required before constitution edit
 **Size**: S
-**Status**: blocked
+**Status**: done
 **Files**: `spec-driven-development/docs/ADR/016-model-upgrade-protocol-cross-reference.md`, `spec-driven-development/constitution/decision-policy.md`
 **Files Blocked**: `spec-driven-development/constitution/principles.md`
 **Depends on**: T-015-01
@@ -209,10 +209,10 @@ Draft ADR-016 explaining why `decision-policy.md` should reference `docs/MODEL-U
 
 ### Acceptance Criteria
 
-- [ ] ADR-016 exists if `decision-policy.md` is edited.
-- [ ] ADR-016 status is accepted or owner waiver is recorded before the constitution edit.
-- [ ] `decision-policy.md` references `docs/MODEL-UPGRADE-PROTOCOL.md` without weakening SDD-014 Friction Analysis requirements.
-- [ ] No edit is made to `constitution/principles.md`.
+- [x] ADR-016 exists if `decision-policy.md` is edited.
+- [x] ADR-016 status is accepted or owner waiver is recorded before the constitution edit.
+- [x] `decision-policy.md` references `docs/MODEL-UPGRADE-PROTOCOL.md` without weakening SDD-014 Friction Analysis requirements.
+- [x] No edit is made to `constitution/principles.md`.
 
 ### Verification
 

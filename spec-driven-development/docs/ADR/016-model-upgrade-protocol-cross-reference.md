@@ -1,7 +1,7 @@
 ---
 id: ADR-016
 type: spec
-status: draft
+status: accepted
 owner: principal-architect
 updated: 2026-06-08
 feature: 2026-06-08-model-upgrade-discipline
@@ -10,9 +10,10 @@ feature: 2026-06-08-model-upgrade-discipline
 # ADR-016: Model Upgrade Protocol Cross-Reference
 
 - Date: 2026-06-08
-- Status: **proposed**
+- Status: **accepted**
 - Authors: Principal Architect + Principal Software Developer
 - Related: `spec-driven-development/specs/2026-06-08-model-upgrade-discipline/`
+- Acceptance evidence: Rodolfo Lerma explicitly accepted ADR-016 on 2026-06-08 via Executive Manager owner decision: "accept ADR-016".
 
 ---
 
@@ -35,14 +36,13 @@ acceptance or an explicit owner waiver before the edit lands.
 
 ## Decision
 
-Proposed: add a short model-upgrade paragraph under the Level 2 section of
+Accepted: add a short model-upgrade paragraph under the Level 2 section of
 `constitution/decision-policy.md` that links to
 `docs/MODEL-UPGRADE-PROTOCOL.md` and states that in-scope model upgrades remain
 Level-2 decisions subject to the existing Friction Analysis requirements.
 
-This ADR is intentionally **not accepted** by F-14. F-14 may draft it, but must
-not edit `decision-policy.md` until Rodolfo accepts this ADR or records an
-explicit waiver.
+Owner acceptance was recorded on 2026-06-08. F-14 may now apply the minimal
+`decision-policy.md` cross-reference required by SDD-015.
 
 ---
 

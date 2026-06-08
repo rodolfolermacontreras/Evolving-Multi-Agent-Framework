@@ -1,7 +1,7 @@
 ---
 id: SDD-20260607DEDUP-clarification
 type: clarification
-status: draft
+status: done
 owner: principal-architect
 updated: 2026-06-07
 feature: 2026-06-07-cross-feature-dedup
@@ -11,7 +11,7 @@ feature: 2026-06-07-cross-feature-dedup
 
 - Date: 2026-06-07
 - Drafted by: Principal Architect (scaffold session, EM context)
-- Status: AWAITING OWNER ANSWERS -- to be answered in fresh Sprint 6 implementation session per Article VII
+- Status: CLOSED 2026-06-07
 - Spec ID: SDD-020
 - Gating: /spec finalization is blocked until these answers are recorded.
 
@@ -42,7 +42,7 @@ Recommended answer: (c) backlog + open spec dirs. Closed specs are
 historical; flagging overlap with a done spec is interesting but rarely
 actionable. PI-wide is implicit because BACKLOG is PI-scoped.
 
-Answer: TBD
+Answer: (c) backlog + open spec dirs. Scan `backlog/BACKLOG.md` + `backlog/IDEAS.md` + open spec dirs (`specs/**/spec.md` where status != done/archived). Closed specs are historical and rarely actionable.
 
 ---
 
@@ -65,7 +65,7 @@ confidence label (HARD / SOFT / ADVISORY). Keeps the tool stdlib-only,
 deterministic, fast, and inspectable. Semantic-LLM is a future
 enhancement (out-of-scope candidate).
 
-Answer: TBD
+Answer: (e) layered, NO LLM in v1. Layer 1: exact frontmatter `id` collision (reuse `parse_frontmatter` from `cli/schema_lint.py`). Layer 2: title fuzzy match (stdlib `difflib.SequenceMatcher` ratio >= 0.8). Layer 3: keyword Jaccard on tokenized problem-statement text. Each layer reports with confidence label (HARD / SOFT / ADVISORY). Stdlib-only, deterministic, fast, inspectable.
 
 ### Q3: Tooling form -- CLI subcommand, skill, or both?
 
@@ -81,7 +81,7 @@ core; skill provides the orchestration around it (read BACKLOG, present
 overlap to owner, write decision to dedup log). This matches the SDD
 pattern -- CLI for mechanics, skill for workflow.
 
-Answer: TBD
+Answer: (a) standalone `cli/dedup.py` -- new module with CLI entry point, NOT a `fleet.py` subcommand. Reason: avoids file-scope collision with SDD-019 which also modifies `fleet.py`. A separate skill (`.github/skills/workflow/cross-feature-dedup/SKILL.md`) can invoke the CLI. Matches the SDD pattern: CLI for mechanics, skill for workflow.
 
 ---
 
@@ -104,7 +104,7 @@ HARD (exact ID collision) blocks. SOFT (fuzzy title match) prompts.
 ADVISORY (keyword overlap) warns and proceeds. Auto-merge is never used
 in v1 -- too risky without owner judgment.
 
-Answer: TBD
+Answer: (d) tiered. HARD (exact ID collision) blocks triage/clarify from proceeding. SOFT (fuzzy title >= 0.8) prompts owner to decide (merge / keep-both / discard / rewrite). ADVISORY (keyword Jaccard overlap) warns and proceeds. Auto-merge is never used in v1.
 
 ### Q5: Integration with SDD-019 -- ordering and dependency
 
@@ -124,7 +124,7 @@ amendment). If both ship in Sprint 6, the order is irrelevant to the
 final composed behavior. **This question MUST be answered jointly with
 the SDD-019 CLARIFY session.**
 
-Answer: TBD
+Answer: (c) independent and composable, SDD-020 ships first. Neither blocks the other at the dependency level. Implementation order: SDD-020 first (lower risk, no constitutional amendment). The composed end-state (gate refuses dispatch if lock held; dedup runs at triage/clarify and writes its own log) is the same regardless of order. Confirmed jointly with SDD-019 Q5.
 
 ### Q6: Dedup log artifact -- where does the audit trail live?
 
@@ -141,7 +141,7 @@ queryable surface; per-spec-dir log gives reviewers context inside the
 spec dir; rolling log gives PM a single place to audit triage hygiene
 over time. All three reuse existing infra.
 
-Answer: TBD
+Answer: (d) combination. Ledger row (`dedup_scan_run`, `dedup_overlap_flagged`, `dedup_decision_recorded`) + per-spec-dir `dedup-scan.md` (for spec-bound dedups) + rolling `backlog/DEDUP-LOG.md` (for pure-BACKLOG triage rounds). All three reuse existing infrastructure.
 
 ---
 
@@ -158,7 +158,7 @@ Recommended answer: (b) explicit notice. Silent skips obscure the fact
 that the pass ran; an explicit notice makes the run auditable even when
 trivially clean.
 
-Answer: TBD
+Answer: (b) explicit notice. Emit "no corpus to dedup against; 0 candidates scanned" message. Silent skips obscure that the pass ran; explicit notices make the run auditable.
 
 ---
 

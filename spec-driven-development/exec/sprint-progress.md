@@ -481,3 +481,20 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 - CLARIFY outcomes: owner approved Q-A through Q-H defaults with "aproved defaults"; Q-I remained resolved by dispatch constraint. Final decisions: `tasks.md` authoritative; GitHub Issues live round-trip v1; ADO adapter/test fixture fast-follow; explicit `/taskstoissues` only; `tasks.md` wins conflicts; per-spec-dir `issue-map.json`; env-var token auth with dry-run default; sync title/body/labels/status/source links only; stdlib `urllib.*` and `json` only.
 - Notes: F-12 pass 2 closed CLARIFY, finalized the spec with R1..R12 and AC-1..AC-12, locked validation V-1..V-16, authored an implementation-oriented plan, and decomposed 10 atomic tasks T-022-01..T-022-10. No Article V amendment, ADR, ledger schema migration, constitution edit, host-project write, or F-13 work was performed.
 - Next: F-13 may start in a fresh isolated session after this commit. F-14 caveat: live GitHub write validation needs a safe owner/operator token and disposable issue target; automated tests must remain no-network and credential-free.
+
+### F-13 -- model-upgrade-discipline -- DONE
+
+- Date: 2026-06-08
+- Owner: Principal Product Manager + Principal Architect
+- Commits: <this commit>
+- Files changed: 6
+  - spec-driven-development/specs/2026-06-08-model-upgrade-discipline/clarify.md
+  - spec-driven-development/specs/2026-06-08-model-upgrade-discipline/spec.md
+  - spec-driven-development/specs/2026-06-08-model-upgrade-discipline/validation.md
+  - spec-driven-development/specs/2026-06-08-model-upgrade-discipline/plan.md
+  - spec-driven-development/specs/2026-06-08-model-upgrade-discipline/tasks.md
+  - spec-driven-development/exec/sprint-progress.md
+- Tests: 305 -> 305 (docs/spec artifacts only; no code changes in F-13)
+- Validation: 12/12 REQUIRED defined and locked for F-14; 0/12 checked because implementation has not run yet.
+- Notes: CLARIFY closed Q-J through Q-O using Sprint 8 defaults. Actual repo state corrected the kickoff assumption: `docs/MODEL-UPGRADE-PROTOCOL.md` does not exist yet and `decision-policy.md` does not reference it yet. F-13 therefore locks F-14 work to create the protocol, fixture-backed stdlib A/B harness, pricing/quality evidence, and ADR-backed constitution cross-reference. F-13 did not edit `constitution/**`.
+- Next: F-14 can start after this commit. Caveat: F-14 must not edit `constitution/decision-policy.md` until ADR-016 is accepted or the owner grants an explicit waiver; if that approval is unavailable, F-14 must stop as OWNER-ATTENTION rather than marking SDD-015 done.

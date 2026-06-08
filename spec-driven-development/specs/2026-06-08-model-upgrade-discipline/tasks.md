@@ -1,7 +1,7 @@
 ---
 id: SDD-20260608MODELUPGRADE-tasks
 type: tasks
-status: blocked
+status: done
 owner: principal-software-developer
 updated: 2026-06-08
 feature: 2026-06-08-model-upgrade-discipline
@@ -229,7 +229,7 @@ Select-String -Path spec-driven-development/docs/ADR/016-model-upgrade-protocol-
 **Type**: [S] sequential
 **Execution**: [AFK] autonomous unless T-015-06 is blocked
 **Size**: S
-**Status**: blocked
+**Status**: done
 **Files**: `spec-driven-development/specs/2026-06-08-model-upgrade-discipline/validation.md`, `spec-driven-development/specs/2026-06-08-model-upgrade-discipline/spec.md`, `spec-driven-development/specs/2026-06-08-model-upgrade-discipline/tasks.md`
 **Files Blocked**: unrelated spec dirs, SDD-035 files
 **Depends on**: T-015-01, T-015-02, T-015-03, T-015-04, T-015-05, T-015-06
@@ -240,11 +240,11 @@ Run targeted tests, schema_lint, and full pytest. Check V-1 through V-12 only af
 
 ### Acceptance Criteria
 
-- [ ] V-1 through V-12 are checked with evidence.
-- [ ] Targeted model-upgrade tests pass.
-- [ ] `python spec-driven-development/cli/schema_lint.py` exits 0.
-- [ ] Full pytest exits 0 with test count at or above baseline plus new tests.
-- [ ] This spec dir's statuses are updated to done only after checks pass.
+- [x] V-1 through V-12 are checked with evidence.
+- [x] Targeted model-upgrade tests pass.
+- [x] `python spec-driven-development/cli/schema_lint.py` exits 0.
+- [x] Full pytest exits 0 with test count at or above baseline plus new tests.
+- [x] This spec dir's statuses are updated to done only after checks pass.
 
 ### Verification
 

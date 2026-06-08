@@ -1,7 +1,7 @@
 ---
 id: SDD-20260608MODELUPGRADE-validation
 type: validation
-status: blocked
+status: done
 owner: principal-architect
 updated: 2026-06-08
 feature: 2026-06-08-model-upgrade-discipline

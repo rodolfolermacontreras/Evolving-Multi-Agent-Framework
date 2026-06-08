@@ -544,3 +544,14 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 - Validation: SDD-015 V-9 is checked; M-2 is checked; T-015-06 is done. No SDD-022 artifacts were edited.
 - Validation commands: `python spec-driven-development/cli/schema_lint.py` -> PASS, Schema lint clean; `python -m pytest spec-driven-development/ --tb=no -q` -> 331 passed, 2 skipped.
 - Next: commit only the governance-unblock files. F-15 remains gated until this unblock commit lands.
+
+### F-14 -- sprint8-implement -- DONE
+
+- Date: 2026-06-08
+- Owner: Principal Software Developer
+- Commits: `0b47def` (F-14 implementation) -> `a2c1476` (ADR-016 acceptance and governance unblock)
+- Files changed in this closure: SDD-015 status close-out, backlog status update, and this sprint-progress block only.
+- Tests: 305 -> 331 (+26), 2 skipped.
+- Validation: SDD-022 16/16 REQUIRED checked; SDD-015 12/12 REQUIRED checked. No REQUIRED item was loosened or deferred.
+- Notes: ADR-016 acceptance unblocked SDD-015 V-9; `decision-policy.md` now references `docs/MODEL-UPGRADE-PROTOCOL.md` through the accepted governance path. Existing unrelated SDD-035/Azure/workflow dirty work remains outside F-14 and was not staged.
+- Next: F-15 may start. Sprint 8 remains open until F-15 completes and the sprint is explicitly closed.

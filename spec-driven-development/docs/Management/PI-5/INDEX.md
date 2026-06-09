@@ -1,6 +1,6 @@
 # PI-5: Brownfield Adoption + Anti-Conflict + Stakeholder Discipline
 
-- **Status**: Active
+- **Status**: CLOSED / DONE-WITH-CARRYOVER (owner approved 2026-06-09)
 - **Started**: 2026-06-06
 - **Theme**: Make the framework safely adoptable by other teams, harden anti-conflict gates, finish the Scott Feedback Bundle
 
@@ -19,8 +19,9 @@
 
 | Artifact | Location | Status |
 |----------|----------|--------|
-| PI-5 Plan | `sprints/PI-5/CURRENT_PI.md` | Active |
-| Sprint 1 spec dir | `specs/2026-06-06-symlink-portability/` | Active |
+| PI-5 Plan | `sprints/PI-5/CURRENT_PI.md` | Closed / DONE-WITH-CARRYOVER |
+| PI-5 Close approval | `sprints/PI-5/CURRENT_PI.md` | Owner approved 2026-06-09; DONE-WITH-CARRYOVER |
+| Sprint 1 spec dir | `specs/2026-06-06-symlink-portability/` | Closed |
 | Sprint kickoff prompt | `feature-prompts/SPRINT-05-KICKOFF.prompt.md` | Reference |
 | F-03 prompt | `feature-prompts/F-03-pi5-kickoff.prompt.md` | Reference |
 | F-04 prompt | `feature-prompts/F-04-symlink-portability-clarify-spec.prompt.md` | Reference |

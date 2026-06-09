@@ -1,11 +1,11 @@
 # Executive State
 
-Generated date: 2026-06-08
-Current PI: PI-4 (Alpha Release)
+Generated date: 2026-06-09
+Current PI: PI-5 (Brownfield Adoption + Anti-Conflict + Stakeholder Discipline)
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
 Active focus: Finish implementation of 'azure-decommission'
 
-PI progress: 4/6 commitments complete (67%)
+PI progress: 5/8 commitments complete (62%)
 
 ## Spec Pipeline
 
@@ -144,8 +144,9 @@ _none -- no dispatches without outcome older than 24h_
 
 ## Next Milestones
 
-- Domain skills marked as reference examples (DEFERRED to PI-5)
-- GitHub Actions Node.js deprecation resolved (DEFERRED to PI-5)
+- SDD-034 content-shingle dedup upgrade remains open and carried forward
+- SDD-039 Article VII wording clarification remains open and carried forward; requires ADR/owner approval before constitution wording changes
+- PI-4 housekeeping remains open and carried forward: domain-skill annotations and GitHub Actions Node.js deprecation bump
 
 ---
 

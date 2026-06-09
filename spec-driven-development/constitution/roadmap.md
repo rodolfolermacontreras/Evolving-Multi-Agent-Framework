@@ -1,7 +1,7 @@
 ---
 version: '1.0.0'
 ratified: 2026-05-12
-last_amended: 2026-06-06
+last_amended: 2026-06-09
 ---
 
 # Roadmap
@@ -89,7 +89,7 @@ lifecycle end-to-end on a real feature.
 
 ---
 
-## PI-4: Alpha Release (current, started 2026-06-02)
+## PI-4: Alpha Release (closed 2026-06-06)
 
 - [x] Live UI v2 dashboard (sprint-first layout, 90 tests, v3.0)
 - [x] Root README.md with quickstart and bootstrap pointer
@@ -99,6 +99,21 @@ lifecycle end-to-end on a real feature.
 - [ ] GitHub Actions Node.js deprecation resolved (DEFERRED to PI-5)
 
 **PI-4 close decision: DONE-WITH-DEFERRED.** Ratified by owner 2026-06-06 (Level-2, via Executive Manager). Three of five PI-4 commitments shipped (dashboard, README + roadmap, filesystem data contracts). Two cosmetic / maintenance commitments deferred to PI-5: domain-skill annotation, Node.js Actions bump. No PI-4 commitment was loosened or scope-reduced; the deferred items are explicitly out of Sprint 4's accepted scope.
+
+---
+
+## PI-5: Brownfield Adoption + Anti-Conflict + Stakeholder Discipline (current, closed 2026-06-09)
+
+- [x] Sprint 1: Brownfield portability -- SDD-016 host-link and SDD-017 dev-env-manager hire
+- [x] Sprint 2: Anti-conflict gates and host integration hardening -- SDD-019, SDD-020, SDD-027, SDD-028, SDD-029
+- [x] Sprint 3: UI Lifecycle Variant and Sprint 6 completion bundle -- SDD-018, SDD-032, SDD-033
+- [x] Sprint 4: ADO/GitHub Bridge and Model Upgrade Discipline -- SDD-022, SDD-015
+- [x] Sprint 5: Self-review, stakeholder defense, and first-class user gates -- SDD-021, SDD-023, SDD-025
+- [ ] SDD-034 content-shingle dedup upgrade remains open and carried forward
+- [ ] SDD-039 Article VII wording clarification remains open and carried forward; requires ADR/owner approval before constitution wording changes
+- [ ] PI-4 housekeeping remains open and carried forward: domain-skill annotations and GitHub Actions Node.js deprecation bump
+
+**PI-5 close decision: DONE-WITH-CARRYOVER.** Ratified by owner 2026-06-09 via Executive Manager. Evidence: owner message "Approve" in response to the Executive Manager recommendation to approve Sprint 9 push and close PI-5 as DONE-WITH-CARRYOVER. All planned PI-5 sprints and primary Sprint 9 validation contracts are closed; SDD-034, SDD-039, and PI-4 housekeeping remain open and explicit carry-forward.
 
 ---
 

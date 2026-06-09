@@ -711,3 +711,16 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 - Owner ratification: REQUIRED BEFORE PUSH; pending for Sprint 9 close. PI-close approval is also pending and must be explicit before PI-5 is marked closed.
 - Notes: Sprint 9 shipped the final planned PI-5 process-discipline bundle without silent REQUIRED deferral, constitution edits, new dependencies, ledger schema migration, external writes, or push. The sprint's main lesson is that user gates now need to be treated as first-class close evidence: green tests and generated state confirm implementation health, but they do not substitute for owner approval on push or PI close. F-20 therefore closes Sprint 9 locally, leaves PI-5 active, and recommends an owner decision on DONE-WITH-CARRYOVER because three non-primary carry-forward items remain open.
 - Next: Owner reviews Sprint 9 close and PI-5 close-readiness. After explicit approval, push Sprint 9 close or mark PI-5 closed per the owner's chosen posture.
+
+### PI-5 -- CLOSED / DONE-WITH-CARRYOVER
+
+- Date: 2026-06-09
+- Owner: Principal Executive Manager (recommendation); Owner Rodolfo Lerma (approval); Principal Software Developer (close stamp)
+- Owner approval evidence: owner message via Executive Manager, 2026-06-09, "Approve", in response to recommendation to approve Sprint 9 push and close PI-5 as DONE-WITH-CARRYOVER.
+- Sprint 9 push approval: APPROVED 2026-06-09 by the same owner message.
+- PI-5 close approval: APPROVED 2026-06-09 by the same owner message.
+- Final PI-5 status: CLOSED / DONE-WITH-CARRYOVER, not clean DONE.
+- Sprints completed: Sprint 1 Brownfield Portability; Sprint 2 Anti-Conflict Gates + Carry-Over; Sprint 3 UI Lifecycle Variant; Sprint 4 ADO/GitHub Bridge + Model Upgrade Discipline; Sprint 5 Self-Review + Stakeholder Defense + Uniform Gates.
+- Validation at approval stamp: `python spec-driven-development/cli/schema_lint.py` -> Schema lint clean; `python -m pytest spec-driven-development/ --tb=no -q` -> 337 passed, 2 skipped.
+- Carry-forward remains open: SDD-034 (content-shingle dedup upgrade), SDD-039 (Article VII wording clarification; requires ADR/owner approval for constitution wording), and PI-4 housekeeping (domain-skill annotations; GitHub Actions Node.js deprecation bump).
+- Notes: This block records the missing owner gate only. It does not mark SDD-034, SDD-039, or PI-4 housekeeping DONE, and it does not change implementation behavior.

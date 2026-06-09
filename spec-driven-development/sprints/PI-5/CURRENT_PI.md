@@ -1,20 +1,22 @@
 ---
 id: SDD-PI-5-CURRENT_PI-sprint
 type: sprint
-status: active
+status: done
 owner: principal-product-manager
-updated: 2026-06-08
+updated: 2026-06-09
 sprint: PI-5
 ---
 
 # PI-5: Brownfield Adoption + Anti-Conflict + Stakeholder Discipline
 
-- Status: **Active pending owner PI-close approval** (Sprint 1 CLOSED 2026-06-06, Sprint 2 CLOSED 2026-06-07, Sprint 3 CLOSED 2026-06-08, Sprint 4 CLOSED 2026-06-08, Sprint 5 CLOSED 2026-06-08; no planned sprints remaining)
+- Status: **CLOSED / DONE-WITH-CARRYOVER** (Sprint 1 CLOSED 2026-06-06, Sprint 2 CLOSED 2026-06-07, Sprint 3 CLOSED 2026-06-08, Sprint 4 CLOSED 2026-06-08, Sprint 5 CLOSED 2026-06-08; no planned sprints remaining)
 - Theme: Make the framework safely adoptable by other teams, harden the gates that prevent two features from colliding, and finish the discipline tools surfaced by the Scott Feedback Bundle.
 - Started: 2026-06-06
+- Closed: 2026-06-09
 - Owner: principal-executive-manager
 - Predecessor: PI-4 (Alpha Release) closed DONE-WITH-DEFERRED on 2026-06-06.
 - Authorization: Owner directive 2026-06-06 in Sprint 5 worker session (consolidated F-03 -> F-05 execution); EM rollup 2026-06-05.
+- Close approval evidence: owner message via Executive Manager, 2026-06-09, "Approve", in response to recommendation to approve Sprint 9 push and close PI-5 as DONE-WITH-CARRYOVER.
 
 ---
 
@@ -390,15 +392,17 @@ constitutional amendment (Article XII, principles.md `1.2.0` -> `1.3.0`),
 **SDD-021**: DONE (`session-self-review` skill plus sprint-close guidance in `sprints/README.md`; transcript-independent evidence model; durable promotion through lesson-capture, `/evolve`, PM triage, `/constitution`, or approved implementation tasks; no direct mutation behavior).
 **SDD-025**: DONE (`stakeholder-pressure-defense` skill plus stakeholder-pressure response template; Level-2 or irreversible shortcut pressure routes to SDD-014 Friction Analysis; repeated pressure lessons route through SDD-021 self-review promotion targets).
 **Carry-forward**: SDD-034 remains carried forward (content-shingle dedup upgrade). SDD-039 remains carried forward (Article VII wording clarification; requires ADR/owner approval for constitution wording). PI-4 carry-over housekeeping remains carried forward (domain-skill annotations; GitHub Actions Node.js deprecation bump). None were pulled into Sprint 9.
-**Owner gates**: Sprint 9 push approval is **REQUIRED BEFORE PUSH** and remains pending. PI-5 close approval is **REQUIRED BEFORE PI CLOSE** and remains pending. F-20 does not push and does not close PI-5.
+**Owner gates**: Sprint 9 push approval **APPROVED 2026-06-09**. PI-5 close approval **APPROVED 2026-06-09**. Evidence: owner message via Executive Manager, 2026-06-09, "Approve", in response to recommendation to approve Sprint 9 push and close PI-5 as DONE-WITH-CARRYOVER.
 **Retro (one paragraph)**: Sprint 9 closed the final planned PI-5 process-discipline bundle without a constitution edit, new dependency, ledger schema migration, external write, or push. The sequencing held: SDD-023 established a uniform gate vocabulary first, SDD-021 reused it for self-review findings, and SDD-025 reused both the gate model and SDD-014 Friction Analysis path for pressure defense. F-19 kept implementation deliberately small: gate parsing and executive visibility stayed inside existing stdlib CLI surfaces, while self-review and pressure-defense shipped as skills/templates. F-20's self-review finding is `none` for durable promotion: no repeated tool friction, no missing approval workaround, and no agent/skill delta beyond the shipped artifacts. Remaining PI-close risk is governance, not implementation: the owner must decide whether to close PI-5 as DONE-WITH-CARRYOVER because SDD-034, SDD-039, and PI-4 housekeeping remain open.
 
-## PI-5 Close-Readiness Recommendation (F-20)
+## PI-5 Close Decision (Approved 2026-06-09)
 
-- Status: **READY FOR OWNER PI-CLOSE DECISION; PI-5 remains ACTIVE until approved.**
-- Recommended close posture: **DONE-WITH-CARRYOVER**, not automatic DONE, because all five planned PI-5 sprints and primary Sprint 9 validation contracts are closed, but SDD-034, SDD-039, and PI-4 housekeeping remain open.
-- Evidence ready for owner review: Sprint 5 close block above; `exec/sprint-progress.md` Sprint 9 CLOSED block; generated `exec/state.md`, `exec/state.html`, and `exec/work-index.md`; schema lint clean; full pytest green at 337 passed, 2 skipped.
-- Owner approvals still needed: Sprint 9 push approval before any push; PI-5 close approval before changing PI-5 from active to closed; separate ADR/owner approval before any future Article VII constitution wording change for SDD-039.
+- Status: **CLOSED / DONE-WITH-CARRYOVER.**
+- Owner approval evidence: owner message via Executive Manager, 2026-06-09, "Approve", in response to recommendation to approve Sprint 9 push and close PI-5 as DONE-WITH-CARRYOVER.
+- Sprint 9 push approval: **APPROVED** by the same owner message.
+- PI-5 close approval: **APPROVED** by the same owner message.
+- Close posture: **DONE-WITH-CARRYOVER**, not clean DONE, because all five planned PI-5 sprints and primary Sprint 9 validation contracts are closed, but SDD-034, SDD-039, and PI-4 housekeeping remain open.
+- Carry-forward items that remain open: SDD-034 (content-shingle dedup upgrade), SDD-039 (Article VII wording clarification; requires ADR/owner approval for constitution wording), and PI-4 housekeeping (domain-skill annotations; GitHub Actions Node.js deprecation bump).
 
 ---
 

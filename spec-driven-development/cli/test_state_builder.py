@@ -225,7 +225,7 @@ class TestFullBuild:
         assert result == 0
 
         state_md = (sdd / "exec" / "state.md").read_text(encoding="utf-8")
-        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        today = datetime.now().strftime("%Y-%m-%d")
 
         # All 7 sections present
         assert "# Executive State" in state_md

@@ -1,7 +1,7 @@
 ---
 id: SDD-20260608PRESSUREDEFENSE-spec
 type: spec
-status: active
+status: done
 owner: principal-architect
 updated: 2026-06-08
 feature: 2026-06-08-stakeholder-pressure-defense
@@ -11,7 +11,7 @@ feature: 2026-06-08-stakeholder-pressure-defense
 
 - Date: 2026-06-08
 - Author: Principal Architect + Principal Product Manager
-- Status: APPROVED FOR PLAN/TASKS
+- Status: DONE 2026-06-08
 - Priority: P3
 - Sprint: PI-5 / Sprint 5 (= overall Sprint 9)
 - Spec ID: SDD-025

@@ -1,7 +1,7 @@
 ---
 id: SDD-20260608PRESSUREDEFENSE-tasks
 type: tasks
-status: active
+status: done
 owner: principal-software-developer
 updated: 2026-06-08
 feature: 2026-06-08-stakeholder-pressure-defense

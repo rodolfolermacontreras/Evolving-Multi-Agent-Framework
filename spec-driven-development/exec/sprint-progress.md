@@ -678,3 +678,36 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 - Level-2/manual gates: no constitution edit, ledger schema migration, dependency, M365 permission change, production-branch behavior change, push behavior change, external-write behavior change, or SDD-014 template edit landed. No owner approval was required for F-19 implementation beyond the existing locked design contracts.
 - Notes: F-19 intentionally kept SDD-021/SDD-025 skill/template-first and kept SDD-023 enforcement inside existing stdlib CLI surfaces. Generated executive files were regenerated only through `python spec-driven-development/cli/state_builder.py`.
 - Next: F-20 should close Sprint 9 and produce PI-5 close-readiness, including owner approval request before any push.
+
+### F-20 -- sprint9-close -- DONE
+
+- Date: 2026-06-08
+- Owner: Principal Software Developer
+- Commits: (this commit)
+- Files changed: Sprint 9 close paths only: backlog, three Sprint 9 spec dirs, PI-5 CURRENT_PI, sprint-progress, and generated exec state.
+- Tests: 337 -> 337 (2 skipped)
+- Schema lint: `python spec-driven-development/cli/schema_lint.py` -> Schema lint clean
+- Validation: Sprint 9 close criteria satisfied: SDD-023 14/14 REQUIRED + 3/3 manual; SDD-021 12/12 REQUIRED + 3/3 manual; SDD-025 13/13 REQUIRED + 3/3 manual; BACKLOG updated; CURRENT_PI Sprint 5 closed; exec state regenerated via `state_builder.py`; no REQUIRED item deferred.
+- PI-5 close-readiness: READY FOR OWNER PI-CLOSE DECISION; PI-5 remains ACTIVE pending explicit owner PI-close approval. Recommended posture is DONE-WITH-CARRYOVER because SDD-034, SDD-039, and PI-4 housekeeping remain open.
+- Owner gates: Sprint 9 push approval REQUIRED BEFORE PUSH and pending. PI-5 close approval REQUIRED BEFORE PI CLOSE and pending.
+- Self-review summary: none promoted. No durable process delta beyond the shipped SDD-021/023/025 artifacts; remaining action is owner governance approval, not implementation remediation.
+- Next: Request owner approval for Sprint 9 push and separate owner decision on PI-5 close posture. Do not push until approval is recorded.
+
+### Sprint 9 -- CLOSED
+
+- Date: 2026-06-08
+- Owner: Principal Executive Manager (lead); PM + Architect owned design; SW Dev + workers owned implementation and close
+- Features completed: F-16, F-17, F-18, F-19, F-20
+- Commits: `6345366`, `82689d3`, `18c9015`, `7fd190e`, `9a04c92`, (this commit)
+- Tests: 331 -> 337; F-20 rerun `python -m pytest spec-driven-development/ --tb=no -q` -> 337 passed, 2 skipped
+- Schema lint: `python spec-driven-development/cli/schema_lint.py` -> Schema lint clean
+- Validation: SDD-023 14/14 REQUIRED + 3/3 manual; SDD-021 12/12 REQUIRED + 3/3 manual; SDD-025 13/13 REQUIRED + 3/3 manual
+- ADRs: none introduced in Sprint 9
+- PI-5 status: ACTIVE pending owner PI-close approval; all planned PI-5 sprints are locally closed
+- SDD-023: DONE (validation.md is the authoritative user-gate surface; schema_lint validates gate fields/status/evidence; generated exec surfaces expose pending/blocked gates)
+- SDD-021: DONE (session-self-review skill and sprint-close guidance define transcript-independent review records and route durable changes through governed promotion paths)
+- SDD-025: DONE (stakeholder-pressure-defense skill and response template route approval pressure through SDD-023 gates and Level-2 pressure through SDD-014 Friction Analysis)
+- Carry-forward: SDD-034 remains open (content-shingle dedup upgrade); SDD-039 remains open (Article VII wording clarification; constitution edit requires ADR/owner approval); PI-4 housekeeping remains open (domain-skill annotations and GitHub Actions Node.js deprecation bump)
+- Owner ratification: REQUIRED BEFORE PUSH; pending for Sprint 9 close. PI-close approval is also pending and must be explicit before PI-5 is marked closed.
+- Notes: Sprint 9 shipped the final planned PI-5 process-discipline bundle without silent REQUIRED deferral, constitution edits, new dependencies, ledger schema migration, external writes, or push. The sprint's main lesson is that user gates now need to be treated as first-class close evidence: green tests and generated state confirm implementation health, but they do not substitute for owner approval on push or PI close. F-20 therefore closes Sprint 9 locally, leaves PI-5 active, and recommends an owner decision on DONE-WITH-CARRYOVER because three non-primary carry-forward items remain open.
+- Next: Owner reviews Sprint 9 close and PI-5 close-readiness. After explicit approval, push Sprint 9 close or mark PI-5 closed per the owner's chosen posture.

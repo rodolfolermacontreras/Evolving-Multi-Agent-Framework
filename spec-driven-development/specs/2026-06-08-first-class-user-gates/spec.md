@@ -1,7 +1,7 @@
 ---
 id: SDD-20260608USERGATES-spec
 type: spec
-status: active
+status: done
 owner: principal-architect
 updated: 2026-06-08
 feature: 2026-06-08-first-class-user-gates
@@ -11,7 +11,7 @@ feature: 2026-06-08-first-class-user-gates
 
 - Date: 2026-06-08
 - Author: Principal Architect + Principal Product Manager
-- Status: APPROVED FOR PLAN/TASKS
+- Status: DONE 2026-06-08
 - Priority: P1
 - Sprint: PI-5 / Sprint 5 (= overall Sprint 9)
 - Spec ID: SDD-023

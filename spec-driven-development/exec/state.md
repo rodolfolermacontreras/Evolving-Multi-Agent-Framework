@@ -35,10 +35,10 @@ PI progress: 4/6 commitments complete (67%)
 | serial-clarify-spec-gate | REVIEW | done | Status: done but RETRO missing |
 | ado-github-bridge | REVIEW | done | Status: done but RETRO missing |
 | azure-decommission | IMPLEMENT | active | validation 17% (4/23) |
-| end-of-session-self-review | REVIEW | active | validation 83% (15/18) |
-| first-class-user-gates | REVIEW | active | validation 85% (17/20) |
+| end-of-session-self-review | REVIEW | done | Status: done but RETRO missing |
+| first-class-user-gates | REVIEW | done | Status: done but RETRO missing |
 | model-upgrade-discipline | REVIEW | done | Status: done but RETRO missing |
-| stakeholder-pressure-defense | REVIEW | active | validation 84% (16/19) |
+| stakeholder-pressure-defense | REVIEW | done | Status: done but RETRO missing |
 | sprint-6-completion | DONE | done | validation 100%, RETRO present |
 | ui-lifecycle-variant | DONE | done | Status: done, RETRO present |
 

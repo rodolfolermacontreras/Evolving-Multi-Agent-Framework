@@ -1,7 +1,7 @@
 ---
 id: SDD-20260608SELFREVIEW-plan
 type: plan
-status: active
+status: done
 owner: principal-software-developer
 updated: 2026-06-08
 feature: 2026-06-08-end-of-session-self-review

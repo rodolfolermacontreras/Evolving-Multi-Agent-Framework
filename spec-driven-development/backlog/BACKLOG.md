@@ -54,6 +54,14 @@ Source: Owner ratification 2026-06-08 via Executive Manager routing (Option 3 hy
 
 Source: Owner Q&A session via EM 2026-06-08 (Azure decommission Q1; Scott UI re-evaluation Q2; drag-to-reorder correction; SDD-039 timing). See `docs/TEAM-SHARE-ONEPAGER.md` (committed at `22b6d22`) for downstream context.
 
+### PI-6 Dashboard Bundle (filed 2026-06-10)
+
+| ID | Title | Priority | R | I | C | E | RICE | Sprint | Status | Notes |
+|----|-------|----------|---|---|---|---|------|--------|--------|-------|
+| SDD-040 | state_builder.py parser fix + auto-refresh | P1 | H | H | H | S | -- | PI-6 Sprint 10 | Allocated to PI-6 Sprint 10 as anchor feature. | Two defects: (1) Active-focus heuristic is stale -- picks features by frontmatter alone, doesn't reflect "what shipped most recently" (current dashboard still says `Active focus: azure-decommission` after PI-5 close at `8417818`); need to flip to commit-recency-or-validation-state signal. (2) `state.html` is static -- re-runs only when `state_builder.py` is invoked manually; need a serve-mode auto-refresh (file-watch on `specs/**`, `sprints/**`, `exec/**`, `ledger/fleet.db` OR a polling refresh in the HTTP handler). Owner verbatim 2026-06-10 via EM: "Still says Active focus: azure-decommission (stale -- that wrapped up). Static -- refreshes only when you re-run state_builder.py." Stdlib-only constraint (Article V) applies: no `watchdog`, no `flask`; use `urllib`/`http.server` and either polling or a stdlib file-mtime sweep. |
+
+Source: Owner direction 2026-06-10 via EM; first dashboard work after PI-5 close (`8417818`).
+
 ## P2 - Should Have
 
 | ID | Title | Priority | Reach | Impact | Confidence | Effort | RICE | Sprint | Status |

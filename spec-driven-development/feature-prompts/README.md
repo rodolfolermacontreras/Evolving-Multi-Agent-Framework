@@ -3,7 +3,7 @@ id: feature-prompts-index
 type: index
 status: active
 owner: principal-executive-manager
-updated: 2026-06-09
+updated: 2026-06-10
 ---
 
 # Feature Prompts -- Index
@@ -99,6 +99,24 @@ ADR drafting if confirmed). Per owner direction 2026-06-08 (Option 3
 hybrid), **no REQUIRED-item deferral is permitted from Sprint 7 close**,
 and Sprint 7 close requires **explicit owner approval before any close
 commit is pushed**.
+
+### Sprint 10 -- PI-6 Sprint 1 / Dashboard parser fix + auto-refresh (SDD-040)
+
+| Order | File | Owner | Status |
+|-------|------|-------|--------|
+| 0 | [SPRINT-10-KICKOFF.prompt.md](SPRINT-10-KICKOFF.prompt.md) | Principal Executive Manager (lead) | READY (gated on Sprint 10 HARD PREREQUISITE) |
+
+Prerequisite: **PI-5 must be closed at commit `8417818`** (PI-5 CLOSED /
+DONE-WITH-CARRYOVER 2026-06-09), **PI-6 must be launched** via
+[`../sprints/PI-6/CURRENT_PI.md`](../sprints/PI-6/CURRENT_PI.md), tests at
+or above 337, schema lint clean, **SDD-040 filed in BACKLOG under "PI-6
+Dashboard Bundle (filed 2026-06-10)"** as P1 allocated to PI-6 Sprint 10,
+SDD-036/037/038 still present in BACKLOG as PI-6 candidates, and **owner
+approval recorded** for Sprint 10 start. F-21 (CLARIFY/SPEC/PLAN/TASKS),
+F-22 (IMPLEMENT + QA), and F-23 (sprint close + SPRINT-11 kickoff
+authoring) run sequentially. SDD-040 has a stdlib-only constraint
+(Article V): no `watchdog`, no `flask` -- auto-refresh must use polling,
+on-request refresh, stdlib file-mtime sweep, or Server-Sent Events.
 
 ---
 

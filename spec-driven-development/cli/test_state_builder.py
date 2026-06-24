@@ -32,6 +32,7 @@ from cli.state_builder import (
     build,
     build_index,
     detect_current_sprint,
+    derive_next_action,
     load_backlog,
     load_decisions,
     load_features,
@@ -43,6 +44,7 @@ from cli.state_builder import (
     parse_args,
     render_html,
     render_markdown,
+    served_html_with_refresh,
 )
 
 SCHEMA_SQL = (Path(__file__).resolve().parent.parent / "ledger" / "schema.sql").read_text(
@@ -370,6 +372,210 @@ class TestDeterministic:
         run2 = (sdd / "exec" / "state.md").read_text(encoding="utf-8")
 
         assert run1 == run2
+
+
+class TestActiveFocusHeuristic:
+    """SDD-040 R1: current sprint active-focus helper."""
+
+    def _seed_pi6_focus_root(self, tmp_path: Path) -> Path:
+        sdd = _seed_sdd_root(tmp_path)
+
+        (sdd / "constitution" / "roadmap.md").write_text(
+            "# Roadmap\n\n"
+            "## PI-6: Dashboard Reinvestment (current)\n\n"
+            "- [ ] Dashboard Parser Fix + Auto-Refresh (SDD-040)\n",
+            encoding="utf-8",
+        )
+        pi_dir = sdd / "sprints" / "PI-6"
+        pi_dir.mkdir(parents=True)
+        (pi_dir / "CURRENT_PI.md").write_text(
+            "# PI-6\n\n"
+            "## Sprint Allocation\n\n"
+            "| Sprint | Overall | Title | Items |\n"
+            "|--------|---------|-------|-------|\n"
+            "| PI-6 Sprint 1 | Sprint 10 | Parser fix | SDD-040 |\n"
+            "| PI-6 Sprint 2 | Sprint 11 | Lifecycle | SDD-036 |\n",
+            encoding="utf-8",
+        )
+        (sdd / "backlog" / "BACKLOG.md").write_text(
+            "# Product Backlog\n\n"
+            "| ID | Title | Priority | R | I | C | E | RICE | Sprint | Status | Notes |\n"
+            "|----|-------|----------|---|---|---|---|------|--------|--------|-------|\n"
+            "| SDD-040 | state_builder.py parser fix + auto-refresh | P1 | H | H | H | S | -- | PI-6 Sprint 10 | Allocated | Anchor |\n"
+            "| SDD-036 | lifecycle dashboard | P1 | H | H | M | L | -- | PI-6 Sprint 11 | Planned | Later |\n",
+            encoding="utf-8",
+        )
+
+        stale = sdd / "specs" / "2026-06-08-azure-decommission"
+        stale.mkdir(parents=True)
+        (stale / "spec.md").write_text(
+            "# Feature Spec: Azure Decommission\n\n- Status: Implementing\n\nSpec ID: SDD-035\n",
+            encoding="utf-8",
+        )
+        (stale / "plan.md").write_text(
+            "# Plan\n\nAny later-found reference filed as P3 docs bug (SDD-040+), not a spec re-open.\n",
+            encoding="utf-8",
+        )
+        focused = sdd / "specs" / "2026-06-10-state-builder-fixes"
+        focused.mkdir(parents=True)
+        (focused / "spec.md").write_text(
+            "# Feature Spec: SDD-040 -- state_builder.py parser fix + auto-refresh\n\n"
+            "- Status: Approved\n\nSpec ID: SDD-040\n",
+            encoding="utf-8",
+        )
+        (focused / "validation.md").write_text(
+            "# Validation\n\n## Required Items\n\n- [ ] **R1 -- Active-focus combination rule.**\n",
+            encoding="utf-8",
+        )
+        return sdd
+
+    def test_scope_guard_prefers_current_sprint_sdd040_over_stale_frontmatter(
+        self, tmp_path: Path
+    ) -> None:
+        sdd = self._seed_pi6_focus_root(tmp_path)
+        pi = PIBlock(name="PI-6", title="Dashboard", is_current=True)
+        action = derive_next_action(sdd, pi, load_features(sdd))
+
+        assert "SDD-040" in action[0]
+        assert "azure" not in action[0].lower()
+
+    def test_prefers_unchecked_required_validation_in_scoped_candidates(
+        self, tmp_path: Path
+    ) -> None:
+        sdd = self._seed_pi6_focus_root(tmp_path)
+        second = sdd / "specs" / "2026-06-10-second-current-item"
+        second.mkdir(parents=True)
+        (second / "spec.md").write_text(
+            "# Feature Spec: SDD-041\n\n- Status: Approved\n\nSpec ID: SDD-041\n",
+            encoding="utf-8",
+        )
+        (second / "validation.md").write_text(
+            "# Validation\n\n## Required Items\n\n- [ ] **R1 -- Still open.**\n",
+            encoding="utf-8",
+        )
+        focused_validation = sdd / "specs" / "2026-06-10-state-builder-fixes" / "validation.md"
+        focused_validation.write_text(
+            "# Validation\n\n## Required Items\n\n- [x] **R1 -- Done.**\n",
+            encoding="utf-8",
+        )
+        current_pi = sdd / "sprints" / "PI-6" / "CURRENT_PI.md"
+        current_pi.write_text(
+            current_pi.read_text(encoding="utf-8").replace("SDD-040", "SDD-040, SDD-041"),
+            encoding="utf-8",
+        )
+        backlog = sdd / "backlog" / "BACKLOG.md"
+        backlog.write_text(
+            backlog.read_text(encoding="utf-8")
+            + "| SDD-041 | second current item | P1 | H | H | H | S | -- | PI-6 Sprint 10 | Allocated | Anchor |\n",
+            encoding="utf-8",
+        )
+
+        pi = PIBlock(name="PI-6", title="Dashboard", is_current=True)
+        action = derive_next_action(sdd, pi, load_features(sdd))
+
+        assert "SDD-041" in action[0]
+
+    def test_git_recency_breaks_ties_with_bounded_subprocess(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        sdd = self._seed_pi6_focus_root(tmp_path)
+        newer = sdd / "specs" / "2026-06-10-newer-current-item"
+        newer.mkdir(parents=True)
+        (newer / "spec.md").write_text(
+            "# Feature Spec: SDD-041\n\n- Status: Approved\n\nSpec ID: SDD-041\n",
+            encoding="utf-8",
+        )
+        (newer / "validation.md").write_text(
+            "# Validation\n\n## Required Items\n\n- [ ] **R1 -- Still open.**\n",
+            encoding="utf-8",
+        )
+        current_pi = sdd / "sprints" / "PI-6" / "CURRENT_PI.md"
+        current_pi.write_text(
+            current_pi.read_text(encoding="utf-8").replace("SDD-040", "SDD-040, SDD-041"),
+            encoding="utf-8",
+        )
+        backlog = sdd / "backlog" / "BACKLOG.md"
+        backlog.write_text(
+            backlog.read_text(encoding="utf-8")
+            + "| SDD-041 | newer current item | P1 | H | H | H | S | -- | PI-6 Sprint 10 | Allocated | Anchor |\n",
+            encoding="utf-8",
+        )
+
+        def fake_run(cmd, **kwargs):
+            assert cmd[:4] == ["git", "log", "-1", "--format=%ct"]
+            assert kwargs["timeout"] <= 2
+            path_arg = cmd[-1]
+            stamp = "200\n" if "newer-current-item" in path_arg else "100\n"
+            return subprocess.CompletedProcess(cmd, 0, stdout=stamp, stderr="")
+
+        monkeypatch.setattr("cli.state_builder.subprocess.run", fake_run)
+        pi = PIBlock(name="PI-6", title="Dashboard", is_current=True)
+        action = derive_next_action(sdd, pi, load_features(sdd))
+
+        assert "SDD-041" in action[0]
+
+    def test_falls_back_to_existing_chain_when_helper_returns_none(self, tmp_path: Path) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        pi = PIBlock(
+            name="PI-2",
+            title="Fleet Maturity and CLI",
+            is_current=True,
+            checkboxes=[(True, "Fleet Ledger v0.1"), (False, "state_builder.py")],
+        )
+
+        action = derive_next_action(sdd, pi, load_features(sdd))
+
+        assert action == (
+            "Start: 'state_builder.py'",
+            "Highest-priority unstarted commitment in PI-2. Run /clarify to start the lifecycle.",
+            "spec-driven-development/constitution/roadmap.md",
+        )
+
+
+class TestServeModeRefresh:
+    """SDD-040 R3: served refresh is handler-side and static output stays static."""
+
+    def test_served_html_includes_meta_refresh_with_default_5_seconds(self) -> None:
+        htm = served_html_with_refresh(_render_html_with_features(live=True, port=8765), 5)
+        assert '<meta http-equiv="refresh" content="5">' in htm
+        assert '<meta http-equiv="refresh" content="20">' not in htm
+
+    def test_served_html_uses_refresh_seconds_override(self) -> None:
+        htm = served_html_with_refresh(_render_html_with_features(live=True, port=8765), 17)
+        assert '<meta http-equiv="refresh" content="17">' in htm
+
+    def test_static_html_written_without_meta_refresh(self, tmp_path: Path) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        result = main(["--sdd-root", str(sdd)])
+        assert result == 0
+        htm = (sdd / "exec" / "state.html").read_text(encoding="utf-8")
+        assert 'http-equiv="refresh"' not in htm
+
+    def test_served_refresh_adds_no_script_tag(self) -> None:
+        htm = served_html_with_refresh(_render_html_with_features(live=True, port=8765), 5)
+        assert "<script" not in htm.lower()
+
+
+class TestRefreshCadenceFlag:
+    """SDD-040 R5: serve-only refresh cadence argparse contract."""
+
+    def test_parse_args_serve_refresh_seconds_default_is_5(self) -> None:
+        args = parse_args(["serve"])
+        assert args.refresh_seconds == 5
+
+    def test_parse_args_serve_refresh_seconds_accepts_positive_integer(self) -> None:
+        args = parse_args(["serve", "--refresh-seconds", "12"])
+        assert args.refresh_seconds == 12
+
+    def test_parse_args_serve_refresh_seconds_rejects_zero(self) -> None:
+        with pytest.raises(SystemExit) as exc_info:
+            parse_args(["serve", "--refresh-seconds", "0"])
+        assert exc_info.value.code == 2
+
+    def test_parse_args_serve_refresh_seconds_rejects_negative(self) -> None:
+        with pytest.raises(SystemExit) as exc_info:
+            parse_args(["serve", "--refresh-seconds", "-1"])
+        assert exc_info.value.code == 2
 
 
 class TestStdlibOnly:

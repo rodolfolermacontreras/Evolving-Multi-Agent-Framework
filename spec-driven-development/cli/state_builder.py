@@ -560,14 +560,189 @@ def load_decisions(sdd_root: Path, limit: int = 50) -> list[dict]:
 # Next-action heuristic (state-dashboard feature)
 # ---------------------------------------------------------------------------- #
 
-def derive_next_action(sdd_root: Path, pi: PIBlock | None, features: list[Feature]) -> tuple[str, str, str | None]:
+_SPRINT_LABEL_RE = re.compile(r"Sprint\s+(\d+)", re.IGNORECASE)
+_BACKLOG_ID_RE = re.compile(r"\b[A-Z]{2,}-\d{2,3}\b")
+
+
+def _feature_relpath(sdd_root: Path, feature: Feature) -> str:
+    return str(feature.feature_dir.relative_to(repo_root_for(sdd_root))).replace("\\", "/")
+
+
+def _first_current_pi_sprint_anchor(sdd_root: Path, pi: PIBlock | None) -> tuple[str, list[str]]:
+    if not pi:
+        return "", []
+    current_pi_path = sdd_root / "sprints" / pi.name / "CURRENT_PI.md"
+    if not current_pi_path.is_file():
+        return "", []
+    text = current_pi_path.read_text(encoding="utf-8", errors="replace")
+    anchors: list[tuple[int, str, list[str]]] = []
+    for line in text.splitlines():
+        if not line.lstrip().startswith("|"):
+            continue
+        if pi.name not in line or "Sprint" not in line:
+            continue
+        ids = _BACKLOG_ID_RE.findall(line)
+        sprint_match = _SPRINT_LABEL_RE.search(line)
+        if not ids or not sprint_match:
+            continue
+        sprint_number = int(sprint_match.group(1))
+        anchors.append((sprint_number, f"Sprint {sprint_number}", ids))
+    if not anchors:
+        return "", []
+    _, sprint_label, ids = sorted(anchors, key=lambda item: item[0])[0]
+    return sprint_label, ids
+
+
+def _active_sprint_pi(sdd_root: Path) -> PIBlock | None:
+    sprints_dir = sdd_root / "sprints"
+    if not sprints_dir.is_dir():
+        return None
+    candidates: list[PIBlock] = []
+    for current_pi_path in sprints_dir.glob("PI-*/CURRENT_PI.md"):
+        try:
+            text = current_pi_path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        if re.search(r"status:\s*active", text, re.IGNORECASE) or "Status: **ACTIVE**" in text:
+            candidates.append(PIBlock(
+                name=current_pi_path.parent.name,
+                title="",
+                is_current=True,
+            ))
+    if not candidates:
+        return None
+    return sorted(candidates, key=lambda item: int(item.name.split("-", 1)[1]), reverse=True)[0]
+
+
+def _backlog_ids_for_sprint(sdd_root: Path, pi_name: str, sprint_label: str) -> list[str]:
+    backlog_path = sdd_root / "backlog" / "BACKLOG.md"
+    if not backlog_path.is_file() or not pi_name or not sprint_label:
+        return []
+    ids: list[str] = []
+    for line in backlog_path.read_text(encoding="utf-8", errors="replace").splitlines():
+        if not line.lstrip().startswith("|"):
+            continue
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if len(cells) < 9:
+            continue
+        item_id = cells[0]
+        sprint = cells[8]
+        if _BACKLOG_ID_RE.fullmatch(item_id) and pi_name in sprint and sprint_label in sprint:
+            ids.append(item_id)
+    return ids
+
+
+def _feature_for_backlog_id(sdd_root: Path, features: list[Feature], backlog_id: str) -> Feature | None:
+    needle = backlog_id.lower()
+    weak_match: Feature | None = None
+    strong_re = re.compile(rf"(?:^# .*\b{re.escape(backlog_id)}\b|Spec ID:\s*{re.escape(backlog_id)}\b)", re.IGNORECASE | re.MULTILINE)
+    for feature in features:
+        if needle in feature.name.lower() or needle in feature.feature_dir.name.lower():
+            return feature
+        for artifact_name in ("clarify.md", "spec.md", "validation.md", "tasks.md", "plan.md"):
+            artifact = feature.feature_dir / artifact_name
+            if not artifact.is_file():
+                continue
+            try:
+                text = artifact.read_text(encoding="utf-8", errors="replace")
+                if strong_re.search(text):
+                    return feature
+                if weak_match is None and needle in text.lower():
+                    weak_match = feature
+            except OSError:
+                continue
+    return weak_match
+
+
+def _unchecked_required_count(feature_dir: Path) -> int:
+    validation_path = feature_dir / "validation.md"
+    if not validation_path.is_file():
+        return 0
+    try:
+        text = validation_path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return 0
+    return len(re.findall(r"^\s*- \[ \]\s+\*\*R\d+\b", text, re.MULTILINE))
+
+
+def _git_recency_timestamp(sdd_root: Path, feature_dir: Path) -> int:
+    rel = str(feature_dir.relative_to(repo_root_for(sdd_root))).replace("\\", "/")
+    try:
+        result = subprocess.run(
+            ["git", "log", "-1", "--format=%ct", "--", rel],
+            capture_output=True,
+            text=True,
+            check=False,
+            cwd=str(repo_root_for(sdd_root)),
+            timeout=2,
+        )
+    except (subprocess.SubprocessError, OSError):
+        return 0
+    if result.returncode != 0:
+        return 0
+    try:
+        return int(result.stdout.strip().splitlines()[0])
+    except (IndexError, ValueError):
+        return 0
+
+
+def _derive_current_sprint_focus(
+    sdd_root: Path,
+    pi: PIBlock | None,
+    features: list[Feature],
+) -> tuple[str, str, str | None] | None:
+    anchor_pi = _active_sprint_pi(sdd_root) or pi
+    sprint_label, current_pi_ids = _first_current_pi_sprint_anchor(sdd_root, anchor_pi)
+    if not current_pi_ids or not anchor_pi:
+        return None
+    backlog_ids = set(_backlog_ids_for_sprint(sdd_root, anchor_pi.name, sprint_label))
+    scoped_ids = [item_id for item_id in current_pi_ids if item_id in backlog_ids]
+    if not scoped_ids:
+        scoped_ids = current_pi_ids
+
+    candidates: list[tuple[str, Feature, int]] = []
+    for item_id in scoped_ids:
+        feature = _feature_for_backlog_id(sdd_root, features, item_id)
+        if feature is None:
+            continue
+        candidates.append((item_id, feature, _unchecked_required_count(feature.feature_dir)))
+    if not candidates:
+        return None
+
+    required_candidates = [candidate for candidate in candidates if candidate[2] > 0]
+    pool = required_candidates or candidates
+    enriched = [
+        (item_id, feature, unchecked_required, _git_recency_timestamp(sdd_root, feature.feature_dir))
+        for item_id, feature, unchecked_required in pool
+    ]
+    item_id, feature, unchecked_required, _ = sorted(
+        enriched,
+        key=lambda candidate: (-candidate[3], scoped_ids.index(candidate[0])),
+    )[0]
+    if unchecked_required:
+        action = f"Finish validation for '{feature.name}' ({item_id})"
+        reason = (
+            f"Current {anchor_pi.name} {sprint_label} anchor with {unchecked_required} "
+            "unchecked REQUIRED validation item(s)."
+        )
+    else:
+        action = f"Continue current sprint anchor '{feature.name}' ({item_id})"
+        reason = f"Current {anchor_pi.name} {sprint_label} anchor from CURRENT_PI and BACKLOG."
+    return action, reason, _feature_relpath(sdd_root, feature)
+
+
+def _derive_next_action_fallback(
+    sdd_root: Path,
+    pi: PIBlock | None,
+    features: list[Feature],
+) -> tuple[str, str, str | None]:
     in_flight = [f for f in features if f.stage == "IMPLEMENT"]
     if in_flight:
         f = in_flight[0]
         return (
             f"Finish implementation of '{f.name}'",
             f"Only feature in IMPLEMENT stage ({f.notes}). Quality gate: do not start new work while a feature is in flight.",
-            str(f.feature_dir.relative_to(repo_root_for(sdd_root))).replace("\\", "/"),
+            _feature_relpath(sdd_root, f),
         )
     in_review = [f for f in features if f.stage == "REVIEW"]
     if in_review:
@@ -575,7 +750,7 @@ def derive_next_action(sdd_root: Path, pi: PIBlock | None, features: list[Featur
         return (
             f"Close out '{f.name}' (currently in REVIEW)",
             f"Two-stage review then mark DONE. {f.notes}",
-            str(f.feature_dir.relative_to(repo_root_for(sdd_root))).replace("\\", "/"),
+            _feature_relpath(sdd_root, f),
         )
     if pi:
         for done, label in pi.checkboxes:
@@ -587,6 +762,13 @@ def derive_next_action(sdd_root: Path, pi: PIBlock | None, features: list[Featur
                 )
     return ("Open PI-2 planning or pick from backlog", "No active in-flight work.",
             "spec-driven-development/backlog/BACKLOG.md")
+
+
+def derive_next_action(sdd_root: Path, pi: PIBlock | None, features: list[Feature]) -> tuple[str, str, str | None]:
+    sprint_focus = _derive_current_sprint_focus(sdd_root, pi, features)
+    if sprint_focus:
+        return sprint_focus
+    return _derive_next_action_fallback(sdd_root, pi, features)
 
 
 # ---------------------------------------------------------------------------- #
@@ -2327,9 +2509,22 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
 # Live HTTP server (state-dashboard feature)
 # ---------------------------------------------------------------------------- #
 
+def served_html_with_refresh(html_doc: str, refresh_seconds: int) -> str:
+    if refresh_seconds < 1:
+        raise ValueError("refresh_seconds must be positive")
+    meta = f'<meta http-equiv="refresh" content="{refresh_seconds}">'
+    if re.search(r'<meta http-equiv="refresh" content="\d+">', html_doc):
+        return re.sub(r'<meta http-equiv="refresh" content="\d+">', meta, html_doc, count=1)
+    return html_doc.replace(
+        '<meta name="viewport" content="width=device-width, initial-scale=1">',
+        '<meta name="viewport" content="width=device-width, initial-scale=1">\n' + meta,
+        1,
+    )
+
 class DashboardHandler(BaseHTTPRequestHandler):
     server_port: int = 8765
     sdd_root: Path = DEFAULT_SDD_ROOT
+    refresh_seconds: int = 5
 
     def log_message(self, format, *args):  # noqa: A002
         sys.stderr.write(f"[bridge] {self.address_string()} {format % args}\n")
@@ -2360,7 +2555,8 @@ class DashboardHandler(BaseHTTPRequestHandler):
         if path in ("/", "/index.html"):
             try:
                 info = build(sdd_root=self.sdd_root, write=False, live_html=True, port=self.server_port)
-                self._send(200, info["html"].encode("utf-8"))
+                html_doc = served_html_with_refresh(info["html"], self.refresh_seconds)
+                self._send(200, html_doc.encode("utf-8"))
             except Exception as exc:
                 msg = f"<h1>Build failed</h1><pre>{html.escape(repr(exc))}</pre>"
                 self._send(500, msg.encode("utf-8"))
@@ -2383,7 +2579,10 @@ def _port_available(host: str, port: int) -> bool:
 
 
 def serve(sdd_root: Path, host: str = "127.0.0.1", port: int = 8765,
-          open_browser: bool = True) -> int:
+          open_browser: bool = True, refresh_seconds: int = 5) -> int:
+    if refresh_seconds < 1:
+        print("ERROR: --refresh-seconds must be a positive integer", file=sys.stderr)
+        return 1
     if not _port_available(host, port):
         for offset in range(1, 6):
             if _port_available(host, port + offset):
@@ -2392,10 +2591,11 @@ def serve(sdd_root: Path, host: str = "127.0.0.1", port: int = 8765,
             print(f"ERROR: no available port near {port} on {host}", file=sys.stderr); return 1
     DashboardHandler.server_port = port
     DashboardHandler.sdd_root = sdd_root
+    DashboardHandler.refresh_seconds = refresh_seconds
     httpd = ThreadingHTTPServer((host, port), DashboardHandler)
     url = f"http://{host}:{port}/"
     print(f"Bridge dashboard live at {url}")
-    print("Each request rebuilds state from artifacts. Page auto-refreshes every 20s.")
+    print(f"Each request rebuilds state from artifacts. Page auto-refreshes every {refresh_seconds}s.")
     print("Press Ctrl+C to stop.")
     if open_browser:
         try: webbrowser.open(url)
@@ -2764,6 +2964,18 @@ def _resolve_sdd_root(arg: str | None) -> Path:
     if arg:
         return Path(arg).expanduser().resolve()
     return DEFAULT_SDD_ROOT
+
+
+def _positive_int(value: str) -> int:
+    try:
+        parsed = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("must be a positive integer") from exc
+    if parsed < 1:
+        raise argparse.ArgumentTypeError("must be a positive integer")
+    return parsed
+
+
 def parse_args(argv: list[str]) -> argparse.Namespace:
     """Parse command-line arguments (separated per CLI-PATTERN.md)."""
     parser = argparse.ArgumentParser(
@@ -2784,6 +2996,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     sub_serve = sub.add_parser("serve", help="Run a local HTTP server that rebuilds on every request.")
     sub_serve.add_argument("--host", default="127.0.0.1")
     sub_serve.add_argument("--port", type=int, default=8765)
+    sub_serve.add_argument("--refresh-seconds", type=_positive_int, default=5,
+                           help="Positive meta-refresh cadence in seconds for serve mode. Default: 5.")
     sub_serve.add_argument("--no-open", action="store_true")
 
     sub_build_index = sub.add_parser("build-index",
@@ -2815,7 +3029,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.cmd == "serve":
         return serve(sdd_root=sdd_root, host=args.host, port=args.port,
-                     open_browser=not args.no_open)
+                     open_browser=not args.no_open,
+                     refresh_seconds=args.refresh_seconds)
 
     if args.cmd == "count":
         return cmd_count(args, sdd_root)

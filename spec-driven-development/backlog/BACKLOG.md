@@ -62,6 +62,14 @@ Source: Owner Q&A session via EM 2026-06-08 (Azure decommission Q1; Scott UI re-
 
 Source: Owner direction 2026-06-10 via EM; first dashboard work after PI-5 close (`8417818`).
 
+### PI-6 Dashboard Bundle follow-up (filed 2026-06-24)
+
+| ID | Title | Priority | R | I | C | E | RICE | Sprint | Status | Notes |
+|----|-------|----------|---|---|---|---|------|--------|--------|-------|
+| SDD-041 | True browser drag-and-drop backlog reorder | P1 | H | H | M | M | -- | PI-6 Sprint 13 (follow-up) | Allocated to PI-6 Sprint 13 (or a dedicated follow-up sprint) -- builds directly on SDD-036. Not Sprint 12 (that's SDD-037 ledger visibility). | Owner direction 2026-06-24: SDD-036 shipped keyboard-accessible reorder controls (accessibility-first CLARIFY choice), not true mouse drag. Owner wants real drag-and-drop. Builds on the SDD-036 foundation already shipped: `depends_on` frontmatter, dependency-lock, append-only `reorder-audit.jsonl`, force-as-Level-2 governance (ADR-017). This adds the browser drag/drop UI layer ON TOP of that safeguard machinery -- same audit trail, same dependency-lock, same force-override path, just mouse-driven instead of keyboard-driven. Stdlib-only constraint (Article V) means vanilla JS drag/drop events, no framework. Keyboard control stays as the accessible fallback. |
+
+Source: Owner direction 2026-06-24 via EM -- true drag follow-up to SDD-036 (shipped keyboard-only at db25eec).
+
 ## P2 - Should Have
 
 | ID | Title | Priority | Reach | Impact | Confidence | Effort | RICE | Sprint | Status |

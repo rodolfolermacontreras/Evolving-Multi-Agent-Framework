@@ -1,7 +1,7 @@
 ---
 id: SDD-20260610STATEBUILDERFIX-plan
 type: plan
-status: active
+status: done
 owner: principal-architect
 updated: 2026-06-10
 feature: 2026-06-10-state-builder-fixes
@@ -11,49 +11,21 @@ feature: 2026-06-10-state-builder-fixes
 
 - Spec Reference: [`spec.md`](./spec.md) (SDD-040)
 - Sprint: PI-6 / Sprint 1 (= overall Sprint 10), feature slot F-21
-- Author: Principal Architect (EM-routed Sprint 10 prep)
+- Author: Principal Architect (EM-routed Sprint 10 F-21)
 - Date: 2026-06-10
-
----
-
-> **SKELETON PLAN -- 2026-06-10.** The approach and file scope below
-> are final at scaffold. The Risk Assessment table and any detailed
-> design choices (active-focus signal source, auto-refresh mechanism,
-> cadence) are TODO blocks that reference open CLARIFY questions in
-> [`clarify.md`](./clarify.md). The full plan is finalized at F-21
-> after CLARIFY closes.
+- Status: **APPROVED** -- implementation remains F-22
 
 ---
 
 ## Approach Summary
 
-SDD-040 ships two defect fixes inside one feature against
-`cli/state_builder.py`:
+SDD-040 ships two defect fixes inside one feature against `cli/state_builder.py`:
 
-- **Parser fix (Defect 1).** Replace the stale active-focus
-  heuristic in `derive_next_action` (line 562) with a heuristic that
-  consumes a runtime signal (commit recency, validation-completeness,
-  sprint-frontmatter, or a combination per CLARIFY Q-A). The fix is
-  **additive**: a new helper function is introduced; the existing
-  `derive_next_action` body is preserved as the final fallback path
-  and is not modified in place beyond replacing its first-pick line
-  with a call to the new helper.
-- **Auto-refresh (Defect 2).** Extend the serve subcommand
-  (`cli/state_builder.py serve`, line ~2385) with an auto-refresh
-  mechanism per CLARIFY Q-B at the cadence chosen in Q-C, constrained
-  to stdlib-only per Q-D. The existing `DashboardHandler.do_GET`
-  (line 2358) is preserved and continues to rebuild on every request;
-  the new behavior layers on top (either client-side polling via
-  HTML meta-refresh or `<script>`, server-side mtime sweep on a
-  background thread, or SSE -- F-21 picks).
+- **Parser fix (Defect 1).** Add a small active-focus helper that applies the locked combination rule from [`clarify.md`](./clarify.md) Q-A: current PI/Sprint allocation first, unchecked REQUIRED validation items second, bounded git-log recency third, current sprint anchor fourth, and existing fallback chain last. The existing `derive_next_action` fallback chain is preserved for helper-none cases.
+- **Serve-mode auto-refresh (Defect 2).** Add handler-side meta refresh to served HTML only. The existing HTTP handler continues to rebuild on every GET; the browser refresh drives those GETs at the configured cadence. No JavaScript, SSE, watcher/background thread, or third-party web/file dependency is introduced.
+- **Cadence control.** Add a serve-only `--refresh-seconds` flag with default `5` and positive integer validation. Non-serve invocation does not accept or use the flag.
 
-The two defects touch different code paths inside the same file and
-can be implemented in parallel within a single session. Fleet
-dispatch is **not** justified for this feature (small scope, single
-file, two tasks that serialize at the import level even if logically
-independent). The F-22 IMPLEMENT session runs sequentially:
-T-040-02 (parser fix) -> T-040-03 (auto-refresh) -> T-040-04
-(cadence flag) -> T-040-05 (regression) -> T-040-06 (close).
+The two defects touch different concerns inside the same file and should be implemented sequentially in F-22. Fleet dispatch is not justified: this is a small, single-file CLI/handler change with a tight regression surface.
 
 ---
 
@@ -61,148 +33,84 @@ T-040-02 (parser fix) -> T-040-03 (auto-refresh) -> T-040-04
 
 | Phase | Goal | Dependencies | Deliverables |
 |-------|------|--------------|--------------|
-| 0 | CLARIFY (F-21) | None | [`clarify.md`](./clarify.md) Q-A through Q-E answered; [`spec.md`](./spec.md), [`validation.md`](./validation.md), [`tasks.md`](./tasks.md) finalized; validation contract LOCKED |
-| 1 | Parser fix (active-focus heuristic) | Phase 0 (Q-A locked) | `cli/state_builder.py` additive helper + `cli/test_state_builder.py` new tests |
-| 2 | Auto-refresh handler | Phase 0 (Q-B, Q-C locked); serial with Phase 1 in same session | `cli/state_builder.py` additive handler + `cli/test_state_builder.py` new tests |
-| 3 | Cadence flag | Phase 2 complete | argparse flag on `serve` + test |
-| 4 | Regression sweep | Phases 1-3 | Byte-identical static-output check + existing-tests-green check |
-| 5 | Sprint 10 close | Phases 1-4 | Full pytest, schema_lint, state regen, smoke test, owner pre-push approval |
+| 0 | CLARIFY/SPEC/PLAN/TASKS finalization (F-21) | Owner-approved Sprint 10 kickoff decisions | [`clarify.md`](./clarify.md) done; [`spec.md`](./spec.md) approved; [`validation.md`](./validation.md) locked; [`tasks.md`](./tasks.md) ready |
+| 1 | Baseline read and test-first setup | Phase 0 | Document baseline behavior in [`tasks.md`](./tasks.md); add failing tests for R1/R3/R5/R2 before code |
+| 2 | Parser fix | Phase 1 | Add helper + prepend call in `derive_next_action`; tests for scope guard, unchecked validation, git recency tie-break, fallback preservation |
+| 3 | Serve-mode meta refresh | Phase 2 | Add served-only meta refresh injection and tests proving static HTML remains unchanged |
+| 4 | Cadence flag | Phase 3 | Add `serve --refresh-seconds`; default 5; reject zero/negative/non-integer inputs before server start |
+| 5 | Regression and close verification | Phases 2-4 | Existing tests green; full pytest; schema lint; state regen; smoke test; serve-mode manual check; owner pre-push approval request |
 
 ---
 
-## File Scope (constrained, additive only)
+## File Scope (Constrained, Additive Only)
 
 | File | Change Type | R-Items | Owner |
 |------|-------------|---------|-------|
-| `cli/state_builder.py` | **Additive only**: new active-focus heuristic helper (Phase 1) + new auto-refresh handler logic in serve mode (Phase 2) + new argparse flag for cadence (Phase 3). Existing `render_markdown` (line 528), `derive_next_action` (line 562 -- body preserved; first-pick line replaced with a call to the new helper), `DashboardHandler.do_GET` (line 2358 -- body preserved; additive layering only), and `serve` (line 2385 -- body preserved; new flag plumbed through) all stay byte-stable in body. | R1, R3, R4, R5 | T-040-02, T-040-03, T-040-04 |
-| `cli/test_state_builder.py` | **New tests only**: new test classes for active-focus heuristic, auto-refresh handler, and cadence flag. Existing test classes and test names untouched. | R1, R3, R5, R6, R7 | T-040-02, T-040-03, T-040-04, T-040-05 |
+| `cli/state_builder.py` | Additive helper for active-focus combination rule; serve-only meta refresh injection; serve-only cadence flag. Existing fallback chain, static render contract, security headers, and count/build-index behavior preserved. | R1, R2, R3, R4, R5, R6 | T-040-02, T-040-03, T-040-04, T-040-05 |
+| `cli/test_state_builder.py` | New tests only. Existing test classes and test names remain untouched. | R1, R2, R3, R5, R6, R7 | T-040-02, T-040-03, T-040-04, T-040-05 |
 
-### Files NOT in scope
+### Files Not In Scope
 
-- `cli/state_builder.py` outside the four enumerated additive sites.
-- All other files under `cli/` (`fleet.py`, `dedup.py`, `qa.py`,
-  `retro.py`, `schema_lint.py`, etc.).
-- `constitution/` (no constitution edit expected).
-- `backlog/BACKLOG.md`, `sprints/PI-6/CURRENT_PI.md`,
-  `exec/sprint-progress.md` -- updates happen at Sprint 10 close
-  (F-23), not in F-22 implementation.
-- `exec/state.md`, `exec/state.html`, `exec/work-index.md` --
-  regenerated artifacts, not source.
+- All other files under `cli/` (`fleet.py`, `dedup.py`, `qa.py`, `retro.py`, `schema_lint.py`, etc.).
+- `constitution/`.
+- `backlog/BACKLOG.md`, `sprints/PI-6/CURRENT_PI.md`, and `exec/sprint-progress.md` during F-22 implementation. Sprint-close updates happen in F-23.
+- `exec/state.md`, `exec/state.html`, `exec/work-index.md` except as regenerated artifacts during F-22/F-23 verification.
+- SDD-036/037/038/034/039 and Azure decommission artifacts.
 
 ---
 
-## Lock-Surface Protections (DO NOT MODIFY)
+## Lock-Surface Protections (Do Not Modify In Place)
 
-The following surfaces in `cli/state_builder.py` are **LOCKED** by
-PI-4 / PI-5 work and **MUST NOT** be modified in their existing
-bodies by any T-040-NN task. Verification is by `git diff` against
-the PI-5 close commit (`8417818`) at T-040-05 (regression sweep) and
-T-040-06 (close verification).
+The following surfaces in `cli/state_builder.py` are protected by prior dashboard and filesystem-data-contract work. F-22 should add helpers and small call-site plumbing; it should not rewrite these surfaces.
 
-### Render path (PI-4 / SDD-FDC-001 lock surface)
+### Render Path
 
-- **`render_markdown(...)` -- line 528.** The canonical 7-section
-  output format is locked by SDD-002 (the original state_builder
-  feature). SDD-040 does not modify this function's body. The new
-  active-focus signal source feeds the existing `next_action[0]`
-  call site at line 621 unchanged.
-- **`derive_next_action(sdd_root, pi, features)` -- line 562.**
-  Existing body (IMPLEMENT > REVIEW > PI commitments > backlog
-  fallback chain) is preserved. The new active-focus helper from
-  R1 is layered as a **prepended** check at the top of the function
-  body; if the new helper returns a non-None result, that result is
-  returned. If it returns None (no recent commit signal, no
-  validation gap, no sprint match -- per Q-A), the existing fallback
-  chain runs unchanged. This guarantees AC-4 (byte-identical
-  non-serve output for cases where the new helper has nothing to
-  contribute).
+- **`render_markdown(...)`.** The canonical 7-section markdown output remains unchanged except for data supplied through the existing `next_action` parameter.
+- **`derive_next_action(sdd_root, pi, features)`.** Existing fallback order remains intact. The new helper is a prepended check: if it returns a candidate, return it; if it returns `None`, run the existing chain.
 
-### Serve / HTTP handler (PI-3 / state-dashboard lock surface)
+### Serve / HTTP Handler
 
-- **`DashboardHandler` class -- line 2330.** Class identity, class
-  variables (`server_port`, `sdd_root`), `_send` body, and security
-  headers (REC-2 from SECURITY-REVIEW.md) are all preserved.
-- **`DashboardHandler.do_GET` -- line 2358.** Existing body
-  (rebuilds state on every GET via `build(... write=False,
-  live_html=True ...)`) is preserved. Any auto-refresh hook the
-  chosen Q-B mechanism needs is **additive** -- e.g. a new
-  `_send_with_refresh_meta` helper, or a new background thread
-  started in `serve()`, or a new `text/event-stream` branch added
-  alongside the existing routes (`/`, `/healthz`, `/favicon.ico`,
-  404).
-- **`serve(sdd_root, host, port, open_browser)` -- line 2385.**
-  Existing body (port-availability sweep, ThreadingHTTPServer
-  bring-up, browser open, KeyboardInterrupt handling) is preserved.
-  The new cadence flag (R5) is plumbed through the existing argparse
-  surface at `sub_serve.add_argument(...)` near line 2784; no
-  rename, no default change for `--port` or `--no-open`.
+- **`DashboardHandler._send`.** Security headers are preserved. No CSP relaxation is needed because the chosen mechanism uses meta refresh, not JavaScript.
+- **`DashboardHandler.do_GET`.** Existing rebuild-on-GET behavior remains the server-side freshness path. Meta refresh is layered into the returned HTML only for root page responses.
+- **`serve(...)`.** Existing host/port/no-open behavior is preserved. The new cadence argument is plumbed through without changing `--host`, `--port`, or `--no-open` defaults.
 
-### Test surface (PI-3 / PI-4 lock)
+### Test Surface
 
-- **All existing test classes and test names** in
-  `cli/test_state_builder.py` are preserved. New tests are added
-  as **new** test classes (e.g. `TestActiveFocusHeuristic`,
-  `TestAutoRefreshHandler`, `TestRefreshCadenceFlag`).
-- **No existing test fixtures** are renamed or have their behavior
-  changed.
+- Existing test classes and test names in `cli/test_state_builder.py` are preserved. New coverage lands in new classes such as `TestActiveFocusHeuristic`, `TestServeModeRefresh`, and `TestRefreshCadenceFlag`.
 
-### Article XII (UI Lifecycle Variant) compatibility
+### Article XII Compatibility
 
-- SDD-040 does **NOT** carry the `ui-variant: true` frontmatter
-  marker. Article XII relaxation does not apply. Article X
-  (Validation Is a Pre-Implementation Contract) is fully binding:
-  validation contract locks at F-21, no post-lock loosening.
-- The serve-mode dashboard surface is the same surface SDD-018
-  retroactively validated. SDD-040 changes runtime behavior (when
-  the page rebuilds) but does not change the visible 7-section
-  contract from SDD-002 or the FDC-001 frontmatter contract.
+- SDD-040 does not carry the `ui-variant: true` marker.
+- Article X is fully binding: validation contract locks at F-21, and no REQUIRED item may be loosened or silently deferred after lock.
 
 ---
 
 ## Parallel-Safe Tasks
 
-SDD-040 tasks **all serialize on `cli/state_builder.py`** -- they
-are not parallel-safe across the file boundary. Within the same
-file, the parser-fix logic (T-040-02) and the auto-refresh logic
-(T-040-03) touch different functions and can be implemented in
-either order, but fleet dispatch is not justified (single file,
-small diff, single session is the right shape per Article VII).
-
-- T-040-02 (parser fix in `derive_next_action` + new helper)
-- T-040-03 (auto-refresh in `DashboardHandler` / `serve` + new
-  handler logic)
-- T-040-04 (cadence flag in argparse near line 2784)
-- T-040-05 (regression sweep)
-- T-040-06 (close verification)
-
-All listed sequentially in [`tasks.md`](./tasks.md).
+None. All F-22 implementation tasks serialize on `cli/state_builder.py` and the same test module. Parallel dispatch would add coordination cost without reducing risk.
 
 ## Sequential Tasks
 
-(See [`tasks.md`](./tasks.md) for full breakdown.) Order:
-
-1. T-040-01 (read existing state, document baseline heuristic)
-2. T-040-02 (parser fix)
-3. T-040-03 (auto-refresh)
-4. T-040-04 (cadence flag)
-5. T-040-05 (regression sweep)
-6. T-040-06 (close)
+1. T-040-01 -- baseline read and task baseline documentation.
+2. T-040-02 -- parser fix tests and implementation.
+3. T-040-03 -- serve-mode meta refresh tests and implementation.
+4. T-040-04 -- cadence flag tests and implementation.
+5. T-040-05 -- regression sweep.
+6. T-040-06 -- close verification and owner-gate evidence.
 
 ---
 
 ## Risk Assessment
 
-> **TODO -- finalized at F-21 after CLARIFY closes.** Initial risks
-> identified at scaffold; mitigation strength depends on the Q-A,
-> Q-B, Q-C answers.
-
 | Risk | Probability | Impact | Mitigation |
 |------|-------------|--------|------------|
-| R-1: File-watch on Windows (no stdlib inotify) | MEDIUM | LOW | Constrain Q-B to polling, mtime sweep, handler-side rebuild, or SSE (all stdlib-compatible on Windows). Article V binding. |
-| R-2: PI-4/PI-5 lock surface drift | LOW | HIGH | Enumerate DO-NOT-MODIFY surfaces above; verify by `git diff` at T-040-05 and T-040-06. |
-| R-3: Refresh cadence too aggressive (CPU cost) | LOW | LOW | Q-C decides default; R5 binds a CLI flag for override. |
-| R-4: New helper returns None for all PI-6 work and dashboard regresses to existing fallback chain | LOW | MEDIUM | Smoke test (M1) gates close: regenerated state.md must NOT say "Active focus: azure-decommission". T-040-06 enforces. |
-| R-5: CLARIFY surfaces a constitutional question (e.g. on the stdlib boundary) | LOW | HIGH | Per `SPRINT-10-KICKOFF.prompt.md` Hard Constraints item 4: draft an ADR, route to owner, split constitution work into a separate feature. SDD-040 does not absorb a constitution edit. |
+| R-1: Active-focus helper selects wrong feature because scope guard parsing is too broad | Medium | Medium | Parse current PI/Sprint allocation from PI-6 CURRENT_PI and BACKLOG; tests must prove SDD-040 outranks stale azure-decommission-style frontmatter and that fallback chain still runs when helper returns no candidate. |
+| R-2: Bounded `git log` recency becomes flaky on fresh clones or shallow history | Medium | Low | Git recency is tie-break only, not primary source. If subprocess fails or returns no match, helper falls back to current sprint anchor and then existing chain. Tests mock `subprocess.run`. |
+| R-3: Meta refresh accidentally appears in static `state.html` | Low | Medium | Inject only in served HTML path. R3 tests served HTML has meta refresh; R2/R6 tests static output does not. |
+| R-4: Invalid cadence values start the server | Low | Low | Positive integer validation is part of argument parsing or a pre-serve validation branch. Tests cover zero, negative, and non-integer rejection. |
+| R-5: CSP/security tests fail because implementation uses JavaScript | Low | High | Q-B prohibits JavaScript. Existing `TestSecurityAudit.test_no_script_tags` must pass unchanged. |
+| R-6: Scope creep into SDD-036/037/038 or carryover work | Medium | High | File scope excludes those paths. F-22 must stop as OWNER-ATTENTION if asked to absorb lifecycle pipeline, dispatch cards, aesthetic tokens, dedup upgrade, Article VII wording, or Azure decommission work. |
+| R-7: Non-serve output comparison is over-applied to intentional active-focus changes | Medium | Low | R2 explicitly applies byte-identical comparison only to controlled fixtures where helper returns no candidate. Real repo active-focus may intentionally differ. |
 
 ---
 
@@ -210,30 +118,26 @@ All listed sequentially in [`tasks.md`](./tasks.md).
 
 | Phase | Estimate (S/M/L) | Notes |
 |-------|------------------|-------|
-| 0 (CLARIFY) | S | 5 questions, owner-routed via EM; lock at F-21 close. |
-| 1 (parser fix) | S | One additive helper + 2-4 unit tests. |
-| 2 (auto-refresh) | M | One mechanism per Q-B; complexity depends on whether SSE is chosen vs polling/mtime. |
-| 3 (cadence flag) | S | One argparse arg + 1 unit test. |
-| 4 (regression) | S | Diff harness + run existing tests. |
-| 5 (close) | S | Standard close pattern (pytest + schema_lint + state regen + validation audit + smoke test + owner approval). |
+| 0 (F-21 finalization) | S | Completed by this artifact set. |
+| 1 (baseline + tests) | S | Documentation plus test-first setup. |
+| 2 (parser fix) | S | One helper, one call-site prepend, mocked git recency tests. |
+| 3 (meta refresh) | S | Meta tag injection is simpler than watcher/SSE/polling thread. |
+| 4 (cadence flag) | S | One argparse arg or equivalent validation branch. |
+| 5 (regression/close) | S | Standard Sprint 10 validation commands and manual check. |
 
-Total backlog estimate was **S** (small). Plan confirms S is
-achievable provided Q-B does not pick SSE; if SSE is chosen, total
-moves to **M**.
+Total remains **S**. The no-JS/no-watcher decision avoids the complexity that would have moved the feature to M.
 
 ---
 
 ## Validation Criteria
 
-(See [`validation.md`](./validation.md) for the full SKELETON.
-Each AC in [`spec.md`](./spec.md) maps to one or more REQUIRED
-rows there.)
+See [`validation.md`](./validation.md), locked at F-21. Summary:
 
-- [ ] AC-1 -> R1 (active-focus signal source)
-- [ ] AC-2 -> R3, R5 (auto-refresh mechanism + cadence)
-- [ ] AC-3 -> R4 (stdlib-only constraint)
-- [ ] AC-4 -> R2, R6 (backwards compat + existing tests)
-- [ ] AC-5 -> R7, R8, R9 (new tests, test count, schema lint)
-- [ ] Smoke test M1 + serve verification M2 + owner approval M3
+- [ ] AC-1 -> R1, R7 (active-focus combination rule)
+- [ ] AC-2 -> R3, R7 (serve-only meta refresh)
+- [ ] AC-3 -> R5, R7 (positive cadence flag)
+- [ ] AC-4 -> R4 (stdlib-only)
+- [ ] AC-5 -> R2, R6 (non-serve compatibility)
+- [ ] AC-6 -> R8, R9, M1, M2, M3 (full close evidence)
 
-All bind to concrete tests / commits / SHAs at F-21 lock.
+All checkboxes intentionally remain unchecked until F-22 supplies evidence.

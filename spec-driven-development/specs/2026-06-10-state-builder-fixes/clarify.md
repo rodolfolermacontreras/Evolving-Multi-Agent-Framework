@@ -1,7 +1,7 @@
 ---
 id: SDD-20260610STATEBUILDERFIX-clarification
 type: clarification
-status: active
+status: done
 owner: principal-product-manager
 updated: 2026-06-10
 feature: 2026-06-10-state-builder-fixes
@@ -9,30 +9,21 @@ feature: 2026-06-10-state-builder-fixes
 
 # CLARIFY: SDD-040 -- state_builder.py parser fix + auto-refresh
 
-- Date: 2026-06-10 (SKELETON)
+- Date: 2026-06-10
 - Authors: Principal Product Manager + Principal Architect (jointly, at F-21)
-- Status: **OPEN** -- 5 questions; closes at F-21 in a fresh Sprint 10 session
+- Status: **DONE** -- Q-A through Q-E answered; validation contract locked in [`validation.md`](./validation.md)
 - Spec ID: SDD-040
-- Sprint: PI-6 / Sprint 1 (= overall Sprint 10), F-21 (pass 1 of 1; CLARIFY+SPEC+PLAN+TASKS fused per [`SPRINT-10-KICKOFF.prompt.md`](../../feature-prompts/SPRINT-10-KICKOFF.prompt.md) section 2)
-- Gating: lock of [`validation.md`](./validation.md), finalization of [`spec.md`](./spec.md) Acceptance Criteria + Out-of-Scope, finalization of [`plan.md`](./plan.md) Risk Assessment, and finalization of [`tasks.md`](./tasks.md) per-task scope, all unblocked once Q-A through Q-E are answered.
+- Sprint: PI-6 / Sprint 1 (= overall Sprint 10), F-21 (CLARIFY+SPEC+PLAN+TASKS fused per [`SPRINT-10-KICKOFF.prompt.md`](../../feature-prompts/SPRINT-10-KICKOFF.prompt.md) section 2)
+- Decision source: EM-synthesized owner-approved Sprint 10 kickoff decision, 2026-06-10.
 
 ---
 
 ## Ground Rules
 
-- **One question at a time is the author discipline.** The five
-  questions below are pre-staged at scaffold so the owner can answer
-  them in a single round, but the owner may answer them one at a time
-  across multiple turns within F-21 if preferred. PM and Architect
-  each give a recommendation per question. Where they agree, a
-  **Joint recommendation** is recorded.
-- This file is the **only** source of truth for SDD-040 design
-  decisions. Anything decided in chat or hallway must be back-filled
-  here before [`spec.md`](./spec.md) finalizes at F-21.
-- All five questions inherit the Article V (stdlib-only) constraint
-  per Q-D and the Article VII (one feature, one session) constraint
-  per [`SPRINT-10-KICKOFF.prompt.md`](../../feature-prompts/SPRINT-10-KICKOFF.prompt.md)
-  section 0.
+- This file is the source of truth for SDD-040 design decisions.
+- All answers are attributed to the EM-synthesized owner-approved Sprint 10 kickoff decision dated 2026-06-10.
+- Article V (stdlib-only CLI) and Article VII (context isolation) remain binding.
+- No implementation is authorized by this file alone; implementation starts only after the locked validation contract in [`validation.md`](./validation.md) is honored by F-22.
 
 ---
 
@@ -40,252 +31,114 @@ feature: 2026-06-10-state-builder-fixes
 
 ### Q-A: Active-focus signal source
 
-**Context.** The current `derive_next_action` heuristic in
-`cli/state_builder.py` (line 562) picks the active focus by walking
-features by stage in fixed order: IMPLEMENT > REVIEW > PI commitments
-> backlog fallback. Source of truth is **frontmatter only** -- no
-runtime signal. Owner verbatim 2026-06-10 via EM proves this fails
-empirically: "Still says Active focus: azure-decommission (stale --
-that wrapped up)." azure-decommission shipped at PI-5 close
-(`8417818`, 2026-06-09); the dashboard still picks it because the
-heuristic does not know what shipped most recently.
+**Context.** The current `derive_next_action` heuristic in `cli/state_builder.py` picks the active focus by walking features by stage in fixed order: IMPLEMENT > REVIEW > PI commitments > backlog fallback. Source of truth is frontmatter only -- no runtime signal. Owner verbatim 2026-06-10 via EM proves this fails empirically: "Still says Active focus: azure-decommission (stale -- that wrapped up)." azure-decommission shipped at PI-5 close (`8417818`, 2026-06-09); the dashboard still picks it because the heuristic does not know what shipped most recently.
 
-Four candidate signal sources, alone or in combination:
+**PM recommendation:** Use a combination rule. Scope the candidate set first to the current PI/Sprint allocation, which for Sprint 10 is SDD-040 per [`CURRENT_PI.md`](../../sprints/PI-6/CURRENT_PI.md) and [`BACKLOG.md`](../../backlog/BACKLOG.md). Within that guarded scope, prefer features with unchecked REQUIRED validation items. If more than one candidate remains, tie-break by bounded git-log recency. If the runtime helper produces no candidate, fall back to the current sprint anchor and then the existing fallback chain.
 
-- **(a) Commit recency.** Read `git log --since=N` (or a similar
-  bounded window) and pick the spec dir whose files were most
-  recently touched. Reflects "what is being worked on right now"
-  even if the spec dir is still in active status.
-- **(b) Validation-completeness.** Pick the spec dir with REQUIRED
-  items still unchecked in its `validation.md`. Reflects "what is
-  still owed contractually." If multiple, tie-break by sprint
-  frontmatter or commit recency.
-- **(c) Sprint frontmatter.** Pick by the currently-open sprint
-  per `sprints/PI-N/CURRENT_PI.md`. Reflects "what is planned for
-  this sprint" -- but this is essentially what the current heuristic
-  already does, and it is the source of the staleness.
-- **(d) Combination.** A composite rule -- for example, "most recent
-  commit among spec dirs with REQUIRED items unchecked, falling back
-  to the current sprint's anchor feature if none qualify."
+**Architect recommendation:** Same. The scope guard prevents unrelated stale specs, including Azure decommission work, from outranking the current Sprint 10 feature. Bounded git-log recency is acceptable under Article V when invoked through stdlib `subprocess.run`; no Python git library is allowed.
 
-**PM recommendation:** TBD at F-21.
+**Joint recommendation:** **Combination rule**:
 
-**Architect recommendation:** TBD at F-21.
+1. Scope guard: current PI/Sprint allocation from PI-6 CURRENT_PI and BACKLOG; for Sprint 10 this means SDD-040.
+2. Prefer scoped candidates with unchecked REQUIRED validation items.
+3. Tie-break by bounded `git log` recency via stdlib `subprocess.run`.
+4. Fall back to the current sprint anchor.
+5. If no candidate is found, run the existing fallback chain unchanged.
 
-**Joint recommendation:** TBD at F-21.
-
-**Status:** OPEN.
-**Answer:** TBD at F-21.
+**Status:** ANSWERED.
+**Answer:** Owner-approved via EM synthesis, 2026-06-10: choose the combination rule above. The active-focus helper may intentionally change the `Active focus:` line when it contributes a candidate; when it returns no candidate, the existing fallback chain must preserve the controlled-output baseline.
 
 ---
 
 ### Q-B: Auto-refresh mechanism
 
-**Context.** Article V (stdlib-only CLI) rules out `watchdog`,
-`flask`, `fastapi`, `requests`. The existing serve subcommand
-(`cli/state_builder.py serve`, line 2385) already rebuilds state on
-every HTTP GET via `DashboardHandler.do_GET` (line 2358) using
-`build(... write=False, live_html=True ...)`. The defect is that
-the **page itself does not refresh** -- the owner has to F5 the
-browser, or the existing "Page auto-refreshes every 20s" print
-claim on line 2402 is not wired through to the served HTML.
+**Context.** Article V rules out `watchdog`, `flask`, `fastapi`, and other third-party web/file-watch dependencies. The existing serve subcommand already rebuilds state on every HTTP GET through `DashboardHandler.do_GET` and `build(... write=False, live_html=True ...)`. The defect is that served HTML does not refresh itself in the browser.
 
-Four candidate mechanisms (all stdlib-compatible):
+**PM recommendation:** Use handler-side meta refresh plus the existing rebuild-on-request behavior. Keep the browser behavior predictable and avoid adding JavaScript, SSE, or a watcher thread.
 
-- **(a) Handler-side meta-refresh.** Inject `<meta http-equiv="refresh"
-  content="N">` into the served HTML head. Simplest possible
-  mechanism. Cadence is fixed per page render (so changing cadence
-  requires a server-side flag). No JS required.
-- **(b) Client-side polling via `<script>`.** Inject a small inline
-  `<script>` that polls a JSON endpoint (e.g. `GET /state.json`) or
-  re-fetches the page on a timer. More flexible than (a), but
-  introduces JS to a previously script-free page (CSP currently
-  blocks scripts; would need a CSP relaxation).
-- **(c) Server-side file-mtime sweep.** Background thread that
-  walks `specs/**`, `sprints/**`, `exec/**`, `ledger/fleet.db` and
-  checks `os.stat` mtimes against a cached snapshot. On change,
-  invalidates the rebuild cache so the next GET picks up new state.
-  Pairs naturally with (a) to drive client refresh.
-- **(d) Server-Sent Events (SSE).** New `text/event-stream` route
-  pushes a "refresh" event when the mtime sweep detects a change.
-  Stdlib-only (use `BaseHTTPRequestHandler` raw `wfile.write` with
-  `Content-Type: text/event-stream`). Most responsive UX. Highest
-  implementation cost.
+**Architect recommendation:** Same. `<meta http-equiv="refresh" content="N">` in served HTML is the lowest-risk implementation: stdlib-only, compatible with the existing handler, and scoped to serve mode. It does not require CSP relaxation, a background thread, or any new route.
 
-**PM recommendation:** TBD at F-21.
+**Joint recommendation:** **Handler-side meta refresh plus existing rebuild-on-request.** No JavaScript, no SSE, no watcher/background thread. Serve mode already rebuilds on GET; SDD-040 makes that cadence explicit, tested, configurable, and applies refresh only to served HTML.
 
-**Architect recommendation:** TBD at F-21.
-
-**Joint recommendation:** TBD at F-21.
-
-**Status:** OPEN.
-**Answer:** TBD at F-21.
+**Status:** ANSWERED.
+**Answer:** Owner-approved via EM synthesis, 2026-06-10: implement handler-side meta refresh in served HTML only. Existing rebuild-on-GET remains the server-side freshness mechanism.
 
 ---
 
 ### Q-C: Refresh cadence
 
-**Context.** Cadence balances dashboard freshness against laptop
-CPU cost. Too aggressive (e.g. 1 second) burns CPU on every file
-walk; too lazy (e.g. 60 seconds) defeats the point.
+**Context.** Cadence balances dashboard freshness against laptop CPU cost. With handler-side meta refresh, the browser drives periodic GETs; each GET triggers the existing rebuild path.
 
-Candidate defaults:
+**PM recommendation:** Default to 5 seconds, exposed through a serve-only CLI flag named `--refresh-seconds`.
 
-- **(a) 1 second.** Effectively instant. Highest CPU cost. Only
-  defensible if Q-B answer is (c) or (d) with a cheap mtime sweep.
-- **(b) 5 seconds.** Conservative default for polling. Reasonable
-  developer-laptop CPU profile.
-- **(c) 10 seconds.** Matches the existing "20s" print claim at
-  half. Owner-friendly for casual monitoring.
-- **(d) 20 seconds.** Matches the existing print claim verbatim;
-  least change relative to the implicit current contract.
-- **(e) On-demand only.** No timer; refresh triggered by manual
-  POST/GET to a refresh endpoint. Lowest CPU; needs owner action
-  per refresh.
+**Architect recommendation:** Same. Require positive integer validation; reject zero and negative values before the server starts. Do not apply the flag to non-serve invocation.
 
-CLI flag for override is required by validation R5 regardless of
-default choice.
+**Joint recommendation:** **Default 5 seconds**, with serve-only CLI flag `--refresh-seconds` and positive integer validation.
 
-**PM recommendation:** TBD at F-21.
-
-**Architect recommendation:** TBD at F-21.
-
-**Joint recommendation:** TBD at F-21.
-
-**Status:** OPEN.
-**Answer:** TBD at F-21.
+**Status:** ANSWERED.
+**Answer:** Owner-approved via EM synthesis, 2026-06-10: default refresh cadence is 5 seconds; `serve --refresh-seconds N` overrides it when `N` is a positive integer.
 
 ---
 
 ### Q-D: Stdlib-only constraint (Article V) confirmation
 
-**Context.** Article V (Stdlib-Only CLI Pattern, see
-[`docs/CLI-PATTERN.md`](../../docs/CLI-PATTERN.md)) binds all
-`cli/*.py` modules. SDD-040 must confirm and re-affirm the
-constraint explicitly, because Q-B candidate (d) SSE and Q-A
-candidate (a) commit-recency both flirt with edge cases that could
-tempt a third-party import (`watchdog`, `pygit2`, etc.).
+**Context.** Article V (Stdlib-Only CLI Pattern, see [`docs/CLI-PATTERN.md`](../../docs/CLI-PATTERN.md)) binds all `cli/*.py` modules. SDD-040 must re-affirm the constraint explicitly.
 
 Concrete confirmation:
 
-- Implementation MUST use only stdlib modules. Modules already
-  imported by `cli/state_builder.py` are `http.server`, `urllib`,
-  `pathlib`, `json`, `os`, `sqlite3`, `socket`, `sys`, `html`,
-  `webbrowser`, `re`, `datetime`. New stdlib modules are
-  permitted (e.g. `threading` for Q-B (c)/(d); `subprocess` for
-  Q-A (a) `git log` invocation; `dataclasses` if helpful).
-- Implementation MUST NOT add `watchdog`, `flask`, `fastapi`,
-  `requests`, `pygit2`, or any other PyPI dependency.
-- If commit-recency (Q-A (a)) is chosen, the implementation reads
-  `git log` via `subprocess.run` -- not via a Python git library.
+- Implementation MUST use only stdlib modules.
+- New stdlib modules are permitted when justified by the locked design; for SDD-040 that includes `subprocess` for bounded git-log recency.
+- Implementation MUST NOT add `watchdog`, `flask`, `fastapi`, `requests`, `pygit2`, or any other PyPI dependency.
+- If commit recency is used, the implementation reads `git log` via `subprocess.run`, not through a Python git library.
 
-**PM recommendation:** **CONFIRM Article V binding.** No exceptions
-for SDD-040. If F-21 needs to question Article V's stdlib reach,
-that is a separate constitutional question and requires an ADR per
-[`SPRINT-10-KICKOFF.prompt.md`](../../feature-prompts/SPRINT-10-KICKOFF.prompt.md)
-Hard Constraints item 4.
+**PM recommendation:** **CONFIRM Article V binding.** No exceptions for SDD-040.
 
-**Architect recommendation:** **CONFIRM Article V binding** for the
-reasons PM gives. The set of permitted stdlib modules above is the
-working list; F-21 may extend it with any additional stdlib import
-without ceremony.
+**Architect recommendation:** **CONFIRM Article V binding.** `subprocess` is a stdlib boundary and is acceptable for bounded `git log` inspection.
 
-**Joint recommendation:** **CONFIRM Article V binding.** No new
-third-party dependency. Implementation uses only stdlib modules.
+**Joint recommendation:** **CONFIRM Article V binding.** No new third-party dependency. Implementation uses only stdlib modules.
 
-**Status:** OPEN (pre-staged at scaffold; expected to be a quick
-ratification at F-21).
-**Answer:** TBD at F-21 (pre-staged "CONFIRM").
+**Status:** ANSWERED.
+**Answer:** Owner-approved via EM synthesis, 2026-06-10: Article V is confirmed. `subprocess` is acceptable for bounded git recency; the named third-party dependencies are prohibited.
 
 ---
 
 ### Q-E: Backwards compatibility for non-serve invocation
 
-**Context.** `python state_builder.py` (without `serve`) writes
-static `state.md`, `state.html`, and `work-index.md` to `exec/` for
-git/diff use. Many existing tests in `cli/test_state_builder.py`
-exercise this path. Sprint 10's parser fix MUST NOT regress this
-path; the new active-focus signal source must be deterministic when
-fed deterministic inputs.
+**Context.** `python state_builder.py` (without `serve`) writes static `state.md`, `state.html`, and `work-index.md` to `exec/` for git/diff use. Sprint 10's parser fix must not regress this path.
 
 Concrete confirmation:
 
-- Non-serve invocation MUST produce byte-identical static `state.md`
-  and `state.html` to the pre-SDD-040 baseline (commit `8417818`)
-  in cases where the new active-focus helper has nothing to
-  contribute (e.g. no recent commits in the configured window, no
-  REQUIRED-unchecked spec dirs -- per Q-A answer).
-- Non-serve invocation MAY produce a different `Active focus:` line
-  in cases where the new helper does contribute -- and SHOULD (that
-  is the entire point of the parser fix).
-- Auto-refresh behavior MUST be serve-mode-only. The CLI form
-  `python state_builder.py` (without `serve`) MUST NOT gain a
-  background thread, a watcher, or any new side effect.
-- All existing tests in `cli/test_state_builder.py` MUST stay green
-  without modification.
+- Non-serve invocation MUST continue writing static `state.md`, `state.html`, and `work-index.md`.
+- Auto-refresh behavior MUST be serve-mode-only. Non-serve invocation MUST NOT gain a background thread, watcher, browser loop, or any new long-running side effect.
+- Byte-identical comparison applies to controlled inputs where the new active-focus helper returns no candidate.
+- Active-focus output MAY intentionally differ when the new helper does contribute a candidate; that difference is the parser fix, not a regression.
 
-**PM recommendation:** **CONFIRM backwards compatibility.** Pre-stage
-the answer at scaffold; F-21 ratifies.
+**PM recommendation:** **CONFIRM backwards compatibility.**
 
-**Architect recommendation:** **CONFIRM** with one clarification:
-"byte-identical" applies to **static output for unchanged inputs**.
-If a CLARIFY answer to Q-A changes the active-focus line for the
-current input set (which is the whole point), that is not a
-regression -- it is the fix. The regression test (R2/R6) measures
-the byte-identical property against a **controlled baseline input
-set** (e.g. specs/sprints/exec frozen at a known commit), not
-against live inputs that have shifted.
+**Architect recommendation:** **CONFIRM** with the controlled-input clarification above.
 
-**Joint recommendation:** **CONFIRM backwards compatibility** per
-the Architect's clarification. R2 in [`validation.md`](./validation.md)
-will reference a controlled baseline input set at F-21.
+**Joint recommendation:** **CONFIRM backwards compatibility.** R2 and R6 in [`validation.md`](./validation.md) bind the controlled-baseline test.
 
-**Status:** OPEN (pre-staged at scaffold; expected to be a quick
-ratification at F-21).
-**Answer:** TBD at F-21 (pre-staged "CONFIRM with clarification").
+**Status:** ANSWERED.
+**Answer:** Owner-approved via EM synthesis, 2026-06-10: non-serve static generation remains unchanged except for intentional `Active focus:` differences when the new helper contributes. Auto-refresh is serve-only.
 
 ---
 
-## OWNER-ATTENTION items (at F-21 close)
+## OWNER-ATTENTION Items (F-21 close)
 
-- **None at scaffold.** F-21 may surface OWNER-ATTENTION items as
-  Q-A through Q-C are answered -- e.g. if Q-A (d) "combination" is
-  chosen, the precise composition rule may need owner sign-off; if
-  Q-B (b) client-side script is chosen, the CSP relaxation may
-  need owner sign-off. Any surfaced item is recorded here and
-  flagged in the F-21 close report.
+- **None.** The owner-approved Sprint 10 kickoff decision resolved Q-A through Q-E. No Level-2 approval, dependency approval, CSP relaxation, schema migration, constitution edit, or production-branch decision is surfaced by F-21.
 
-## ADR decision
+## ADR Decision
 
-- **Default at scaffold: no ADR needed.** Per
-  [`SPRINT-10-KICKOFF.prompt.md`](../../feature-prompts/SPRINT-10-KICKOFF.prompt.md)
-  section 3, the active-focus heuristic and refresh mechanism are
-  implementation choices inside an existing CLI surface, not new
-  constitutional ground.
-- **Escalate to ADR if:** F-21 surfaces a refresh mechanism that
-  challenges Article V's stdlib reach (Q-D), OR Q-B (b) requires
-  a CSP relaxation that constitutes a security-policy change, OR
-  any other answer rises to a Level-2 decision per
-  [`docs/RULES.md`](../../docs/RULES.md).
+- **No ADR.** The active-focus heuristic and handler-side meta-refresh are implementation choices inside an existing stdlib CLI/HTTP-handler surface. They do not introduce a new dependency, schema migration, constitutional rule, security-policy change, or irreversible external integration.
 
-## F-21 close checklist
+## F-21 Close Checklist
 
-When the owner finishes answering Q-A through Q-E, the F-21 owner:
-
-1. Updates each Q-N "Answer" line above with the owner's verbatim
-   response (or EM-synthesized decision with attribution).
-2. Sets this file's frontmatter `status: done` and updates `updated:`.
-3. Finalizes [`spec.md`](./spec.md) Acceptance Criteria (AC-1..AC-5)
-   with concrete Given/When/Then wording bound to the answers.
-4. Finalizes [`validation.md`](./validation.md) R1-R9 with concrete
-   test names, file paths, and verification commands, then **LOCKS**
-   the contract (records lock timestamp at the top of the file).
-5. Finalizes [`plan.md`](./plan.md) Risk Assessment with mitigations
-   updated against the chosen Q-B mechanism.
-6. Finalizes [`tasks.md`](./tasks.md) per-task file scope and
-   acceptance test columns.
-7. Decides ADR yes/no per the rule above; if yes, drafts ADR-NNN
-   and routes to owner for Level-2 approval before F-22 starts.
-8. Commits the F-21 finalization with subject
-   `clarify: SDD-040 CLARIFY closed; validation contract LOCKED`
-   and routes to owner for ratification per Sprint 10 pre-push gate.
+1. Q-A through Q-E answered with EM-synthesized owner-approved decisions.
+2. This file frontmatter set to `status: done` and `updated: 2026-06-10`.
+3. [`spec.md`](./spec.md) Acceptance Criteria, Test Strategy, Traceability Matrix, Open Questions, and Out-of-Scope finalized.
+4. [`validation.md`](./validation.md) R1-R9 finalized and contract locked with timestamp/date; checkboxes remain unchecked for F-22.
+5. [`plan.md`](./plan.md) Risk Assessment and file scope finalized for the no-JS/no-watcher path.
+6. [`tasks.md`](./tasks.md) T-040-01..T-040-06 finalized; implementation tasks remain pending.
+7. ADR decision recorded as no.
+8. No implementation, commit, or push performed in F-21.

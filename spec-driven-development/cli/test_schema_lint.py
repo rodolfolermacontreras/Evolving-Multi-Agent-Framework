@@ -437,3 +437,149 @@ class UserGateContractAcceptance(unittest.TestCase):
         self.assertEqual(findings, [])
 
 
+# ----------------------------------------------------------------------- #
+# SDD-036 / ADR-017: optional `depends_on` frontmatter contract
+#
+# T-036-02 (parse helper) + T-036-03 (check_depends_on validator).
+# Validates: present-only enforcement, ID shape, duplicates, self-dep,
+# BACKLOG existence warning, and absent => zero findings.
+# ----------------------------------------------------------------------- #
+
+def _spec_with_depends_on(dep_line: str, spec_id: str = "SDD-036-spec") -> str:
+    return (
+        "---\n"
+        f"id: {spec_id}\n"
+        "type: spec\n"
+        "status: active\n"
+        "owner: principal-architect\n"
+        "updated: 2026-06-11\n"
+        f"{dep_line}\n"
+        "---\n# spec body\n"
+    )
+
+
+class DependsOnParseHelper(unittest.TestCase):
+    """T-036-02 -- parse_depends_on hand-parses the inline list form."""
+
+    def test_absent_field_returns_empty(self):
+        self.assertEqual(schema_lint.parse_depends_on({}), [])
+        self.assertEqual(schema_lint.parse_depends_on({"id": "x"}), [])
+
+    def test_inline_single_id(self):
+        fm = schema_lint.parse_frontmatter(_spec_with_depends_on("depends_on: [SDD-018]"))
+        self.assertEqual(schema_lint.parse_depends_on(fm), ["SDD-018"])
+
+    def test_inline_multiple_ids(self):
+        fm = schema_lint.parse_frontmatter(_spec_with_depends_on("depends_on: [SDD-018, SDD-019]"))
+        self.assertEqual(schema_lint.parse_depends_on(fm), ["SDD-018", "SDD-019"])
+
+    def test_empty_inline_list(self):
+        fm = schema_lint.parse_frontmatter(_spec_with_depends_on("depends_on: []"))
+        self.assertEqual(schema_lint.parse_depends_on(fm), [])
+
+    def test_bare_scalar(self):
+        fm = schema_lint.parse_frontmatter(_spec_with_depends_on("depends_on: SDD-018"))
+        self.assertEqual(schema_lint.parse_depends_on(fm), ["SDD-018"])
+
+
+class DependsOnValidator(unittest.TestCase):
+    """T-036-03 -- check_depends_on validates ONLY when present."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
+        self.tmp = Path(self._tmp.name)
+
+    def tearDown(self):
+        gc.collect()
+        self._tmp.cleanup()
+
+    def _spec(self, dep_line: str, spec_id: str = "SDD-036-spec") -> Path:
+        p = self.tmp / "spec.md"
+        p.write_text(_spec_with_depends_on(dep_line, spec_id), encoding="utf-8")
+        return p
+
+    def test_absent_depends_on_zero_findings(self):
+        p = self.tmp / "spec.md"
+        p.write_text(GOOD_ARTIFACT, encoding="utf-8")
+        self.assertEqual(schema_lint.check_depends_on(p, {"SDD-018"}), [])
+
+    def test_valid_single_dep_zero_findings(self):
+        p = self._spec("depends_on: [SDD-018]")
+        self.assertEqual(schema_lint.check_depends_on(p, {"SDD-018"}), [])
+
+    def test_bad_id_shape_is_error(self):
+        p = self._spec("depends_on: [not-an-id]")
+        findings = schema_lint.check_depends_on(p, {"SDD-018"})
+        self.assertTrue(any("is not a valid artifact ID" in f.issue for f in findings))
+        self.assertTrue(all(f.severity == "ERROR" for f in findings))
+
+    def test_duplicate_entry_is_error(self):
+        p = self._spec("depends_on: [SDD-018, SDD-018]")
+        findings = schema_lint.check_depends_on(p, {"SDD-018"})
+        dups = [f for f in findings if "duplicate entry" in f.issue]
+        self.assertEqual(len(dups), 1)
+        self.assertEqual(dups[0].severity, "ERROR")
+
+    def test_self_dependency_is_error(self):
+        # Self-dep is keyed on the frontmatter `id`; use a shape-valid id so
+        # the entry passes ID-shape validation and reaches the self-dep check.
+        p = self._spec("depends_on: [SDD-036]", spec_id="SDD-036")
+        findings = schema_lint.check_depends_on(p, {"SDD-036"})
+        self.assertTrue(any("depends_on lists self" in f.issue for f in findings))
+        self.assertTrue(all(f.severity == "ERROR" for f in findings))
+
+    def test_missing_backlog_ref_is_warning(self):
+        p = self._spec("depends_on: [SDD-999]")
+        findings = schema_lint.check_depends_on(p, {"SDD-018"})
+        warns = [f for f in findings if "not found in BACKLOG.md" in f.issue]
+        self.assertEqual(len(warns), 1)
+        self.assertEqual(warns[0].severity, "WARNING")
+
+    def test_backlog_none_skips_existence_check(self):
+        p = self._spec("depends_on: [SDD-999]")
+        self.assertEqual(schema_lint.check_depends_on(p, None), [])
+
+
+class DependsOnDiscoveryAndWalk(unittest.TestCase):
+    """T-036-03 -- BACKLOG discovery + integration into _walk_artifacts."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
+        self.tmp = Path(self._tmp.name)
+        (self.tmp / "backlog").mkdir(parents=True)
+        (self.tmp / "backlog" / "BACKLOG.md").write_text(
+            "| SDD-018 | UI variant | DONE |\n", encoding="utf-8"
+        )
+        self.specs = self.tmp / "specs" / "demo"
+        self.specs.mkdir(parents=True)
+
+    def tearDown(self):
+        gc.collect()
+        self._tmp.cleanup()
+
+    def test_discover_backlog_ids_walks_up(self):
+        ids = schema_lint._discover_backlog_ids(self.specs)
+        self.assertIsNotNone(ids)
+        self.assertIn("SDD-018", ids)
+
+    def test_discover_returns_none_when_absent(self):
+        # Isolated tree with no `backlog/BACKLOG.md` in any ancestor.
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as loose:
+            self.assertIsNone(schema_lint._discover_backlog_ids(Path(loose)))
+
+    def test_walk_valid_demonstrator_clean(self):
+        (self.specs / "spec.md").write_text(
+            _spec_with_depends_on("depends_on: [SDD-018]"), encoding="utf-8"
+        )
+        findings = schema_lint.scan(self.tmp, paths=[self.tmp / "specs"])
+        self.assertEqual(findings, [], f"unexpected findings: {[f.issue for f in findings]}")
+
+    def test_walk_bad_dep_surfaces_finding(self):
+        (self.specs / "spec.md").write_text(
+            _spec_with_depends_on("depends_on: [bogus]"), encoding="utf-8"
+        )
+        findings = schema_lint.scan(self.tmp, paths=[self.tmp / "specs"])
+        self.assertTrue(any("is not a valid artifact ID" in f.issue for f in findings))
+
+
+

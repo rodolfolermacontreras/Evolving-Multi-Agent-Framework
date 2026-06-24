@@ -3,7 +3,7 @@ id: feature-prompts-index
 type: index
 status: active
 owner: principal-executive-manager
-updated: 2026-06-10
+updated: 2026-06-24
 ---
 
 # Feature Prompts -- Index
@@ -122,7 +122,7 @@ on-request refresh, stdlib file-mtime sweep, or Server-Sent Events.
 
 | Order | File | Owner | Status |
 |-------|------|-------|--------|
-| 0 | [SPRINT-11-KICKOFF.prompt.md](SPRINT-11-KICKOFF.prompt.md) | Principal Executive Manager (lead) | READY (gated on Sprint 10 local close prep + no-push owner evidence) |
+| 0 | [SPRINT-11-KICKOFF.prompt.md](SPRINT-11-KICKOFF.prompt.md) | Principal Executive Manager (lead) | CLOSED 2026-06-24 (owner-approved commit + push) |
 
 Prerequisite: **Sprint 10 must be closed locally** with SDD-040 marked DONE in
 BACKLOG, PI-6 still ACTIVE, tests at or above 349 passed / 2 skipped, schema
@@ -131,7 +131,25 @@ serve-mode refresh verification recorded, and owner evidence from EM prompt
 2026-06-10: `Approve close prep, no push`. Sprint 11 scope is **SDD-036 only**:
 lifecycle pipeline, 4-card documentation row, and drag-to-reorder with
 dependency-lock/audit-trail safeguards. SDD-037 remains Sprint 12;
-SDD-038/carryovers remain Sprint 13 contingency.
+SDD-038/carryovers remain Sprint 13 contingency. Closed 2026-06-24: tests
+349 -> 412, schema lint clean, 10/10 REQUIRED + ADR-017.
+
+### Sprint 12 -- PI-6 Sprint 3 / Dispatches Card + Health Pills (SDD-037)
+
+| Order | File | Owner | Status |
+|-------|------|-------|--------|
+| 0 | [SPRINT-12-KICKOFF.prompt.md](SPRINT-12-KICKOFF.prompt.md) | Principal Executive Manager (lead) | READY (gated on Sprint 11 close + push) |
+
+Prerequisite: **Sprint 11 must be closed and pushed** with SDD-036 marked DONE
+in BACKLOG, PI-6 still ACTIVE, tests at or above 412 passed / 2 skipped, schema
+lint clean, and the SDD-036 lifecycle pipeline + 4-card docs row rendering on
+the regenerated dashboard. Sprint 12 scope is **SDD-037 only**: a Dispatches
+card surfacing fleet ledger rows per feature/sprint and a header health-pills
+strip (constitution semver consistency, skill frontmatter validity, ledger
+reachability, stale-tracker) with click-through. SDD-038/carryovers remain
+Sprint 13 contingency. Stdlib-only (Article V); respect the Article X locked
+render functions (new `inject_*` post-processors only); cache the ledger read
+in the SDD-040 refresh cycle.
 
 ---
 

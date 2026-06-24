@@ -47,6 +47,20 @@ from cli.state_builder import (
     served_html_with_refresh,
 )
 
+# SDD-036: lifecycle pipeline + four-card docs row + reorder control surfaces.
+from cli.state_builder import (
+    STAGES,
+    inject_lifecycle_html,
+    load_display_order,
+    order_features_for_display,
+    render_docs_row,
+    render_lifecycle_pipeline,
+    render_reorder_control,
+    resolve_docs_cards,
+    _feature_display_id,
+    _sprint_stage,
+)
+
 SCHEMA_SQL = (Path(__file__).resolve().parent.parent / "ledger" / "schema.sql").read_text(
     encoding="utf-8"
 )
@@ -2345,4 +2359,293 @@ class TestCountSubcommand:
 
 
 import argparse  # noqa: E402  -- used by TestCountSubcommand.test_count_handler_returns_zero
+
+
+# ---------------------------------------------------------------------------
+# SDD-036: lifecycle pipeline (AC-1) + four-card docs row (AC-2)
+#          + keyboard reorder control (AC-8)
+# ---------------------------------------------------------------------------
+
+
+class TestLifecyclePipeline:
+    """AC-1: 9-node horizontal pipeline with current-state emphasis."""
+
+    NODES = ["IDEA", "BACKLOG", "CLARIFY", "SPEC", "PLAN", "TASKS",
+             "IMPLEMENT", "REVIEW", "DONE"]
+
+    def test_stages_constant_is_the_nine_ac1_nodes(self) -> None:
+        assert list(STAGES) == self.NODES
+
+    def test_pipeline_renders_all_nine_nodes(self) -> None:
+        out = render_lifecycle_pipeline("IMPLEMENT")
+        for node in self.NODES:
+            assert f">{node}</li>" in out
+        assert out.count('<li class="pipe-node') == 9
+
+    def test_current_active_feature_emphasis(self) -> None:
+        out = render_lifecycle_pipeline("IMPLEMENT")
+        # current node carries pipe-current + aria-current
+        assert 'pipe-node pipe-current" aria-current="step">IMPLEMENT</li>' in out
+        # earlier nodes complete, later nodes outlined
+        assert 'pipe-node pipe-complete">SPEC</li>' in out
+        assert 'pipe-node pipe-later">DONE</li>' in out
+
+    def test_current_done_feature_marks_all_prior_complete(self) -> None:
+        out = render_lifecycle_pipeline("DONE")
+        assert 'pipe-node pipe-current" aria-current="step">DONE</li>' in out
+        assert 'pipe-node pipe-complete">IDEA</li>' in out
+        # nothing after DONE -> no pipe-later
+        assert "pipe-later" not in out
+
+    def test_first_node_current_marks_rest_later(self) -> None:
+        out = render_lifecycle_pipeline("IDEA")
+        assert 'pipe-node pipe-current" aria-current="step">IDEA</li>' in out
+        assert "pipe-complete" not in out
+        assert 'pipe-node pipe-later">DONE</li>' in out
+
+    def test_unknown_stage_outlines_everything(self) -> None:
+        out = render_lifecycle_pipeline("NOPE")
+        assert "pipe-current" not in out
+        assert "pipe-complete" not in out
+        assert out.count("pipe-later") == 9
+
+    def test_sprint_stage_mapping(self) -> None:
+        assert _sprint_stage("Active") == "IMPLEMENT"
+        assert _sprint_stage("Done") == "DONE"
+        assert _sprint_stage("complete") == "DONE"
+        assert _sprint_stage("Planned") == "PLAN"
+        assert _sprint_stage("Queued") == "BACKLOG"
+        assert _sprint_stage("Review") == "REVIEW"
+        assert _sprint_stage(None) == "IMPLEMENT"
+        assert _sprint_stage("something weird") == "IMPLEMENT"
+
+    def test_sprint_pipeline_uses_mapped_stage(self) -> None:
+        out = render_lifecycle_pipeline(_sprint_stage("Active"),
+                                        aria_label="Sprint 1 lifecycle")
+        assert 'aria-label="Sprint 1 lifecycle"' in out
+        assert 'pipe-current" aria-current="step">IMPLEMENT</li>' in out
+
+
+class TestDocsRow:
+    """AC-2: four-card docs row with missing-state handling."""
+
+    def _feature_root(self, tmp_path: Path) -> tuple[Path, Feature]:
+        sdd = tmp_path / "sdd"
+        (sdd / "constitution").mkdir(parents=True)
+        (sdd / "constitution" / "principles.md").write_text("# P", encoding="utf-8")
+        feat_dir = sdd / "specs" / "feat-a"
+        feat_dir.mkdir(parents=True)
+        (feat_dir / "spec.md").write_text("# spec", encoding="utf-8")
+        # tasks.md (Sprint) intentionally omitted -> missing card
+        (sdd / "docs" / "ADR").mkdir(parents=True)
+        feature = Feature(feature_dir=Path("specs/feat-a"), name="feat-a",
+                          stage="SPEC", created="2026-06-01")
+        return sdd, feature
+
+    def test_resolve_returns_four_cards(self, tmp_path: Path) -> None:
+        sdd, feature = self._feature_root(tmp_path)
+        cards = resolve_docs_cards(feature, sdd)
+        labels = [c[0] for c in cards]
+        assert labels == ["Constitution", "Spec", "Sprint", "ADRs"]
+
+    def test_resolved_cards_have_relative_href(self, tmp_path: Path) -> None:
+        sdd, feature = self._feature_root(tmp_path)
+        cards = dict(resolve_docs_cards(feature, sdd))
+        assert cards["Constitution"] == "../constitution/principles.md"
+        assert cards["Spec"] == "../specs/feat-a/spec.md"
+        assert cards["ADRs"] == "../docs/ADR"
+
+    def test_missing_target_resolves_to_none(self, tmp_path: Path) -> None:
+        sdd, feature = self._feature_root(tmp_path)
+        cards = dict(resolve_docs_cards(feature, sdd))
+        assert cards["Sprint"] is None
+
+    def test_render_row_has_four_cards_one_disabled(self, tmp_path: Path) -> None:
+        sdd, feature = self._feature_root(tmp_path)
+        out = render_docs_row(feature, sdd)
+        # `class="docs-card` prefixes both the 3 anchors and the 1 missing span.
+        assert out.count('class="docs-card') == 4
+        assert 'aria-disabled="true"' in out
+        assert "Sprint (missing)" in out
+        # resolved cards are anchors
+        assert '<a class="docs-card" href="../specs/feat-a/spec.md">' in out
+
+
+class TestReorderControl:
+    """AC-8: keyboard-accessible reorder control (no JS framework)."""
+
+    def test_control_present_with_buttons(self) -> None:
+        out = render_reorder_control("SDD-036", rank=1, total=3)
+        assert 'class="reorder-control"' in out
+        assert out.count('<button type="button"') == 2
+        assert "rank 2 of 3" in out
+
+    def test_up_disabled_at_top(self) -> None:
+        out = render_reorder_control("SDD-036", rank=0, total=3)
+        assert 'class="reorder-btn reorder-up" aria-label="Move SDD-036 up' in out
+        assert "reorder-up" in out and "disabled>" in out
+        # down active -> carries data-cmd
+        assert "reorder-down" in out
+        assert "--to-rank 1" in out
+
+    def test_down_disabled_at_bottom(self) -> None:
+        out = render_reorder_control("SDD-036", rank=2, total=3)
+        # up active
+        assert "--to-rank 1" in out
+        # down disabled
+        assert 'reorder-down" aria-label="Move SDD-036 down' in out
+        assert out.rstrip().count("disabled>") == 1
+
+    def test_command_targets_backlog_reorder(self) -> None:
+        out = render_reorder_control("SDD-036", rank=1, total=3)
+        assert "python cli/backlog_reorder.py move --item SDD-036 --to-rank 0" in out
+        assert "python cli/backlog_reorder.py move --item SDD-036 --to-rank 2" in out
+
+    def test_no_script_tag(self) -> None:
+        out = render_reorder_control("SDD-036", rank=1, total=3)
+        assert "<script" not in out.lower()
+
+
+class TestDisplayOrderOverlay:
+    """AC-8: display-order overlay reader + feature ordering."""
+
+    def _features(self) -> list[Feature]:
+        return [
+            Feature(feature_dir=Path("specs/feat-a"), name="feat-a",
+                    stage="IMPLEMENT", created="2026-06-01"),
+            Feature(feature_dir=Path("specs/feat-b"), name="feat-b",
+                    stage="DONE", created="2026-05-01"),
+        ]
+
+    def test_absent_overlay_returns_empty(self, tmp_path: Path) -> None:
+        assert load_display_order(tmp_path) == []
+
+    def test_malformed_overlay_returns_empty(self, tmp_path: Path) -> None:
+        (tmp_path / "backlog").mkdir()
+        (tmp_path / "backlog" / "display-order.json").write_text(
+            "{ not json", encoding="utf-8")
+        assert load_display_order(tmp_path) == []
+
+    def test_valid_overlay_returns_order(self, tmp_path: Path) -> None:
+        (tmp_path / "backlog").mkdir()
+        (tmp_path / "backlog" / "display-order.json").write_text(
+            json.dumps({"order": ["feat-b", "feat-a"], "updated": "2026-06-24Z"}),
+            encoding="utf-8")
+        assert load_display_order(tmp_path) == ["feat-b", "feat-a"]
+
+    def test_no_overlay_yields_natural_order(self, tmp_path: Path) -> None:
+        ordered = order_features_for_display(self._features(), tmp_path)
+        names = [f.name for _, f in ordered]
+        assert names == ["feat-a", "feat-b"]
+
+    def test_overlay_order_respected(self, tmp_path: Path) -> None:
+        (tmp_path / "backlog").mkdir()
+        (tmp_path / "backlog" / "display-order.json").write_text(
+            json.dumps({"order": ["feat-b", "feat-a"]}), encoding="utf-8")
+        ordered = order_features_for_display(self._features(), tmp_path)
+        names = [f.name for _, f in ordered]
+        assert names == ["feat-b", "feat-a"]
+
+    def test_overlay_leftover_features_appended(self, tmp_path: Path) -> None:
+        (tmp_path / "backlog").mkdir()
+        # overlay lists only feat-b; feat-a must still appear (no drop)
+        (tmp_path / "backlog" / "display-order.json").write_text(
+            json.dumps({"order": ["feat-b"]}), encoding="utf-8")
+        ordered = order_features_for_display(self._features(), tmp_path)
+        names = [f.name for _, f in ordered]
+        assert names == ["feat-b", "feat-a"]
+
+    def test_overlay_unknown_id_skipped(self, tmp_path: Path) -> None:
+        (tmp_path / "backlog").mkdir()
+        (tmp_path / "backlog" / "display-order.json").write_text(
+            json.dumps({"order": ["ghost", "feat-a", "feat-b"]}), encoding="utf-8")
+        ordered = order_features_for_display(self._features(), tmp_path)
+        names = [f.name for _, f in ordered]
+        assert names == ["feat-a", "feat-b"]
+
+    def test_feature_display_id_reads_spec_line(self, tmp_path: Path) -> None:
+        feat_dir = tmp_path / "specs" / "feat-x"
+        feat_dir.mkdir(parents=True)
+        (feat_dir / "spec.md").write_text(
+            "# Spec\n\n- Feature ID: SDD-099\n", encoding="utf-8")
+        feature = Feature(feature_dir=feat_dir, name="feat-x",
+                          stage="SPEC", created="2026-06-01")
+        assert _feature_display_id(feature) == "SDD-099"
+
+    def test_feature_display_id_fallbacks_to_dir_name(self, tmp_path: Path) -> None:
+        feat_dir = tmp_path / "specs" / "feat-y"
+        feat_dir.mkdir(parents=True)
+        (feat_dir / "spec.md").write_text("# Spec\n\nNo id here.\n", encoding="utf-8")
+        feature = Feature(feature_dir=feat_dir, name="feat-y",
+                          stage="SPEC", created="2026-06-01")
+        assert _feature_display_id(feature) == "feat-y"
+
+
+class TestInjectLifecycleHtml:
+    """AC-1/AC-2/AC-8: integration of the lifecycle section into the doc."""
+
+    DOC = ('<main id="main" role="main" class="grid-v3">'
+           '<section class="zone-next" aria-labelledby="next-heading">'
+           '<h2 id="next-heading">What Comes Next</h2></section></main>')
+
+    def _features(self) -> list[Feature]:
+        return [
+            Feature(feature_dir=Path("specs/feat-a"), name="feat-a",
+                    stage="IMPLEMENT", created="2026-06-01"),
+            Feature(feature_dir=Path("specs/feat-b"), name="feat-b",
+                    stage="DONE", created="2026-05-01"),
+        ]
+
+    def test_section_injected_after_main_open(self, tmp_path: Path) -> None:
+        out = inject_lifecycle_html(
+            self.DOC, features=self._features(), sdd_root=tmp_path,
+            current_sprint={"num": 1, "title": "T", "status": "Active"})
+        assert 'class="zone-lifecycle"' in out
+        assert "Lifecycle &amp; Docs" in out
+        # injected immediately after main open
+        marker = '<main id="main" role="main" class="grid-v3">'
+        assert out.index(marker) < out.index('class="zone-lifecycle"')
+
+    def test_renders_pipeline_for_active_and_done_feature(self, tmp_path: Path) -> None:
+        out = inject_lifecycle_html(
+            self.DOC, features=self._features(), sdd_root=tmp_path,
+            current_sprint=None)
+        # active feature current = IMPLEMENT; done feature current = DONE
+        assert 'pipe-current" aria-current="step">IMPLEMENT</li>' in out
+        assert 'pipe-current" aria-current="step">DONE</li>' in out
+
+    def test_renders_sprint_card(self, tmp_path: Path) -> None:
+        out = inject_lifecycle_html(
+            self.DOC, features=self._features(), sdd_root=tmp_path,
+            current_sprint={"num": 2, "title": "Build", "status": "Active"})
+        assert "Sprint 2 -- Build" in out
+        assert 'class="lifecycle-card lifecycle-sprint"' in out
+
+    def test_each_feature_has_docs_row_and_reorder(self, tmp_path: Path) -> None:
+        out = inject_lifecycle_html(
+            self.DOC, features=self._features(), sdd_root=tmp_path,
+            current_sprint=None)
+        assert out.count('class="docs-row"') == 2
+        assert out.count('class="reorder-control"') == 2
+
+    def test_overlay_order_reflected_in_section(self, tmp_path: Path) -> None:
+        (tmp_path / "backlog").mkdir()
+        (tmp_path / "backlog" / "display-order.json").write_text(
+            json.dumps({"order": ["feat-b", "feat-a"]}), encoding="utf-8")
+        out = inject_lifecycle_html(
+            self.DOC, features=self._features(), sdd_root=tmp_path,
+            current_sprint=None)
+        # feat-b card appears before feat-a card
+        assert out.index("feat-b") < out.index("feat-a")
+
+    def test_empty_features_and_no_sprint_returns_unchanged(self, tmp_path: Path) -> None:
+        out = inject_lifecycle_html(
+            self.DOC, features=[], sdd_root=tmp_path, current_sprint=None)
+        assert out == self.DOC
+
+    def test_no_script_injected(self, tmp_path: Path) -> None:
+        out = inject_lifecycle_html(
+            self.DOC, features=self._features(), sdd_root=tmp_path,
+            current_sprint={"num": 1, "title": "T", "status": "Active"})
+        assert "<script" not in out.lower()
 

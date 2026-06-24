@@ -2312,6 +2312,322 @@ def inject_user_gates_html(html_doc: str, user_gates: list[UserGate]) -> str:
                                 '<main id="main" role="main" class="grid-v3">' + gates_html,
                                 1)
     return html_doc.replace(marker, marker + gates_html, 1)
+
+
+# ---------------------------------------------------------------------------- #
+# SDD-036: Lifecycle pipeline + four-card docs row + reorder control.
+#
+# These surfaces are rendered by post-processor injectors that run in build()
+# AFTER render_html, mirroring the inject_user_gates_html precedent. They are
+# kept OUTSIDE render_html on purpose: render_html carries an Article X
+# footprint lock (SDD-FDC-001) whose source body must remain byte-identical.
+# No new state registry or frontmatter state field is introduced; the current
+# lifecycle stage is taken from the existing detect_stage() result (features)
+# or a coarse mapping of sprint status (_sprint_stage).
+# ---------------------------------------------------------------------------- #
+
+_SPRINT_STAGE_MAP = {
+    "done":        "DONE",
+    "complete":    "DONE",
+    "completed":   "DONE",
+    "closed":      "DONE",
+    "active":      "IMPLEMENT",
+    "in progress": "IMPLEMENT",
+    "in-progress": "IMPLEMENT",
+    "review":      "REVIEW",
+    "planned":     "PLAN",
+    "planning":    "PLAN",
+    "queued":      "BACKLOG",
+    "not started": "BACKLOG",
+}
+
+
+def _sprint_stage(status: str | None) -> str:
+    """Map a free-form sprint status to a canonical lifecycle stage (AC-1).
+
+    Unknown statuses fall back to IMPLEMENT (an in-flight sprint). No new state
+    registry is introduced; this only reuses the existing STAGES vocabulary.
+    """
+    return _SPRINT_STAGE_MAP.get((status or "").strip().lower(), "IMPLEMENT")
+
+
+def render_lifecycle_pipeline(current_stage: str, *, aria_label: str = "Lifecycle pipeline") -> str:
+    """Render the 9-node horizontal lifecycle pipeline (AC-1).
+
+    The node matching ``current_stage`` is emphasized (class ``pipe-current``
+    + ``aria-current="step"``); earlier nodes are marked complete
+    (``pipe-complete``); later nodes are outlined (``pipe-later``). The stage
+    vocabulary is the existing module-level ``STAGES`` constant -- no new
+    registry is added.
+    """
+    try:
+        current_idx = STAGES.index(current_stage)
+    except ValueError:
+        current_idx = -1
+    nodes: list[str] = []
+    for i, stage in enumerate(STAGES):
+        if i == current_idx:
+            state_cls, aria = "pipe-current", ' aria-current="step"'
+        elif current_idx >= 0 and i < current_idx:
+            state_cls, aria = "pipe-complete", ""
+        else:
+            state_cls, aria = "pipe-later", ""
+        nodes.append(f'<li class="pipe-node {state_cls}"{aria}>{h(stage)}</li>')
+    return (
+        f'<ol class="lifecycle-pipeline" aria-label="{h(aria_label)}">'
+        + "".join(nodes)
+        + "</ol>"
+    )
+
+
+def resolve_docs_cards(feature: Feature, sdd_root: Path) -> list[tuple[str, str | None]]:
+    """Resolve the four governing-doc targets for a feature card (AC-2).
+
+    Returns (label, href) pairs for Constitution / Spec / Sprint / ADRs. ``href``
+    is a path relative to the exec/ output directory (``../<rel>``) when the
+    local artifact exists, or ``None`` when it does not (rendered as a disabled
+    "missing" card). No SDD-037 cards are added.
+    """
+    name = feature.feature_dir.name
+    candidates: list[tuple[str, Path]] = [
+        ("Constitution", Path("constitution") / "principles.md"),
+        ("Spec",         Path("specs") / name / "spec.md"),
+        ("Sprint",       Path("specs") / name / "tasks.md"),
+        ("ADRs",         Path("docs") / "ADR"),
+    ]
+    cards: list[tuple[str, str | None]] = []
+    for label, rel in candidates:
+        if (sdd_root / rel).exists():
+            cards.append((label, "../" + rel.as_posix()))
+        else:
+            cards.append((label, None))
+    return cards
+
+
+def render_docs_row(feature: Feature, sdd_root: Path) -> str:
+    """Render the four-card docs row (AC-2). Unresolved targets are disabled."""
+    items: list[str] = []
+    for label, href in resolve_docs_cards(feature, sdd_root):
+        if href:
+            items.append(f'<a class="docs-card" href="{h(href)}">{h(label)}</a>')
+        else:
+            items.append(
+                f'<span class="docs-card docs-card-missing" aria-disabled="true" '
+                f'title="No local artifact resolved">{h(label)} (missing)</span>'
+            )
+    return (
+        '<div class="docs-row" role="group" aria-label="Feature documents">'
+        + "".join(items)
+        + "</div>"
+    )
+
+
+def render_reorder_control(item_id: str, rank: int, total: int) -> str:
+    """Render the keyboard-accessible reorder control (AC-8, no JS framework).
+
+    Up/down are native ``<button>`` elements (keyboard-focusable by default).
+    Each carries the exact ``backlog_reorder.py move`` command the operator
+    runs (``data-cmd``); the up control is disabled at rank 0 and the down
+    control at the last rank. Display order itself reflects the overlay (see
+    ``order_features_for_display``).
+    """
+    up_disabled = rank <= 0
+    down_disabled = rank >= total - 1
+    up_cmd = f"python cli/backlog_reorder.py move --item {item_id} --to-rank {rank - 1}"
+    down_cmd = f"python cli/backlog_reorder.py move --item {item_id} --to-rank {rank + 1}"
+
+    def _btn(direction: str, glyph: str, label: str, cmd: str, disabled: bool) -> str:
+        if disabled:
+            return (
+                f'<button type="button" class="reorder-btn reorder-{direction}" '
+                f'aria-label="{h(label)}" disabled>{glyph}</button>'
+            )
+        return (
+            f'<button type="button" class="reorder-btn reorder-{direction}" '
+            f'aria-label="{h(label)}" data-cmd="{h(cmd)}">{glyph}</button>'
+        )
+
+    up_btn = _btn("up", "&#9650;", f"Move {item_id} up to rank {rank - 1}",
+                  up_cmd, up_disabled)
+    down_btn = _btn("down", "&#9660;", f"Move {item_id} down to rank {rank + 1}",
+                    down_cmd, down_disabled)
+    return (
+        f'<div class="reorder-control" role="group" '
+        f'aria-label="Reorder {h(item_id)} (current rank {rank})">'
+        f'{up_btn}{down_btn}'
+        f'<span class="reorder-rank">rank {rank + 1} of {total}</span>'
+        f'</div>'
+    )
+
+
+def _feature_display_id(feature: Feature) -> str:
+    """Best-effort SDD feature ID for a feature.
+
+    Reads a ``- Feature ID: SDD-NNN`` line from the feature's spec.md when
+    present; otherwise falls back to the feature directory name. Used to key the
+    display-order overlay and the reorder control.
+    """
+    spec = feature.feature_dir / "spec.md"
+    if spec.is_file():
+        try:
+            text = spec.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            text = ""
+        for line in text.splitlines():
+            stripped = line.strip()
+            if stripped.lower().startswith("- feature id:"):
+                m = re.search(r"\b([A-Z]{2,}-\d{2,3})\b", stripped)
+                if m:
+                    return m.group(1)
+    return feature.feature_dir.name
+
+
+def load_display_order(sdd_root: Path) -> list[str]:
+    """Read the display-order overlay (backlog/display-order.json), read-only.
+
+    Returns the explicit ``order`` list of feature IDs, or [] when the overlay
+    is absent or malformed. BACKLOG.md remains PM-authoritative; this overlay is
+    presentation-only (Q-C) and never feeds RICE scoring.
+    """
+    overlay = sdd_root / "backlog" / "display-order.json"
+    if not overlay.is_file():
+        return []
+    try:
+        data = json.loads(overlay.read_text(encoding="utf-8"))
+    except (ValueError, OSError):
+        return []
+    order = data.get("order") if isinstance(data, dict) else None
+    if not isinstance(order, list):
+        return []
+    return [str(x) for x in order]
+
+
+def order_features_for_display(
+    features: list[Feature], sdd_root: Path
+) -> list[tuple[str, Feature]]:
+    """Order features by the display-order overlay (AC-8).
+
+    Returns (feature_id, feature) pairs. Features whose ID appears in the
+    overlay come first, in overlay order; the remainder follow in natural (load)
+    order. Overlay IDs with no matching feature are skipped; no feature is
+    dropped.
+    """
+    pairs = [(_feature_display_id(f), f) for f in features]
+    overlay = load_display_order(sdd_root)
+    if not overlay:
+        return pairs
+    by_id: dict[str, tuple[str, Feature]] = {}
+    for fid, f in pairs:
+        by_id.setdefault(fid, (fid, f))
+    ordered: list[tuple[str, Feature]] = []
+    used_ids: set[str] = set()
+    for fid in overlay:
+        if fid in by_id and fid not in used_ids:
+            ordered.append(by_id[fid])
+            used_ids.add(fid)
+    appended = {id(pair[1]) for pair in ordered}
+    for fid, f in pairs:
+        if id(f) not in appended:
+            ordered.append((fid, f))
+            appended.add(id(f))
+    return ordered
+
+
+_LIFECYCLE_STYLE = (
+    "<style>"
+    ".zone-lifecycle{grid-column:1/-1;margin-top:1rem}"
+    ".lifecycle-card{border:1px solid var(--line,#333);border-radius:6px;"
+    "padding:.6rem .8rem;margin:.5rem 0}"
+    ".lifecycle-head{display:flex;gap:.5rem;align-items:baseline;flex-wrap:wrap;"
+    "margin-bottom:.4rem}"
+    ".lifecycle-id{font-weight:700;letter-spacing:.03em}"
+    ".lifecycle-stage{margin-left:auto;opacity:.7;font-size:.85em}"
+    ".lifecycle-pipeline{display:flex;flex-wrap:wrap;gap:.25rem;list-style:none;"
+    "padding:0;margin:.2rem 0}"
+    ".pipe-node{font-size:.72em;padding:.15rem .4rem;border-radius:3px;"
+    "border:1px solid transparent}"
+    ".pipe-complete{opacity:.55}"
+    ".pipe-current{font-weight:700;border-color:currentColor}"
+    ".pipe-later{opacity:.35;border-color:var(--line,#333)}"
+    ".docs-row{display:flex;gap:.4rem;flex-wrap:wrap;margin:.4rem 0}"
+    ".docs-card{font-size:.78em;padding:.2rem .55rem;border:1px solid "
+    "var(--line,#333);border-radius:4px;text-decoration:none}"
+    ".docs-card-missing{opacity:.4;border-style:dashed}"
+    ".reorder-control{display:flex;gap:.3rem;align-items:center;margin-top:.3rem}"
+    ".reorder-btn{font-size:.8em;padding:.1rem .45rem;cursor:pointer}"
+    ".reorder-btn[disabled]{opacity:.4;cursor:not-allowed}"
+    ".reorder-rank{font-size:.72em;opacity:.6}"
+    "</style>"
+)
+
+
+def inject_lifecycle_html(
+    html_doc: str,
+    *,
+    features: list[Feature],
+    sdd_root: Path,
+    current_sprint: dict | None,
+) -> str:
+    """Inject the SDD-036 lifecycle section into the dashboard (AC-1/AC-2/AC-8).
+
+    Builds, for the current sprint and each feature (ordered by the display
+    overlay), a card containing the lifecycle pipeline, the four-card docs row,
+    and -- for features -- the keyboard reorder control. The section is appended
+    after the user-gates marker / main open, mirroring inject_user_gates_html.
+    Kept outside render_html because that function has an Article X footprint
+    lock from SDD-FDC-001.
+    """
+    ordered = order_features_for_display(features, sdd_root)
+    total = len(ordered)
+
+    sprint_block = ""
+    if current_sprint:
+        s_num = current_sprint.get("num", "")
+        s_title = current_sprint.get("title", "")
+        s_status = current_sprint.get("status", "")
+        s_pipe = render_lifecycle_pipeline(
+            _sprint_stage(s_status), aria_label=f"Sprint {s_num} lifecycle")
+        sprint_block = (
+            f'<article class="lifecycle-card lifecycle-sprint" '
+            f'aria-label="Sprint {h(s_num)} lifecycle">'
+            f'<div class="lifecycle-head">'
+            f'<span class="lifecycle-name">Sprint {h(s_num)} -- {h(s_title)}</span>'
+            f'<span class="lifecycle-stage">{h(s_status)}</span></div>'
+            f'{s_pipe}</article>'
+        )
+
+    feature_blocks: list[str] = []
+    for rank, (fid, feature) in enumerate(ordered):
+        pipeline = render_lifecycle_pipeline(
+            feature.stage, aria_label=f"{feature.name} lifecycle")
+        docs = render_docs_row(feature, sdd_root)
+        control = render_reorder_control(fid, rank, total)
+        feature_blocks.append(
+            f'<article class="lifecycle-card" '
+            f'aria-label="{h(feature.name)} lifecycle">'
+            f'<div class="lifecycle-head">'
+            f'<span class="lifecycle-id">{h(fid)}</span>'
+            f'<span class="lifecycle-name">{h(feature.name)}</span>'
+            f'<span class="lifecycle-stage">{h(feature.stage)}</span></div>'
+            f'{pipeline}{docs}{control}</article>'
+        )
+
+    body = sprint_block + "".join(feature_blocks)
+    if not body:
+        return html_doc
+    section = (
+        '<section class="zone-lifecycle" aria-labelledby="lifecycle-heading">'
+        + _LIFECYCLE_STYLE
+        + '<h2 id="lifecycle-heading">Lifecycle &amp; Docs</h2>'
+        + body
+        + '</section>'
+    )
+    marker = '<main id="main" role="main" class="grid-v3">'
+    if marker in html_doc:
+        return html_doc.replace(marker, marker + section, 1)
+    return html_doc + section
+
+
 # ---------------------------------------------------------------------------- #
 # Work index generator (for principal pre-work checks, IDEA 2026-06-03)
 # ---------------------------------------------------------------------------- #
@@ -2478,6 +2794,9 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
         sprint_goal=sprint_goal, decisions=decisions,
     )
     htm = inject_user_gates_html(htm, user_gates)
+    # SDD-036: lifecycle pipeline + four-card docs row + reorder control.
+    htm = inject_lifecycle_html(
+        htm, features=features, sdd_root=sdd_root, current_sprint=current_sprint)
 
     result = {
         "markdown_chars": len(md), "html_chars": len(htm),

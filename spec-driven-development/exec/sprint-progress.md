@@ -786,3 +786,40 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 - Owner ratification: APPROVED FOR LOCAL CLOSE PREP ONLY. Evidence from EM prompt, 2026-06-10: `Approve close prep, no push`. No push performed.
 - Notes: Sprint 10 closed the dashboard trust defect that opened PI-6 without widening scope. The sprint deliberately stopped at local close prep because the owner selected no-push approval; therefore all close artifacts say commit pending instead of fabricating SHAs. SDD-036 is now ready as the Sprint 11 anchor, while SDD-037 and SDD-038 stay sequenced behind it.
 - Next: SPRINT-11-KICKOFF.prompt.md authored at `spec-driven-development/feature-prompts/SPRINT-11-KICKOFF.prompt.md`; SDD-036 (lifecycle pipeline + 4-card docs + drag-to-reorder w/ safeguards) is the Sprint 11 anchor
+
+### F-25 -- SDD-036 implementation (Sprint 11, PI-6) -- LOCAL ONLY, NOT CLOSED
+
+- Date: 2026-06-24
+- Owner: Principal Software Developer (serial implementation, Article VII isolated dispatch)
+- Scope honored: edited/created only F-25-scoped files -- `cli/schema_lint.py`, `cli/state_builder.py`, `cli/backlog_reorder.py` (NEW), `cli/test_schema_lint.py`, `cli/test_state_builder.py`, `cli/test_backlog_reorder.py` (NEW), the demonstrator `specs/2026-06-24-dashboard-lifecycle-reorder/spec.md`, `docs/ADR/017-backlog-reorder-safeguards.md` (proposed), the spec dir `validation.md` checkoff, regenerated exec surfaces, and this append-only block. No `constitution/**`, no Azure, no BACKLOG mutation, no real `display-order.json`/`reorder-audit.jsonl` write.
+- Article X lock respected: the five locked render functions (`render_html`, `load_sprint_table`, `load_sprint_goal`, `detect_current_sprint`, `load_decisions`) were NOT edited; all SDD-036 surfaces are `inject_lifecycle_html()` post-processors wired in `build()` after `inject_user_gates_html`. `TestS1FootprintLockGuard` golden SHA-256 hashes still PASS.
+- Implementation: (schema) `parse_depends_on` + `check_depends_on` for optional `depends_on` inline list, demonstrator `depends_on: [SDD-018]`; (reorder) `cli/backlog_reorder.py` `move` subcommand with `dependency_violations` (incomplete-dep-above + cycle), 9-field append-only audit, `--force`+reason governance; (dashboard) `render_lifecycle_pipeline` (9 nodes), `resolve_docs_cards`/`render_docs_row` (4-card Constitution/Spec/Sprint/ADRs with disabled missing cards), `render_reorder_control` (native keyboard `<button>` up/down, no JS framework), `load_display_order`/`order_features_for_display` overlay, scoped `<style>` (no `<script>`).
+- Tests: `python -m pytest spec-driven-development/cli/ -q` -> 399 passed, 2 skipped (baseline 349+2; +50 new SDD-036 tests). `test_schema_lint.py` 43, `test_backlog_reorder.py` 14, `test_state_builder.py` 168.
+- Schema lint: `python cli/schema_lint.py` -> `Schema lint clean`, EXIT=0.
+- State regeneration: `python cli/state_builder.py` -> exit 0, regenerated `exec/state.md`, `exec/state.html`, `exec/work-index.md`.
+- Dashboard smoke (regenerated `exec/state.html`): zone-lifecycle:1, lifecycle-card:32, pipe-current:33 (32 cards + 1 CSS rule), docs-row:32, reorder-control:32, docs-card-missing:13, script tags:0. (No active sprint detected in live tree, so `lifecycle-sprint:0`; sprint-card path is unit-tested via `TestInjectLifecycleHtml`.)
+- Reorder smoke (isolated temp-dir, NO real-tree mutation per DA-Evidence Discipline + dispatch R-C): BLOCKED move reason `SDD-103 cannot be ranked above SDD-101: SDD-103 depends on SDD-101 and SDD-101 is not yet complete`; ALLOWED move audit row 9 fields `{event_type, actor, timestamp(UTC Z), item_id, from_rank, to_rank, reason, dependency_check:pass, force_override:false}`.
+- Validation: REQUIRED R-1, R-2, R-3, R-4, R-5, R-6, R-7, R-8, R-9, R-10 checked with evidence (UI-variant R-1/R-2/R-8 satisfied as-locked -> no delta entries). Optional O-1/O-2/O-3 not implemented. Manual M-1..M-3 and tone U-1..U-3 remain F-26.
+- NOT performed (per dispatch): no commit, no push, no SDD-036 DONE in BACKLOG, no sprint close, no actual forced runtime move.
+- OWNER-ATTENTION: SDD-036 is implemented and green locally only. F-26 owns close evidence (M-1..M-3), owner pre-push approval, commit, and Sprint 11 close.
+
+### Sprint 11 -- CLOSED
+
+- Date: 2026-06-24
+- Owner: Principal Executive Manager (lead); PM + Architect owned design (F-24); SW Dev + workers owned implementation and close (F-25, F-26)
+- Features completed: F-24, F-25, F-26
+- Commits: Sprint 11 close commit (SHA reported in the F-26 owner report; one commit lands all staged SDD-036 + close paths)
+- Tests: 349 -> 412 (412 passed, 2 skipped; >= 349 required). Full `spec-driven-development/` suite is authoritative (the 399 figure in the F-25 block was the `cli/`-only subset).
+- Schema lint: clean (exit 0)
+- Validation: SDD-036 10/10 REQUIRED (R-1..R-10) + 0/3 OPTIONAL + manual M-1..M-3 + tone U-1..U-3, all checked with real-run evidence. No REQUIRED item deferred.
+- ADRs: ADR-017 (proposed) -- optional `depends_on` field, `check_depends_on` validator, append-only `ledger/reorder-audit.jsonl` (9 fields), `display-order.json` overlay (BACKLOG stays PM-authoritative), dependency-lock, force-as-Level-2.
+- PI-6 status: ACTIVE; Sprint 12 (SDD-037) is the next planned sprint
+- SDD-036: DONE (lifecycle pipeline on feature/sprint cards + Constitution/Spec/Sprint/ADRs 4-card docs row + keyboard-accessible drag-to-reorder with dependency-lock, append-only audit trail, and force-as-Level-2 governance)
+- Article X lock held: the five SHA-pinned render functions were not edited; SDD-036 surfaces are `inject_lifecycle_html()` post-processors. `TestS1FootprintLockGuard` golden SHA-256 hashes PASS.
+- Dashboard smoke: PASS (regenerated `exec/state.html` -- zone-lifecycle, lifecycle-card, pipe-current, docs-row, reorder-control present; `<script` count 0)
+- Reorder / dependency-lock smoke: PASS (isolated temp tree -- blocked move exit 1 with plain-language reason; legal move exit 0 + one 9-field append-only audit row; no real-tree mutation)
+- Active-focus smoke: PASS (regenerated `exec/state.md` does not say `Active focus: azure-decommission`)
+- Carry-forward: SDD-037 -> Sprint 12; SDD-038 + SDD-034 + SDD-039 + PI-4 housekeeping -> Sprint 13 contingency; SDD-035 (Azure decommission) remains out-of-band
+- Owner ratification / push approval: **APPROVED FOR COMMIT + PUSH** (owner explicitly approved commit + push for this close).
+- Notes: Sprint 11 landed the largest CLARIFY surface in PI-6 (SDD-036) without scope leakage. `depends_on` shipped optional with no flag-day backfill; reorder writes an append-only `display-order.json` overlay plus a 9-field audit trail rather than mutating the PM-authoritative BACKLOG; force-override is a Level-2 runtime gate, not a silent escape hatch. The Article XII UI Lifecycle Variant split kept schema/ledger items strict while letting the three visual surfaces (R-1/R-2/R-8) close as-locked with zero delta entries. DA-Evidence Discipline was honored end to end: F-26 independently re-ran every gate, verified M-1..M-3 with real evidence, and ran the reorder smoke against an isolated temp tree so no real `display-order.json`/`reorder-audit.jsonl` was mutated. Unlike Sprint 10 (no-push), the owner approved commit + push for Sprint 11.
+- Next: SPRINT-12-KICKOFF.prompt.md authored at `spec-driven-development/feature-prompts/SPRINT-12-KICKOFF.prompt.md`; SDD-037 (Dispatches card + dashboard health pills) is the Sprint 12 anchor. PI-6 remains ACTIVE; Sprint 13 (SDD-038 + carryovers) is contingency, not guaranteed.

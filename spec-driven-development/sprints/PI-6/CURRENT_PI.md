@@ -3,13 +3,13 @@ id: SDD-PI-6-CURRENT_PI-sprint
 type: sprint
 status: active
 owner: principal-product-manager
-updated: 2026-06-10
+updated: 2026-06-24
 sprint: PI-6
 ---
 
 # PI-6: Dashboard Reinvestment + Carryover Cleanup
 
-- Status: **ACTIVE** (Sprint 1 / Sprint 10 CLOSED locally on 2026-06-10; Sprint 11 / SDD-036 is next planned; no commit or push performed by F-23 close prep)
+- Status: **ACTIVE** (Sprint 1 / Sprint 10 CLOSED locally 2026-06-10; Sprint 2 / Sprint 11 CLOSED 2026-06-24 with owner-approved commit + push; Sprint 3 / Sprint 12 / SDD-037 is next planned)
 - Theme: Ship dashboard patterns that make the framework's state visible and useful at a glance, then clear the carryover backlog accumulated across PI-3..PI-5.
 - Started: 2026-06-10
 - Owner: principal-executive-manager
@@ -110,7 +110,7 @@ capacity; Sprint 13 is a contingency sprint, not a guarantee.
 | Sprint | Overall | Title | Items | Size | Why this order |
 |--------|---------|-------|-------|------|----------------|
 | **PI-6 Sprint 1** | Sprint 10 | Dashboard Parser Fix + Auto-Refresh | SDD-040 | S | **CLOSED locally 2026-06-10.** Highest-trust-payoff fix shipped in local working tree; active focus no longer points at stale azure-decommission work and serve-mode refresh is verified. Commit pending; no push performed. |
-| **PI-6 Sprint 2** | Sprint 11 | Lifecycle Pipeline + Drag-to-Reorder (with Safeguards) | SDD-036 | L | **NEXT PLANNED.** Heaviest CLARIFY load in PI-6; introduces new `depends_on` frontmatter field and audit-trail ledger schema; sequencing precondition SDD-018 (UI Lifecycle Variant) is satisfied. Must land before SDD-037 because SDD-037's Dispatches card sits on the same dashboard surface as the SDD-036 lifecycle pipeline. |
+| **PI-6 Sprint 2** | Sprint 11 | Lifecycle Pipeline + Drag-to-Reorder (with Safeguards) | SDD-036 | L | **CLOSED 2026-06-24.** Shipped SDD-036 (lifecycle pipeline + 4-card docs row + reorder safeguards); tests 349 -> 412; schema lint clean; 10/10 REQUIRED + ADR-017 (proposed); owner-approved commit + push. Unblocks SDD-037, whose Dispatches card sits on the same dashboard surface as the SDD-036 lifecycle pipeline. |
 | **PI-6 Sprint 3** | Sprint 12 | Dispatches Card + Health Pills | SDD-037 | M | Builds on SDD-036's dashboard surface; surfaces ledger contents and runtime health pills; cheap relative to SDD-036 because no new schema, just new rendering. |
 | **PI-6 Sprint 4** | Sprint 13 | Aesthetic Tokens + Carryover Cleanup | SDD-038 + carryovers (SDD-034 dedup, SDD-039 Article VII wording, PI-4 housekeeping) | M | Contingency sprint. Pulled in only if Sprints 10-12 hold velocity. Aesthetic tokens are P3 polish; the carryover items are the long tail of PI-5 DONE-WITH-CARRYOVER and should not block PI-7 planning. |
 
@@ -208,14 +208,26 @@ capacity; Sprint 13 is a contingency sprint, not a guarantee.
 6. Owner approval: EM prompt, 2026-06-10: `Approve close prep, no push`.
 7. Commit chain: local close prep, commit pending.
 
-### Sprint 2 -- Lifecycle Pipeline + Drag-to-Reorder -- NEXT PLANNED
-**Status**: **NEXT PLANNED** (scope locked at SDD-036; kickoff prompt authored at Sprint 10 close)
-**Planned scope**: SDD-036.
+### Sprint 2 -- Lifecycle Pipeline + Drag-to-Reorder -- CLOSED
+**Status**: **CLOSED** 2026-06-24 (owner-approved commit + push; PI-6 remains ACTIVE; Sprint 12 / SDD-037 next planned).
+**Scope**: SDD-036 (lifecycle pipeline on feature/sprint cards + 4-card Constitution/Spec/Sprint/ADRs docs row + keyboard-accessible backlog reorder with dependency-lock, append-only audit trail, and force-as-Level-2 governance).
 **Sprint kickoff**: [`../../feature-prompts/SPRINT-11-KICKOFF.prompt.md`](../../feature-prompts/SPRINT-11-KICKOFF.prompt.md)
+**Close evidence**:
+1. Tests: 349 -> 412 passed, 2 skipped (full `spec-driven-development/` suite; >= 349 required).
+2. Schema lint: clean (exit 0).
+3. Validation: SDD-036 10/10 REQUIRED (R-1..R-10) + manual M-1..M-3 + tone U-1..U-3 checked; Optional O-1..O-3 not implemented.
+4. ADR: ADR-017 (proposed) -- optional `depends_on` field, `check_depends_on` validator, append-only `ledger/reorder-audit.jsonl`, `display-order.json` overlay (BACKLOG stays PM-authoritative), dependency-lock, force-as-Level-2.
+5. Dashboard smoke: lifecycle pipeline + 4-card docs row render on feature/sprint cards in regenerated `exec/state.html`; 0 `<script>` tags (no JS framework).
+6. Reorder smoke (isolated temp tree, no real-tree mutation): dependency-blocked move rejected exit 1 with plain-language reason; legal move exit 0 + one 9-field append-only audit row.
+7. Article X lock held: the five SHA-pinned render functions were not edited; SDD-036 surfaces are `inject_lifecycle_html()` post-processors.
+8. Owner ratification: APPROVED FOR COMMIT + PUSH.
+
+**Retro**: Sprint 11 landed the largest CLARIFY surface in PI-6 without scope leakage -- `depends_on` shipped optional (no flag-day backfill), reorder writes an append-only overlay + audit trail rather than mutating BACKLOG, and force-override is governed as a Level-2 runtime gate. The UI Lifecycle Variant (Article XII) split kept the schema/ledger items strict while letting the three visual surfaces (R-1/R-2/R-8) close as-locked with zero delta entries. DA-Evidence Discipline was honored: every close claim came from a real run, and the reorder smoke ran against an isolated temp tree so no real `display-order.json`/`reorder-audit.jsonl` was mutated. SDD-037 (Dispatches card + health pills) is unblocked on the same dashboard surface and is the Sprint 12 anchor.
 
 ### Sprint 3 -- Dispatches Card + Health Pills -- PLANNED
-**Status**: **PLANNED** (scope locked at SDD-037; kickoff prompt to be authored at Sprint 11 close)
+**Status**: **PLANNED** (scope locked at SDD-037; kickoff prompt authored at Sprint 11 close).
 **Planned scope**: SDD-037.
+**Sprint kickoff**: [`../../feature-prompts/SPRINT-12-KICKOFF.prompt.md`](../../feature-prompts/SPRINT-12-KICKOFF.prompt.md)
 
 ### Sprint 4 -- Aesthetic Tokens + Carryover Cleanup -- CONTINGENCY
 **Status**: **CONTINGENCY** (pulled in only if Sprints 10-12 hold velocity; kickoff prompt to be authored at Sprint 12 close if pull-in is approved)

@@ -80,6 +80,11 @@ ARTIFACT_SKIP_PREFIXES = ("_",)
 # Best-effort ISO date pattern for the `updated` field.
 _ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
+# SDD-036 / ADR-017: optional `depends_on` artifact ID shape (e.g. SDD-018).
+# Deliberately NOT added to REQUIRED_CONTRACT_FIELDS -- depends_on is optional
+# and only validated when present.
+_DEPENDS_ON_ID_RE = re.compile(r"^[A-Z]{2,}-\d{2,3}$")
+
 
 # ---------------------------------------------------------------------------- #
 # SDD-018 UI Lifecycle Variant (Article XII candidate; ADR-014)
@@ -286,6 +291,44 @@ def parse_frontmatter(text: str) -> dict:
     return out
 
 
+def parse_depends_on(fm: dict) -> list[str]:
+    """Parse the optional `depends_on` frontmatter field into a list of IDs.
+
+    SDD-036 / ADR-017: `depends_on` is OPTIONAL and is NOT part of
+    REQUIRED_CONTRACT_FIELDS. parse_frontmatter stores an inline list
+    `depends_on: [SDD-018, SDD-019]` as the raw string "[SDD-018, SDD-019]"
+    (the stdlib parser does no list normalization). This helper hand-parses
+    that inline form -- no PyYAML, no third-party deps (Article V).
+
+    Returns:
+        - []                       when the field is absent or `[]`.
+        - ["SDD-018", "SDD-019"]   for the inline list form `[SDD-018, SDD-019]`.
+        - ["SDD-018"]              for a bare scalar `depends_on: SDD-018`.
+
+    A block-list form (one `- ID` per line) is parsed by parse_frontmatter as
+    an empty nested dict and is treated here as empty; the framework convention
+    (ADR-017) is the inline `[...]` form.
+    """
+    raw = fm.get("depends_on")
+    if raw is None:
+        return []
+    if isinstance(raw, dict):
+        # Block-style list the stdlib parser cannot read -> treat as empty.
+        return []
+    if isinstance(raw, list):
+        # Defensive: parse_frontmatter never yields this today.
+        return [str(item).strip().strip("'\"") for item in raw if str(item).strip()]
+    s = str(raw).strip()
+    if not s:
+        return []
+    if s.startswith("[") and s.endswith("]"):
+        inner = s[1:-1].strip()
+        if not inner:
+            return []
+        return [item.strip().strip("'\"") for item in inner.split(",") if item.strip()]
+    return [s.strip("'\"")]
+
+
 def _has_unquoted_version(raw_lines: list[str]) -> tuple[bool, str | None]:
     """Return (is_unquoted, raw_value). True when `version:` exists with an
     unquoted, unquoted-looking value (e.g. `version: 1.0`)."""
@@ -431,6 +474,85 @@ def check_artifact(path: Path) -> list[Finding]:
                 severity="WARNING",
             ))
 
+    return findings
+
+
+def _parse_backlog_ids(backlog_path: Path) -> set[str]:
+    """Extract artifact IDs (e.g. SDD-036) mentioned in BACKLOG.md."""
+    try:
+        text = backlog_path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return set()
+    return set(re.findall(r"\b([A-Z]{2,}-\d{2,3})\b", text))
+
+
+def _discover_backlog_ids(start: Path) -> set[str] | None:
+    """Walk up from `start` to find `backlog/BACKLOG.md` and parse its IDs.
+
+    Returns None when no BACKLOG.md is found (so callers can SKIP the
+    existence check rather than warn on every reference). Returns a set of
+    IDs (possibly empty) when a BACKLOG.md exists.
+    """
+    cur = start.resolve()
+    for _ in range(8):
+        candidate = cur / "backlog" / "BACKLOG.md"
+        if candidate.is_file():
+            return _parse_backlog_ids(candidate)
+        if cur.parent == cur:
+            break
+        cur = cur.parent
+    return None
+
+
+def check_depends_on(path: Path, backlog_ids: set[str] | None = None) -> list[Finding]:
+    """Validate the optional `depends_on` frontmatter list on a spec.md.
+
+    SDD-036 / ADR-017: `depends_on` is OPTIONAL and NOT in
+    REQUIRED_CONTRACT_FIELDS. When the field is ABSENT this returns zero
+    findings. When PRESENT it enforces, validating ONLY what is present:
+      - each entry matches the artifact ID shape  ^[A-Z]{2,}-\\d{2,3}$  (ERROR)
+      - no duplicate entries                                            (ERROR)
+      - no self-dependency (entry == this artifact's own id)            (ERROR)
+      - referenced ID exists in BACKLOG.md, when discoverable           (WARNING)
+
+    When `backlog_ids` is None, the BACKLOG existence check is skipped.
+    """
+    findings: list[Finding] = []
+    text = path.read_text(encoding="utf-8", errors="replace")
+    fm = parse_frontmatter(text)
+    if not fm or "depends_on" not in fm:
+        return findings
+
+    deps = parse_depends_on(fm)
+    self_id = (fm.get("id") or "").strip() if isinstance(fm.get("id"), str) else ""
+    seen: set[str] = set()
+    for dep in deps:
+        if not _DEPENDS_ON_ID_RE.match(dep):
+            findings.append(Finding(
+                str(path), "artifact",
+                f"depends_on entry '{dep}' is not a valid artifact ID "
+                f"(expected shape like SDD-018)",
+            ))
+            continue
+        if dep in seen:
+            findings.append(Finding(
+                str(path), "artifact",
+                f"depends_on contains duplicate entry '{dep}'",
+            ))
+            continue
+        seen.add(dep)
+        if self_id and dep == self_id:
+            findings.append(Finding(
+                str(path), "artifact",
+                f"depends_on lists self '{dep}' (an artifact cannot depend on itself)",
+            ))
+            continue
+        if backlog_ids is not None and dep not in backlog_ids:
+            findings.append(Finding(
+                str(path), "artifact",
+                f"depends_on references '{dep}' which is not found in BACKLOG.md",
+                severity="WARNING",
+            ))
     return findings
 
 
@@ -899,6 +1021,10 @@ def _walk_artifacts(base: Path) -> list[Finding]:
         if _spec_has_ui_variant(spec_path.parent):
             variant_spec_dirs.add(spec_path.parent.resolve())
 
+    # SDD-036 / ADR-017: discover BACKLOG IDs once for the optional
+    # depends_on existence check (None => skip the existence WARNING).
+    backlog_ids = _discover_backlog_ids(base)
+
     for p in sorted(base.rglob("*.md")):
         if _should_skip_artifact(p):
             continue
@@ -906,6 +1032,7 @@ def _walk_artifacts(base: Path) -> list[Finding]:
         # `ui-variant: yes` style typos even for non-variant spec dirs).
         if p.name == "spec.md":
             findings.extend(_ui_variant_marker_shape_findings(p))
+            findings.extend(check_depends_on(p, backlog_ids))
         # Variant dispatch: validation.md inside a variant spec dir
         if p.name == "validation.md" and p.parent.resolve() in variant_spec_dirs:
             spec_dir_rel = _spec_dir_relative_path(p.parent.resolve())

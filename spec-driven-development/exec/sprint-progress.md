@@ -724,3 +724,65 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 - Validation at approval stamp: `python spec-driven-development/cli/schema_lint.py` -> Schema lint clean; `python -m pytest spec-driven-development/ --tb=no -q` -> 337 passed, 2 skipped.
 - Carry-forward remains open: SDD-034 (content-shingle dedup upgrade), SDD-039 (Article VII wording clarification; requires ADR/owner approval for constitution wording), and PI-4 housekeeping (domain-skill annotations; GitHub Actions Node.js deprecation bump).
 - Notes: This block records the missing owner gate only. It does not mark SDD-034, SDD-039, or PI-4 housekeeping DONE, and it does not change implementation behavior.
+
+---
+
+## Sprint 10 -- PI-6 Sprint 1 / Dashboard Parser Fix + Auto-Refresh
+
+- Sprint kickoff: [../feature-prompts/SPRINT-10-KICKOFF.prompt.md](../feature-prompts/SPRINT-10-KICKOFF.prompt.md)
+- Scope: SDD-040 only. SDD-036, SDD-037, SDD-038, SDD-034, SDD-039, PI-4 housekeeping, and Azure decommission work remain out of Sprint 10 F-21 scope.
+- Sequence: F-21 (CLARIFY + SPEC + PLAN + TASKS) -> F-22 (IMPLEMENT + QA) -> F-23 (Sprint 10 close + Sprint 11 kickoff).
+- Owner: PM + Architect own F-21; SW Dev owns F-22/F-23.
+
+### F-21 -- state-builder-fixes-finalize -- DONE
+
+- Date: 2026-06-10
+- Owner: Principal Product Manager + Principal Architect
+- Commits: none in F-21; no commit or push performed.
+- Files changed: 6 docs/governance files only:
+  - `spec-driven-development/specs/2026-06-10-state-builder-fixes/clarify.md`
+  - `spec-driven-development/specs/2026-06-10-state-builder-fixes/spec.md`
+  - `spec-driven-development/specs/2026-06-10-state-builder-fixes/plan.md`
+  - `spec-driven-development/specs/2026-06-10-state-builder-fixes/tasks.md`
+  - `spec-driven-development/specs/2026-06-10-state-builder-fixes/validation.md`
+  - `spec-driven-development/exec/sprint-progress.md`
+- Tests: not run as full suite; F-21 is docs/spec finalization only. Schema lint run is recorded in the session report.
+- Validation: SDD-040 validation contract LOCKED for F-22 with 9 REQUIRED items, 2 optional items marked not applicable by lock decision, 3 manual checks, and 1 conditional UX check. All implementation checkboxes intentionally remain unchecked.
+- CLARIFY outcomes: Q-A combination rule approved; Q-B handler-side meta refresh plus existing rebuild-on-request approved; Q-C default 5 seconds with serve-only `--refresh-seconds` positive integer validation approved; Q-D Article V stdlib-only confirmed with `subprocess` allowed for bounded git recency; Q-E non-serve backwards compatibility confirmed.
+- OWNER-ATTENTION: none.
+- ADRs: none. The active-focus helper and handler-side meta refresh are implementation choices inside the existing stdlib CLI/HTTP-handler surface.
+- No implementation: F-21 did not edit `cli/state_builder.py`, `cli/test_state_builder.py`, generated exec artifacts, backlog, CURRENT_PI, constitution files, or any SDD-036/037/038/034/039/Azure decommission path.
+- Next: F-22 implements T-040-02 through T-040-06 against the locked validation contract. No REQUIRED item may be silently deferred.
+
+### F-22 -- state-builder-fixes-implement-qa -- DONE (implementation complete; M3 pending)
+
+- Date: 2026-06-10
+- Owner: Principal Software Developer
+- Commits: none; no commit or push performed.
+- Scope honored: edited only `spec-driven-development/cli/state_builder.py`, `spec-driven-development/cli/test_state_builder.py`, SDD-040 `tasks.md`/`validation.md`, regenerated exec surfaces, and this append-only sprint-progress block.
+- Implementation: added an active-focus helper before the existing fallback chain; helper scopes to active PI-6 Sprint 10 / SDD-040 via `CURRENT_PI.md` and `BACKLOG.md`, prefers unchecked REQUIRED validation items, tie-breaks scoped candidates with bounded stdlib `subprocess.run` git recency, and avoids weak cross-reference matches such as the stale azure-decommission `SDD-040+` note. Added serve-only post-render meta refresh plus `serve --refresh-seconds N` positive integer validation. No JS, SSE, watcher, background thread, or third-party dependency added.
+- Tests: `python -m pytest spec-driven-development/cli/test_state_builder.py -q` -> 135 passed. `python -m pytest spec-driven-development/ --tb=no -q` -> 349 passed, 2 skipped.
+- Schema lint: `python spec-driven-development/cli/schema_lint.py` -> clean.
+- State regeneration: `python spec-driven-development/cli/state_builder.py` regenerated `exec/state.md`, `exec/state.html`, and `exec/work-index.md`. Smoke result: `Active focus:` no longer says `azure-decommission`; F-22 smoke observed `Finish validation for 'state-builder-fixes' (SDD-040)` before validation evidence checkoff.
+- Serve verification: `serve --no-open --port 8876 --refresh-seconds 7` returned served HTML with `meta7 True`, SDD-040 focus, and no `<script>` tag via stdlib `urllib`. A second run, `serve --no-open --port 8877 --refresh-seconds 6`, stayed running while `validation.md` was edited; a later stdlib `urllib` GET returned `meta6 True` and SDD-040 focus without rerunning the CLI.
+- Validation: R1-R9 checked with evidence; M1 and M2 checked. M3 owner pre-push approval remains unchecked and mandatory before any push.
+- OWNER-ATTENTION: owner pre-push approval required (M3). Sprint 10 is not claimed closed by F-22; F-23 still owns Sprint 10 close and Sprint 11 kickoff.
+
+### Sprint 10 -- CLOSED
+
+- Date: 2026-06-10
+- Owner: Principal Executive Manager (lead); PM + Architect owned design; SW Dev + workers owned implementation and close
+- Features completed: F-21, F-22, F-23
+- Commits: local close prep, commit pending. No commit or push generated by this F-23 prep.
+- Tests: 337 -> 349 (349 passed, 2 skipped; >= 337 required)
+- Schema lint: clean
+- Validation: SDD-040 9/9 REQUIRED + M1/M2/M3 checked
+- ADRs: none
+- PI-6 status: ACTIVE; Sprint 11 (SDD-036) is the next planned sprint
+- SDD-040: DONE locally (active-focus helper scopes to current PI/Sprint allocation and validation state before bounded git recency fallback; serve mode uses handler-side meta refresh plus `--refresh-seconds` without third-party dependencies)
+- Smoke test: regenerated `state.md` no longer says `Active focus: azure-decommission`; current line after F-23 regeneration is `Active focus: Continue current sprint anchor 'state-builder-fixes' (SDD-040)`
+- Serve-mode auto-refresh verification: PASS (`serve --no-open --port 8877 --refresh-seconds 6`; after an allowed `validation.md` edit while the server was running, a later stdlib `urllib` GET returned configured meta refresh and SDD-040 focus without rerunning the CLI)
+- Carry-forward: SDD-034, SDD-039, and PI-4 housekeeping remain open; SDD-036 + SDD-037 + SDD-038 remain PI-6 candidates per CURRENT_PI.md; SDD-037 is Sprint 12; SDD-038/carryovers are Sprint 13 contingency; Azure decommission remains out-of-band
+- Owner ratification: APPROVED FOR LOCAL CLOSE PREP ONLY. Evidence from EM prompt, 2026-06-10: `Approve close prep, no push`. No push performed.
+- Notes: Sprint 10 closed the dashboard trust defect that opened PI-6 without widening scope. The sprint deliberately stopped at local close prep because the owner selected no-push approval; therefore all close artifacts say commit pending instead of fabricating SHAs. SDD-036 is now ready as the Sprint 11 anchor, while SDD-037 and SDD-038 stay sequenced behind it.
+- Next: SPRINT-11-KICKOFF.prompt.md authored at `spec-driven-development/feature-prompts/SPRINT-11-KICKOFF.prompt.md`; SDD-036 (lifecycle pipeline + 4-card docs + drag-to-reorder w/ safeguards) is the Sprint 11 anchor

@@ -2,6 +2,85 @@
 
 ---
 
+## Week of June 5 - June 11, 2026
+
+Date: June 11, 2026 | Owner: Rodolfo Lerma | Branch: master at 8c7a22c (234 commits)
+
+### Progress since last week (June 4)
+
+**Record week: PI-4 closed, PI-5 ran 5 sprints end-to-end and closed, PI-6 launched. 91 commits, +43,418/-251 lines across 236 files. Tests jumped 152 -> 349.**
+
+This was a heavy governance + tooling hardening cycle, mostly absorbing the Scott Feedback Bundle (SDD-015..SDD-039) and adding three new binding constitution articles.
+
+**PI-4 Sprint S4 -- Frontmatter/Document Contract (FDC) (COMPLETE, Jun 5-6)**
+- SDD-FDC-001: frontmatter schema + commit convention, `schema_lint` extended with an artifact-contract validator, `count` subcommand added (rollup + handler), opt-in commit-msg hook, S1 footprint lock guard.
+- Frontmatter backfilled across all `specs/**` and `sprints/**`. ADR-012 approved.
+- PI-4 closed DONE-WITH-DEFERRED with owner ratification.
+
+**PI-5 Launch + Sprint S5 -- Symlink Portability (COMPLETE, Jun 6)**
+- PI-5 launched to absorb the deferred Scott bundle across sprints.
+- SDD-016 host-link (symlink/junction install of framework into host) + SDD-017 hired a `dev-env-manager` worker. Co-spec approved, implemented, closed.
+
+**PI-5 Sprint S6 -- Serial Gate + Dedup + Gitignore (COMPLETE, Jun 7)**
+- SDD-019: lock scanner + serial gate at CLARIFY/SPEC with subcommands. Article XI added (serial gate, ADR-013).
+- SDD-020: `cli/dedup.py` content-dedup tool + tests.
+- SDD-027: host `.gitignore` protection. SDD-028 junction test + SDD-029 stale-symlink distinction fixes.
+
+**PI-5 Sprint S7 -- Sprint 6 Completion Bundle + UI Lifecycle Variant (COMPLETE, Jun 8)**
+- SDD-032: closed prompt hooks, triple-destination log writers in `cli/fleet.py`.
+- SDD-018: UI Lifecycle Variant -- Article XII ratified (ADR-014), `schema_lint` variant dispatch + append-only enforcement, template stubs, state-dashboard retroactive-demo migration.
+- Azure decommission inventoried (SDD-035) and ADR-015 approved -- retired the Azure dashboard deploy workflow (pivot to local-only dashboard per human direction).
+
+**PI-5 Sprint S8 -- Model Upgrade Discipline + ADO/GitHub Bridge (COMPLETE, Jun 8)**
+- SDD-015: model upgrade discipline plan + sync/model-upgrade gates implemented. ADR-016 governance unblock accepted.
+- SDD-022: ADO GitHub bridge plan finalized.
+
+**PI-5 Sprint S9 -- User Gates + Self-Review + Pressure Defense (COMPLETE, Jun 8)**
+- SDD-023: first-class user gates. SDD-021: session self-review loop. SDD-025: stakeholder pressure defense. All implemented as skills, closed.
+- PI-5 closed DONE-WITH-CARRYOVER with owner approval (commit 8417818).
+
+**PI-6 Launch + Sprint 10 -- Dashboard Parser Fix + Auto-Refresh (IN FLIGHT, Jun 10-11)**
+- PI-6 (Dashboard Reinvestment + Carryover Cleanup) launched with SDD-040 as Sprint 10 anchor.
+- SDD-040: fixes stale active-focus heuristic (smoke test: dashboard no longer says "Active focus: azure-decommission") + serve-mode auto-refresh (stdlib-only, Article V).
+- Spec/plan/tasks/validation authored. Implementation + tests complete locally (349 passing).
+- Status: M3 owner ratification pending; implementation uncommitted in working tree. SPRINT-11-KICKOFF.prompt.md (SDD-036) drafted.
+
+### Blockers / Next Steps
+
+| Item | Status | Blocker |
+|------|--------|---------|
+| Sprint 10 / SDD-040 | Implemented, uncommitted | M3 owner ratification + pre-push approval pending |
+| Sprint 11 / SDD-036 (lifecycle pipeline + drag-to-reorder) | Kickoff drafted | Starts after Sprint 10 closes |
+| Carryover: SDD-034 (content-shingle dedup), SDD-039 (Article VII wording) | Backlogged | Visible in BACKLOG, not pulled into Sprint 10 |
+| PI-4 housekeeping (domain-skill annotations, GH Actions Node bump) | Deferred | Visible carryover |
+
+### Key Meetings This Week
+
+| Meeting | Date | Key Outcome |
+|---------|------|-------------|
+| _(No external meetings -- absorbing prior Scott feedback into governance + tooling)_ | -- | -- |
+
+### Scorecard
+
+| Metric | Last Week (Jun 4) | This Week (Jun 11) | Delta |
+|--------|-------------------|-------------------|-------|
+| Total commits | 143 | 234 | +91 |
+| Tests passing | 152 | 349 (+2 skipped) | +197 |
+| PI status | PI-4 active (S1/S2/S3 DONE) | PI-4 closed, PI-5 closed, PI-6 active (Sprint 10 in flight) | +2 PIs closed |
+| Sprints closed | -- | Sprints 4-9 closed (6 sprints), Sprint 10 in flight | +6 sprints |
+| CLI tools / code lines | ~4,074 | ~6,841 (added dedup.py, serial-gate, count, hooks) | +2,767 |
+| Agent definitions | 12 | 13 (added dev-env-manager) | +1 |
+| Skills | 32 | 35 (user gates, self-review, pressure defense, etc.) | +3 |
+| Slash commands | 17 | 18 | +1 |
+| ADRs | 11 | 16 (added 012-016) | +5 |
+| Constitution articles | 10 (I-X) | 12 (added XI serial gate, XII UI lifecycle variant) | +2 |
+| Lessons captured | 14 | 14+ | Carried |
+| Specs in flight / total | 6 | 31 spec dirs total | Major growth |
+| Dashboard | v3.0 (Azure-deployed) | v3.x local-only (Azure deploy retired, parser fix + auto-refresh in flight) | Pivot to local |
+| Scott Feedback Bundle | 14 triaged (2 done) | SDD-015..039 largely absorbed across PI-5 | Mostly cleared |
+
+---
+
 ## Week of May 27 - June 4, 2026
 
 Date: June 4, 2026 | Owner: Rodolfo Lerma | Branch: master at 7438bfd (143 commits)

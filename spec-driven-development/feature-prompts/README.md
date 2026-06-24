@@ -104,7 +104,7 @@ commit is pushed**.
 
 | Order | File | Owner | Status |
 |-------|------|-------|--------|
-| 0 | [SPRINT-10-KICKOFF.prompt.md](SPRINT-10-KICKOFF.prompt.md) | Principal Executive Manager (lead) | READY (gated on Sprint 10 HARD PREREQUISITE) |
+| 0 | [SPRINT-10-KICKOFF.prompt.md](SPRINT-10-KICKOFF.prompt.md) | Principal Executive Manager (lead) | CLOSED locally 2026-06-10 (commit pending; no push performed) |
 
 Prerequisite: **PI-5 must be closed at commit `8417818`** (PI-5 CLOSED /
 DONE-WITH-CARRYOVER 2026-06-09), **PI-6 must be launched** via
@@ -117,6 +117,21 @@ F-22 (IMPLEMENT + QA), and F-23 (sprint close + SPRINT-11 kickoff
 authoring) run sequentially. SDD-040 has a stdlib-only constraint
 (Article V): no `watchdog`, no `flask` -- auto-refresh must use polling,
 on-request refresh, stdlib file-mtime sweep, or Server-Sent Events.
+
+### Sprint 11 -- PI-6 Sprint 2 / Lifecycle Pipeline + Drag-to-Reorder (SDD-036)
+
+| Order | File | Owner | Status |
+|-------|------|-------|--------|
+| 0 | [SPRINT-11-KICKOFF.prompt.md](SPRINT-11-KICKOFF.prompt.md) | Principal Executive Manager (lead) | READY (gated on Sprint 10 local close prep + no-push owner evidence) |
+
+Prerequisite: **Sprint 10 must be closed locally** with SDD-040 marked DONE in
+BACKLOG, PI-6 still ACTIVE, tests at or above 349 passed / 2 skipped, schema
+lint clean, active-focus smoke no longer reporting `azure-decommission`,
+serve-mode refresh verification recorded, and owner evidence from EM prompt
+2026-06-10: `Approve close prep, no push`. Sprint 11 scope is **SDD-036 only**:
+lifecycle pipeline, 4-card documentation row, and drag-to-reorder with
+dependency-lock/audit-trail safeguards. SDD-037 remains Sprint 12;
+SDD-038/carryovers remain Sprint 13 contingency.
 
 ---
 

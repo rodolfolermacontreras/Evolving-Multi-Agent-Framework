@@ -9,7 +9,7 @@ sprint: PI-6
 
 # PI-6: Dashboard Reinvestment + Carryover Cleanup
 
-- Status: **ACTIVE** (Sprint 10 not yet started; launches with the Sprint 10 kickoff session)
+- Status: **ACTIVE** (Sprint 1 / Sprint 10 CLOSED locally on 2026-06-10; Sprint 11 / SDD-036 is next planned; no commit or push performed by F-23 close prep)
 - Theme: Ship dashboard patterns that make the framework's state visible and useful at a glance, then clear the carryover backlog accumulated across PI-3..PI-5.
 - Started: 2026-06-10
 - Owner: principal-executive-manager
@@ -109,8 +109,8 @@ capacity; Sprint 13 is a contingency sprint, not a guarantee.
 
 | Sprint | Overall | Title | Items | Size | Why this order |
 |--------|---------|-------|-------|------|----------------|
-| **PI-6 Sprint 1** | Sprint 10 | Dashboard Parser Fix + Auto-Refresh | SDD-040 | S | Highest-trust-payoff fix; smallest scope; must ship first so the rest of PI-6 can build on a dashboard that no longer lies about active focus and refreshes on its own. |
-| **PI-6 Sprint 2** | Sprint 11 | Lifecycle Pipeline + Drag-to-Reorder (with Safeguards) | SDD-036 | L | Heaviest CLARIFY load in PI-6; introduces new `depends_on` frontmatter field and audit-trail ledger schema; sequencing precondition SDD-018 (UI Lifecycle Variant) is satisfied. Must land before SDD-037 because SDD-037's Dispatches card sits on the same dashboard surface as the SDD-036 lifecycle pipeline. |
+| **PI-6 Sprint 1** | Sprint 10 | Dashboard Parser Fix + Auto-Refresh | SDD-040 | S | **CLOSED locally 2026-06-10.** Highest-trust-payoff fix shipped in local working tree; active focus no longer points at stale azure-decommission work and serve-mode refresh is verified. Commit pending; no push performed. |
+| **PI-6 Sprint 2** | Sprint 11 | Lifecycle Pipeline + Drag-to-Reorder (with Safeguards) | SDD-036 | L | **NEXT PLANNED.** Heaviest CLARIFY load in PI-6; introduces new `depends_on` frontmatter field and audit-trail ledger schema; sequencing precondition SDD-018 (UI Lifecycle Variant) is satisfied. Must land before SDD-037 because SDD-037's Dispatches card sits on the same dashboard surface as the SDD-036 lifecycle pipeline. |
 | **PI-6 Sprint 3** | Sprint 12 | Dispatches Card + Health Pills | SDD-037 | M | Builds on SDD-036's dashboard surface; surfaces ledger contents and runtime health pills; cheap relative to SDD-036 because no new schema, just new rendering. |
 | **PI-6 Sprint 4** | Sprint 13 | Aesthetic Tokens + Carryover Cleanup | SDD-038 + carryovers (SDD-034 dedup, SDD-039 Article VII wording, PI-4 housekeeping) | M | Contingency sprint. Pulled in only if Sprints 10-12 hold velocity. Aesthetic tokens are P3 polish; the carryover items are the long tail of PI-5 DONE-WITH-CARRYOVER and should not block PI-7 planning. |
 
@@ -195,22 +195,23 @@ capacity; Sprint 13 is a contingency sprint, not a guarantee.
 
 ## Sprints
 
-### Sprint 1 -- Dashboard Parser Fix + Auto-Refresh -- NOT STARTED
-**Status**: **NOT STARTED** (launches with [SPRINT-10-KICKOFF.prompt.md](../../feature-prompts/SPRINT-10-KICKOFF.prompt.md))
-**Planned scope**: SDD-040 (state_builder.py parser fix + auto-refresh).
+### Sprint 1 -- Dashboard Parser Fix + Auto-Refresh -- CLOSED
+**Status**: **CLOSED locally** 2026-06-10 (close prep approved by owner evidence `Approve close prep, no push`; no commit or push performed by F-23).
+**Scope**: SDD-040 (state_builder.py parser fix + auto-refresh).
 **Sprint kickoff**: [`../../feature-prompts/SPRINT-10-KICKOFF.prompt.md`](../../feature-prompts/SPRINT-10-KICKOFF.prompt.md)
-**Hard prerequisites** (mirrored in the kickoff prompt):
-1. PI-5 closed at `8417818` (CURRENT_PI.md + sprint-progress.md show close stamp).
-2. PI-6 launched (this CURRENT_PI.md exists OR explicit "PI-6 launches with this sprint" note).
-3. Tests >= 337.
-4. Schema lint clean.
-5. SDD-040 filed in BACKLOG with PI-6 Sprint 10 allocation.
-6. SDD-036, SDD-037, SDD-038 still present in BACKLOG as PI-6 candidates.
-7. Owner approved Sprint 10 start.
+**Close evidence**:
+1. Tests: 337 -> 349 passed, 2 skipped.
+2. Schema lint: clean.
+3. Validation: SDD-040 9/9 REQUIRED + M1/M2/M3 checked.
+4. Smoke: regenerated `state.md` no longer says `Active focus: azure-decommission`; current line reports SDD-040 close work.
+5. Serve verification: handler-side meta refresh with configured cadence verified without manual CLI re-run.
+6. Owner approval: EM prompt, 2026-06-10: `Approve close prep, no push`.
+7. Commit chain: local close prep, commit pending.
 
-### Sprint 2 -- Lifecycle Pipeline + Drag-to-Reorder -- PLANNED
-**Status**: **PLANNED** (scope locked at SDD-036; kickoff prompt to be authored at Sprint 10 close)
+### Sprint 2 -- Lifecycle Pipeline + Drag-to-Reorder -- NEXT PLANNED
+**Status**: **NEXT PLANNED** (scope locked at SDD-036; kickoff prompt authored at Sprint 10 close)
 **Planned scope**: SDD-036.
+**Sprint kickoff**: [`../../feature-prompts/SPRINT-11-KICKOFF.prompt.md`](../../feature-prompts/SPRINT-11-KICKOFF.prompt.md)
 
 ### Sprint 3 -- Dispatches Card + Health Pills -- PLANNED
 **Status**: **PLANNED** (scope locked at SDD-037; kickoff prompt to be authored at Sprint 11 close)

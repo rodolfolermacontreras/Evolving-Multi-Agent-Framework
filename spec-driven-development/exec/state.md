@@ -1,9 +1,9 @@
 # Executive State
 
-Generated date: 2026-06-09
+Generated date: 2026-06-10
 Current PI: PI-5 (Brownfield Adoption + Anti-Conflict + Stakeholder Discipline)
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
-Active focus: Finish implementation of 'azure-decommission'
+Active focus: Continue current sprint anchor 'state-builder-fixes' (SDD-040)
 
 PI progress: 5/8 commitments complete (62%)
 
@@ -41,6 +41,7 @@ PI progress: 5/8 commitments complete (62%)
 | stakeholder-pressure-defense | REVIEW | done | Status: done but RETRO missing |
 | sprint-6-completion | DONE | done | validation 100%, RETRO present |
 | ui-lifecycle-variant | DONE | done | Status: done, RETRO present |
+| state-builder-fixes | REVIEW | done | Status: done but RETRO missing |
 
 ## Sprint Plan
 

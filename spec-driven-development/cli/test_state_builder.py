@@ -2649,3 +2649,420 @@ class TestInjectLifecycleHtml:
             current_sprint={"num": 1, "title": "T", "status": "Active"})
         assert "<script" not in out.lower()
 
+
+# ===========================================================================
+# SDD-037 (F-28): Dispatches card + dashboard health pills
+# Tests-first. Surfaces are additive, read-only indicators -- never gates,
+# never raise, open zero new sqlite connections, emit zero <script> tags.
+# ===========================================================================
+
+from cli.state_builder import (  # noqa: E402  -- SDD-037 surfaces under test
+    _group_dispatches,
+    inject_dispatches_html,
+    inject_health_pills_html,
+    constitution_semver_status,
+    skill_validity_status,
+    ledger_reachability_status,
+    stale_tracker_status,
+)
+
+# Marker doc mirroring the real dashboard <main> open used by the injectors.
+_MAIN_DOC = (
+    '<main id="main" role="main" class="grid-v3">'
+    '<section class="zone-next"><h2>What Comes Next</h2></section></main>'
+)
+
+
+def _grouped_ledger() -> LedgerView:
+    """A populated LedgerView with the SDD-037 grouped widening field."""
+    return LedgerView(
+        recent_success=[],
+        blockers=[],
+        recent=[{"agent_id": "dev-1", "outcome": "success",
+                 "dispatched_at": "2026-06-01T09:00:00Z"}],
+        available=True,
+        grouped=[
+            {"feature_dir": "specs/2026-06-24-alpha", "sprints": [
+                {"sprint": "Sprint A", "rows": [
+                    {"agent_id": "dev-1", "agent_role": "developer",
+                     "task_id": "T-1", "task_title": "Build <widget>",
+                     "outcome": "success", "outcome_at": "2026-06-01T10:00:00Z",
+                     "dispatched_at": "2026-06-01T09:00:00Z"},
+                    {"agent_id": "dev-2", "agent_role": "developer",
+                     "task_id": "T-2", "task_title": "Stuck task",
+                     "outcome": None, "outcome_at": None,
+                     "dispatched_at": "2026-06-01T08:00:00Z"},
+                ]},
+            ]},
+            {"feature_dir": "specs/2026-06-25-beta", "sprints": [
+                {"sprint": "Sprint B", "rows": [
+                    {"agent_id": "qa-1", "agent_role": "qa",
+                     "task_id": "T-9", "task_title": "Validate",
+                     "outcome": "success", "outcome_at": "2026-06-02T10:00:00Z",
+                     "dispatched_at": "2026-06-02T09:00:00Z"},
+                ]},
+            ]},
+        ],
+    )
+
+
+class TestLedgerGrouping:
+    """T-037-02: LedgerView widened additively; grouping by feature_dir -> sprint."""
+
+    def test_ledger_view_has_grouped_field_default_empty(self) -> None:
+        lv = LedgerView(recent_success=[], blockers=[], recent=[], available=False)
+        assert lv.grouped == []
+
+    def test_group_dispatches_groups_feature_then_sprint(self) -> None:
+        rows = [
+            {"feature_dir": "f-a", "sprint": "S1", "agent_id": "d1"},
+            {"feature_dir": "f-a", "sprint": "S1", "agent_id": "d2"},
+            {"feature_dir": "f-a", "sprint": "S2", "agent_id": "d3"},
+            {"feature_dir": "f-b", "sprint": "S1", "agent_id": "d4"},
+        ]
+        grouped = _group_dispatches(rows)
+        assert [g["feature_dir"] for g in grouped] == ["f-a", "f-b"]
+        fa = grouped[0]
+        assert [s["sprint"] for s in fa["sprints"]] == ["S1", "S2"]
+        assert len(fa["sprints"][0]["rows"]) == 2
+        assert grouped[1]["sprints"][0]["rows"][0]["agent_id"] == "d4"
+
+    def test_load_ledger_populates_grouped(self, tmp_path: Path) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        _seed_dispatches(sdd)
+        lv = load_ledger(sdd)
+        assert lv.available is True
+        dirs = {g["feature_dir"] for g in lv.grouped}
+        assert "2026-05-12-fleet-ledger" in dirs
+        assert "2026-05-16-state-builder" in dirs
+        # recent contract preserved (build() uses len(ledger.recent))
+        assert isinstance(lv.recent, list)
+
+    def test_load_ledger_unavailable_has_empty_grouped(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "empty"
+        (sdd / "ledger").mkdir(parents=True)
+        lv = load_ledger(sdd)
+        assert lv.available is False
+        assert lv.grouped == []
+
+
+class TestInjectDispatchesHtml:
+    """T-037-03: grouped dispatches card; empty + disabled states; escaping."""
+
+    def test_card_injected_after_main_marker(self) -> None:
+        out = inject_dispatches_html(_MAIN_DOC, ledger=_grouped_ledger(),
+                                     sdd_root=Path("."))
+        marker = '<main id="main" role="main" class="grid-v3">'
+        assert 'class="zone-dispatches"' in out
+        assert out.index(marker) < out.index('class="zone-dispatches"')
+
+    def test_card_groups_feature_then_sprint_with_rows(self) -> None:
+        out = inject_dispatches_html(_MAIN_DOC, ledger=_grouped_ledger(),
+                                     sdd_root=Path("."))
+        assert "specs/2026-06-24-alpha" in out
+        assert "Sprint A" in out
+        assert "dev-1" in out and "developer" in out
+        assert "T-1" in out
+        # alpha feature group renders before beta group
+        assert out.index("2026-06-24-alpha") < out.index("2026-06-25-beta")
+
+    def test_null_outcome_renders_pending(self) -> None:
+        out = inject_dispatches_html(_MAIN_DOC, ledger=_grouped_ledger(),
+                                     sdd_root=Path("."))
+        assert "pending" in out.lower()
+        assert "success" in out.lower()
+
+    def test_values_html_escaped(self) -> None:
+        out = inject_dispatches_html(_MAIN_DOC, ledger=_grouped_ledger(),
+                                     sdd_root=Path("."))
+        assert "Build &lt;widget&gt;" in out
+        assert "<widget>" not in out
+
+    def test_empty_state_when_reachable_no_rows(self) -> None:
+        lv = LedgerView(recent_success=[], blockers=[], recent=[],
+                        available=True, grouped=[])
+        out = inject_dispatches_html(_MAIN_DOC, ledger=lv, sdd_root=Path("."))
+        assert 'class="zone-dispatches"' in out
+        assert "No dispatches recorded yet." in out
+
+    def test_disabled_state_when_unavailable(self) -> None:
+        lv = LedgerView(recent_success=[], blockers=[], recent=[],
+                        available=False, grouped=[])
+        out = inject_dispatches_html(_MAIN_DOC, ledger=lv, sdd_root=Path("."))
+        assert 'class="zone-dispatches"' in out
+        assert "unavailable" in out.lower()
+
+    def test_no_script_injected(self) -> None:
+        out = inject_dispatches_html(_MAIN_DOC, ledger=_grouped_ledger(),
+                                     sdd_root=Path("."))
+        assert "<script" not in out.lower()
+
+    def test_never_raises_on_malformed_rows(self) -> None:
+        lv = LedgerView(recent_success=[], blockers=[], recent=[], available=True,
+                        grouped=[{"feature_dir": "x", "sprints": [
+                            {"sprint": "S", "rows": [{}]}]}])
+        out = inject_dispatches_html(_MAIN_DOC, ledger=lv, sdd_root=Path("."))
+        assert 'class="zone-dispatches"' in out
+
+
+class TestHealthCheckHelpers:
+    """T-037-04: four read-only status helpers; thresholds; degrade-safe; no writes."""
+
+    def _const(self, tmp_path: Path, versions: dict[str, str]) -> Path:
+        sdd = tmp_path / "sdd"
+        (sdd / "constitution").mkdir(parents=True)
+        for fname, ver in versions.items():
+            (sdd / "constitution" / fname).write_text(
+                f"---\nname: {fname}\nversion: {ver}\n---\n# Body\n",
+                encoding="utf-8")
+        return sdd
+
+    def test_constitution_green_when_all_quoted_valid(self, tmp_path: Path) -> None:
+        sdd = self._const(tmp_path, {"a.md": "'1.0.0'", "b.md": "'2.3.4'"})
+        status, _reason, _detail = constitution_semver_status(sdd)
+        assert status == "green"
+
+    def test_constitution_yellow_when_unquoted(self, tmp_path: Path) -> None:
+        sdd = self._const(tmp_path, {"a.md": "'1.0.0'", "b.md": "1.0.0"})
+        status, _reason, detail = constitution_semver_status(sdd)
+        assert status == "yellow"
+        assert any("b.md" in d for d in detail)
+
+    def test_constitution_red_when_missing_version(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "sdd"
+        (sdd / "constitution").mkdir(parents=True)
+        (sdd / "constitution" / "a.md").write_text(
+            "---\nname: a\n---\n# Body\n", encoding="utf-8")
+        status, _reason, detail = constitution_semver_status(sdd)
+        assert status == "red"
+        assert detail
+
+    def test_constitution_never_writes(self, tmp_path: Path) -> None:
+        sdd = self._const(tmp_path, {"a.md": "1.0.0"})
+        before = (sdd / "constitution" / "a.md").read_text(encoding="utf-8")
+        constitution_semver_status(sdd)
+        after = (sdd / "constitution" / "a.md").read_text(encoding="utf-8")
+        assert before == after
+
+    def test_skill_validity_green_when_no_skills(self, tmp_path: Path) -> None:
+        repo = tmp_path / "repo"
+        repo.mkdir()
+        status, _reason, _detail = skill_validity_status(repo)
+        assert status == "green"
+
+    def test_skill_validity_red_on_bad_skill(self, tmp_path: Path) -> None:
+        repo = tmp_path / "repo"
+        sk = repo / ".github" / "skills" / "my-skill"
+        sk.mkdir(parents=True)
+        # Missing license + metadata -> check_skill findings
+        (sk / "SKILL.md").write_text(
+            "---\nname: my-skill\ndescription: x\n---\n# Skill\n",
+            encoding="utf-8")
+        status, _reason, detail = skill_validity_status(repo)
+        assert status == "red"
+        assert detail
+
+    def test_ledger_reachability_green_when_available(self) -> None:
+        lv = LedgerView(recent_success=[], blockers=[], recent=[], available=True)
+        status, _reason, _detail = ledger_reachability_status(lv)
+        assert status == "green"
+
+    def test_ledger_reachability_red_when_unavailable(self) -> None:
+        lv = LedgerView(recent_success=[], blockers=[], recent=[], available=False)
+        status, _reason, _detail = ledger_reachability_status(lv)
+        assert status == "red"
+
+    def _tracker(self, tmp_path: Path, date_str: str | None) -> Path:
+        sdd = tmp_path / "sdd"
+        (sdd / "exec").mkdir(parents=True)
+        body = "# Progress\n"
+        if date_str:
+            body += f"## F-99 ({date_str})\n- done\n"
+        (sdd / "exec" / "sprint-progress.md").write_text(body, encoding="utf-8")
+        return sdd
+
+    def test_stale_tracker_green_at_7_days(self, tmp_path: Path) -> None:
+        now = datetime(2026, 6, 30)
+        sdd = self._tracker(tmp_path, "2026-06-23")  # exactly 7 days
+        status, _reason, _detail = stale_tracker_status(sdd, now=now, stale_days=7)
+        assert status == "green"
+
+    def test_stale_tracker_yellow_at_8_days(self, tmp_path: Path) -> None:
+        now = datetime(2026, 6, 30)
+        sdd = self._tracker(tmp_path, "2026-06-22")  # 8 days
+        status, _reason, _detail = stale_tracker_status(sdd, now=now, stale_days=7)
+        assert status == "yellow"
+
+    def test_stale_tracker_yellow_at_14_days(self, tmp_path: Path) -> None:
+        now = datetime(2026, 6, 30)
+        sdd = self._tracker(tmp_path, "2026-06-16")  # 14 days
+        status, _reason, _detail = stale_tracker_status(sdd, now=now, stale_days=7)
+        assert status == "yellow"
+
+    def test_stale_tracker_red_at_15_days(self, tmp_path: Path) -> None:
+        now = datetime(2026, 6, 30)
+        sdd = self._tracker(tmp_path, "2026-06-15")  # 15 days
+        status, _reason, _detail = stale_tracker_status(sdd, now=now, stale_days=7)
+        assert status == "red"
+
+    def test_stale_tracker_yellow_when_undatable(self, tmp_path: Path) -> None:
+        now = datetime(2026, 6, 30)
+        sdd = self._tracker(tmp_path, None)
+        status, _reason, _detail = stale_tracker_status(sdd, now=now, stale_days=7)
+        assert status == "yellow"
+
+    def test_helpers_degrade_safe_on_missing_paths(self, tmp_path: Path) -> None:
+        missing = tmp_path / "nope"
+        # None of these may raise on a non-existent sdd/repo root.
+        constitution_semver_status(missing)
+        skill_validity_status(missing)
+        stale_tracker_status(missing, now=datetime(2026, 6, 30))
+
+
+class TestInjectHealthPillsHtml:
+    """T-037-05: exactly four pills; colours; server-side anchors for non-green."""
+
+    def _green_sdd(self, tmp_path: Path) -> Path:
+        sdd = tmp_path / "sdd"
+        (sdd / "constitution").mkdir(parents=True)
+        (sdd / "constitution" / "a.md").write_text(
+            "---\nname: a\nversion: '1.0.0'\n---\n# B\n", encoding="utf-8")
+        (sdd / "exec").mkdir()
+        (sdd / "exec" / "sprint-progress.md").write_text(
+            "# P\n## F (2026-06-29)\n- x\n", encoding="utf-8")
+        return sdd
+
+    def test_exactly_four_pills(self, tmp_path: Path) -> None:
+        sdd = self._green_sdd(tmp_path)
+        lv = LedgerView(recent_success=[], blockers=[], recent=[], available=True)
+        out = inject_health_pills_html(
+            _MAIN_DOC, sdd_root=sdd, ledger=lv, now=datetime(2026, 6, 30))
+        assert out.count('class="pill') == 4
+
+    def test_pills_injected_after_main_marker(self, tmp_path: Path) -> None:
+        sdd = self._green_sdd(tmp_path)
+        lv = LedgerView(recent_success=[], blockers=[], recent=[], available=True)
+        out = inject_health_pills_html(
+            _MAIN_DOC, sdd_root=sdd, ledger=lv, now=datetime(2026, 6, 30))
+        marker = '<main id="main" role="main" class="grid-v3">'
+        assert out.index(marker) < out.index('class="zone-health"')
+
+    def test_all_green_has_no_anchor_links(self, tmp_path: Path) -> None:
+        sdd = self._green_sdd(tmp_path)
+        lv = LedgerView(recent_success=[], blockers=[], recent=[], available=True)
+        out = inject_health_pills_html(
+            _MAIN_DOC, sdd_root=sdd, ledger=lv, now=datetime(2026, 6, 30))
+        assert "#health-detail-" not in out
+
+    def test_non_green_pill_links_to_detail_section(self, tmp_path: Path) -> None:
+        sdd = self._green_sdd(tmp_path)
+        # Unavailable ledger -> reachability pill red -> anchor + detail.
+        lv = LedgerView(recent_success=[], blockers=[], recent=[], available=False)
+        out = inject_health_pills_html(
+            _MAIN_DOC, sdd_root=sdd, ledger=lv, now=datetime(2026, 6, 30))
+        assert 'href="#health-detail-ledger"' in out
+        assert 'id="health-detail-ledger"' in out
+
+    def test_no_script_injected(self, tmp_path: Path) -> None:
+        sdd = self._green_sdd(tmp_path)
+        lv = LedgerView(recent_success=[], blockers=[], recent=[], available=False)
+        out = inject_health_pills_html(
+            _MAIN_DOC, sdd_root=sdd, ledger=lv, now=datetime(2026, 6, 30))
+        assert "<script" not in out.lower()
+
+    def test_never_raises_when_paths_missing(self, tmp_path: Path) -> None:
+        lv = LedgerView(recent_success=[], blockers=[], recent=[], available=True)
+        out = inject_health_pills_html(
+            _MAIN_DOC, sdd_root=tmp_path / "nope", ledger=lv,
+            now=datetime(2026, 6, 30))
+        assert 'class="zone-health"' in out
+
+
+class TestSdd037NoNewConnections:
+    """T-037-02/AC-4: the new surfaces open ZERO sqlite connections."""
+
+    def test_new_surfaces_open_no_connections(self, tmp_path: Path, monkeypatch) -> None:
+        import cli.state_builder as sb
+        calls = {"n": 0}
+        real = sqlite3.connect
+
+        def counting(*a, **k):
+            calls["n"] += 1
+            return real(*a, **k)
+
+        monkeypatch.setattr(sb.sqlite3, "connect", counting)
+
+        sdd = self._green(tmp_path)
+        lv = _grouped_ledger()
+        sb.inject_dispatches_html(_MAIN_DOC, ledger=lv, sdd_root=sdd)
+        sb.inject_health_pills_html(_MAIN_DOC, sdd_root=sdd, ledger=lv,
+                                    now=datetime(2026, 6, 30))
+        sb.constitution_semver_status(sdd)
+        sb.skill_validity_status(sdd.parent)
+        sb.ledger_reachability_status(lv)
+        sb.stale_tracker_status(sdd, now=datetime(2026, 6, 30))
+        assert calls["n"] == 0
+
+    def test_load_ledger_opens_exactly_one_connection(
+            self, tmp_path: Path, monkeypatch) -> None:
+        import cli.state_builder as sb
+        calls = {"n": 0}
+        real = sqlite3.connect
+
+        def counting(*a, **k):
+            calls["n"] += 1
+            return real(*a, **k)
+
+        sdd = _seed_sdd_root(tmp_path)
+        _seed_dispatches(sdd)
+        monkeypatch.setattr(sb.sqlite3, "connect", counting)
+        sb.load_ledger(sdd)
+        assert calls["n"] == 1
+
+    def _green(self, tmp_path: Path) -> Path:
+        sdd = tmp_path / "sdd"
+        (sdd / "constitution").mkdir(parents=True)
+        (sdd / "constitution" / "a.md").write_text(
+            "---\nname: a\nversion: '1.0.0'\n---\n# B\n", encoding="utf-8")
+        (sdd / "exec").mkdir()
+        (sdd / "exec" / "sprint-progress.md").write_text(
+            "# P\n## F (2026-06-29)\n- x\n", encoding="utf-8")
+        return sdd
+
+
+class TestSdd037IndicatorsNotGates:
+    """T-037-06: Q-F/FR-14/R-12 -- health checks never raise, never gate build()."""
+
+    def test_build_succeeds_with_unreachable_ledger(self, tmp_path: Path) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        # Remove the ledger db so reachability pill goes red -- build must still pass.
+        (sdd / "ledger" / "fleet.db").unlink()
+        result = build(sdd_root=sdd, write=False)
+        assert "html" in result
+        assert 'class="zone-health"' in result["html"]
+
+    def test_full_build_has_dispatches_card_and_pills(self, tmp_path: Path) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        _seed_dispatches(sdd)
+        result = build(sdd_root=sdd, write=False)
+        htm = result["html"]
+        assert 'class="zone-dispatches"' in htm
+        assert 'class="zone-health"' in htm
+        # The four-pill invariant is scoped to the health strip. The PI
+        # top-bar reuses a plain `class="pill"`; health pills are uniquely
+        # `class="pill pill-<color>"`, so count those to isolate the strip.
+        assert htm.count('class="pill pill-') == 4
+
+    def test_build_html_has_zero_script_tags(self, tmp_path: Path) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        _seed_dispatches(sdd)
+        result = build(sdd_root=sdd, write=False)
+        assert result["html"].lower().count("<script") == 0
+
+    def test_dispatches_result_key_unchanged(self, tmp_path: Path) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        _seed_dispatches(sdd)
+        result = build(sdd_root=sdd, write=False)
+        lv = load_ledger(sdd)
+        assert result["dispatches"] == len(lv.recent)
+

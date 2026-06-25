@@ -58,6 +58,9 @@ from schema_lint import (  # noqa: E402  -- module-bootstrap import per ADR-012
     ARTIFACT_SKIP_PREFIXES,
     UserGate,
     load_user_gates,
+    check_skill,
+    _has_unquoted_version,
+    Finding,
 )
 
 # ---------------------------------------------------------------------------- #
@@ -376,13 +379,48 @@ class LedgerView:
     blockers: list[dict]
     recent: list[dict]
     available: bool
+    # SDD-037 (F-28): additive widening -- all dispatch rows grouped by
+    # feature_dir then sprint, populated inside load_ledger's single
+    # connection. Has a default so existing constructions stay valid.
+    grouped: list = field(default_factory=list)
+
+
+def _group_dispatches(rows: list[dict]) -> list[dict]:
+    """Group dispatch rows by ``feature_dir`` then ``sprint`` (SDD-037).
+
+    Pure helper over a list of row dicts. Feature groups and sprint
+    subgroups preserve first-appearance order; rows keep the order they
+    arrive in (the SQL caller pre-orders most-recent-first within a sprint).
+    Returns ``[{"feature_dir": str, "sprints": [{"sprint": str,
+    "rows": [dict, ...]}, ...]}, ...]``.
+    """
+    groups: list[dict] = []
+    by_feature: dict[str, dict] = {}
+    for row in rows:
+        fdir = (row.get("feature_dir") or "") if isinstance(row, dict) else ""
+        sprint = (row.get("sprint") or "") if isinstance(row, dict) else ""
+        grp = by_feature.get(fdir)
+        if grp is None:
+            grp = {"feature_dir": fdir, "sprints": [], "_by_sprint": {}}
+            by_feature[fdir] = grp
+            groups.append(grp)
+        sub = grp["_by_sprint"].get(sprint)
+        if sub is None:
+            sub = {"sprint": sprint, "rows": []}
+            grp["_by_sprint"][sprint] = sub
+            grp["sprints"].append(sub)
+        sub["rows"].append(row)
+    for grp in groups:
+        grp.pop("_by_sprint", None)
+    return groups
 
 
 def load_ledger(sdd_root: Path, now: dt.datetime | None = None,
                 stale_hours: int = 24, recent_limit: int = 10) -> LedgerView:
     db_path = sdd_root / "ledger" / "fleet.db"
     if not db_path.is_file():
-        return LedgerView(recent_success=[], blockers=[], recent=[], available=False)
+        return LedgerView(recent_success=[], blockers=[], recent=[],
+                          available=False, grouped=[])
     now = now or dt.datetime.now(dt.timezone.utc)
     stale_cutoff = (now - dt.timedelta(hours=stale_hours)).isoformat().replace("+00:00", "Z")
     try:
@@ -400,9 +438,18 @@ def load_ledger(sdd_root: Path, now: dt.datetime | None = None,
                 "SELECT * FROM dispatches ORDER BY dispatched_at DESC LIMIT ?",
                 [recent_limit],
             ).fetchall()]
+            # SDD-037: full grouped view read in the SAME connection so the
+            # Dispatches card adds zero new connections per build tick.
+            grouped_rows = [dict(r) for r in conn.execute(
+                "SELECT * FROM dispatches "
+                "ORDER BY feature_dir, sprint, COALESCE(outcome_at, dispatched_at) DESC"
+            ).fetchall()]
     except sqlite3.Error:
-        return LedgerView(recent_success=[], blockers=[], recent=[], available=False)
-    return LedgerView(recent_success=recent_success, blockers=blockers, recent=recent, available=True)
+        return LedgerView(recent_success=[], blockers=[], recent=[],
+                          available=False, grouped=[])
+    return LedgerView(recent_success=recent_success, blockers=blockers,
+                      recent=recent, available=True,
+                      grouped=_group_dispatches(grouped_rows))
 
 
 # ---------------------------------------------------------------------------- #
@@ -2629,6 +2676,300 @@ def inject_lifecycle_html(
 
 
 # ---------------------------------------------------------------------------- #
+# SDD-037 (F-28): Dispatches card + dashboard health pills
+#
+# All surfaces below are ADDITIVE, READ-ONLY INDICATORS. They never raise out
+# of build(), never alter build()'s exit, never become gates (Q-F / FR-14 /
+# R-12). They consume the LedgerView passed in by build() and open ZERO new
+# sqlite connections. No JavaScript is emitted; non-green pills link to
+# server-rendered same-page anchors.
+# ---------------------------------------------------------------------------- #
+
+_DISPATCHES_STYLE = (
+    "<style>"
+    ".zone-dispatches{margin-top:1rem}"
+    ".zone-dispatches h2{font-size:1.05rem;margin:.4rem 0}"
+    ".dispatch-feature{border:1px solid var(--line,#2a2a33);border-radius:6px;"
+    "padding:.5rem .7rem;margin:.4rem 0}"
+    ".dispatch-feature-name{font-size:.9rem;margin:.1rem 0 .3rem;font-weight:600}"
+    ".dispatch-sprint-name{font-size:.8rem;margin:.3rem 0 .15rem;opacity:.85}"
+    ".dispatch-rows{list-style:none;margin:0;padding:0}"
+    ".dispatch-row{display:flex;flex-wrap:wrap;gap:.5rem;align-items:baseline;"
+    "padding:.15rem 0;font-size:.8rem;border-top:1px solid var(--line,#23232b)}"
+    ".dispatch-agent{font-weight:600}"
+    ".dispatch-role{opacity:.7}"
+    ".dispatch-task{flex:1 1 12rem}"
+    ".dispatch-status-ok{color:#5fd17a}"
+    ".dispatch-status-pending{color:#e0b341}"
+    ".dispatch-when{opacity:.6;font-variant-numeric:tabular-nums}"
+    ".dispatch-note{font-size:.85rem;opacity:.75;font-style:italic}"
+    "</style>"
+)
+
+_HEALTH_PILLS_STYLE = (
+    "<style>"
+    ".zone-health{margin-top:1rem}"
+    ".zone-health h2{font-size:1.05rem;margin:.4rem 0}"
+    ".health-pills{display:flex;flex-wrap:wrap;gap:.4rem}"
+    ".pill{display:inline-block;padding:.2rem .55rem;border-radius:999px;"
+    "font-size:.75rem;text-decoration:none;border:1px solid transparent}"
+    ".pill-green{background:#13351f;color:#7fe39a;border-color:#1f5230}"
+    ".pill-yellow{background:#3a3110;color:#e7c65c;border-color:#5a4c19}"
+    ".pill-red{background:#3a1414;color:#f08a8a;border-color:#5a1f1f}"
+    "a.pill:hover{filter:brightness(1.15)}"
+    ".health-detail{margin-top:.5rem;font-size:.8rem;border-top:1px solid "
+    "var(--line,#23232b);padding-top:.4rem}"
+    ".health-detail h3{font-size:.85rem;margin:.3rem 0}"
+    "</style>"
+)
+
+
+def _group_dispatch_status_class(outcome: object) -> str:
+    if outcome == "success":
+        return "ok"
+    if not outcome:
+        return "pending"
+    return "other"
+
+
+def inject_dispatches_html(html_doc: str, *, ledger: LedgerView, sdd_root: Path) -> str:
+    """Inject the SDD-037 Dispatches card grouped by feature_dir then sprint.
+
+    Consumes ``ledger.grouped`` (populated once by load_ledger). Renders an
+    empty-state when the ledger is reachable but has no rows, and a disabled
+    note when the ledger is unavailable. Never raises; opens no connection.
+    Injected after the lifecycle section at the ``<main>`` marker.
+    """
+    try:
+        available = getattr(ledger, "available", False)
+        grouped = getattr(ledger, "grouped", []) or []
+        if not available:
+            body = ('<p class="dispatch-note">Fleet ledger unavailable '
+                    '(fleet.db missing or unreadable).</p>')
+        elif not grouped:
+            body = '<p class="dispatch-note">No dispatches recorded yet.</p>'
+        else:
+            parts: list[str] = []
+            for grp in grouped:
+                fdir = h(grp.get("feature_dir") or "(unassigned)")
+                parts.append(
+                    '<article class="dispatch-feature">'
+                    f'<h3 class="dispatch-feature-name">{fdir}</h3>'
+                )
+                for sub in grp.get("sprints", []):
+                    parts.append(
+                        '<div class="dispatch-sprint">'
+                        f'<h4 class="dispatch-sprint-name">'
+                        f'{h(sub.get("sprint") or "(no sprint)")}</h4>'
+                        '<ul class="dispatch-rows">'
+                    )
+                    for row in sub.get("rows", []):
+                        outcome = row.get("outcome")
+                        status_txt = h(outcome) if outcome else "pending"
+                        status_cls = _group_dispatch_status_class(outcome)
+                        when = h(row.get("outcome_at") or row.get("dispatched_at") or "")
+                        task = (f'{h(row.get("task_id") or "")} '
+                                f'{h(row.get("task_title") or "")}').strip()
+                        parts.append(
+                            '<li class="dispatch-row">'
+                            f'<span class="dispatch-agent">{h(row.get("agent_id") or "?")}</span>'
+                            f'<span class="dispatch-role">{h(row.get("agent_role") or "")}</span>'
+                            f'<span class="dispatch-task">{task}</span>'
+                            f'<span class="dispatch-status dispatch-status-{status_cls}">'
+                            f'{status_txt}</span>'
+                            f'<span class="dispatch-when">{when}</span></li>'
+                        )
+                    parts.append('</ul></div>')
+                parts.append('</article>')
+            body = "".join(parts)
+    except Exception as exc:  # indicators never raise out of build()
+        body = f'<p class="dispatch-note">Dispatches unavailable: {h(exc)}</p>'
+
+    section = (
+        '<section class="zone-dispatches" aria-labelledby="dispatches-heading">'
+        + _DISPATCHES_STYLE
+        + '<h2 id="dispatches-heading">Dispatches</h2>'
+        + body
+        + '</section>'
+    )
+    marker = '<main id="main" role="main" class="grid-v3">'
+    if marker in html_doc:
+        return html_doc.replace(marker, marker + section, 1)
+    return html_doc + section
+
+
+def constitution_semver_status(sdd_root: Path) -> tuple[str, str, list[str]]:
+    """Health check: constitution version frontmatter is present, quoted, valid.
+
+    Returns ``(status, reason, detail)`` with status in {green,yellow,red}.
+    GREEN: every ``constitution/*.md`` has a quoted, valid ``X.Y.Z`` version.
+    YELLOW: at least one version is present and valid but unquoted.
+    RED: a version is missing or unparseable. Read-only; never writes; never
+    raises (internal failure degrades to RED).
+    """
+    try:
+        cdir = Path(sdd_root) / "constitution"
+        files = sorted(cdir.glob("*.md")) if cdir.is_dir() else []
+        if not files:
+            return ("red", "no constitution files found",
+                    ["constitution/ missing or empty"])
+        reds: list[str] = []
+        yellows: list[str] = []
+        for f in files:
+            try:
+                text = f.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                reds.append(f"{f.name}: unreadable")
+                continue
+            fm = parse_frontmatter(text)
+            raw_lines = fm.get("_raw_lines", []) if isinstance(fm, dict) else []
+            is_unq, raw_val = _has_unquoted_version(raw_lines)
+            ver = fm.get("version") if isinstance(fm, dict) else None
+            present = (ver is not None) or is_unq or (raw_val is not None)
+            if not present:
+                reds.append(f"{f.name}: missing version field")
+                continue
+            candidate = str(ver if ver is not None else raw_val).strip().strip("'\"")
+            valid = bool(re.match(r"^\d+\.\d+\.\d+$", candidate))
+            if not valid:
+                reds.append(f"{f.name}: unparseable version '{candidate}'")
+            elif is_unq:
+                yellows.append(f"{f.name}: unquoted version '{candidate}'")
+        if reds:
+            return ("red", f"{len(reds)} version issue(s)", reds + yellows)
+        if yellows:
+            return ("yellow", f"{len(yellows)} unquoted version(s)", yellows)
+        return ("green", "all versions valid", [])
+    except Exception as exc:  # indicators never raise
+        return ("red", f"check failed: {exc}", [str(exc)])
+
+
+def skill_validity_status(repo_root: Path) -> tuple[str, str, list[str]]:
+    """Health check: every ``.github/skills/**/SKILL.md`` passes ``check_skill``.
+
+    Reuses the schema_lint validator. GREEN when there are no findings (or no
+    skills directory); RED with concrete detail otherwise. Read-only; never
+    raises.
+    """
+    try:
+        skills_dir = Path(repo_root) / ".github" / "skills"
+        if not skills_dir.is_dir():
+            return ("green", "no skills directory", [])
+        findings: list[Finding] = []
+        for p in sorted(skills_dir.rglob("SKILL.md")):
+            findings.extend(check_skill(p))
+        if findings:
+            detail = [f"{Path(fd.path).parent.name}: {fd.issue}" for fd in findings]
+            return ("red", f"{len(findings)} skill issue(s)", detail)
+        return ("green", "all skills valid", [])
+    except Exception as exc:  # indicators never raise
+        return ("red", f"check failed: {exc}", [str(exc)])
+
+
+def ledger_reachability_status(ledger: LedgerView) -> tuple[str, str, list[str]]:
+    """Health check: the fleet ledger was reachable for this build tick."""
+    try:
+        if getattr(ledger, "available", False):
+            return ("green", "fleet ledger reachable", [])
+        return ("red", "fleet ledger unreachable",
+                ["ledger/fleet.db missing or unreadable"])
+    except Exception as exc:  # indicators never raise
+        return ("red", f"check failed: {exc}", [str(exc)])
+
+
+def stale_tracker_status(sdd_root: Path, now: dt.datetime | None = None,
+                         stale_days: int = 7) -> tuple[str, str, list[str]]:
+    """Health check: ``exec/sprint-progress.md`` was updated recently.
+
+    GREEN when the latest dated entry is <= ``stale_days`` old, YELLOW when
+    within ``2*stale_days`` (or no parseable date), RED beyond that. Read-only;
+    never raises.
+    """
+    try:
+        now = now or dt.datetime.now()
+        path = Path(sdd_root) / "exec" / "sprint-progress.md"
+        if not path.is_file():
+            return ("yellow", "sprint-progress.md not found",
+                    ["exec/sprint-progress.md missing"])
+        text = path.read_text(encoding="utf-8", errors="replace")
+        dates: list[dt.date] = []
+        for m in re.finditer(r"\b(\d{4})-(\d{2})-(\d{2})\b", text):
+            try:
+                dates.append(dt.date(int(m.group(1)), int(m.group(2)), int(m.group(3))))
+            except ValueError:
+                continue
+        if not dates:
+            return ("yellow", "no dated entries", ["could not parse any ISO date"])
+        latest = max(dates)
+        now_date = now.date() if hasattr(now, "date") else now
+        age = (now_date - latest).days
+        warn = stale_days * 2
+        if age <= stale_days:
+            return ("green", f"fresh ({age}d)", [])
+        if age <= warn:
+            return ("yellow", f"aging ({age}d)",
+                    [f"latest entry {latest.isoformat()} is {age}d old"])
+        return ("red", f"stale ({age}d)",
+                [f"latest entry {latest.isoformat()} is {age}d old"])
+    except Exception as exc:  # indicators never raise
+        return ("red", f"check failed: {exc}", [str(exc)])
+
+
+def inject_health_pills_html(html_doc: str, *, sdd_root: Path,
+                             ledger: LedgerView,
+                             now: dt.datetime | None = None) -> str:
+    """Inject the SDD-037 four-pill health strip after the Dispatches card.
+
+    Pills: constitution semver, skill frontmatter validity, ledger
+    reachability, stale-tracker (N=7). GREEN pills are plain ``<span>``;
+    non-green pills are ``<a>`` links to server-rendered same-page detail
+    sections (no JavaScript). Read-only; never raises.
+    """
+    try:
+        repo_root = repo_root_for(Path(sdd_root))
+        checks = [
+            ("constitution", "Constitution",
+             constitution_semver_status(Path(sdd_root))),
+            ("skills", "Skills", skill_validity_status(repo_root)),
+            ("ledger", "Ledger", ledger_reachability_status(ledger)),
+            ("tracker", "Tracker", stale_tracker_status(Path(sdd_root), now=now)),
+        ]
+        pills: list[str] = []
+        details: list[str] = []
+        for key, label, result in checks:
+            status, reason, detail = result
+            cls = f"pill pill-{h(status)}"
+            text = f"{h(label)}: {h(reason)}"
+            if status == "green":
+                pills.append(f'<span class="{cls}">{text}</span>')
+            else:
+                pills.append(f'<a class="{cls}" href="#health-detail-{key}">{text}</a>')
+                items = "".join(f"<li>{h(d)}</li>" for d in (detail or [reason]))
+                details.append(
+                    f'<section id="health-detail-{key}" class="health-detail">'
+                    f'<h3>{h(label)}</h3><ul>{items}</ul></section>'
+                )
+        body = (
+            '<div class="health-pills">' + "".join(pills) + '</div>'
+            + "".join(details)
+        )
+    except Exception as exc:  # indicators never raise out of build()
+        body = f'<p class="dispatch-note">Health checks unavailable: {h(exc)}</p>'
+
+    section = (
+        '<section class="zone-health" aria-labelledby="health-heading">'
+        + _HEALTH_PILLS_STYLE
+        + '<h2 id="health-heading">Health</h2>'
+        + body
+        + '</section>'
+    )
+    marker = '<main id="main" role="main" class="grid-v3">'
+    if marker in html_doc:
+        return html_doc.replace(marker, marker + section, 1)
+    return html_doc + section
+
+
+# ---------------------------------------------------------------------------- #
 # Work index generator (for principal pre-work checks, IDEA 2026-06-03)
 # ---------------------------------------------------------------------------- #
 
@@ -2797,6 +3138,12 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
     # SDD-036: lifecycle pipeline + four-card docs row + reorder control.
     htm = inject_lifecycle_html(
         htm, features=features, sdd_root=sdd_root, current_sprint=current_sprint)
+    # SDD-037 (F-28): Dispatches card then health-pills strip. Both are
+    # read-only indicators consuming the SAME LedgerView (zero new sqlite
+    # connections). Pills injected LAST so they render at the top as a header
+    # strip; neither can alter build()'s exit.
+    htm = inject_dispatches_html(htm, ledger=ledger, sdd_root=sdd_root)
+    htm = inject_health_pills_html(htm, sdd_root=sdd_root, ledger=ledger)
 
     result = {
         "markdown_chars": len(md), "html_chars": len(htm),

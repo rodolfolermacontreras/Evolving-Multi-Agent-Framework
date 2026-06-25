@@ -9,7 +9,7 @@ sprint: PI-6
 
 # PI-6: Dashboard Reinvestment + Carryover Cleanup
 
-- Status: **ACTIVE** (Sprint 1 / Sprint 10 CLOSED locally 2026-06-10; Sprint 2 / Sprint 11 CLOSED 2026-06-24 with owner-approved commit + push; Sprint 3 / Sprint 12 / SDD-037 is next planned)
+- Status: **ACTIVE** (Sprint 1 / Sprint 10 CLOSED locally 2026-06-10; Sprint 2 / Sprint 11 CLOSED 2026-06-24 with owner-approved commit + push; Sprint 3 / Sprint 12 / SDD-037 CLOSED 2026-06-25 with owner-approved commit + push; Sprint 4 / Sprint 13 SDD-038 + carryovers is a contingency pending a Highest-Executive pull-in decision)
 - Theme: Ship dashboard patterns that make the framework's state visible and useful at a glance, then clear the carryover backlog accumulated across PI-3..PI-5.
 - Started: 2026-06-10
 - Owner: principal-executive-manager
@@ -111,7 +111,7 @@ capacity; Sprint 13 is a contingency sprint, not a guarantee.
 |--------|---------|-------|-------|------|----------------|
 | **PI-6 Sprint 1** | Sprint 10 | Dashboard Parser Fix + Auto-Refresh | SDD-040 | S | **CLOSED locally 2026-06-10.** Highest-trust-payoff fix shipped in local working tree; active focus no longer points at stale azure-decommission work and serve-mode refresh is verified. Commit pending; no push performed. |
 | **PI-6 Sprint 2** | Sprint 11 | Lifecycle Pipeline + Drag-to-Reorder (with Safeguards) | SDD-036 | L | **CLOSED 2026-06-24.** Shipped SDD-036 (lifecycle pipeline + 4-card docs row + reorder safeguards); tests 349 -> 412; schema lint clean; 10/10 REQUIRED + ADR-017 (proposed); owner-approved commit + push. Unblocks SDD-037, whose Dispatches card sits on the same dashboard surface as the SDD-036 lifecycle pipeline. |
-| **PI-6 Sprint 3** | Sprint 12 | Dispatches Card + Health Pills | SDD-037 | M | Builds on SDD-036's dashboard surface; surfaces ledger contents and runtime health pills; cheap relative to SDD-036 because no new schema, just new rendering. |
+| **PI-6 Sprint 3** | Sprint 12 | Dispatches Card + Health Pills | SDD-037 | M | **CLOSED 2026-06-25.** Shipped SDD-037 (Dispatches card + 4 header health pills) as additive `inject_*` post-processors on the SDD-036 surface; tests 412 -> 450; schema lint clean; 13/13 REQUIRED; Article X lock held; owner-approved commit + push. Sprint 13 (SDD-038 + carryovers) pull-in is a Highest-Executive decision, not authored at this close. |
 | **PI-6 Sprint 4** | Sprint 13 | Aesthetic Tokens + Carryover Cleanup | SDD-038 + carryovers (SDD-034 dedup, SDD-039 Article VII wording, PI-4 housekeeping) | M | Contingency sprint. Pulled in only if Sprints 10-12 hold velocity. Aesthetic tokens are P3 polish; the carryover items are the long tail of PI-5 DONE-WITH-CARRYOVER and should not block PI-7 planning. |
 
 **Unscheduled** (out of PI-6 scope):

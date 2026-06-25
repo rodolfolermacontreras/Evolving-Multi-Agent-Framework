@@ -840,3 +840,24 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 - One test-only adjustment: in `test_full_build_has_dispatches_card_and_pills` the pill-count assertion was scoped to `class="pill pill-` because the full dashboard already renders pre-existing PI top-bar pills (`class="pill"`); the four health pills uniquely use the color-qualified class. Production behavior unchanged.
 - NOT performed (per F-28 directive): no push (owner approval at F-29), no SDD-037 DONE in BACKLOG, no Sprint 12 close, no Sprint 13 kickoff.
 - OWNER-ATTENTION: SDD-037 is implemented, QA-green, and committed LOCAL ONLY. F-29 owns owner pre-push approval, push, BACKLOG DONE, and Sprint 12 close.
+
+### Sprint 12 -- CLOSED
+
+- Date: 2026-06-25
+- Owner: Principal Executive Manager (this-sprint lead, not the Highest Executive); PM + Architect owned design (F-27); SW Dev owned implementation and QA (F-28); EM owned the F-29 close edits
+- Features completed: F-27, F-28, F-29
+- Commits: `d417c66` (feat(sdd-037): dispatches card + dashboard health pills) + the Sprint 12 close commit (this block + BACKLOG DONE + CURRENT_PI update + regenerated exec surfaces)
+- Tests: 412 -> 450 (450 passed, 2 skipped; full `spec-driven-development/` suite is authoritative; the 437 figure in the F-28 block was the `cli/`-only subset). >= 412 required.
+- Schema lint: clean (exit 0)
+- Validation: SDD-037 13/13 REQUIRED (R-1..R-13) checked with real-run evidence (10 strict Article X + 3 UI-variant Article XII); Specific Test Coverage fully checked; manual M-1..M-3 + tone U-1..U-2 confirmed; O-1/O-2/O-4 done, O-3 deferred. No REQUIRED item deferred. Delta DE-01 sharpens R-4 (pill-count assertion scoped to `class="pill pill-`), does not loosen it.
+- ADRs: none -- no Level-2 decision was triggered (no new ledger table/schema, no new ledger read API beyond an additive `LedgerView.grouped` field populated in the existing single connection, no pill-as-gate). The additive read-shape widening was owner-confirmed in-scope Level-1 before F-28.
+- PI-6 status: ACTIVE; Sprint 13 (SDD-038 + carryovers) remains a contingency
+- SDD-037: DONE (Dispatches card surfacing fleet ledger rows per feature/sprint + 4-pill header health strip: constitution semver, skill frontmatter validity reusing `schema_lint.check_skill`, ledger reachability, stale-tracker N=7d; non-green pills anchor to server-rendered `#health-detail-<check>` sections, no JavaScript)
+- Article X lock held: the five SHA-pinned render functions were not edited; both SDD-037 surfaces are additive `inject_dispatches_html` / `inject_health_pills_html` post-processors wired in `build()` after `inject_lifecycle_html`. `TestS1FootprintLockGuard` -> 3 passed (goldens match).
+- Ledger caching: one read per `build()` tick via the existing single `sqlite3.connect`; card + ledger-reachability pill share one in-memory `LedgerView`; `TestSdd037NoNewConnections` confirms zero new connections.
+- Dashboard smoke: PASS (regenerated `exec/state.html` -- zone-dispatches present, 4 color health pills present, `<script>` count 0; 11 dispatch rows across 3 feature groups)
+- Ledger-empty/unreachable smoke: PASS (reachable-empty -> "No dispatches recorded yet."; missing fleet.db -> disabled "Fleet ledger unavailable" note; build never raises and exit code unchanged -- indicators-not-gates, `TestSdd037IndicatorsNotGates`)
+- Carry-forward: SDD-038 + SDD-034 + SDD-039 + PI-4 housekeeping remain Sprint 13 contingency; SDD-035 (Azure decommission) remains out-of-band
+- Owner ratification / push approval: **APPROVED FOR COMMIT + PUSH** (owner explicitly approved decision (a) commit + push for this close, 2026-06-25 via Executive Manager)
+- Notes: Sprint 12 shipped the cheapest PI-6 dashboard feature exactly as scoped -- rendering, not schema. F-27 locked a 13-item contract with no Level-2 trigger; F-28 landed both surfaces as additive injectors in two shared files (serialized, no fleet) and proved the Article X lock + single-connection caching with dedicated tests; F-29 closed on the owner's commit+push approval. The one design judgement call -- additively widening `LedgerView`'s return shape in the existing connection -- was surfaced to and confirmed by the owner as in-scope Level-1 before implementation, honoring the "no new ledger read API without escalation" constraint.
+- Next: **Sprint 13 decision is escalated to the Highest Executive.** Per owner direction 2026-06-25, the this-sprint Executive Manager does NOT author `SPRINT-13-KICKOFF.prompt.md`. SDD-038 (aesthetic tokens) + carryovers (SDD-034 content-shingle dedup, SDD-039 Article VII wording, PI-4 housekeeping) are recorded as a not-yet-pulled-in contingency carry-forward; the pull-in decision and any kickoff authoring belong to the Highest Executive. PI-6 remains ACTIVE.

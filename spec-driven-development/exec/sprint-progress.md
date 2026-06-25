@@ -861,3 +861,26 @@ These items surfaced during F-02 but were intentionally not fixed in-session per
 - Owner ratification / push approval: **APPROVED FOR COMMIT + PUSH** (owner explicitly approved decision (a) commit + push for this close, 2026-06-25 via Executive Manager)
 - Notes: Sprint 12 shipped the cheapest PI-6 dashboard feature exactly as scoped -- rendering, not schema. F-27 locked a 13-item contract with no Level-2 trigger; F-28 landed both surfaces as additive injectors in two shared files (serialized, no fleet) and proved the Article X lock + single-connection caching with dedicated tests; F-29 closed on the owner's commit+push approval. The one design judgement call -- additively widening `LedgerView`'s return shape in the existing connection -- was surfaced to and confirmed by the owner as in-scope Level-1 before implementation, honoring the "no new ledger read API without escalation" constraint.
 - Next: **Sprint 13 decision is escalated to the Highest Executive.** Per owner direction 2026-06-25, the this-sprint Executive Manager does NOT author `SPRINT-13-KICKOFF.prompt.md`. SDD-038 (aesthetic tokens) + carryovers (SDD-034 content-shingle dedup, SDD-039 Article VII wording, PI-4 housekeeping) are recorded as a not-yet-pulled-in contingency carry-forward; the pull-in decision and any kickoff authoring belong to the Highest Executive. PI-6 remains ACTIVE.
+
+---
+
+## Sprint 13 (PI-6 Sprint 4) -- final PI-6 value sprint
+
+Kickoff: `SPRINT-13-KICKOFF.prompt.md` (committed `65d2d05`). Scope: SDD-042 (F-30) + SDD-041 (F-31) + SDD-039 (F-32) + close (F-33). SDD-038/034/PI-4 housekeeping deferred to PI-7; SDD-035 (Azure) out-of-band. Start authorized under owner delegation 2026-06-25 ("work autonomously and make good decisions") on a verified-green Sprint 12 baseline (450 passed / 2 skipped, schema lint clean, close ratified at `84db2de`).
+
+### F-30 -- sdd-042-pi-label-fix -- DONE (local; push pending owner approval)
+
+- Date: 2026-06-25
+- Owner: Principal Executive Manager (routing + verification); developer-cli-specialist-1 (implementation, EM-routed subagent dispatch -- Article VII context isolation)
+- Commits: <pending local commit on master; NOT pushed>
+- Files changed: 2 (fix) + 3 (regenerated exec surfaces)
+  - spec-driven-development/cli/state_builder.py (additive `_read_current_pi_title` + `resolve_display_pi`; single `build()` line rewired from `current_pi(...)` to `resolve_display_pi(...)`)
+  - spec-driven-development/cli/test_state_builder.py (new `TestSdd042PiLabel`, 6 tests)
+  - spec-driven-development/exec/state.md, state.html, work-index.md (regenerated)
+- Tests: 450 -> 456 (+6); 2 skipped. Independently re-run from repo root by EM.
+- Article X lock: HELD. `TestS1FootprintLockGuard` 9/9 PASS; no locked render function body edited (header PI fixed by feeding the corrected `pi` into the renderers, the SDD-036 compute-before-render pattern).
+- Schema lint: clean (exit 0, EM re-run).
+- Validation: dashboard header + HTML title now surface `Current PI: PI-6 (Dashboard Reinvestment + Carryover Cleanup)`; stale `PI-5` header no longer renders.
+- Surfaced residual (OWNER DECISION): the PI **pill-nav** widget in `state.html` still renders PI-1..PI-5 with PI-5 marked current, because that nav is driven by `constitution/roadmap.md` (no PI-6 block) inside the Article-X-locked `render_html`. Out of SDD-042's PI-label scope and not fixable within Sprint 13 constraints (would require either a `constitution/roadmap.md` edit -- the only permitted constitution edit this sprint is SDD-039 -- or a new `inject_*` workaround around a locked function). Recommend filing as a follow-up (PI-7) or an explicit owner-approved roadmap.md update.
+- Notes: Smallest, highest-trust PI-6 fix landed first exactly as the kickoff sequenced. Root cause: `current_pi()` reads roadmap.md (PI-1..PI-5 only) so it returned the stale PI-5; the new resolver prefers the newest ACTIVE `CURRENT_PI.md` and enriches its title from the H1, falling back to the prior heuristic when no PI is ACTIVE (no hard-coded value). Explicit `--pi` override still wins.
+- Next: F-31 (SDD-041 true drag) and F-32 (SDD-039 constitution edit) are HELD. F-32 is **owner-blocked** -- a constitution edit (Article VIII) requires recorded owner approval before applying; cannot proceed in the owner's absence. F-31 is in-scope but deferred this session pending owner steer on the larger UI surface. No push until owner pre-push approval.

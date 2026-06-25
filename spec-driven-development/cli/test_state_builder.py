@@ -31,12 +31,14 @@ from cli.state_builder import (
     StateBuilderError,
     build,
     build_index,
+    current_pi,
     detect_current_sprint,
     derive_next_action,
     load_backlog,
     load_decisions,
     load_features,
     load_ledger,
+    load_pis,
     load_roster,
     load_sprint_goal,
     load_sprint_table,
@@ -44,6 +46,7 @@ from cli.state_builder import (
     parse_args,
     render_html,
     render_markdown,
+    resolve_display_pi,
     served_html_with_refresh,
 )
 
@@ -544,6 +547,109 @@ class TestActiveFocusHeuristic:
             "Highest-priority unstarted commitment in PI-2. Run /clarify to start the lifecycle.",
             "spec-driven-development/constitution/roadmap.md",
         )
+
+
+class TestSdd042PiLabel:
+    """SDD-042: the dashboard header surfaces the ACTIVE sprint PI (from
+    sprints/PI-*/CURRENT_PI.md), not the stale roadmap-derived PI."""
+
+    def _seed_roadmap_pi1_to_pi5(self, sdd: Path) -> None:
+        (sdd / "constitution" / "roadmap.md").write_text(
+            "# Roadmap\n\n"
+            "## PI-1: Bootstrap\n\n- [x] item\n\n"
+            "## PI-2: Fleet Maturity\n\n- [x] item\n\n"
+            "## PI-3: Adoption\n\n- [x] item\n\n"
+            "## PI-4: Hardening\n\n- [x] item\n\n"
+            "## PI-5: Brownfield Adoption (current)\n\n- [ ] item\n",
+            encoding="utf-8",
+        )
+
+    def _add_active_pi6(self, sdd: Path, title: str) -> None:
+        pi6 = sdd / "sprints" / "PI-6"
+        pi6.mkdir(parents=True, exist_ok=True)
+        (pi6 / "CURRENT_PI.md").write_text(
+            "---\nstatus: active\nsprint: PI-6\n---\n\n"
+            f"# PI-6: {title}\n\n- Status: **ACTIVE**\n",
+            encoding="utf-8",
+        )
+
+    def test_resolve_display_pi_prefers_active_pi6_over_roadmap_pi5(
+        self, tmp_path: Path
+    ) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        self._seed_roadmap_pi1_to_pi5(sdd)
+        self._add_active_pi6(sdd, "Dashboard Reinvestment + Carryover Cleanup")
+
+        pis = load_pis(sdd)
+        pi = resolve_display_pi(sdd, pis)
+
+        assert pi is not None
+        assert pi.name == "PI-6"
+        assert pi.title == "Dashboard Reinvestment + Carryover Cleanup"
+
+    def test_rendered_state_md_surfaces_active_pi6_not_pi5(self, tmp_path: Path) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        self._seed_roadmap_pi1_to_pi5(sdd)
+        self._add_active_pi6(sdd, "Dashboard Reinvestment + Carryover Cleanup")
+
+        result = main(["--sdd-root", str(sdd)])
+        assert result == 0
+
+        state_md = (sdd / "exec" / "state.md").read_text(encoding="utf-8")
+        assert (
+            "Current PI: PI-6 (Dashboard Reinvestment + Carryover Cleanup)" in state_md
+        )
+        assert "Current PI: PI-5" not in state_md
+
+    def test_title_pulled_from_current_pi_h1_when_roadmap_lacks_pi6(
+        self, tmp_path: Path
+    ) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        self._seed_roadmap_pi1_to_pi5(sdd)
+        self._add_active_pi6(sdd, "Dashboard Reinvestment + Carryover Cleanup")
+
+        pis = load_pis(sdd)
+        assert all(block.name != "PI-6" for block in pis)
+
+        pi = resolve_display_pi(sdd, pis)
+        assert pi is not None
+        assert pi.title == "Dashboard Reinvestment + Carryover Cleanup"
+        # Guards against the degenerate "PI-6 ()" label.
+        assert pi.title != ""
+
+    def test_h1_trailing_parenthetical_is_stripped(self, tmp_path: Path) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        self._seed_roadmap_pi1_to_pi5(sdd)
+        self._add_active_pi6(sdd, "Dashboard Reinvestment (Sprint 14 in flight)")
+
+        pis = load_pis(sdd)
+        pi = resolve_display_pi(sdd, pis)
+
+        assert pi is not None
+        assert pi.title == "Dashboard Reinvestment"
+
+    def test_falls_back_to_current_pi_when_no_active_sprint(self, tmp_path: Path) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        self._seed_roadmap_pi1_to_pi5(sdd)
+        # No sprints/PI-*/CURRENT_PI.md present -> no ACTIVE sprint.
+
+        pis = load_pis(sdd)
+        pi = resolve_display_pi(sdd, pis)
+        expected = current_pi(pis)
+
+        assert pi is not None and expected is not None
+        assert pi.name == expected.name == "PI-5"
+
+    def test_explicit_override_still_wins_over_active_sprint(self, tmp_path: Path) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        self._seed_roadmap_pi1_to_pi5(sdd)
+        self._add_active_pi6(sdd, "Dashboard Reinvestment + Carryover Cleanup")
+
+        pis = load_pis(sdd)
+        pi = resolve_display_pi(sdd, pis, override="PI-99")
+
+        assert pi is not None
+        assert pi.name == "PI-99"
 
 
 class TestServeModeRefresh:

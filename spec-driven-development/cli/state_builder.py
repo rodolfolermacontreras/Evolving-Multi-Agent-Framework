@@ -661,6 +661,60 @@ def _active_sprint_pi(sdd_root: Path) -> PIBlock | None:
     return sorted(candidates, key=lambda item: int(item.name.split("-", 1)[1]), reverse=True)[0]
 
 
+def _read_current_pi_title(sdd_root: Path, pi_name: str) -> str:
+    """Read the PI title from sprints/<pi_name>/CURRENT_PI.md H1 line.
+
+    Expects a heading of the form ``# PI-6: <title>``; returns the text after
+    the colon with any trailing parenthetical stripped. Returns "" if the file
+    or heading is missing.
+    """
+    current_pi_path = sdd_root / "sprints" / pi_name / "CURRENT_PI.md"
+    if not current_pi_path.is_file():
+        return ""
+    try:
+        text = current_pi_path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return ""
+    heading_re = re.compile(rf"^#\s+{re.escape(pi_name)}\s*:\s*(.+?)\s*$")
+    for line in text.splitlines():
+        m = heading_re.match(line)
+        if m:
+            title = re.sub(r"\s*\([^)]*\)\s*$", "", m.group(1).strip()).strip()
+            return title
+    return ""
+
+
+def resolve_display_pi(
+    sdd_root: Path,
+    pis: list[PIBlock],
+    override: str | None = None,
+) -> PIBlock | None:
+    """Resolve the PI to display in the dashboard header (SDD-042).
+
+    An explicit override always wins (parity with current_pi). Otherwise prefer
+    the highest-numbered ACTIVE sprint PI (from sprints/PI-*/CURRENT_PI.md),
+    resolving its title in order: (a) reuse a roadmap PIBlock of the same name,
+    (b) read the title from the PI's CURRENT_PI.md H1, (c) fall back to the
+    active block as-is. When no sprint is ACTIVE, fall back to the
+    roadmap-derived current_pi (no hard-coded PI).
+    """
+    if override:
+        return current_pi(pis, override=override)
+    active = _active_sprint_pi(sdd_root)
+    if active is None:
+        return current_pi(pis)
+    # (a) reuse a roadmap block with the same name (carries title + checkboxes)
+    for block in pis:
+        if block.name == active.name:
+            return block
+    # (b) read the title from the PI's CURRENT_PI.md H1 line
+    title = _read_current_pi_title(sdd_root, active.name)
+    if title:
+        return PIBlock(name=active.name, title=title, is_current=True)
+    # (c) fall back to the active block as-is (empty title)
+    return active
+
+
 def _backlog_ids_for_sprint(sdd_root: Path, pi_name: str, sprint_label: str) -> list[str]:
     backlog_path = sdd_root / "backlog" / "BACKLOG.md"
     if not backlog_path.is_file() or not pi_name or not sprint_label:
@@ -3093,7 +3147,7 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
     sdd_root = Path(sdd_root).resolve()
 
     pis = load_pis(sdd_root)
-    pi = current_pi(pis, override=pi_override)
+    pi = resolve_display_pi(sdd_root, pis, override=pi_override)
     features = load_features(sdd_root)
     user_gates = load_user_gates(sdd_root)
     backlog = load_backlog(sdd_root)

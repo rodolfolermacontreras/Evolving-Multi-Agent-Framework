@@ -1,11 +1,11 @@
 # Executive State
 
 Generated date: 2026-06-25
-Current PI: PI-5 (Brownfield Adoption + Anti-Conflict + Stakeholder Discipline)
+Current PI: PI-6 (Dashboard Reinvestment + Carryover Cleanup)
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
 Active focus: Continue current sprint anchor 'state-builder-fixes' (SDD-040)
 
-PI progress: 5/8 commitments complete (62%)
+PI progress: 0/0 commitments complete (0%)
 
 ## Spec Pipeline
 
@@ -147,9 +147,7 @@ _none -- no dispatches without outcome older than 24h_
 
 ## Next Milestones
 
-- SDD-034 content-shingle dedup upgrade remains open and carried forward
-- SDD-039 Article VII wording clarification remains open and carried forward; requires ADR/owner approval before constitution wording changes
-- PI-4 housekeeping remains open and carried forward: domain-skill annotations and GitHub Actions Node.js deprecation bump
+_no PI commitments registered_
 
 ---
 

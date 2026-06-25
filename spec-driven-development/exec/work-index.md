@@ -7,7 +7,7 @@ any new work. Consult this file BEFORE writing a spec, planning a sprint,
 or dispatching a worker, to ensure you are not duplicating completed work
 or introducing conflicts with in-flight work.
 
-Current PI: **PI-5 (Brownfield Adoption + Anti-Conflict + Stakeholder Discipline)**
+Current PI: **PI-6 (Dashboard Reinvestment + Carryover Cleanup)**
 
 ---
 

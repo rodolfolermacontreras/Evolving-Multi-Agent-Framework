@@ -3,7 +3,7 @@ id: feature-prompts-index
 type: index
 status: active
 owner: principal-executive-manager
-updated: 2026-06-24
+updated: 2026-06-25
 ---
 
 # Feature Prompts -- Index
@@ -138,7 +138,7 @@ SDD-038/carryovers remain Sprint 13 contingency. Closed 2026-06-24: tests
 
 | Order | File | Owner | Status |
 |-------|------|-------|--------|
-| 0 | [SPRINT-12-KICKOFF.prompt.md](SPRINT-12-KICKOFF.prompt.md) | Principal Executive Manager (lead) | READY (gated on Sprint 11 close + push) |
+| 0 | [SPRINT-12-KICKOFF.prompt.md](SPRINT-12-KICKOFF.prompt.md) | Principal Executive Manager (lead) | CLOSED 2026-06-25 at 84db2de (owner-approved commit + push) |
 
 Prerequisite: **Sprint 11 must be closed and pushed** with SDD-036 marked DONE
 in BACKLOG, PI-6 still ACTIVE, tests at or above 412 passed / 2 skipped, schema
@@ -149,7 +149,27 @@ strip (constitution semver consistency, skill frontmatter validity, ledger
 reachability, stale-tracker) with click-through. SDD-038/carryovers remain
 Sprint 13 contingency. Stdlib-only (Article V); respect the Article X locked
 render functions (new `inject_*` post-processors only); cache the ledger read
-in the SDD-040 refresh cycle.
+in the SDD-040 refresh cycle. Closed 2026-06-25: tests 412 -> 450, schema lint
+clean, 13/13 REQUIRED, Article X lock held.
+
+### Sprint 13 -- PI-6 Sprint 4 / True drag + PI-label fix + Article VII wording (PI-6 close)
+
+| Order | File | Owner | Status |
+|-------|------|-------|--------|
+| 0 | [SPRINT-13-KICKOFF.prompt.md](SPRINT-13-KICKOFF.prompt.md) | Principal Executive Manager (lead) | READY (gated on Sprint 12 close + push at 84db2de) |
+
+Prerequisite: **Sprint 12 must be closed and pushed at `84db2de`** with SDD-037
+marked DONE in BACKLOG, PI-6 still ACTIVE, tests at or above 450 passed / 2
+skipped, and schema lint clean. Sprint 13 is the **final PI-6 sprint** (the
+"value sprint" that closes PI-6) and ships **three features**: SDD-042
+(dashboard PI-label parser fix -- ships first, restores header trust), SDD-041
+(true browser drag-and-drop reorder on the SDD-036 safeguard machinery), and
+SDD-039 (Article VII wording clarification -- constitution edit requiring an ADR
++ recorded owner approval + `principles.md` version bump). SDD-038, SDD-034, and
+PI-4 housekeeping are **deferred to PI-7 hardening** and must not be pulled in.
+Stdlib-only (Article V; vanilla JS drag, no framework); respect the Article X
+locked render functions (additive `inject_*` / helper pattern only). PI-6 CLOSE
+is a separate owner-approved decision taken after Sprint 13 closes.
 
 ---
 

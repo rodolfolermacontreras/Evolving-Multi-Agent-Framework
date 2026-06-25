@@ -67,8 +67,10 @@ Source: Owner direction 2026-06-10 via EM; first dashboard work after PI-5 close
 | ID | Title | Priority | R | I | C | E | RICE | Sprint | Status | Notes |
 |----|-------|----------|---|---|---|---|------|--------|--------|-------|
 | SDD-041 | True browser drag-and-drop backlog reorder | P1 | H | H | M | M | -- | PI-6 Sprint 13 (follow-up) | Allocated to PI-6 Sprint 13 (or a dedicated follow-up sprint) -- builds directly on SDD-036. Not Sprint 12 (that's SDD-037 ledger visibility). | Owner direction 2026-06-24: SDD-036 shipped keyboard-accessible reorder controls (accessibility-first CLARIFY choice), not true mouse drag. Owner wants real drag-and-drop. Builds on the SDD-036 foundation already shipped: `depends_on` frontmatter, dependency-lock, append-only `reorder-audit.jsonl`, force-as-Level-2 governance (ADR-017). This adds the browser drag/drop UI layer ON TOP of that safeguard machinery -- same audit trail, same dependency-lock, same force-override path, just mouse-driven instead of keyboard-driven. Stdlib-only constraint (Article V) means vanilla JS drag/drop events, no framework. Keyboard control stays as the accessible fallback. |
+| SDD-042 | Dashboard PI-label parser fix (stale "Current PI: PI-5") | P1 | H | H | H | S | -- | PI-6 Sprint 13 (closes PI-6) | Allocated to PI-6 Sprint 13 (closes PI-6). | Owner observed Sprint 12 close 2026-06-25: `state.html`/`state.md` header prints "Current PI: PI-5" while actual is PI-6. Same parser-lag class SDD-040 fixed for active-focus, but on the PI-label line. The PI detector reads roadmap/sprint frontmatter and doesn't reflect the newest ACTIVE PI. Fix the PI-detection heuristic in `state_builder.py` to surface the newest ACTIVE `CURRENT_PI.md`. Additive, lock-surface-safe (do not touch Article X `render_html` or locked fns). |
 
 Source: Owner direction 2026-06-24 via EM -- true drag follow-up to SDD-036 (shipped keyboard-only at db25eec).
+Source: Owner observation at Sprint 12 close 2026-06-25 via EM (SDD-042) -- dashboard-trust drift, same parser-lag class PI-6 exists to fix.
 
 ## P2 - Should Have
 

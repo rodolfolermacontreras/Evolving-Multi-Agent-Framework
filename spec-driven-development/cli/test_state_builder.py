@@ -712,8 +712,10 @@ class TestStdlibOnly:
         stdlib_modules = {
             "__future__",
             "argparse",
+            "base64",
             "dataclasses",
             "datetime",
+            "hashlib",
             "html",
             "http",
             "json",
@@ -727,9 +729,10 @@ class TestStdlibOnly:
             "os",
             "typing",
             "webbrowser",
-            # In-tree sibling module imported via the established sys.path
-            # bootstrap (ADR-012 / SDD-FDC-001). Not a third-party dep.
+            # In-tree sibling modules imported via the established sys.path
+            # bootstrap (ADR-012 / SDD-FDC-001). Not third-party deps.
             "schema_lint",
+            "backlog_reorder",
         }
 
         for node in ast.walk(tree):
@@ -1818,13 +1821,14 @@ class TestSecurityAudit:
         text = src.read_text(encoding="utf-8")
         import re as _re
         approved = {
-            "argparse", "datetime", "html", "json", "re", "socket",
-            "sqlite3", "subprocess", "sys", "webbrowser", "dataclasses",
-            "http.server", "http", "pathlib",
+            "argparse", "base64", "datetime", "hashlib", "html", "json",
+            "re", "socket", "sqlite3", "subprocess", "sys", "webbrowser",
+            "dataclasses", "http.server", "http", "pathlib",
             "__future__",
-            # In-tree sibling module imported via the established sys.path
-            # bootstrap (ADR-012 / SDD-FDC-001). Not a third-party dep.
+            # In-tree sibling modules imported via the established sys.path
+            # bootstrap (ADR-012 / SDD-FDC-001). Not third-party deps.
             "schema_lint",
+            "backlog_reorder",
         }
         for line in text.splitlines():
             stripped = line.strip()
@@ -2031,11 +2035,21 @@ class TestIntegration:
         assert "## Blockers" in md
         assert "## Next Milestones" in md
 
-    def test_no_script_tags_in_full_build(self, tmp_path: Path) -> None:
+    def test_single_drag_script_in_full_build(self, tmp_path: Path) -> None:
+        # SDD-041 (F-31): the build now emits exactly ONE <script> -- the
+        # hash-pinned drag layer -- and only when reorderable lifecycle cards
+        # exist. No other inject path emits script markup. (Was previously a
+        # zero-script assertion before the additive drag layer landed.)
         sdd = self._make_sdd(tmp_path)
         result = build(sdd_root=sdd, write=False, live_html=False,
                        fixed_date="2026-06-02")
-        assert "<script" not in result["html"].lower()
+        html_doc = result["html"]
+        script_count = html_doc.lower().count("<script")
+        has_cards = 'draggable="true"' in html_doc
+        assert script_count <= 1, "drag layer must inject at most one <script>"
+        assert script_count == (1 if has_cards else 0), (
+            f"expected {'1' if has_cards else '0'} script, found {script_count}"
+        )
 
     def test_test_count_verification(self) -> None:
         src = Path(__file__).resolve()
@@ -3159,11 +3173,16 @@ class TestSdd037IndicatorsNotGates:
         # `class="pill pill-<color>"`, so count those to isolate the strip.
         assert htm.count('class="pill pill-') == 4
 
-    def test_build_html_has_zero_script_tags(self, tmp_path: Path) -> None:
+    def test_build_html_has_single_drag_script_tag(self, tmp_path: Path) -> None:
+        # SDD-037 surfaces (dispatches card + health pills) remain script-free.
+        # The only <script> in a full build is the additive SDD-041 (F-31) drag
+        # layer, injected last by inject_drag_html.
         sdd = _seed_sdd_root(tmp_path)
         _seed_dispatches(sdd)
         result = build(sdd_root=sdd, write=False)
-        assert result["html"].lower().count("<script") == 0
+        html_doc = result["html"]
+        assert html_doc.lower().count("<script") == 1
+        assert "fetch('/reorder'" in html_doc
 
     def test_dispatches_result_key_unchanged(self, tmp_path: Path) -> None:
         sdd = _seed_sdd_root(tmp_path)
@@ -3171,4 +3190,237 @@ class TestSdd037IndicatorsNotGates:
         result = build(sdd_root=sdd, write=False)
         lv = load_ledger(sdd)
         assert result["dispatches"] == len(lv.recent)
+
+
+# ===========================================================================
+# SDD-041 (F-31): true browser drag-and-drop reorder
+# Additive over SDD-036. The keyboard reorder control (render_reorder_control)
+# stays intact; this layer adds native HTML5 drag affordances, one hash-pinned
+# vanilla-JS block, and the POST /reorder write endpoint. Force is never
+# auto-applied by a drag gesture (ADR-017 / ADR-019).
+# ===========================================================================
+
+import io  # noqa: E402
+
+import cli.state_builder as _sb  # noqa: E402  -- module handle for monkeypatch
+from cli.state_builder import (  # noqa: E402
+    DashboardHandler,
+    Feature,
+    handle_reorder_request,
+    inject_drag_html,
+    inject_lifecycle_html,
+    _DRAG_SCRIPT_BODY,
+    _DRAG_SCRIPT_CSP,
+)
+
+
+class TestSdd041DragAffordance:
+    """AC: lifecycle cards become draggable; keyboard control survives."""
+
+    DOC = ('<main id="main" role="main" class="grid-v3">'
+           '<section class="zone-next"><h2>Next</h2></section></main>')
+
+    def _features(self) -> list[Feature]:
+        return [
+            Feature(feature_dir=Path("specs/feat-a"), name="feat-a",
+                    stage="IMPLEMENT", created="2026-06-01"),
+            Feature(feature_dir=Path("specs/feat-b"), name="feat-b",
+                    stage="DONE", created="2026-05-01"),
+        ]
+
+    def test_feature_cards_are_draggable(self, tmp_path: Path) -> None:
+        out = inject_lifecycle_html(
+            self.DOC, features=self._features(), sdd_root=tmp_path,
+            current_sprint=None)
+        # data-pid is unique to feature cards (the CSS selector also contains
+        # the literal draggable="true", so count by data-pid instead).
+        assert out.count('data-pid="') == 2
+        assert 'draggable="true"' in out and 'data-rank="0"' in out
+        assert 'class="drag-handle"' in out
+
+    def test_keyboard_reorder_control_survives(self, tmp_path: Path) -> None:
+        out = inject_lifecycle_html(
+            self.DOC, features=self._features(), sdd_root=tmp_path,
+            current_sprint=None)
+        # SDD-036 keyboard affordance is untouched: two reorder controls.
+        assert out.count('class="reorder-control"') == 2
+        assert "reorder-btn" in out
+
+    def test_lifecycle_injector_stays_script_free(self, tmp_path: Path) -> None:
+        out = inject_lifecycle_html(
+            self.DOC, features=self._features(), sdd_root=tmp_path,
+            current_sprint=None)
+        assert "<script" not in out.lower()
+
+
+class TestSdd041DragScript:
+    """AC: exactly one hash-pinned script; CSP widened only for it; inert static."""
+
+    _CARD_DOC = (
+        '<html><head>'
+        '<meta http-equiv="Content-Security-Policy" '
+        'content="default-src \'none\'; style-src \'unsafe-inline\'; img-src \'self\'">'
+        '</head><body>'
+        '<article class="lifecycle-card" draggable="true" data-pid="SDD-041" '
+        'data-rank="0">x</article>'
+        '</body></html>'
+    )
+
+    def test_injects_exactly_one_script(self) -> None:
+        out = inject_drag_html(self._CARD_DOC)
+        assert out.lower().count("<script") == 1
+
+    def test_widens_csp_with_script_hash_and_connect(self) -> None:
+        out = inject_drag_html(self._CARD_DOC)
+        assert "script-src 'sha256-" in out
+        assert "connect-src 'self'" in out
+        # never relaxes to unsafe-inline scripts
+        assert "script-src 'unsafe-inline'" not in out
+
+    def test_csp_hash_matches_script_body(self) -> None:
+        import base64
+        import hashlib
+        digest = base64.b64encode(
+            hashlib.sha256(_DRAG_SCRIPT_BODY.encode("utf-8")).digest()
+        ).decode("ascii")
+        assert _DRAG_SCRIPT_CSP == f"'sha256-{digest}'"
+
+    def test_script_guarded_to_http_only(self) -> None:
+        # Static file:// state.html stays inert -- the handler no-ops unless
+        # served over http(s).
+        assert "location.protocol!=='http:'" in _DRAG_SCRIPT_BODY
+        assert "location.protocol!=='https:'" in _DRAG_SCRIPT_BODY
+
+    def test_script_never_sends_force(self) -> None:
+        # ADR-017: a drag gesture must never force past a dependency lock. The
+        # POST body carries only {item, to_rank} -- no force key. (The word
+        # "force" appears only in the user-facing rejection hint text.)
+        assert "JSON.stringify({item:item,to_rank:toRank})" in _DRAG_SCRIPT_BODY
+        assert "force:" not in _DRAG_SCRIPT_BODY
+
+    def test_noop_without_draggable_cards(self) -> None:
+        plain = "<html><body><p>no cards</p></body></html>"
+        assert inject_drag_html(plain) == plain
+
+
+class TestSdd041HandleReorder:
+    """AC: pure validation + delegation contract for POST /reorder."""
+
+    def test_non_dict_payload_is_400(self, tmp_path: Path) -> None:
+        status, body = handle_reorder_request(tmp_path, ["not", "a", "dict"])
+        assert status == 400
+        assert body["status"] == "error"
+
+    def test_invalid_item_is_400(self, tmp_path: Path, monkeypatch) -> None:
+        calls = []
+        monkeypatch.setattr(_sb, "_reorder_move",
+                            lambda *a, **k: calls.append(k) or {})
+        status, body = handle_reorder_request(tmp_path, {"item": "nope", "to_rank": 0})
+        assert status == 400
+        assert calls == []  # mutator never invoked on bad input
+
+    def test_negative_rank_is_400(self, tmp_path: Path, monkeypatch) -> None:
+        calls = []
+        monkeypatch.setattr(_sb, "_reorder_move",
+                            lambda *a, **k: calls.append(k) or {})
+        status, _ = handle_reorder_request(tmp_path, {"item": "SDD-041", "to_rank": -1})
+        assert status == 400
+        assert calls == []
+
+    def test_bool_rank_is_rejected(self, tmp_path: Path, monkeypatch) -> None:
+        # bool is an int subclass -- must not slip through as rank 1/0.
+        calls = []
+        monkeypatch.setattr(_sb, "_reorder_move",
+                            lambda *a, **k: calls.append(k) or {})
+        status, _ = handle_reorder_request(tmp_path, {"item": "SDD-041", "to_rank": True})
+        assert status == 400
+        assert calls == []
+
+    def test_happy_path_returns_200_with_audit(self, tmp_path: Path, monkeypatch) -> None:
+        recorded = {}
+        fake_row = {"item": "SDD-041", "to_rank": 2, "actor": "human"}
+
+        def fake_move(sdd_root, *, item, to_rank, force):
+            recorded.update(sdd_root=sdd_root, item=item, to_rank=to_rank, force=force)
+            return fake_row
+
+        monkeypatch.setattr(_sb, "_reorder_move", fake_move)
+        status, body = handle_reorder_request(tmp_path, {"item": "SDD-041", "to_rank": 2})
+        assert status == 200
+        assert body == {"status": "ok", "audit": fake_row}
+        assert recorded["item"] == "SDD-041"
+        assert recorded["to_rank"] == 2
+        assert recorded["force"] is False  # ADR-017: force never auto-applied
+
+    def test_blocked_returns_409_without_force(self, tmp_path: Path, monkeypatch) -> None:
+        seen = {}
+
+        def fake_move(sdd_root, *, item, to_rank, force):
+            seen["force"] = force
+            raise _sb._ReorderError("SDD-041 depends on SDD-040")
+
+        monkeypatch.setattr(_sb, "_reorder_move", fake_move)
+        status, body = handle_reorder_request(tmp_path, {"item": "SDD-041", "to_rank": 0})
+        assert status == 409
+        assert body["status"] == "blocked"
+        assert "SDD-040" in body["reason"]
+        assert seen["force"] is False  # never retried with force
+
+    def test_out_of_range_rank_returns_400(self, tmp_path: Path, monkeypatch) -> None:
+        def fake_move(sdd_root, *, item, to_rank, force):
+            raise ValueError("to_rank 99 out of range")
+
+        monkeypatch.setattr(_sb, "_reorder_move", fake_move)
+        status, body = handle_reorder_request(tmp_path, {"item": "SDD-041", "to_rank": 99})
+        assert status == 400
+        assert "out of range" in body["reason"]
+
+
+class _CapturingHandler(DashboardHandler):
+    """DashboardHandler with HTTP plumbing bypassed for unit testing do_POST."""
+
+    def __init__(self, sdd_root: Path, body: bytes, path: str = "/reorder",
+                 headers: dict | None = None) -> None:  # noqa: D401
+        # Deliberately skip BaseHTTPRequestHandler.__init__ (needs a socket).
+        self.sdd_root = sdd_root
+        self.path = path
+        self.rfile = io.BytesIO(body)
+        self.headers = headers or {"Content-Length": str(len(body))}
+        self.captured: tuple[int, dict] | None = None
+
+    def _send_json(self, status: int, payload: dict) -> None:  # capture, don't write
+        self.captured = (status, payload)
+
+
+class TestSdd041DoPost:
+    """AC: do_POST routes only /reorder, validates body, delegates; do_GET intact."""
+
+    def test_non_reorder_path_is_404(self, tmp_path: Path) -> None:
+        h = _CapturingHandler(tmp_path, b"{}", path="/elsewhere")
+        h.do_POST()
+        assert h.captured[0] == 404
+
+    def test_malformed_json_is_400(self, tmp_path: Path) -> None:
+        body = b"{not valid json"
+        h = _CapturingHandler(tmp_path, body,
+                              headers={"Content-Length": str(len(body))})
+        h.do_POST()
+        assert h.captured[0] == 400
+        assert "malformed" in h.captured[1]["reason"]
+
+    def test_valid_post_delegates_and_returns_200(
+            self, tmp_path: Path, monkeypatch) -> None:
+        fake_row = {"item": "SDD-041", "to_rank": 1}
+        monkeypatch.setattr(_sb, "_reorder_move",
+                            lambda sdd_root, *, item, to_rank, force: fake_row)
+        body = json.dumps({"item": "SDD-041", "to_rank": 1}).encode("utf-8")
+        h = _CapturingHandler(tmp_path, body,
+                              headers={"Content-Length": str(len(body))})
+        h.do_POST()
+        assert h.captured == (200, {"status": "ok", "audit": fake_row})
+
+    def test_do_get_still_present(self) -> None:
+        # do_GET must remain on the handler (unchanged contract).
+        assert hasattr(DashboardHandler, "do_GET")
+        assert hasattr(DashboardHandler, "do_POST")
 

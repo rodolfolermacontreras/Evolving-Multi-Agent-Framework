@@ -25,7 +25,9 @@ Style: pure Python stdlib (LESSON-001). No third-party dependencies at runtime.
 from __future__ import annotations
 
 import argparse
+import base64
 import datetime as dt
+import hashlib
 import html
 import json
 import re
@@ -62,6 +64,17 @@ from schema_lint import (  # noqa: E402  -- module-bootstrap import per ADR-012
     _has_unquoted_version,
     Finding,
 )
+
+# ---------------------------------------------------------------------------- #
+# Reorder write path (SDD-041 / ADR-019)
+#
+# The dashboard POST /reorder endpoint delegates to the SDD-036 safeguarded
+# overlay mutator. We reuse backlog_reorder.move verbatim -- it enforces the
+# dependency-lock, appends the audit row, and never auto-applies force. The
+# import follows the same in-tree sibling bootstrap as schema_lint (ADR-012).
+# ---------------------------------------------------------------------------- #
+
+from backlog_reorder import move as _reorder_move, ReorderError as _ReorderError
 
 # ---------------------------------------------------------------------------- #
 # SDD root + path helpers
@@ -2658,6 +2671,12 @@ _LIFECYCLE_STYLE = (
     ".reorder-btn{font-size:.8em;padding:.1rem .45rem;cursor:pointer}"
     ".reorder-btn[disabled]{opacity:.4;cursor:not-allowed}"
     ".reorder-rank{font-size:.72em;opacity:.6}"
+    ".lifecycle-card[draggable=\"true\"]{cursor:grab}"
+    ".drag-handle{font-size:.85em;opacity:.45;cursor:grab;user-select:none;"
+    "margin-right:.1rem}"
+    ".lifecycle-card.drag-over{border-color:currentColor;"
+    "box-shadow:0 0 0 2px var(--line,#444) inset}"
+    ".lifecycle-card.drag-rejected{border-color:#f08a8a}"
     "</style>"
 )
 
@@ -2705,8 +2724,11 @@ def inject_lifecycle_html(
         control = render_reorder_control(fid, rank, total)
         feature_blocks.append(
             f'<article class="lifecycle-card" '
+            f'draggable="true" data-pid="{h(fid)}" data-rank="{rank}" '
             f'aria-label="{h(feature.name)} lifecycle">'
             f'<div class="lifecycle-head">'
+            f'<span class="drag-handle" aria-hidden="true" title="Drag to reorder">'
+            f'\u2630</span>'
             f'<span class="lifecycle-id">{h(fid)}</span>'
             f'<span class="lifecycle-name">{h(feature.name)}</span>'
             f'<span class="lifecycle-stage">{h(feature.stage)}</span></div>'
@@ -2727,6 +2749,140 @@ def inject_lifecycle_html(
     if marker in html_doc:
         return html_doc.replace(marker, marker + section, 1)
     return html_doc + section
+
+
+# ---------------------------------------------------------------------------- #
+# SDD-041 (F-31): true browser drag-and-drop reorder
+#
+# A single, hash-pinned vanilla-JS block turns the lifecycle cards into a
+# native HTML5 drag surface. The script is:
+#   - additive: emitted only when draggable cards exist; injected by
+#     inject_drag_html AFTER inject_lifecycle_html so the locked render_html
+#     footprint (Article X) is untouched.
+#   - inert as a static file: it no-ops unless location.protocol is http(s),
+#     so the file:// state.html stays keyboard-only (render_reorder_control).
+#   - CSP-pinned: we widen ONLY for this exact script via its sha256 hash --
+#     never 'unsafe-inline'. The hash is computed at import time over the exact
+#     body, so editing the body re-pins automatically (and a mismatch fails
+#     closed by browser CSP enforcement).
+#   - force-free: the drop handler posts {item, to_rank} only. Forcing past a
+#     dependency lock is a Level-2 human decision (ADR-017) and is NEVER sent
+#     by a drag gesture; a 409 surfaces the reason and tells the user to use
+#     the CLI with --force.
+# ---------------------------------------------------------------------------- #
+
+_DRAG_SCRIPT_BODY = (
+    "(function(){"
+    "if(location.protocol!=='http:'&&location.protocol!=='https:')return;"
+    "var dragId=null;"
+    "function onStart(e){dragId=e.currentTarget.getAttribute('data-pid');"
+    "e.dataTransfer.effectAllowed='move';}"
+    "function onOver(e){e.preventDefault();"
+    "e.currentTarget.classList.add('drag-over');e.dataTransfer.dropEffect='move';}"
+    "function onLeave(e){e.currentTarget.classList.remove('drag-over');}"
+    "function onDrop(e){e.preventDefault();var t=e.currentTarget;"
+    "t.classList.remove('drag-over');"
+    "var toRank=parseInt(t.getAttribute('data-rank'),10);"
+    "var item=dragId;dragId=null;"
+    "if(!item||isNaN(toRank))return;"
+    "fetch('/reorder',{method:'POST',"
+    "headers:{'Content-Type':'application/json'},"
+    "body:JSON.stringify({item:item,to_rank:toRank})})"
+    ".then(function(r){return r.json().then(function(d){"
+    "return {s:r.status,d:d};});})"
+    ".then(function(res){if(res.s===200){location.reload();return;}"
+    "var reason=(res.d&&res.d.reason)?res.d.reason:'reorder rejected';"
+    "t.classList.add('drag-rejected');"
+    "t.setAttribute('title','blocked: '+reason+"
+    "' -- forcing is a Level-2 decision; use the CLI with --force');})"
+    ".catch(function(){});}"
+    "var cards=document.querySelectorAll('.lifecycle-card[draggable=\"true\"]');"
+    "for(var i=0;i<cards.length;i++){var c=cards[i];"
+    "c.addEventListener('dragstart',onStart);"
+    "c.addEventListener('dragover',onOver);"
+    "c.addEventListener('dragleave',onLeave);"
+    "c.addEventListener('drop',onDrop);}"
+    "})();"
+)
+
+_DRAG_SCRIPT_HASH = base64.b64encode(
+    hashlib.sha256(_DRAG_SCRIPT_BODY.encode("utf-8")).digest()
+).decode("ascii")
+
+_DRAG_SCRIPT_CSP = f"'sha256-{_DRAG_SCRIPT_HASH}'"
+
+_CSP_META_RE = re.compile(
+    r'(<meta http-equiv="Content-Security-Policy" content=")([^"]*)(">)'
+)
+
+
+def inject_drag_html(html_doc: str) -> str:
+    """Append the SDD-041 drag script and widen the CSP for exactly that script.
+
+    No-op when no draggable cards are present (e.g. empty backlog). Widens the
+    locked render_html meta CSP -- which is ``default-src 'none'`` with no
+    ``script-src``/``connect-src`` -- by appending a hash-pinned ``script-src``
+    and ``connect-src 'self'`` so the inline drag handler and its same-origin
+    POST /reorder fetch are permitted. The locked render_html body is never
+    modified; this is post-processing of its output (Article X compliant).
+    """
+    if 'draggable="true"' not in html_doc:
+        return html_doc
+
+    def _widen(match: re.Match) -> str:
+        policy = match.group(2)
+        if "script-src" not in policy:
+            policy = f"{policy}; script-src {_DRAG_SCRIPT_CSP}"
+        if "connect-src" not in policy:
+            policy = f"{policy}; connect-src 'self'"
+        return match.group(1) + policy + match.group(3)
+
+    new_doc = _CSP_META_RE.sub(_widen, html_doc, count=1)
+    script_tag = f"<script>{_DRAG_SCRIPT_BODY}</script>"
+    if "</body>" in new_doc:
+        return new_doc.replace("</body>", script_tag + "</body>", 1)
+    return new_doc + script_tag
+
+
+_REORDER_ITEM_RE = re.compile(r"^[A-Z]{2,}-\d{2,3}$")
+
+
+def handle_reorder_request(sdd_root: Path, payload: object) -> tuple[int, dict]:
+    """Validate a drag-drop reorder payload and apply it via the safeguarded mutator.
+
+    Pure function (no HTTP): returns ``(status_code, body_dict)`` so it can be
+    unit-tested without a live server. Contract:
+      - 400 when the payload is malformed (not a dict, bad ``item`` id, or a
+        ``to_rank`` that is not a non-negative int -- bool is rejected).
+      - 200 ``{"status":"ok","audit":<row>}`` on a successful move.
+      - 409 ``{"status":"blocked","reason":<msg>}`` when a dependency lock
+        rejects the move. Force is NEVER auto-applied (ADR-017): the drag layer
+        does not pass force, and a block is surfaced, not retried.
+      - 400 ``{"status":"error","reason":<msg>}`` for an out-of-range rank.
+    """
+    if not isinstance(payload, dict):
+        return 400, {"status": "error", "reason": "body must be a JSON object"}
+
+    item = payload.get("item")
+    if not isinstance(item, str) or not _REORDER_ITEM_RE.match(item):
+        return 400, {"status": "error", "reason": "invalid 'item' feature id"}
+
+    to_rank = payload.get("to_rank")
+    if isinstance(to_rank, bool) or not isinstance(to_rank, int) or to_rank < 0:
+        return 400, {"status": "error", "reason": "'to_rank' must be a non-negative integer"}
+
+    # The drag gesture never forces past a dependency lock (ADR-017). We accept
+    # an explicit force only from a deliberate non-drag client; the injected JS
+    # omits it entirely.
+    force = bool(payload.get("force", False))
+
+    try:
+        row = _reorder_move(sdd_root, item=item, to_rank=to_rank, force=force)
+    except _ReorderError as exc:
+        return 409, {"status": "blocked", "reason": str(exc)}
+    except ValueError as exc:
+        return 400, {"status": "error", "reason": str(exc)}
+    return 200, {"status": "ok", "audit": row}
 
 
 # ---------------------------------------------------------------------------- #
@@ -3198,6 +3354,10 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
     # strip; neither can alter build()'s exit.
     htm = inject_dispatches_html(htm, ledger=ledger, sdd_root=sdd_root)
     htm = inject_health_pills_html(htm, sdd_root=sdd_root, ledger=ledger)
+    # SDD-041 (F-31): native drag-and-drop layer. Injected LAST so it post-
+    # processes the fully assembled doc -- appends one hash-pinned <script> and
+    # widens the CSP for exactly that script. No-op when no draggable cards.
+    htm = inject_drag_html(htm)
 
     result = {
         "markdown_chars": len(md), "html_chars": len(htm),
@@ -3254,10 +3414,13 @@ class DashboardHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
-        # Security headers (REC-2 from SECURITY-REVIEW.md)
+        # Security headers (REC-2 from SECURITY-REVIEW.md). script-src is
+        # pinned to the SDD-041 drag script hash only -- never 'unsafe-inline'
+        # (ADR-019). The served HTML carries the same hash in its meta CSP.
         self.send_header("Content-Security-Policy",
                          "default-src 'none'; "
                          "style-src 'unsafe-inline'; "
+                         f"script-src {_DRAG_SCRIPT_CSP}; "
                          "img-src 'self' data:; "
                          "font-src 'self'; "
                          "connect-src 'self'; "
@@ -3269,6 +3432,10 @@ class DashboardHandler(BaseHTTPRequestHandler):
         self.send_header("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
         self.end_headers()
         self.wfile.write(body)
+
+    def _send_json(self, status: int, payload: dict) -> None:
+        body = json.dumps(payload).encode("utf-8")
+        self._send(status, body, "application/json; charset=utf-8")
 
     def do_GET(self) -> None:  # noqa: N802
         path = self.path.split("?", 1)[0]
@@ -3286,6 +3453,31 @@ class DashboardHandler(BaseHTTPRequestHandler):
         if path == "/favicon.ico":
             self._send(204, b"", "image/x-icon"); return
         self._send(404, b"<h1>404</h1>not found")
+
+    def do_POST(self) -> None:  # noqa: N802
+        # SDD-041 (F-31): the ONLY write endpoint. Localhost-bound (serve()
+        # binds 127.0.0.1), input-validated, and delegates to the safeguarded
+        # backlog_reorder.move via handle_reorder_request. do_GET is unchanged.
+        path = self.path.split("?", 1)[0]
+        if path != "/reorder":
+            self._send_json(404, {"status": "error", "reason": "not found"})
+            return
+        try:
+            length = int(self.headers.get("Content-Length", 0) or 0)
+        except (TypeError, ValueError):
+            length = 0
+        raw = self.rfile.read(length) if length > 0 else b""
+        try:
+            payload = json.loads(raw.decode("utf-8")) if raw else {}
+        except (ValueError, UnicodeDecodeError):
+            self._send_json(400, {"status": "error", "reason": "malformed JSON body"})
+            return
+        try:
+            status, body = handle_reorder_request(self.sdd_root, payload)
+        except Exception as exc:  # fail closed; never 500 the dashboard write path silently
+            self._send_json(500, {"status": "error", "reason": repr(exc)})
+            return
+        self._send_json(status, body)
 
 
 def _port_available(host: str, port: int) -> bool:

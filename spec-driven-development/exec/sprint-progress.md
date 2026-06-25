@@ -904,3 +904,24 @@ Kickoff: `SPRINT-13-KICKOFF.prompt.md` (committed `65d2d05`). Scope: SDD-042 (F-
 - Surfaced minor residual (not in ADR-018 approved scope): two incidental "fresh session" mentions remain unswept -- SPRINT-05 L35 and SPRINT-06 L202 (non-corollary restatements). Left untouched to stay within the recorded-approval scope; recommend a trivial PI-7 cleanup sweep.
 - Notes: SDD-039 is a clarification of existing intent (subagent dispatch was never prohibited, only unnamed) -> MINOR bump. Drafted by the Architect to the approval boundary while the owner was away, then applied by the SW Dev only after the owner's recorded approval -- the Article VIII gate was honored, not bypassed.
 - Next: F-31 (SDD-041 true drag) now authorized by the owner ("item 3, start it autonomously").
+
+### F-31 -- sdd-041-true-drag -- IMPLEMENTED (logic verified; in-browser drag acceptance pending owner)
+
+- Date: 2026-06-25
+- Owner: Principal Executive Manager (architecture analysis + routing + verification); principal-software-developer (implementation, subagent dispatch)
+- Owner authorization: "item 3, start it autonomously" (2026-06-25 via Executive Manager).
+- Commits: <pending local commit on master; pushed under owner's start-autonomously authorization>
+- ADR: ADR-019 (dashboard reorder POST endpoint) -- Level-1 architectural decision, authored + Accepted within Principal authority (localhost-only write surface onto the already-safeguarded `move()`; NOT a Level-2 owner-gated dependency/schema/production change).
+- Files changed: 3 + 1 new ADR + regenerated state.html
+  - spec-driven-development/cli/state_builder.py (additive `do_POST` + `_send_json` on DashboardHandler; pure `handle_reorder_request`; `inject_drag_html` + hash-pinned single drag `<script>` + drag-affordance CSS; CSP widened via post-processing, locked `render_html` untouched)
+  - spec-driven-development/cli/test_state_builder.py (TestSdd041DragAffordance/DragScript/HandleReorder/DoPost; +20 tests; the two zero-script smoke asserts updated to expect the one intended drag script)
+  - spec-driven-development/docs/ADR/019-dashboard-reorder-post-endpoint.md (new; Accepted)
+  - spec-driven-development/exec/state.html (regenerated)
+- Tests: 456 -> 476 (+20), 2 skipped. EM-reverified.
+- Article X lock: HELD. `TestS1FootprintLockGuard` 3/3 PASS; `do_GET` and all five locked render fns byte-identical; the entire drag layer + POST endpoint + CSP widening are additive (`inject_drag_html` post-processor + handler method).
+- Schema lint: clean (exit 0). EM-reverified.
+- Security posture: POST /reorder bound to 127.0.0.1; strict input validation (artifact-ID shape + non-negative int) before `move()` is called; dependency-blocked drop returns HTTP 409 and does NOT silently succeed; force is NEVER auto-applied by the drag gesture (ADR-017 force-as-Level-2) -- the drag client never sends `force:true`; single hash-pinned inline script (no `unsafe-inline`).
+- Validation: drag affordance (`draggable`/`data-pid`/`data-rank` + handle) present; keyboard `reorder-btn` fallback preserved (no regression); audit trail reuses `reorder-audit.jsonl`; `depends_on` dependency-lock reused. Static `exec/state.html` stays keyboard-only (the script is inert without a server) -- true drag operates only in `serve` mode.
+- OPEN (owner manual check): the actual in-browser drag *feel* (cursor drag, drop-target highlight, reload-on-drop, 409 tooltip) is NOT machine-verifiable. Requires the owner to run `python spec-driven-development/cli/state_builder.py serve` and drag a card. SDD-041 is IMPLEMENTED + logic-verified but should not be marked DONE in BACKLOG until the owner confirms the in-browser interaction. This is a UI Lifecycle Variant acceptance step, not a blocking gate.
+- Notes: Architecture resolved before dispatch -- a static HTML file cannot POST, so true drag required an additive serve-mode `do_POST` onto the existing safeguarded `move()`; the keyboard controls remain the static-file path. No reorder logic was forked. Pill-nav PI-7 follow-up captured in IDEAS.md in the same change.
+- Next: owner in-browser acceptance of SDD-041; then mark SDD-041/042/039 DONE in BACKLOG and proceed to the F-33 Sprint 13 close (a separate owner-approved step); PI-6 close is a further separate owner decision.

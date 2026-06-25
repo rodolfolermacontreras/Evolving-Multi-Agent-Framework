@@ -242,7 +242,7 @@ The framework has never been used to deliver a real feature. All assets are scaf
 
 Do not contaminate context across features. In practice:
 
-- Open a NEW Copilot Chat session when starting work on a different feature (different spec dir under `spec-driven-development/specs/`).
+- Run a different feature (different spec dir under `spec-driven-development/specs/`) in its own context-isolated unit -- a fresh Copilot Chat session OR an EM-routed subagent dispatch. Both satisfy the context-isolation property: context from one feature does not contaminate work on another. Neither is privileged; pick whichever fits the work.
 - Reusing a session is acceptable for: continuing the SAME feature, EM-level routing/status questions, or small one-off edits (typos, doc fixes <3 files).
 - The Executive Manager session stays high-level (routing, synthesis); it never absorbs feature implementation depth.
 - When a session ends, durable state lives in the spec dir, the ledger, and `spec-driven-development/sessions/SESSION-MEMORY.md` -- not in chat history.

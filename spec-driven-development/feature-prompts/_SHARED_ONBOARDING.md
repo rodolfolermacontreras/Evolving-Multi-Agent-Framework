@@ -94,8 +94,9 @@ The ones most worker sessions touch:
   third-party dependencies. (LESSON-001 / CLI-PATTERN rule 1.)
 - **Article VII -- One Feature, One Session.** Do not contaminate context.
   Reuse a session ONLY for the same feature, EM-level routing/status, or true
-  one-off edits (<3 files). For a different feature, open a new session and
-  paste its prompt.
+  one-off edits (<3 files). For a different feature, run it in its own
+  context-isolated unit -- a fresh chat session OR an EM-routed subagent
+  dispatch (both satisfy the context-isolation property).
 - **Article VIII -- Constitution Immutability.** No edits to `constitution/**`
   without an ADR. Route any constitution change to the Architect.
 - **Article X -- Validation Contract.** Locked at `/tasks`; cannot be loosened
@@ -202,7 +203,7 @@ Do not edit prior blocks. Append-only.
 - Do NOT use emojis in code, docs, commits, or filenames.
 - Do NOT trust agent reports or session checkpoints without verifying in
   git/tests/files.
-- Do NOT contaminate sessions. **One feature, one session.**
+- Do NOT contaminate context across features. **One feature, one context-isolated unit** (fresh session OR subagent dispatch).
 
 ---
 

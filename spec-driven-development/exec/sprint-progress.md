@@ -884,3 +884,23 @@ Kickoff: `SPRINT-13-KICKOFF.prompt.md` (committed `65d2d05`). Scope: SDD-042 (F-
 - Surfaced residual (OWNER DECISION): the PI **pill-nav** widget in `state.html` still renders PI-1..PI-5 with PI-5 marked current, because that nav is driven by `constitution/roadmap.md` (no PI-6 block) inside the Article-X-locked `render_html`. Out of SDD-042's PI-label scope and not fixable within Sprint 13 constraints (would require either a `constitution/roadmap.md` edit -- the only permitted constitution edit this sprint is SDD-039 -- or a new `inject_*` workaround around a locked function). Recommend filing as a follow-up (PI-7) or an explicit owner-approved roadmap.md update.
 - Notes: Smallest, highest-trust PI-6 fix landed first exactly as the kickoff sequenced. Root cause: `current_pi()` reads roadmap.md (PI-1..PI-5 only) so it returned the stale PI-5; the new resolver prefers the newest ACTIVE `CURRENT_PI.md` and enriches its title from the H1, falling back to the prior heuristic when no PI is ACTIVE (no hard-coded value). Explicit `--pi` override still wins.
 - Next: F-31 (SDD-041 true drag) and F-32 (SDD-039 constitution edit) are HELD. F-32 is **owner-blocked** -- a constitution edit (Article VIII) requires recorded owner approval before applying; cannot proceed in the owner's absence. F-31 is in-scope but deferred this session pending owner steer on the larger UI surface. No push until owner pre-push approval.
+
+### F-32 -- sdd-039-article-vii-wording -- DONE (constitution edit, owner-approved)
+
+- Date: 2026-06-25
+- Owner: Principal Executive Manager (routing + verification); principal-architect (ADR-018 draft, subagent dispatch); principal-software-developer (apply, subagent dispatch)
+- Owner approval: recorded 2026-06-25 via Executive Manager ("item 1, yes approved") -- the Article VIII / Level-2 recorded approval for the constitution edit, plus the three EM-surfaced sub-choices adopted (template = `_SHARED_ONBOARDING.md`; SPRINT-04 left untouched; `.github/copilot-instructions.md` included).
+- Commits: <pending local commit on master; pushed with owner approval>
+- ADR: ADR-018 (Article VII context-isolation wording) -- status Proposed -> Accepted.
+- Files changed: 7
+  - spec-driven-development/constitution/principles.md (Article VII corollary reworded; `version` 1.3.0 -> 1.4.0 MINOR; `last_amended` 2026-06-08 -> 2026-06-25)
+  - spec-driven-development/docs/ADR/018-article-vii-context-isolation-wording.md (new; Accepted)
+  - spec-driven-development/feature-prompts/_SHARED_ONBOARDING.md (Article VII bullet + do-NOT bullet)
+  - spec-driven-development/feature-prompts/SPRINT-05-KICKOFF.prompt.md, SPRINT-06-KICKOFF.prompt.md, SPRINT-07-KICKOFF.prompt.md (corollary restatements add subagent-dispatch equivalence; "do not collapse" guards preserved)
+  - .github/copilot-instructions.md (Article VII corollary section matched to the constitution)
+- Tests: 456 passed, 2 skipped (no change; Markdown-only edit, no version-pinned test). EM-reverified.
+- Schema lint: clean (exit 0; constitution semver consistency held). EM-reverified.
+- Validation: Article VII corollary in principles.md + the three SPRINT-05/06/07 prompts + the shared template + copilot-instructions now read "fresh chat session OR subagent dispatch -- both satisfy the context-isolation property." `principles.md` version bumped. ADR committed + Accepted with recorded owner approval.
+- Surfaced minor residual (not in ADR-018 approved scope): two incidental "fresh session" mentions remain unswept -- SPRINT-05 L35 and SPRINT-06 L202 (non-corollary restatements). Left untouched to stay within the recorded-approval scope; recommend a trivial PI-7 cleanup sweep.
+- Notes: SDD-039 is a clarification of existing intent (subagent dispatch was never prohibited, only unnamed) -> MINOR bump. Drafted by the Architect to the approval boundary while the owner was away, then applied by the SW Dev only after the owner's recorded approval -- the Article VIII gate was honored, not bypassed.
+- Next: F-31 (SDD-041 true drag) now authorized by the owner ("item 3, start it autonomously").

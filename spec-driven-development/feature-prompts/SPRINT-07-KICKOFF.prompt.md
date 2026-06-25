@@ -56,8 +56,10 @@ unapproved kickoff.
 
 1. Read [_SHARED_ONBOARDING.md](_SHARED_ONBOARDING.md) end to end.
 2. Verify the HARD PREREQUISITE above (six checks).
-3. Execute the sprint sequence below. **Each F-## runs in its own fresh
-   chat session** (Article VII: one feature, one session).
+3. Execute the sprint sequence below. **Each F-## runs in its own
+   context-isolated unit** -- a fresh chat session OR an EM-routed subagent
+   dispatch (both satisfy context isolation) (Article VII: one feature, one
+   context-isolated unit).
 4. Append a sprint-close block to
    [`../exec/sprint-progress.md`](../exec/sprint-progress.md) when DONE.
 
@@ -158,10 +160,11 @@ Sprint 7 has **two outcomes** (both must ship):
   `302bee5`) still bind any implementation work; SDD-032 must not
   weaken them, and SDD-018 must not write into host trees as part of any
   UI artifact.
-- **One feature, one session** (Article VII). F-09, F-10, F-11 each run
-  in their own fresh chat session. Do not collapse them into a single
+- **One feature, one context-isolated unit** (Article VII). F-09, F-10, F-11
+  each run in their own fresh chat session OR EM-routed subagent dispatch
+  (both satisfy context isolation). Do not collapse them into a single
   session unless the owner explicitly approves a consolidated execution
-  (the default is three sessions).
+  (the default is three isolated units).
 - **NO REQUIRED-item deferral from Sprint 7 close** per owner direction
   2026-06-08 (Option 3 hybrid established the no-silent-slip precedent
   in writing). If a REQUIRED item cannot close, the relevant feature

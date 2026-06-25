@@ -47,8 +47,10 @@ scaffold.
 
 1. Read [_SHARED_ONBOARDING.md](_SHARED_ONBOARDING.md) end to end.
 2. Verify the HARD PREREQUISITE above (six checks).
-3. Execute the sprint sequence below. **Each F-## runs in its own fresh
-   chat session** (Article VII: one feature, one session).
+3. Execute the sprint sequence below. **Each F-## runs in its own
+   context-isolated unit** -- a fresh chat session OR an EM-routed subagent
+   dispatch (both satisfy context isolation) (Article VII: one feature, one
+   context-isolated unit).
 4. Append a sprint-close block to
    [`../exec/sprint-progress.md`](../exec/sprint-progress.md) when DONE.
 
@@ -121,10 +123,11 @@ three specs). Budget the F-06 session accordingly.
 - **No host-project pollution.** SDD-027 is explicitly about NOT writing
   into a host repo's tree without explicit opt-in; the spec must encode
   this in its acceptance criteria.
-- **One feature, one session** (Article VII). F-06, F-07, F-08 each run in
-  their own fresh chat session. Do not collapse them into a single session
+- **One feature, one context-isolated unit** (Article VII). F-06, F-07, F-08
+  each run in their own fresh chat session OR EM-routed subagent dispatch
+  (both satisfy context isolation). Do not collapse them into a single session
   unless the owner explicitly approves a Sprint-5-style consolidated
-  execution; the default is three sessions.
+  execution; the default is three isolated units.
 
 ---
 

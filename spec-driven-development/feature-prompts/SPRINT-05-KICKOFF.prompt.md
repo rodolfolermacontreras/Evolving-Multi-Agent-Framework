@@ -91,8 +91,9 @@ host's `.github/`), unblocks future portability tests, and is self-contained
 - **No host-project pollution**: SDD-016 must respect the host repo's
   `.gitignore` and never overwrite a host's existing `.github/` content
   without explicit opt-in. The Architect spec must encode this.
-- **One feature, one session** (Article VII): F-03, F-04, F-05 each run in
-  their own fresh chat session.
+- **One feature, one context-isolated unit** (Article VII): F-03, F-04, F-05
+  each run in their own fresh chat session OR EM-routed subagent dispatch
+  (both satisfy context isolation).
 
 ---
 

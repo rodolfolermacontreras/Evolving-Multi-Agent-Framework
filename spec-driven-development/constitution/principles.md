@@ -1,7 +1,7 @@
 ---
-version: '1.3.0'
+version: '1.4.0'
 ratified: 2026-05-12
-last_amended: 2026-06-08
+last_amended: 2026-06-25
 ---
 
 # Framework Principles
@@ -93,13 +93,17 @@ a ledger row.
 
 **One feature, one session.** A direct corollary of the rule above: chat
 sessions are ephemeral context, not project state. Each in-flight feature
-SHOULD use its own dedicated Copilot session so context from one feature does
-not contaminate work on another. The Principal Executive Manager session
-stays high-level (routing, status, synthesis) and never absorbs feature
-implementation depth. When a session ends, the durable artifacts (specs,
-tasks, validation, ledger rows, session checkpoints under
-`spec-driven-development/sessions/`) carry the state forward -- not the chat
-history.
+SHOULD run in its own context-isolated unit -- either a fresh Copilot chat
+session OR an EM-routed subagent dispatch. Both satisfy the
+context-isolation property: they keep context from one feature from
+contaminating work on another. Neither is privileged over the other; pick
+whichever fits the work. The Principal Executive Manager session stays
+high-level (routing, status, synthesis) and never absorbs feature
+implementation depth -- and this corollary is not a license to cram
+multiple features into one undifferentiated session. When a session ends,
+the durable artifacts (specs, tasks, validation, ledger rows, session
+checkpoints under `spec-driven-development/sessions/`) carry the state
+forward -- not the chat history.
 
 ## Article VIII: Constitution Is Immutable Without An ADR
 

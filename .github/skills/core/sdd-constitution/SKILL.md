@@ -3,7 +3,7 @@ name: sdd-constitution
 description: "Use when starting any SDD workflow task, making architectural decisions, or validating that work aligns with project mission, principles, tech stack, and decision policies."
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 
@@ -18,7 +18,7 @@ Load this skill when:
 - Making architectural decisions (Level 1+ changes)
 - Validating feature specs or implementation plans
 - Resolving conflicts between requirements and project principles
-- Onboarding to the Day-to-Day Agent codebase
+- Onboarding to the host project's codebase
 
 Do NOT load when:
 - Working on non-SDD features (use standard git-workflow instead)

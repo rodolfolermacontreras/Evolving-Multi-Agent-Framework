@@ -1,7 +1,7 @@
 ---
-version: '1.0.0'
+version: '1.1.0'
 ratified: 2026-05-12
-last_amended: 2026-06-09
+last_amended: 2026-06-26
 ---
 
 # Roadmap
@@ -45,8 +45,8 @@ details live in backlog items.
 
 ### Phase 4: Extraction (2026-05-12)
 
-- [x] Migrated all 82 SDD files from the Day-to-Day Agent host repo to standalone repository
-- [x] Day-to-Day Agent host repo cleaned of SDD references
+- [x] Migrated all 82 SDD files from the origin host repo to standalone repository
+- [x] Origin host repo cleaned of SDD references
 - [x] This repository initialized with its own git history
 
 ---
@@ -59,10 +59,10 @@ lifecycle end-to-end on a real feature.
 - [x] `principles.md` generalized -- nine binding articles rewritten to describe framework rules, not host project rules
 - [x] Fleet ledger database (`ledger/fleet.db`) instantiated against the documented schema (done PI-2)
 - [x] PI-1 retrospective captures what worked and what needs adjustment
-- [ ] Constitution generalized: `mission.md`, `tech-stack.md`, `CONTEXT.md`, `roadmap.md` decoupled from Day-to-Day Agent specifics (deferred)
+- [ ] Constitution generalized: `mission.md`, `tech-stack.md`, `CONTEXT.md`, `roadmap.md` decoupled from origin-project specifics (deferred)
 - [ ] Article X validation contract and TDD gate deliverable planned for PI-1 (deferred)
 - [ ] Root `README.md` created (deferred to PI-4)
-- [ ] Day-to-Day-specific domain skills marked as examples (deferred to PI-4)
+- [ ] Origin-project-specific domain skills marked as examples (deferred to PI-4)
 - [ ] First pilot feature delivered through the full SDD lifecycle (done PI-2)
 - [ ] At least one slash command exercised end-to-end with a real worker dispatch (done PI-2)
 
@@ -75,13 +75,13 @@ lifecycle end-to-end on a real feature.
 - [x] Fleet batch size increased to 4 with parallel dispatch validated
 - [x] Schema validation lint for agent/skill/prompt frontmatter (SHIPPED 2026-05-16, SDD-006)
 - [ ] Specialization mechanic exercised: at least one generic worker earns a permanent identity through a domain skill pack (deferred)
-- [ ] Conflict-detection workflow validated against a real two-worker collision (deferred)
+- [ ] Serial CLARIFY/SPEC lock gate validated against a real two-worker collision (deferred; true file-overlap detector tracked as SDD-049)
 
 ---
 
 ## PI-3: Portability Validation (closed 2026-06-02)
 
-- [x] Bootstrap SDD on a second project with a different tech stack (Day-to-Day Agent brownfield bootstrap validates portability)
+- [x] Bootstrap SDD on a second project with a different tech stack (origin-project brownfield bootstrap validates portability)
 - [x] SDD process metrics baseline established (implicit via fleet ledger)
 - [ ] GENERALIZATION_SDD.md v1.0 published after second-project bootstrap (deferred)
 - [ ] Package as a GitHub template repo or scaffolding CLI (deferred to future PI)
@@ -117,21 +117,6 @@ lifecycle end-to-end on a real feature.
 
 ---
 
-## PI-6: Dashboard Reinvestment + Carryover Cleanup (closed 2026-06-26)
-
-- [x] Sprint 1 / Sprint 10: Dashboard parser fix + serve-mode auto-refresh -- SDD-040 (CLOSED locally 2026-06-10; stale `Active focus: azure-decommission` resolved, stdlib-only refresh)
-- [x] Sprint 2 / Sprint 11: Lifecycle pipeline + 4-card docs row + safeguarded drag-to-reorder -- SDD-036 (CLOSED 2026-06-24; ADR-017; 349 -> 412 tests)
-- [x] Sprint 3 / Sprint 12: Dispatches card + 4-pill dashboard health strip -- SDD-037 (CLOSED 2026-06-25 at `d417c66`; 412 -> 450 tests)
-- [x] Sprint 4 / Sprint 13: Final value sprint -- SDD-042 dashboard PI-label fix (`ac1ccf0`), SDD-041 OPEN-only Backlog drag-reorder Option A (`afbfe47`), SDD-039 Article VII wording + ADR-018 + principles.md 1.3.0 -> 1.4.0 (`699d8bb`) (CLOSED 2026-06-26)
-- [ ] SDD-038 aesthetic tokens -- DEFERRED to PI-7
-- [ ] SDD-034 content-shingle dedup upgrade -- DEFERRED to PI-7 (carried from PI-5)
-- [ ] PI-4 housekeeping (domain-skill annotations, GitHub Actions Node.js bump) -- DEFERRED to PI-7 (carried from PI-4/PI-5)
-- [ ] SDD-041 Option B reorder re-optimization, SDD-042 pill-nav, Current Sprint widget repoint, SDD-039 incidental "fresh session" wording cleanup -- DEFERRED to PI-7
-
-**PI-6 close decision: DONE-WITH-CARRYOVER.** Ratified by owner 2026-06-26 via Executive Manager (owner direction "yes, lets close this" / "yes to close"). All four planned PI-6 sprints closed with full validation contracts and owner-approved commit + push; six features shipped (SDD-040, SDD-036, SDD-037, SDD-042, SDD-041, SDD-039). Tests 337 -> 481 across the PI. The Scott UI patterns (lifecycle pipeline, docs cards, dispatches, health pills, working drag-reorder) are now functionally complete. No PI-6 commitment was loosened; the deferred items (SDD-038, SDD-034, PI-4 housekeeping, plus the Sprint 13 residuals) are explicit carry-forward to PI-7.
-
----
-
 ## Tech Debt Backlog
 
 These items are tracked and prioritized but not yet scheduled.
@@ -143,7 +128,7 @@ These items are tracked and prioritized but not yet scheduled.
 | F3 | Implement `cli/qa.py` -- two-stage review automation | M | P3 |
 | F4 | Implement `cli/retro.py` -- sprint retro generator | S | P3 |
 | F5 | Schema validator for agent/skill/prompt YAML frontmatter | M | P2 |
-| F6 | Replace or annotate Day-to-Day-specific domain skills | S | P1 |
+| F6 | Replace or annotate origin-project-specific domain skills | S | P1 |
 | F7 | Root `README.md` with quickstart and bootstrap pointer | S | DONE |
 | F8 | Fleet ledger schema migration scripts (versioned `ledger/migrations/`) | M | P3 |
 | F9 | GENERALIZATION_SDD.md v1.0 -- second-project battle-tested | L | P2 |

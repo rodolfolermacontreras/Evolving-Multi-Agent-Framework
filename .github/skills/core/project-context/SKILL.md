@@ -3,7 +3,7 @@ name: project-context
 description: "Use when starting any session, encountering unfamiliar terminology, making naming decisions, or updating shared project vocabulary. Ensures consistent terminology across all agents and artifacts."
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 
@@ -84,8 +84,8 @@ Update CONTEXT.md:
 **Supersedes**: "Task" (ambiguous as of 2026-05-20)
 
 ## User Task
-**Definition**: A todo item created by the user in the Day-to-Day dashboard.
-**Context**: Exposed via FastAPI /tasks endpoints and task board UI.
+**Definition**: A todo item created by the user in the host project's dashboard.
+**Context**: Exposed via the web framework's /tasks endpoints and task board UI.
 **Supersedes**: "Task" (ambiguous as of 2026-05-20)
 ```
 

@@ -4,7 +4,7 @@ description: "Use when adopting the SDD framework into a brownfield host repo vi
 argument-hint: "Which host repo path is the target, and which conflict mode (abort/backup/force)?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 

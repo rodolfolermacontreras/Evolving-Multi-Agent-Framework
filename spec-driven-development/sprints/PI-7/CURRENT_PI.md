@@ -9,7 +9,7 @@ sprint: PI-7
 
 # PI-7: Hardening + Orchestration Maturity
 
-- Status: **ACTIVE (launched 2026-06-26, owner-approved via Executive Manager).** Sprint 14 (PI-7 Sprint 1) CLOSED 2026-06-26 -- owner-approved commit + push; SDD-043/044/045 DONE; tests 481 -> 501; ADR-020 Accepted. Sprint 15 (PI-7 Sprint 2 -- "Make promises true") CLOSED 2026-06-26 -- owner-approved commit + push; SDD-046 (B-1/B-2/B-4) DONE; tests 501 -> 518; ADR-021 supersedes ADR-009. PI-7 remains ACTIVE and continues into Sprint 16 (PI-7 Sprint 3 -- "De-author", SDD-047 A-2/A-3/D-1/D-3). The PI-7 CLOSE is a separate owner-approved decision after Sprint 17.
+- Status: **ACTIVE (launched 2026-06-26, owner-approved via Executive Manager).** Sprint 14 (PI-7 Sprint 1) CLOSED 2026-06-26 -- owner-approved commit + push; SDD-043/044/045 DONE; tests 481 -> 501; ADR-020 Accepted. Sprint 15 (PI-7 Sprint 2 -- "Make promises true") CLOSED 2026-06-26 -- owner-approved commit + push; SDD-046 (B-1/B-2/B-4) DONE; tests 501 -> 518; ADR-021 supersedes ADR-009. Sprint 16 (PI-7 Sprint 3 -- "De-author") CLOSED 2026-06-26 -- owner-approved commit + push; SDD-047 (A-2/A-3/D-1/D-3) DONE; tests 518 -> 540; ADR-022 Accepted (constitution de-author). PI-7 remains ACTIVE and continues into Sprint 17 (PI-7 Sprint 4 -- "Maintainability + right-sizing", SDD-048 C-1/C-2/C-3/D-2). The PI-7 CLOSE is a separate owner-approved decision after Sprint 17.
 - Theme: Make the framework genuinely team-portable -- a teammate clones the
   repo, runs one setup command, and builds their own project the same day with
   no trace of the original author -- and fix the two-tier orchestration

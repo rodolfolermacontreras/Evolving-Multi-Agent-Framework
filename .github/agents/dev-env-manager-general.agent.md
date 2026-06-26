@@ -129,5 +129,5 @@ is assigned.
 
 ## First Dispatch Target
 Your first dispatch is the realistic host-link demo against a second project
-(likely the Day-to-Day Agent repo). That work is post-PI-5-Sprint-1 and
+(a second project). That work is post-PI-5-Sprint-1 and
 gives you the evidence to earn specialization on demand.

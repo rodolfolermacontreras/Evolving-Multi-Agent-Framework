@@ -467,6 +467,129 @@ class DependsOnParseHelper(unittest.TestCase):
 
     def test_inline_single_id(self):
         fm = schema_lint.parse_frontmatter(_spec_with_depends_on("depends_on: [SDD-018]"))
+        self.assertEqual(fm.get("depends_on"), "[SDD-018]")
+
+
+# ----------------------------------------------------------------------- #
+# T-047-11 (SDD-047 D-1) -- orphan-skill rule
+#
+# Every non-domain skill slug must be referenced at least once across
+# .github/agents, .github/prompts, and .github/instructions. domain/ skills
+# are reference implementations and are EXEMPT. Opt-in via --check-orphans so
+# the default scan() output stays byte-identical (existing tests unaffected).
+# ----------------------------------------------------------------------- #
+
+
+def _make_orphan_root(tmp: Path) -> Path:
+    root = tmp / "orphan-repo"
+    (root / ".github" / "agents").mkdir(parents=True)
+    (root / ".github" / "prompts").mkdir(parents=True)
+    (root / ".github" / "instructions").mkdir(parents=True)
+    (root / ".github" / "skills").mkdir(parents=True)
+    return root
+
+
+def _skill_body(slug: str) -> str:
+    return (
+        "---\n"
+        f"name: {slug}\n"
+        "description: A skill.\n"
+        "license: MIT\n"
+        "metadata:\n"
+        "  author: emf-framework\n"
+        "  version: '1.0'\n"
+        "---\n"
+        f"# {slug}\n"
+    )
+
+
+class OrphanSkillRule(unittest.TestCase):
+    """SDD-047 D-1 R-1..R-3 -- unreferenced (non-domain) skills are flagged."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
+        self.root = _make_orphan_root(Path(self._tmp.name))
+
+    def tearDown(self):
+        gc.collect()
+        self._tmp.cleanup()
+
+    def _write_skill(self, slug: str, sub: str = "") -> None:
+        base = self.root / ".github" / "skills"
+        d = (base / sub / slug) if sub else (base / slug)
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "SKILL.md").write_text(_skill_body(slug), encoding="utf-8")
+
+    def test_unreferenced_skill_is_flagged(self):
+        """R-1: a non-domain skill referenced nowhere is an orphan finding."""
+        self._write_skill("lonely-skill")
+        findings = schema_lint.check_orphan_skills(self.root)
+        self.assertTrue(
+            any("lonely-skill" in f.path and "orphan" in f.issue for f in findings)
+        )
+
+    def test_referenced_in_agent_not_flagged(self):
+        """R-1: a skill named in an agent file is not an orphan."""
+        self._write_skill("wired-skill")
+        write_agent(self.root, "owner-agent",
+                    "---\ndescription: a.\n---\n# Agent\n- wired-skill: does things\n")
+        findings = schema_lint.check_orphan_skills(self.root)
+        self.assertFalse(any("wired-skill" in f.path for f in findings))
+
+    def test_referenced_in_prompt_not_flagged(self):
+        """R-1: a skill named only in a prompt is not an orphan."""
+        self._write_skill("prompt-wired")
+        write_prompt(self.root, "use-it",
+                     "---\ndescription: p.\n---\nApply the prompt-wired skill.\n")
+        findings = schema_lint.check_orphan_skills(self.root)
+        self.assertFalse(any("prompt-wired" in f.path for f in findings))
+
+    def test_referenced_in_instruction_not_flagged(self):
+        """R-1: a skill named only in an instruction file is not an orphan."""
+        self._write_skill("instr-wired")
+        (self.root / ".github" / "instructions" / "x.instructions.md").write_text(
+            "---\ndescription: i.\n---\nSee instr-wired for details.\n", encoding="utf-8"
+        )
+        findings = schema_lint.check_orphan_skills(self.root)
+        self.assertFalse(any("instr-wired" in f.path for f in findings))
+
+    def test_domain_skill_is_exempt(self):
+        """R-2: domain/ reference skills are exempt even when unreferenced."""
+        self._write_skill("fastapi-routes", sub="domain")
+        findings = schema_lint.check_orphan_skills(self.root)
+        self.assertFalse(any("fastapi-routes" in f.path for f in findings))
+
+    def test_check_orphans_flag_off_by_default(self):
+        """R-3: default scan() does not run the orphan rule (byte-identical)."""
+        self._write_skill("lonely-skill")
+        # Default scan must not surface an orphan finding.
+        findings = schema_lint.scan(self.root)
+        self.assertFalse(any("orphan" in f.issue for f in findings))
+
+    def test_check_orphans_cli_flag_flags_orphan(self):
+        """R-3: --check-orphans surfaces the orphan and exits non-zero."""
+        self._write_skill("lonely-skill")
+        with_flag = subprocess.run(
+            [sys.executable, str(SCHEMA_LINT), "--repo-root", str(self.root),
+             "--check-orphans"],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(with_flag.returncode, 1)
+        self.assertIn("orphan", with_flag.stdout.lower())
+
+    def test_real_repo_has_zero_orphans(self):
+        """R-1 in practice: the live framework has every skill wired."""
+        findings = schema_lint.check_orphan_skills(REPO_ROOT)
+        if findings:
+            sample = "\n".join(f"  {f.path}: {f.issue}" for f in findings)
+            self.fail(f"{len(findings)} orphan skill(s):\n{sample}")
+
+
+class DependsOnParseHelperContinued(unittest.TestCase):
+    """T-036-02 (continued) -- parse_depends_on inline-list parsing."""
+
+    def test_inline_single_id_value(self):
+        fm = schema_lint.parse_frontmatter(_spec_with_depends_on("depends_on: [SDD-018]"))
         self.assertEqual(schema_lint.parse_depends_on(fm), ["SDD-018"])
 
     def test_inline_multiple_ids(self):

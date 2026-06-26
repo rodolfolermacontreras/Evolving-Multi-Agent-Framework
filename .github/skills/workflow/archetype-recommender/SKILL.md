@@ -4,7 +4,7 @@ description: "Use when the human says they're starting a new project (greenfield
 argument-hint: "What kind of project are you starting? (one sentence is enough)"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 

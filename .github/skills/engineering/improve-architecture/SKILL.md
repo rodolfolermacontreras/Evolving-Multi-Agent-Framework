@@ -4,7 +4,7 @@ description: "Use when identifying pattern violations, technical debt, or archit
 argument-hint: "What architecture issue or area should I improve?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 
@@ -95,7 +95,7 @@ Create Architecture Decision Record in `spec-driven-development/docs/ADR/`:
 **Decision levels** (from decision-policy.md):
 - **Level 0 (Trivial)**: Rename variable, extract helper. Proceed without approval.
 - **Level 1 (Module)**: Refactor single module, change API. Get Principal Architect approval.
-- **Level 2 (System)**: Change core abstraction (engine.py, llm.py). Get Principal Architect + PM approval.
+- **Level 2 (System)**: Change a core abstraction module (the orchestrator, the LLM client). Get Principal Architect + PM approval.
 - **Level 3 (Foundational)**: Change tech stack or principles. Get human approval + team review.
 
 **Approval process**:
@@ -113,7 +113,7 @@ Follow TDD discipline:
 2. Implement fix following ADR plan
 3. Refactor to clean patterns
 4. Update affected tests
-5. Run full suite (743+ baseline)
+5. Run full suite (recorded baseline)
 6. Commit with reference to ADR
 ```
 
@@ -159,7 +159,7 @@ Extract data aggregation into separate `BoardDataAggregator` class. Keep renderi
 2. Create agent/board_metrics.py with BoardMetrics class
 3. Refactor board.py to use aggregator
 4. Update tests to mock aggregator
-5. Verify baseline 743+ tests pass
+5. Verify the recorded test baseline passes
 
 ## Affected Modules
 - agent/board.py (refactor)

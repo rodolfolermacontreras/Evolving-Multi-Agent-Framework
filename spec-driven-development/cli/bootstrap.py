@@ -50,6 +50,25 @@ def today_iso() -> str:
     return datetime.date.today().isoformat()
 
 
+def load_project_config(root: Path) -> dict:
+    """Return the host project's identity config from ``project.config.json``.
+
+    The config surface (A-2) holds ``owner``, ``team``, and ``repo_url`` so the
+    framework's generic files never hardcode a personal name -- they trace to
+    config or to "the host project's owner". Returns an empty dict when the
+    file is absent or unreadable, so callers degrade gracefully on a fresh
+    clone. Stdlib-only (Article V).
+    """
+    config_path = root / "project.config.json"
+    if not config_path.is_file():
+        return {}
+    try:
+        data = json.loads(config_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         prog="bootstrap.py",
@@ -1152,10 +1171,14 @@ def run_doctor(root: Path, *, run_tests: bool = True) -> int:
         except sqlite3.Error as exc:
             checks.append(("ledger reachable", False, f"cannot query fleet.db: {exc}"))
 
-    # (b) schema_lint clean (framework checkout only).
+    # (b) schema_lint clean (framework checkout only). --check-orphans enforces
+    #     the SDD-047 D-1 lock: every non-domain skill must be wired to an
+    #     agent, prompt, or instruction.
     if is_framework:
         code, output = _run_check(
-            root, [str(root / "spec-driven-development" / "cli" / "schema_lint.py")]
+            root,
+            [str(root / "spec-driven-development" / "cli" / "schema_lint.py"),
+             "--check-orphans"],
         )
         checks.append(("schema_lint clean", code == 0,
                        "ok" if code == 0 else output.splitlines()[-1] if output else "failed"))
@@ -1165,8 +1188,8 @@ def run_doctor(root: Path, *, run_tests: bool = True) -> int:
     checks.append(("governance coherent", gov_ok,
                    "ok" if gov_ok else "; ".join(gov_findings)))
 
-    # (d) no origin tokens.
-    findings = origin_lint.scan_origin_tokens(root, list(origin_lint.DEFAULT_DENYLIST))
+    # (d) no origin tokens (config-aware tightened denylist: owner name + origin tokens).
+    findings = origin_lint.scan_origin_tokens(root, origin_lint.load_config_denylist(root))
     checks.append(("origin tokens absent", not findings,
                    "ok" if not findings else f"{len(findings)} token(s) found"))
 

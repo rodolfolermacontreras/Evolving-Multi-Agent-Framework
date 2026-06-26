@@ -7,7 +7,7 @@ description: >
   implementable as CSS custom properties and maintain WCAG 2.1 AA compliance.
 license: MIT
 metadata:
-  author: principal-ui-designer
+  author: emf-framework
   version: '1.0'
   origin: LESSON-007 (PI-3/S3 DEFER, shipped S4)
 ---

@@ -4,7 +4,7 @@ description: "Use when ending a feature session, closing a feature, hitting OWNE
 argument-hint: "Feature or sprint being reviewed, plus optional sanitized notes about friction or evidence."
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 

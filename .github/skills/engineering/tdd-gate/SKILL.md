@@ -4,7 +4,7 @@ description: "Use during spec compliance review. Mechanically checks a diff for 
 argument-hint: "Which diff or commit range should I check?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 

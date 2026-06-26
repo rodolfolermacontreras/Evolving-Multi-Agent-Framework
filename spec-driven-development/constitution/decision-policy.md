@@ -1,7 +1,7 @@
 ---
-version: '1.1.0'
+version: '1.2.0'
 ratified: 2026-05-12
-last_amended: 2026-06-03
+last_amended: 2026-06-26
 ---
 
 # Decision Policy
@@ -54,7 +54,7 @@ the shape of the public API. Examples:
 
 ## Level 2: Human Decision
 
-**Authority**: Rodolfo (human owner)
+**Authority**: The host project's owner (human)
 **Approval**: Explicit human approval required before implementation begins
 **Documentation**: Level-2 decision brief (see template below) submitted FIRST; on approval, an ADR is drafted that links back to the brief; a note is added to the relevant spec.
 

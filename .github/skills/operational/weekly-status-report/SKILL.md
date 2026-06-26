@@ -4,7 +4,7 @@ description: "Generate or update the weekly 1:1 status report for the Evolving M
 argument-hint: "Optionally specify the week date range, e.g. 'May 22-28, 2026'. Defaults to the current week."
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
   origin: PI-2 operational need (2026-05-21)
 ---
@@ -40,7 +40,7 @@ Gather ALL of the following before writing. Run these steps in order:
 ### Step 2 -- Git history
 
 ```powershell
-cd C:\Training\Projects\Evolving-Multi-Agent-Framework
+cd <your-repo-root>
 git log --oneline --after="YYYY-MM-DD" --before="YYYY-MM-DD" --format="%h %ad %s" --date=short
 ```
 
@@ -110,7 +110,7 @@ Use this exact structure for the new week section. Match the style of the existi
 
 ## Week of {Month} {start_day}-{end_day}, {year}
 
-Date: {Month} {end_day}, {year} | Owner: Rodolfo Lerma | Branch: master at {short_sha} ({total_commits} commits)
+Date: {Month} {end_day}, {year} | Owner: {owner} | Branch: master at {short_sha} ({total_commits} commits)
 
 ### Progress since last week ({Month} {prior_week_end_day})
 

@@ -13,7 +13,7 @@ A comprehensive framework for designing, building, and evaluating AI agents. Key
 | Capability | How We Use It |
 |-----------|---------------|
 | Gap Analysis Table | Map capability domains to coverage levels and identify improvement areas |
-| Agent Architecture Patterns | ReAct, Plan-Execute patterns for the Day-to-Day agent evaluation |
+| Agent Architecture Patterns | ReAct, Plan-Execute patterns for the host project's agent evaluation |
 | Subagent Coordination | Dispatching parallel explore agents for codebase analysis |
 | Prompt Engineering | Evaluating and improving LLM prompt templates in `agent/prompts/templates.py` |
 | Execution Planning | Phased improvement plan with dependency tracking |

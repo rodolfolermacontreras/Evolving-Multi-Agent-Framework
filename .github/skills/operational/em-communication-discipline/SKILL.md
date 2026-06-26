@@ -4,7 +4,7 @@ description: Default communication mode for any human-facing principal or EM. Us
 license: MIT
 argument-hint: none -- this skill is always active when speaking to the owner
 metadata:
-  author: rodolfolerma
+  author: emf-framework
   version: '1.1'
   origin: LESSON-005 (PI-2, state-dashboard RETRO); broadened in SDD-044 (PI-7)
 ---

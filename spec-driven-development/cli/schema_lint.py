@@ -1059,6 +1059,61 @@ def _spec_dir_relative_path(spec_dir: Path) -> str:
 
 
 # ---------------------------------------------------------------------------- #
+# Orphan-skill rule (SDD-047 D-1) -- opt-in via --check-orphans
+# ---------------------------------------------------------------------------- #
+
+# Reference dirs whose .md files may name a skill by slug.
+_ORPHAN_REF_DIRS = ("agents", "prompts", "instructions")
+
+
+def check_orphan_skills(repo_root: Path) -> list[Finding]:
+    """Flag non-domain skills that nothing references by slug (SDD-047 D-1).
+
+    A skill's slug is its containing directory name
+    (.github/skills/<...>/<slug>/SKILL.md). Skills under .github/skills/domain/
+    are reference implementations and are EXEMPT. The reference corpus is the
+    full text of every .md file under .github/{agents,prompts,instructions};
+    a skill is an orphan when its slug appears zero times in that corpus.
+
+    Opt-in only: scan() never runs this so default output stays byte-identical.
+    """
+    findings: list[Finding] = []
+    skills_dir = repo_root / ".github" / "skills"
+    if not skills_dir.is_dir():
+        return findings
+
+    # slug -> SKILL.md path, skipping domain/ reference skills.
+    slugs: dict[str, Path] = {}
+    for p in sorted(skills_dir.rglob("SKILL.md")):
+        rel = p.relative_to(skills_dir)
+        if rel.parts and rel.parts[0] == "domain":
+            continue
+        slugs[p.parent.name] = p
+    if not slugs:
+        return findings
+
+    github_dir = repo_root / ".github"
+    corpus_parts: list[str] = []
+    for sub in _ORPHAN_REF_DIRS:
+        d = github_dir / sub
+        if not d.is_dir():
+            continue
+        for f in d.rglob("*.md"):
+            corpus_parts.append(f.read_text(encoding="utf-8", errors="ignore"))
+    corpus = "\n".join(corpus_parts)
+
+    for slug in sorted(slugs):
+        if slug not in corpus:
+            findings.append(Finding(
+                path=str(slugs[slug]),
+                kind="skill",
+                issue=(f"orphan skill: '{slug}' not referenced by any agent, "
+                       "prompt, or instruction"),
+            ))
+    return findings
+
+
+# ---------------------------------------------------------------------------- #
 # Walk + scan
 # ---------------------------------------------------------------------------- #
 
@@ -1155,6 +1210,10 @@ def main(argv: list[str] | None = None) -> int:
                              "Ignored when positional paths are supplied.")
     parser.add_argument("--json", action="store_true",
                         help="Emit findings as JSON instead of human-readable text.")
+    parser.add_argument("--check-orphans", action="store_true",
+                        help="Also flag non-domain skills that no agent, prompt, "
+                             "or instruction references by slug (SDD-047 D-1). "
+                             "Off by default so standard scans stay byte-identical.")
     args = parser.parse_args(argv)
 
     explicit_paths: list[Path] = []
@@ -1177,6 +1236,10 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         findings = scan(root)
         scanned_root = root
+
+    if args.check_orphans:
+        orphan_root = Path(args.repo_root).expanduser().resolve()
+        findings = findings + check_orphan_skills(orphan_root)
 
     if args.json:
         print(render_json(findings))

@@ -4,7 +4,7 @@ description: "Use when breaking a plan into atomic, executable tasks. Produces t
 argument-hint: "Which implementation plan should I break into tasks?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 
@@ -156,7 +156,7 @@ Manual verification:
 **Classification**: AFK
 
 ### Description
-Create FastAPI POST endpoint /calendar/sync that calls GoogleCalendarClient.fetch_events(), stores results in calendar_events table, and returns count of events synced.
+Create a web-framework POST endpoint /calendar/sync that calls GoogleCalendarClient.fetch_events(), stores results in calendar_events table, and returns count of events synced.
 
 ### Acceptance Test
 ```python

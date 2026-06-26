@@ -4,7 +4,7 @@ description: Run a structured clarification session for a spec or feature reques
 argument-hint: "What spec or feature request should I clarify?"
 ---
 
-You are running the **Clarify** command for the Day-to-Day Agent SDD workflow.
+You are running the **Clarify** command for the SDD workflow.
 
 ## Workflow Phase
 - Primary phase: **Phase 4 - Clarify**

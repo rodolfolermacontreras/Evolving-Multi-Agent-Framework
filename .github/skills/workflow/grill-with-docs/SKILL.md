@@ -4,7 +4,7 @@ description: "Same as grill-me but ALSO updates CONTEXT.md with new terms/decisi
 argument-hint: "What decision, feature, or vocabulary should I grill and document?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 

@@ -4,7 +4,7 @@ description: Generate a feature specification from a clarified request.
 argument-hint: "What feature do you want to spec?"
 ---
 
-You are running the **Spec** command for the Day-to-Day Agent SDD workflow.
+You are running the **Spec** command for the SDD workflow.
 
 ## Workflow Phase
 - Primary phase: **Phase 5 - Specify**

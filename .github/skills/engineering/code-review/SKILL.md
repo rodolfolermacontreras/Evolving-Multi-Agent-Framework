@@ -4,7 +4,7 @@ description: "Use when reviewing implementation. Two-stage process: Stage 1 chec
 argument-hint: "Which file, PR, or commit range should I review?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 

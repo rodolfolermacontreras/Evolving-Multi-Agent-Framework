@@ -4,7 +4,7 @@ description: Validate an implementation against the spec, plan, and task criteri
 argument-hint: "Which implementation should I validate?"
 ---
 
-You are running the **QA** command for the Day-to-Day Agent SDD workflow.
+You are running the **QA** command for the SDD workflow.
 
 ## Workflow Phase
 - Primary phase: **Phase 8 - Implement / Review**
@@ -57,7 +57,7 @@ Review as relevant:
 
 ## Guardrails
 - Be strict about spec compliance before style opinions.
-- Mention the 743-test baseline when regression scope matters.
+- Mention the test baseline (recorded at sprint start) when regression scope matters.
 - If the spec itself is weak or contradictory, say so explicitly.
 
 ## Ledger Close (required before DONE)

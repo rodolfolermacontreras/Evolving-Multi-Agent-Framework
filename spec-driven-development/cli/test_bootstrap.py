@@ -709,5 +709,39 @@ class TestDoctorPrintsNewCheckLines(unittest.TestCase):
         self.assertIn(rc, (0, 1))
 
 
+# --------------------------------------------------------------------------- #
+# SDD-047 A-2 -- project.config.json reader (owner/team/repo_url as config)
+# --------------------------------------------------------------------------- #
+
+
+class TestLoadProjectConfig(unittest.TestCase):
+    """A-2 R-1: project.config.json is the single config surface for identity."""
+
+    def test_framework_config_returns_owner(self) -> None:
+        config = bootstrap.load_project_config(bootstrap.framework_root())
+        self.assertEqual(config.get("owner"), "Rodolfo Lerma")
+
+    def test_framework_config_has_team_and_repo_url(self) -> None:
+        config = bootstrap.load_project_config(bootstrap.framework_root())
+        self.assertIn("team", config)
+        self.assertIn("repo_url", config)
+        self.assertTrue(config["repo_url"].startswith("https://"))
+
+    def test_missing_config_returns_empty_dict(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            config = bootstrap.load_project_config(Path(tmp))
+            self.assertEqual(config, {})
+
+    def test_reads_arbitrary_config(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "project.config.json").write_text(
+                json.dumps({"owner": "Jane Doe", "team": "T", "repo_url": "x"}),
+                encoding="utf-8",
+            )
+            config = bootstrap.load_project_config(root)
+            self.assertEqual(config["owner"], "Jane Doe")
+
+
 if __name__ == "__main__":
     unittest.main()

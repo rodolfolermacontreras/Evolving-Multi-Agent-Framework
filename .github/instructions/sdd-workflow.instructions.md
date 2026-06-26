@@ -2,7 +2,7 @@
 applyTo: "spec-driven-development/**"
 ---
 
-When editing files under `spec-driven-development/`, treat this directory as the process and governance layer for the Day-to-Day Agent's spec-driven development framework.
+When editing files under `spec-driven-development/`, treat this directory as the process and governance layer for the host project's spec-driven development framework.
 
 ## Core Purpose
 - `spec-driven-development/` owns framework artifacts, not production application code.

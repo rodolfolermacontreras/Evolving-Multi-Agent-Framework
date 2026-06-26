@@ -4,7 +4,7 @@ description: Analyze codebase impact, dependencies, and blast radius for a propo
 argument-hint: "What proposed change should I analyze?"
 ---
 
-You are running the **Analyze** command for the Day-to-Day Agent SDD workflow.
+You are running the **Analyze** command for the SDD workflow.
 
 ## Workflow Phase
 - Supports **Phases 5-7**: Spec, Plan, and Tasks.
@@ -18,7 +18,7 @@ Review as relevant:
 1. Modules and files likely to change
 2. Shared helpers and reused patterns
 3. Routing and API impact
-4. Template, HTMX, CSS, or frontend impact
+4. Template, frontend, CSS, or rendering impact
 5. Data storage or schema implications
 6. Test surface and regression risk
 7. Observability, privacy, or security implications

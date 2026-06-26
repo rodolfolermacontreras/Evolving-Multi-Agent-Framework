@@ -4,7 +4,7 @@ description: "Use when transforming a raw feature idea into a structured specifi
 argument-hint: "What raw feature idea should I turn into a spec?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.1'
 ---
 

@@ -4,7 +4,7 @@ description: "Use when processing new feature ideas from backlog. Applies RICE s
 argument-hint: "What feature idea or backlog item should I triage?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 

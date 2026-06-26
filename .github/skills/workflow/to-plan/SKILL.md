@@ -4,7 +4,7 @@ description: "Use when transforming a completed spec into an implementation plan
 argument-hint: "Which completed spec should I turn into a plan?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 
@@ -74,7 +74,7 @@ Do NOT load when:
 
    After Phase 1:
    - [ ] All models create/migrate successfully
-   - [ ] Test suite passes (baseline 743)
+   - [ ] Test suite passes (recorded baseline)
    - [ ] No new lint errors
 
    After Phase 2:
@@ -178,7 +178,7 @@ Do NOT load when:
 
 After Phase 1:
 - [ ] calendar_events table exists in DB
-- [ ] Test suite passes (baseline 743)
+- [ ] Test suite passes (recorded baseline)
 
 After Phase 2:
 - [ ] /calendar/sync returns 200 with events

@@ -4,7 +4,7 @@ description: "Use when a constitution file is being amended. Scans all skills, p
 argument-hint: "Which constitution file is being amended?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.1'
 ---
 

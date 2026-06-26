@@ -1130,3 +1130,95 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - Notes: Credibility sprint. The ledger is now genuinely true (logging is a required close step, dogfooded on Sprint 15 itself), the TDD gate and DONE-completeness rules block on violation instead of being prose, and one CI workflow runs the doctor set for everyone on push/PR. Three subagent dispatches (F-38 architect, F-39 sw-dev, F-40 sw-dev) ran with 100% success; the first two are logged in the ledger.
 - Next: SPRINT-16 kickoff (PI-7 Sprint 3 -- De-author: SDD-047 A-2/A-3/D-1/D-3)
 - Reported up to project EM: YES (2026-06-26)
+
+---
+
+## Sprint 16 -- PI-7 Sprint 3 / De-author (SDD-047 A-2/A-3/D-1/D-3)
+
+- Sprint kickoff: [../feature-prompts/SPRINT-16-KICKOFF.prompt.md](../feature-prompts/SPRINT-16-KICKOFF.prompt.md)
+- Lead: Sprint Executive Manager (Level 0, routes; reports up to project EM at close)
+- Prerequisite: verified PASS 8/8 technical at HEAD `0becb36` -- Sprint 15 CLOSED at `44d546d`/`db98dbd`; tests 518/2; schema lint exit 0; doctor 7/7 (ex-tests); SDD-047 OPEN/S16; SDD-048 stays S17; audit source present; live B-1/B-2/B-4 gates in force.
+- Owner start approval: delegated 2026-06-26 ("work autonomously and make good decisions"). Hard constraint still binds: NO push without recorded owner pre-push approval -> this session is LOCAL ONLY.
+- Sequence: F-41 (design) -> F-42 (implement + QA) -> F-43 (close)
+
+### F-41 -- sdd-047 de-author design (CLARIFY -> SPEC -> PLAN -> TASKS) -- DONE (design-only; local)
+
+- Date: 2026-06-26
+- Owner: Sprint Executive Manager (drove the design in autonomous execution; PM + Architect roles)
+- Commits: none in F-41; no commit or push performed (design artifacts only).
+- Scope honored: DESIGN ONLY. No agent/skill/INSTRUCTIONS/README/config/CLI/constitution edit. SDD-047 carried through CLARIFY -> SPEC -> PLAN -> TASKS with per-item validation contracts.
+- Spec dir: `spec-driven-development/specs/2026-06-26-sdd-047-de-author/`
+- Files created: 7 docs/governance artifacts:
+  - `specs/2026-06-26-sdd-047-de-author/clarify.md`
+  - `specs/2026-06-26-sdd-047-de-author/spec.md`
+  - `specs/2026-06-26-sdd-047-de-author/plan.md`
+  - `specs/2026-06-26-sdd-047-de-author/tasks.md`
+  - `specs/2026-06-26-sdd-047-de-author/validation-A2.md`
+  - `specs/2026-06-26-sdd-047-de-author/validation-A3.md`
+  - `specs/2026-06-26-sdd-047-de-author/validation-D1.md`
+  - `specs/2026-06-26-sdd-047-de-author/validation-D3.md`
+  - `docs/ADR/022-de-author-constitution.md` (NEW; status proposed -- Level-2, owner-gated)
+- Tests: 518 passed, 2 skipped (no change; docs/spec artifacts only, no code). EM-reverified.
+- Schema lint: clean (exit 0; one fix applied -- `clarify.md` type `clarify` -> `clarification`). EM-reverified.
+- Doctor: green 7/7 (ex-tests) with the new artifacts present.
+- Per-item SDD-IDs assigned (SDD-047 umbrella): A-2, A-3, D-1, D-3 -- each with its own validation contract (mirrors SDD-046 B-1/B-2/B-4 pattern).
+- CLARIFY outcomes (kickoff defaults adopted): Q-A `project.config.json` (owner/team/repo_url; A-6 reads it) -- chosen over `constitution/owner.md` to avoid a Level-2 surface; Q-B replace-not-delete origin examples, relocate `engine.py` table to host archetype, README origin story = labeled history; Q-C wire `tdd-gate` first + per-skill wire/delete list + schema_lint orphan-skill rule; Q-D rename in `GENERALIZATION_SDD.md` + `constitution/roadmap.md`, file SDD-049 for a real detector; Q-E ESCALATED (Level-2 constitution).
+- Stale-check (DA-Evidence Discipline, verified against live HEAD `0becb36`): personal-name hits remain in `INSTRUCTIONS.md`, `.github/copilot-instructions.md`, the PM agent, ~15 skill `author:` frontmatter, `weekly-status-report` + `pi-planning` skill bodies, and `constitution/mission.md` + `constitution/decision-policy.md`. D-3 over-claim in `constitution/roadmap.md` L78 + `GENERALIZATION_SDD.md` L772/L900. No `project.config.json` yet. No audit item stale enough to drop.
+- **DE-1 (scope sharpen, surfaced -- not loosened):** three target lines live under `constitution/**` -- `mission.md` (A-2), `decision-policy.md` (A-2), `roadmap.md` (D-3). These are **Level-2** edits requiring ADR-022 + recorded owner approval + a constitution version bump. ADR-022 is drafted (proposed). The constitution lines still must be clean for SDD-047 to close -- the delta splits each item into a Level-0/1 portion (proceeds in F-42) and a Level-2 portion (owner-gated).
+- OWNER-ATTENTION (ESCALATION, MEDIUM): SDD-047 cannot be stamped DONE without the Level-2 constitution de-author (ADR-022). Owner is unavailable. Recommended path (Option 1): land the Level-0/1 portions in F-42, leave the three constitution lines + final close for owner approval. SDD-047 stays OPEN; no false close; no push.
+- NOT performed (per design-only + no-push): no commit, no push, no implementation, no BACKLOG DONE, no constitution edit, ADR-022 left proposed.
+- Next: F-42 implements the Level-0/1 portions of A-2/A-3/D-1/D-3 with real-run evidence per the four validation contracts (config surface, origin scrub, wire-or-delete skills + schema_lint orphan rule, GENERALIZATION_SDD rename, file SDD-049); F-42 dogfoods the B-1 ledger gate. The Level-2 constitution edits (T-047-13) + Sprint 16 close (F-43) wait for owner approval.
+
+### Owner approval (post-F-41)
+
+- 2026-06-26: Owner replied "approved" to the F-41 report. This ACCEPTS ADR-022 (the Level-2 constitution de-author) and grants pre-push approval to implement, close, and push SDD-047 per the recommended Option 1 path. The Sprint 16 header's "LOCAL ONLY" line above predates this approval; from F-42 on, the constitution edits are authorized and commit + push are approved.
+
+### F-42 -- sdd-047 de-author implement + QA -- DONE
+
+- Date: 2026-06-26
+- Owner: Sprint Executive Manager (routing + independent green re-verify at close); principal-software-developer (implementation, EM-routed subagent dispatch -- Article VII context isolation; dispatch rows 14-17 in the ledger).
+- Commits: <Sprint 16 close commit on master; pushed under owner approval>
+- Ledger dogfood (B-1): dispatch rows 14-17 (T-047-01/06/11/13) logged then marked `success`; decision row 3 records the Level-2 ADR-022 acceptance (decider "Rodolfo Lerma (owner)"). `doctor` current-PI check: PI-7 = 6 rows.
+- Scope honored: de-authored GENERIC instruction surfaces only (`.github/agents/**`, `.github/skills/**`, `.github/prompts/**`, `.github/instructions/**`, `INSTRUCTIONS.md`, `README.md`, `copilot-instructions.md`, `constitution/**`, `GENERALIZATION_SDD.md`, `archetypes/**`). Historical `specs/**` bodies, `sprints/**`, retros, and prior ADRs were NOT touched.
+- A-2 (owner -> config) DONE: created `project.config.json` (owner/team/repo_url) + stdlib reader in `bootstrap.py`; `cli/origin_lint.py` gained `load_config_denylist()` (RECOMMENDED + ORIGIN_TOKENS + config owner-name, regex-escaped); `doctor`'s origin-token check uses it; skill `author:` frontmatter neutralized to `emf-framework` across the skill library; personal-name skill bodies (`weekly-status-report`, `pi-planning`, `testing-conventions`) de-authored; PM agent traces value to "the host project's owner".
+- A-3 (scrub origin leakage) DONE: origin tech tokens (Day-to-Day, FastAPI, HTMX, World State, Outlander, 743, engine.py) removed from the generic agents/skills/prompts/instructions or replaced with stack-neutral examples; the `engine.py` lazy-singleton table relocated to `archetypes/python-web-service/README.md`; the README + `copilot-instructions.md` + `principles.md` host-article origin story wrapped in labeled `<!-- example: ... -->` history blocks (preserved as history, exempt from the lint). `domain/` skills are EXEMPT_DIRS (labeled EXAMPLE reference skills).
+- D-1 (wire-or-delete 10 dead skills) DONE: all 10 WIRED, 0 deleted -- `tdd-gate`/`diagnose`/`host-integration-symlink`/`respect-existing` -> SW Dev; `to-plan` -> Architect; `grill-with-docs` -> PM; `stakeholder-pressure-defense`/`weekly-status-report`/`lesson-capture`/`session-self-review` -> EM. New `schema_lint --check-orphans` rule (+ doctor wiring) fails when a shipped skill is referenced by zero agents/prompts; real-repo orphan count = 0.
+- D-3 (rename over-claim) DONE: 3 reframes in `GENERALIZATION_SDD.md` (conflict detection -> serial CLARIFY/SPEC gate, matching `fleet.py _scan_lock_state`) + the `constitution/roadmap.md` line renamed; honest backlog item **SDD-049** (P3) filed for a true file-overlap detector.
+- Level-2 constitution (ADR-022 Accepted): `mission.md` 1.0.0 -> 1.1.0; `decision-policy.md` 1.1.0 -> 1.2.0; `roadmap.md` 1.0.0 -> 1.1.0; `principles.md` host-article block wrapped as labeled history (labeling-only, no rule/version change). `docs/ADR/022-de-author-constitution.md` Status -> Accepted.
+- Files changed: `project.config.json` (new); `cli/origin_lint.py`, `cli/schema_lint.py`, `cli/bootstrap.py` (+ `cli/test_origin_lint.py` new, `cli/test_schema_lint.py`, `cli/test_bootstrap.py`); all 10 agent files; ~35 SKILL.md; 14 prompt files; 2 instruction files; `INSTRUCTIONS.md`; `README.md`; `GENERALIZATION_SDD.md`; `archetypes/python-web-service/README.md`; `constitution/{mission,decision-policy,roadmap,principles}.md`; `backlog/BACKLOG.md` (SDD-049 filed); `docs/ADR/022-...md`; the SDD-047 spec dir (4 validation contracts checked, status done).
+- EM independent verification (DA-Evidence Discipline -- real runs, not subagent claims):
+  - `python -m pytest spec-driven-development/ --tb=line -q` -> **540 passed, 2 skipped** (518 -> 540).
+  - `python spec-driven-development/cli/schema_lint.py` -> exit 0.
+  - `python spec-driven-development/cli/origin_lint.py` -> clean (0 tokens).
+  - `python spec-driven-development/cli/bootstrap.py doctor --skip-tests` -> 7/7 PASS, exit 0; with a re-added "Rodolfo Lerma" probe in `.github/` doctor FAILS exit 1 ("origin tokens absent: 1 token(s) found") -- proves A-2 R-5 enforcement; probe removed.
+  - Article X: `TestS1FootprintLockGuard` 3/3 PASS (locked render fns byte-identical).
+- Validation: SDD-047 per-item A-2 (R-1..R-6), A-3 (R-1..R-5), D-1 (R-1..R-3), D-3 (R-1..R-3) all checked with real-run evidence; R-A2-6 / R-A3-5 / R-D3-2 (Level-2) landed under accepted ADR-022.
+- Next: F-43 close.
+
+### Sprint 16 -- CLOSED
+
+- Date: 2026-06-26
+- Owner: Sprint Executive Manager (lead, reports up to project EM); Sprint EM drove F-41 design; principal-software-developer (subagent) owned F-42 implementation; Sprint EM owned the F-43 close + independent re-verify
+- Features completed: F-41, F-42, F-43
+- Commits: <Sprint 16 close commit SHA>
+- Tests: 518 -> 540 passed, 2 skipped (>= 518 required)
+- Schema lint: clean (exit 0)
+- Validation: SDD-047 per-item A-2 6/6 + A-3 5/5 + D-1 3/3 + D-3 3/3 REQUIRED checked with real-run evidence + manual checks
+- A-2 config surface: `project.config.json` (owner/team/repo_url); A-6 lint reads it via `load_config_denylist`; doctor enforces (re-added name -> exit 1)
+- A-3 scrub: generic files carry 0 origin tokens (origin_lint clean); examples replaced/relocated (engine.py table -> archetype), not deleted; README/copilot-instructions/principles origin story = labeled history
+- D-1 skills: all 10 WIRED (0 deleted) -- tdd-gate/diagnose/host-integration-symlink/respect-existing -> SW Dev; to-plan -> Architect; grill-with-docs -> PM; stakeholder-pressure-defense/weekly-status-report/lesson-capture/session-self-review -> EM; new `schema_lint --check-orphans` rule + doctor wiring (orphan count 0)
+- D-3 rename: "conflict detection" -> "serial CLARIFY/SPEC gate" in GENERALIZATION_SDD.md + constitution/roadmap.md; honest backlog item filed for true file-overlap detector: YES (SDD-049, P3)
+- Historical record preserved: YES (PI-1..PI-6 specs/sprints/retros/prior ADRs untouched)
+- A-6 origin/identity lint: 0 hits in generic files (.github/ + constitution/)
+- Per-item SDD-IDs assigned for SDD-047: A-2, A-3, D-1, D-3
+- Level-2 constitution (ADR-022 Accepted, owner-approved): mission.md 1.0.0->1.1.0, decision-policy.md 1.1.0->1.2.0, roadmap.md 1.0.0->1.1.0; principles.md host-article block labeled as history (labeling-only)
+- Live gates satisfied: B-1 ledger dogfood (rows 14-17 success + decision row 3; PI-7 = 6 rows), B-2 (TDD gate + DONE-completeness PASS), B-4 CI green (doctor entrypoint)
+- Article X lock: held (TestS1FootprintLockGuard 3/3 PASS)
+- PI-7 status: ACTIVE -> continues into Sprint 17
+- SDD-047: DONE (A-2 config identity + A-3 origin scrub + D-1 wire/delete skills + D-3 rename)
+- Deferred to later PI-7 sprints: SDD-048 (S17); SDD-035 out-of-band; SDD-049 (true file-overlap detector, P3, filed)
+- Out-of-scope untracked artifacts left UNSTAGED (as in Sprint 14): `backlog/display-order.json`, `ledger/reorder-audit.jsonl` (SDD-041 reorder runtime artifacts) -- not part of this close
+- Owner ratification: APPROVED FOR COMMIT + PUSH (owner, 2026-06-26: "approved" = ACCEPT ADR-022 + APPROVE commit + push)
+- Notes: The de-author sprint. The framework no longer carries the fingerprints of its author or origin project on any generic surface a teammate reads as instruction: owner/identity is a config value, origin examples are stack-neutral or relocated to the archetype, the origin story is preserved only as labeled history, every shipped skill is wired to an agent/prompt (none orphaned), and no doc claims a "conflict detection" the code does not perform. The A-6 lint now reads the owner name from config and doctor fails on a re-added personal name. F-42 ran as an EM-routed subagent dispatch (Article VII isolation) with the Sprint EM independently re-running every gate at close (DA-Evidence Discipline) rather than trusting the subagent's report. The one Level-2 surface (three constitution files) landed under owner-accepted ADR-022.
+- Next: SPRINT-17 kickoff (PI-7 Sprint 4 -- Maintainability + right-sizing: SDD-048 C-1/C-2/C-3/D-2)
+- Reported up to project EM: YES (2026-06-26)

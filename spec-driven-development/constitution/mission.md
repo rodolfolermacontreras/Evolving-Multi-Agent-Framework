@@ -1,7 +1,7 @@
 ---
-version: '1.0.0'
+version: '1.1.0'
 ratified: 2026-05-12
-last_amended: 2026-05-12
+last_amended: 2026-06-26
 ---
 
 # Mission
@@ -14,8 +14,7 @@ lifecycle.
 
 ## Owner
 
-Rodolfo Lerma, Senior Data Scientist (L63)
-WWIC Central Analytics / Design & Analytics, Microsoft
+See `project.config.json` (`owner`, `team`, `repo_url`) for the host project's owner.
 
 ## Vision
 
@@ -76,8 +75,11 @@ their own non-negotiables on top via their own `.github/copilot-instructions.md`
 
 ## Origin
 
-The framework was extracted from the Day-to-Day Agent project (a personal AI work
-management dashboard built with FastAPI/HTMX) on 2026-05-12 after proving its value
-inside that codebase. It is now a standalone initiative. Day-to-Day Agent remains a
-useful reference implementation and example host project but is no longer the framework's
-target.
+The framework was extracted from its origin host project on 2026-05-12 after proving its
+value inside that codebase. It is now a standalone, project-agnostic initiative.
+
+<!-- example: origin-history (the framework's origin project; narrative only, not framework rules)
+The original host was the Day-to-Day Agent project (a personal AI work management dashboard
+built with FastAPI/HTMX). It remains a useful reference implementation and example host
+project but is no longer the framework's target.
+-->

@@ -4,7 +4,7 @@ description: "Use when a stakeholder, owner, or agent pressures validation, appr
 argument-hint: "Pressure request, affected feature/gate, missing evidence, and urgency."
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 

@@ -4,13 +4,13 @@ description: "Use when creating branches, setting up worktrees, merging features
 argument-hint: "What git operation, branch, or worktree do you need help with?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 
 # Git Workflow
 
-Enforces git conventions for the Day-to-Day Agent parallel development framework: master is read-only production, integration/improvements is the dev track, feature branches live in ../wt-{name} worktrees.
+Enforces git conventions for the host project's parallel development framework: master is read-only production, integration/improvements is the dev track, feature branches live in ../wt-{name} worktrees.
 
 ## When to Use
 
@@ -120,7 +120,7 @@ git branch -d feature/f2.1-calendar-sync
 - Committing directly to master - NEVER. Master is read-only production.
 - Committing directly to integration/improvements - All work goes through feature branches.
 - Creating worktrees without feature branches - Each worktree needs its own branch.
-- Forgetting to run tests before merge - Baseline 743 tests must all pass.
+- Forgetting to run tests before merge - the recorded test baseline must all pass.
 - Merging feature branches into master - Features merge to integration/improvements only.
 - Not cleaning up worktrees after merge - Leaves orphan directories.
 - Creating worktrees in subdirectories of Day_to_Day - They must be siblings at ../wt-{name}.

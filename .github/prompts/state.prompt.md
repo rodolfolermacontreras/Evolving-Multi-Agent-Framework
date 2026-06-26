@@ -3,7 +3,7 @@ name: state
 description: Rebuild and summarize the executive state view for the current SDD workflow.
 ---
 
-You are running the **State** command for the Day-to-Day Agent SDD workflow.
+You are running the **State** command for the SDD workflow.
 
 ## Workflow Phase
 - Can be used at **any phase**.

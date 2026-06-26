@@ -2,7 +2,7 @@
 applyTo: "**/wt-*/**"
 ---
 
-When working inside a worktree branch, assume you are executing isolated feature work for the Day-to-Day Agent.
+When working inside a worktree branch, assume you are executing isolated feature work for the host project.
 
 ## Worktree Discipline
 - A worktree maps to exactly one feature branch and one primary task stream.

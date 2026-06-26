@@ -4,7 +4,7 @@ description: "Use when implementing new features or fixing bugs. Enforces test-d
 argument-hint: "What feature or bug should I implement with TDD?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 
@@ -159,7 +159,7 @@ def get_board_data():
 
 # Step 1: Ensure existing tests pass
 # ..\Day_to_Day\.venv\Scripts\python.exe -m pytest tests\ -v --tb=short
-# Result: 743 passed
+# Result: baseline tests passed
 
 # Step 2: Write test for new helper (if complex logic)
 def test_safe_api_call_handles_timeout():
@@ -184,7 +184,7 @@ def safe_api_call(func):
 
 # Step 4: Refactor existing code to use helper (tests still pass)
 
-# Step 5: Run ALL tests (must maintain 743 baseline)
+# Step 5: Run ALL tests (must maintain the recorded baseline)
 # Result: 744 passed (added 1 test)
 
 # Step 6: Commit
@@ -201,4 +201,4 @@ def safe_api_call(func):
 - Batch committing ("test + feat" in one commit) - lose atomic history
 - Testing implementation details instead of behavior - brittle tests
 - Not refactoring when tests are green - accumulates tech debt
-- Letting test count decrease - violates 743 baseline rule
+- Letting test count decrease - violates the baseline rule

@@ -217,12 +217,14 @@ testing baselines tied to its current state, deployment rules tied to its
 infrastructure. Host articles are numbered starting from H1 to distinguish
 them from framework articles (I-XII).
 
+<!-- example: host-article history (origin project, retained as illustration; not framework rules)
 The Day-to-Day Agent host project's articles -- the original nine that lived
 in this file before generalization -- are an example of host articles. They
 described that project's specific rules (Engine singleton, World State
 contract, 743-test baseline, FastAPI route discipline, etc.). Those articles
 remain valid for the Day-to-Day Agent project; they do not belong here in the
 framework's constitution.
+-->
 
 Reference: see `spec-driven-development/GENERALIZATION_SDD.md` for the
 procedure a host project follows to bootstrap its own articles.

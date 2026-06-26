@@ -3,7 +3,7 @@ name: retro
 description: Generate a sprint retrospective with evidence, themes, and action items.
 ---
 
-You are running the **Retro** command for the Day-to-Day Agent SDD workflow.
+You are running the **Retro** command for the SDD workflow.
 
 ## Workflow Phase
 - Primary phase: **Phase 9 - Sprint Review and Retro**

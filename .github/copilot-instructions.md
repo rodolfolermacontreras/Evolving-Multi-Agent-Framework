@@ -7,7 +7,7 @@ Read this file first on every session start. This is the authoritative context f
 ## Project Identity
 
 - **Name**: Evolving Multi-Agent Framework (working title: Spec-Driven Development / SDD)
-- **Owner**: Rodolfo Lerma, Senior Data Scientist (L63), Microsoft WWIC Central Analytics
+- **Owner**: see `project.config.json` (the host project's owner)
 - **Type**: Standalone framework -- NOT tied to any specific application
 - **Goal**: A portable, replicable multi-agent development system that can be carried to ANY project. One human developer orchestrates a team of AI agents through a structured spec-driven lifecycle with quality gates, traceability, and separation of concerns.
 - **Status**: Framework scaffolded (v0.1). Core assets created. No pilot run yet. Ready for generalization and first real-world test.
@@ -16,6 +16,7 @@ Read this file first on every session start. This is the authoritative context f
 
 ## Origin Story
 
+<!-- example: origin-history (the framework's origin project; narrative only, not host rules)
 This framework was born inside the [Day-to-Day Agent](https://github.com/rodolfolermacontreras/day-to-day-microsoft) project -- a personal AI-powered work management dashboard (Python/FastAPI/HTMX). As that project grew to 743+ tests and 20+ feature branches, the ad-hoc "chat with AI and paste code" approach hit scaling limits:
 
 - Context overload across architecture, implementation, and testing
@@ -24,6 +25,7 @@ This framework was born inside the [Day-to-Day Agent](https://github.com/rodolfo
 - No quality gates between idea and production
 
 The solution was to formalize the development process itself: a **team of specialized AI agents** with defined roles, constrained scopes, and explicit handoff protocols. The framework was developed inside the Day-to-Day repo during May 2026, then extracted on 2026-05-12 to become a standalone initiative.
+-->
 
 ---
 
@@ -166,9 +168,11 @@ The framework plan was created using a dual-LLM approach:
 
 ### Phase 4: Extraction (completed 2026-05-12)
 
+<!-- example: origin-history (extraction from the origin repo; narrative only, not host rules)
 - Migrated all 82 SDD files from the Day-to-Day repo to this standalone repository
 - Day-to-Day repo cleaned of all SDD references
 - This repo initialized with its own git history
+-->
 
 ---
 
@@ -176,15 +180,15 @@ The framework plan was created using a dual-LLM approach:
 
 ### Critical: No Pilot Run
 
-The framework has never been used to deliver a real feature. All assets are scaffolded but untested in practice. The originally planned pilot was "docs drift cleanup" in the Day-to-Day project. Now that this is standalone, the pilot needs to be redefined -- ideally a feature within this framework itself (dogfooding).
+The framework has never been used to deliver a real feature. All assets are scaffolded but untested in practice. The originally planned pilot was "docs drift cleanup" in the origin project. Now that this is standalone, the pilot needs to be redefined -- ideally a feature within this framework itself (dogfooding).
 
 ### Specific Gaps
 
-1. **Constitution files reference Day-to-Day project specifics** -- `mission.md`, `tech-stack.md`, `CONTEXT.md`, and `roadmap.md` all contain Day-to-Day-specific content (FastAPI, HTMX, Engine singleton, etc.). These need to be **generalized** to describe the framework itself, not the original host project.
+1. **Constitution files reference origin-project specifics** -- `mission.md`, `tech-stack.md`, `CONTEXT.md`, and `roadmap.md` all contain origin-project-specific content (a web framework, a hypermedia layer, an orchestrator singleton, etc.). These need to be **generalized** to describe the framework itself, not the original host project.
 
-2. **FINAL_MERGED_PLAN.md references Day-to-Day** -- The 85KB plan was written for implementing SDD inside the Day-to-Day project. Section references to `agent/`, `templates/`, specific test files, etc. are Day-to-Day-specific.
+2. **FINAL_MERGED_PLAN.md references the origin project** -- The 85KB plan was written for implementing SDD inside the origin project. Section references to `agent/`, `templates/`, specific test files, etc. are origin-project-specific.
 
-3. **Domain skills are Day-to-Day-specific** -- `fastapi-routes`, `htmx-frontend`, `pytest-runner` skills under `.github/skills/domain/` are specific to the Day-to-Day tech stack. They serve as examples of how domain skills work, but should be either removed or clearly marked as examples.
+3. **Domain skills are origin-project-specific** -- `fastapi-routes`, `htmx-frontend`, `pytest-runner` skills under `.github/skills/domain/` are specific to the origin project's tech stack. They serve as examples of how domain skills work, but should be either removed or clearly marked as examples.
 
 4. **CLI scripts are scaffolds only** -- `cli/fleet.py`, `cli/qa.py`, `cli/retro.py`, `cli/state_builder.py` and `cli/common/*.py` are empty scaffolds. They need implementation.
 
@@ -204,7 +208,7 @@ The framework has never been used to deliver a real feature. All assets are scaf
 
 ### Immediate: Generalize the Framework
 
-1. **Decouple from Day-to-Day** -- Update `constitution/mission.md`, `constitution/tech-stack.md`, `CONTEXT.md`, and `constitution/roadmap.md` to describe the framework itself (not a FastAPI dashboard). Keep the Day-to-Day references as an "origin story" appendix or example.
+1. **Decouple from the origin project** -- Update `constitution/mission.md`, `constitution/tech-stack.md`, `CONTEXT.md`, and `constitution/roadmap.md` to describe the framework itself (not the origin project's stack). Keep the origin-story references as an "origin story" appendix or example.
 
 2. **Create a root README.md** -- Explain what this framework is, who it is for, how to bootstrap it on a new project.
 

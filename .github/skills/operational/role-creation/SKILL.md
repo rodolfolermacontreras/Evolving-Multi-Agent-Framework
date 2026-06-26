@@ -4,7 +4,7 @@ description: "Use during /hire. Knows the agent file templates, agents.json rost
 argument-hint: "Which role and mode (generic | specialist)?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 # Role Creation
@@ -41,7 +41,7 @@ description: "Use when dispatching <role> work in the <domain> domain to the pro
 argument-hint: "Dispatch brief for <domain> work"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 

@@ -38,7 +38,7 @@ and a constitution amendment per Article VIII.
 - Authority:
   - Level 1 for visual decisions (palette, type scale, layout, motion, accessibility approach)
   - Level 1 for information architecture decisions
-  - Level 2 (human) for any new UI runtime dependency (HTMX, Alpine, React, CSS frameworks)
+  - Level 2 (human) for any new UI runtime dependency (a frontend runtime library, an interaction layer, or a CSS framework)
   - Level 2 (human) for any decision that breaks AA accessibility
 - Communication style: precise, evidence-based, no menus, no emojis (per Rule 1)
 

@@ -4,7 +4,7 @@ description: "Use during any phase when something happens that suggests the fram
 argument-hint: "What did you observe and what change does it suggest?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 

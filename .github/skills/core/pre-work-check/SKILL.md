@@ -3,7 +3,7 @@ name: pre-work-check
 description: "Use when proposing, accepting, or authorizing any new feature, spec, or sprint task. Forces a cross-check against spec-driven-development/exec/work-index.md so principals do not duplicate shipped features or introduce work that conflicts with in-flight features."
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 

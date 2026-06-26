@@ -8,7 +8,7 @@ A portable, replicable multi-agent development system for spec-driven software d
 
 The Evolving Multi-Agent Framework is a structured development system where one human developer orchestrates a team of AI agents through a complete software lifecycle -- from IDEA to DONE -- with quality gates, full traceability, and separation of concerns at every phase. It is not a runtime or library you import; it is a set of Markdown files, YAML schemas, agent definitions, composable skills, and conventions that operate inside VS Code with GitHub Copilot.
 
-The framework defines four Principal agents (Executive Manager, Product Manager, Architect, Software Developer) who handle strategy, and N Worker agents (Developer, UX Designer, QA Engineer, Data Scientist, and any role created on demand via `/hire`) who handle tactics. Workers are constrained to 1-3 files per task. Every implementation goes through a two-stage review: spec compliance first, then code quality. Fleet dispatch enables parallel execution of up to 4 independent tasks with automatic conflict detection.
+The framework defines four Principal agents (Executive Manager, Product Manager, Architect, Software Developer) who handle strategy, and N Worker agents (Developer, UX Designer, QA Engineer, Data Scientist, and any role created on demand via `/hire`) who handle tactics. Workers are constrained to 1-3 files per task. Every implementation goes through a two-stage review: spec compliance first, then code quality. Fleet dispatch enables parallel execution of up to 4 independent tasks with file-overlap conflict checks.
 
 Skills are composable, single-purpose Markdown files with YAML frontmatter that any agent can load on demand. The framework ships with 28+ skills across five categories (core, workflow, engineering, operational, domain) and is designed so that host projects add their own domain skills without modifying the framework itself.
 
@@ -95,7 +95,16 @@ The dashboard is deployed to Azure Container Apps via GitHub Actions (OIDC authe
 
 ## Origin story
 
-This framework was born inside the [Day-to-Day Agent](https://github.com/rodolfolermacontreras/day-to-day-microsoft) project -- an AI-powered personal work management system built with Python, FastAPI, HTMX, and SQLite. As the agent team and process matured, the framework outgrew its host. On 2026-05-12, all 82 SDD files were extracted into this standalone repository. The framework has since been validated back on Day-to-Day as a brownfield bootstrap (PI-3), proving portability across tech stacks.
+This framework was extracted from its origin host project on 2026-05-12, when all
+82 SDD files were moved into this standalone repository. The original host was a
+personal, AI-powered work management application; as the agent team and process
+matured, the framework outgrew it. The framework has since been validated back on
+that origin project as a brownfield bootstrap (PI-3), proving portability across
+tech stacks.
+
+*This section is historical narrative only; it does not define any framework rule.
+See `project.config.json` for the current host project's owner, and
+`spec-driven-development/constitution/mission.md` for the full origin record.*
 
 ## Inspirations
 

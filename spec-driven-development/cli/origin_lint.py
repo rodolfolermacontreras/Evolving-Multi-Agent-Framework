@@ -60,10 +60,37 @@ RECOMMENDED_DENYLIST = DEFAULT_DENYLIST + (
     r"[A-Za-z]:\\Dev\\",
 )
 
+# Origin-project tokens (SDD-047 / A-3). These name the framework's origin
+# project (Day-to-Day Agent) and its stack. They are legitimate only inside a
+# labeled ``<!-- example: ... -->`` history block (exempt) or in the historical
+# record (specs/**, sprints/**, docs/** -- not scanned). A fully-generalized
+# host folds these into the tightened denylist so they cannot leak into a
+# generic agent, skill, or constitution file.
+ORIGIN_TOKENS = (
+    r"Day-to-Day",
+    r"FastAPI",
+    r"HTMX",
+    r"World State",
+    r"Outlander",
+    r"\b743\b",
+)
+
 # Relative directories scanned for origin tokens.
 SCAN_DIRS = (
     Path(".github"),
     Path("spec-driven-development") / "constitution",
+)
+
+# Directories exempt from the origin-token scan (SDD-047 / A-3, "generic
+# scope"). The domain skill library is a deliberately stack-specific set of
+# EXAMPLE reference skills (their descriptions begin with "EXAMPLE"); they
+# illustrate how a host wires its own stack and legitimately name a concrete
+# framework (e.g. a web framework, a frontend library). Scrubbing their stack
+# tokens would destroy the reference value (R-A3-4 no concept loss), so they
+# are excluded from the generic-scope lint -- mirroring the orphan-skill
+# exemption in schema_lint.
+EXEMPT_DIRS = (
+    Path(".github") / "skills" / "domain",
 )
 
 # Text file suffixes scanned. Binary and generated artifacts are skipped.
@@ -107,8 +134,55 @@ def load_denylist(path: Path | None) -> list[str]:
     return data
 
 
+def _read_owner_name(root: Path) -> str:
+    """Return the ``owner`` field from ``project.config.json`` ('' if absent).
+
+    Degrades silently to an empty string when the config file is missing,
+    unreadable, malformed, or lacks a string ``owner`` value -- the lint must
+    never crash on a host that has not populated the config surface.
+    """
+    config_path = root / "project.config.json"
+    try:
+        data = json.loads(config_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return ""
+    if isinstance(data, dict):
+        owner = data.get("owner", "")
+        if isinstance(owner, str):
+            return owner.strip()
+    return ""
+
+
+def load_config_denylist(root: Path) -> list[str]:
+    """Return a config-aware tightened denylist for a generalized host.
+
+    Combines the recommended stricter patterns (home paths, project roots,
+    ``engine.py``) with the origin-project tokens (A-3) and the host owner's
+    personal name read from ``project.config.json`` (A-2 R-5). The owner name
+    is regex-escaped so a re-added personal name in any generic file fails the
+    lint. A missing or unreadable config degrades to the token denylist with
+    no owner-name pattern (no crash).
+    """
+    patterns = list(RECOMMENDED_DENYLIST) + list(ORIGIN_TOKENS)
+    owner = _read_owner_name(root)
+    if owner:
+        patterns.append(re.escape(owner))
+    return patterns
+
+
 def _iter_text_files(root: Path) -> list[Path]:
-    """Return scanned text files under the framework's SCAN_DIRS."""
+    """Return scanned text files under the framework's SCAN_DIRS.
+
+    Files under EXEMPT_DIRS (the labeled EXAMPLE domain skill library) are
+    excluded from the generic-scope scan.
+    """
+    exempt_bases = [root / rel for rel in EXEMPT_DIRS]
+
+    def _is_exempt(path: Path) -> bool:
+        return any(
+            path == base or base in path.parents for base in exempt_bases
+        )
+
     files: list[Path] = []
     for rel in SCAN_DIRS:
         base = root / rel
@@ -116,6 +190,8 @@ def _iter_text_files(root: Path) -> list[Path]:
             continue
         for path in sorted(base.rglob("*")):
             if path.is_file() and path.suffix.lower() in TEXT_SUFFIXES:
+                if _is_exempt(path):
+                    continue
                 files.append(path)
     return files
 

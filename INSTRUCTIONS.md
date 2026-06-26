@@ -2,7 +2,7 @@
 
 You are an AI agent (Copilot CLI, Claude Code, Cursor, or similar) starting a session in this repository. Read this file first, then follow the order below.
 
-This repo is the **Evolving Multi-Agent Framework** — a portable spec-driven development system. Owner: Rodolfo Lerma. Repo: https://github.com/rodolfolermacontreras/Evolving-Multi-Agent-Framework
+This repo is the **Evolving Multi-Agent Framework** — a portable spec-driven development system. Owner and repo metadata live in `project.config.json` at the repo root.
 
 ---
 

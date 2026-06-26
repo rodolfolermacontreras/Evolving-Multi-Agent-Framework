@@ -4,7 +4,7 @@ description: "Use when ending a session that another session (or agent) will pic
 argument-hint: "What will the next session be used for?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 

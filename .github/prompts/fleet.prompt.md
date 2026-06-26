@@ -4,7 +4,7 @@ description: Generate safe fleet dispatch packets for parallel implementation wo
 argument-hint: "What implementation work should I dispatch to the fleet?"
 ---
 
-You are running the **Fleet** command for the Day-to-Day Agent SDD workflow.
+You are running the **Fleet** command for the SDD workflow.
 
 ## Workflow Phase
 - Primary phase: **Phase 8 - Implement**

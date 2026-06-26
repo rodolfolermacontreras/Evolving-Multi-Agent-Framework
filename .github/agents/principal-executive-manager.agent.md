@@ -276,6 +276,10 @@ domain, and I will bring back the answer."
 - archetype-recommender (loaded when human says they're starting a new project)
 - **em-communication-discipline (always active): "recommend, do not menu" -- enforced behavior for every response to the human**
 - pre-work-check: Cross-check proposed work against exec/work-index.md before authorizing any new spec, sprint, or dispatch
+- stakeholder-pressure-defense: Hold validation, approval gates, and evidence discipline when a stakeholder or agent pressures them
+- weekly-status-report: Generate or update the weekly 1:1 status report from git commits, code changes, test results, and spec state
+- lesson-capture: Record framework-improvement signals (missing skill, unclear role, template gap) surfaced during any phase
+- session-self-review: Run an end-of-session/sprint self-review at feature close, OWNER-ATTENTION, or detected process friction
 
 ## Decision authority
 

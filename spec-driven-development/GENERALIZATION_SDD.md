@@ -563,7 +563,7 @@ In the solo model:
 When 2-5 people share the framework:
 - **Backlog ownership**: One person owns BACKLOG.md. Others contribute to IDEAS.md.
 - **Spec reviews**: Cross-review between team members BEFORE AI-driven code review.
-- **Fleet coordination**: The ledger (fleet.db) prevents two people from dispatching workers to the same files.
+- **Fleet coordination**: The ledger (fleet.db) records every dispatch, and the serial CLARIFY/SPEC gate (`fleet.py` `_scan_lock_state`) enforces one feature at a time through the clarify and spec phases. Avoiding same-file dispatch within a batch is still a manual discipline (assign explicit per-worker file scopes) -- there is no automated file-overlap detector (see SDD-049).
 - **CONTEXT.md**: Becomes a team alignment tool. Review it at the start of each PI.
 - **Chatmode sharing**: Any team member can use any chatmode. The chatmodes are roles, not people.
 
@@ -769,7 +769,7 @@ These are failure modes observed or anticipated during SDD development. Each ant
 
 **What happens**: A worker agent given free reign modifies files outside its assigned scope. It "helpfully" refactors a shared utility while implementing a feature, breaking another worker's concurrent changes.
 
-**Why it breaks SDD**: The fleet coordination model depends on workers staying within their assigned file scope. Full access defeats conflict detection.
+**Why it breaks SDD**: The fleet coordination model depends on workers staying within their assigned file scope. Conflict avoidance is a manual discipline (explicit per-worker file scopes), not an automated detector -- full access removes the only safeguard.
 
 **Fix**: Every agent brief must include an explicit `Files IN scope` and `Files OUT of scope` list. Workers must be instructed: "If you need to modify a file outside your scope, STOP and report to Principal SW Dev."
 
@@ -897,7 +897,7 @@ SDD is designed to grow incrementally. Do not attempt to implement everything at
 
 **What the MCP server exposes**:
 - `sdd_dispatch_batch`: Create dispatch packets for a sprint batch
-- `sdd_check_conflicts`: Run pre-dispatch conflict detection
+- `sdd_check_lock_state`: Report the serial CLARIFY/SPEC gate state before dispatch (`fleet.py` `_scan_lock_state`)
 - `sdd_query_ledger`: Query fleet.db for status, metrics, history
 - `sdd_compose_prompt`: Build a runtime agent prompt from base + skills + context
 - `sdd_update_state`: Regenerate `exec/state.md`

@@ -4,7 +4,7 @@ description: Ask one Socratic clarification question at a time and recommend an 
 argument-hint: "What plan or feature should I grill you on?"
 ---
 
-You are running the **Grill** command for the Day-to-Day Agent SDD workflow.
+You are running the **Grill** command for the SDD workflow.
 
 ## Workflow Phase
 - Primary phase: **Phase 4 - Clarify**

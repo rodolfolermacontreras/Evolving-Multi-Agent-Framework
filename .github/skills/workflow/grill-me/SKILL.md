@@ -4,7 +4,7 @@ description: "Use when scope is ambiguous, acceptance criteria are weak, user im
 argument-hint: "What plan or feature do you want me to grill you on?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 

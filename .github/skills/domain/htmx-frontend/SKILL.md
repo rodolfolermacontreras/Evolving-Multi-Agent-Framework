@@ -4,7 +4,7 @@ description: "EXAMPLE (Day-to-Day Agent host project). Use when working with HTM
 argument-hint: "What HTMX template, component, or UI flow should I work on?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
   status: example
   origin: day-to-day-agent

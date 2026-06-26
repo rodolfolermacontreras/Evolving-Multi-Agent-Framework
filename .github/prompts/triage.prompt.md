@@ -4,7 +4,7 @@ description: Classify incoming work by priority, autonomy, and next SDD phase.
 argument-hint: "What idea or backlog item should I triage?"
 ---
 
-You are running the **Triage** command for the Day-to-Day Agent SDD workflow.
+You are running the **Triage** command for the SDD workflow.
 
 ## Workflow Phase
 - Primary phase: **Phase 1 - Backlog Grooming**

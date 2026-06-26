@@ -4,7 +4,7 @@ description: "Use when dispatching parallel workers. Checks conflict matrix (6 l
 argument-hint: "What work should I coordinate across parallel agents?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 
@@ -35,7 +35,7 @@ Before dispatching, verify no conflicts:
 | 0 | Independent files | routes/a.py vs routes/b.py | Safe - dispatch |
 | 1 | Same file, different functions | board.py::fn1 vs board.py::fn2 | Caution - review diffs before merge |
 | 2 | Same function | board.py::get_data() | UNSAFE - serialize |
-| 3 | Shared global state | Both modify engine.py | UNSAFE - serialize |
+| 3 | Shared global state | Both modify the core orchestrator module | UNSAFE - serialize |
 | 4 | Database schema changes | Both alter same table | UNSAFE - coordinate |
 | 5 | Breaking API changes | Both change same endpoint signature | UNSAFE - coordinate |
 ```

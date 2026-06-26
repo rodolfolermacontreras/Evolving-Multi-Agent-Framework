@@ -4,7 +4,7 @@ description: "EXAMPLE (Day-to-Day Agent host project). Use when creating FastAPI
 argument-hint: "What FastAPI route or endpoint should I work on?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
   status: example
   origin: day-to-day-agent

@@ -4,7 +4,7 @@ description: "Use when debugging failures or unexpected behavior. Workflow: repr
 argument-hint: "What failure, error, or unexpected behavior should I diagnose?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 
@@ -144,7 +144,7 @@ def sync_calendar():
 # Run full test suite to ensure fix doesn't break anything
 ..\Day_to_Day\.venv\Scripts\python.exe -m pytest tests\ -v --tb=short
 
-# Baseline must remain 743+
+# Baseline must not decrease
 ```
 
 ## Examples

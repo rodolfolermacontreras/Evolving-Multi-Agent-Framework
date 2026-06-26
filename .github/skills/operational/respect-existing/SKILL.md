@@ -4,7 +4,7 @@ description: "Use during any worker dispatch in a brownfield host project. Const
 argument-hint: "Which file or scope are you currently working in?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 

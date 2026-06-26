@@ -4,7 +4,7 @@ description: Start implementing a task using the SDD worker and TDD workflow.
 argument-hint: "Which task should I implement?"
 ---
 
-You are running the **Implement** command for the Day-to-Day Agent SDD workflow.
+You are running the **Implement** command for the SDD workflow.
 
 ## Workflow Phase
 - Primary phase: **Phase 8 - Implement**
@@ -43,7 +43,7 @@ Implementation is not done until one of these is true:
 - The relevant validation-contract checkboxes are marked complete and backed by passing test output or confirmed manual checks.
 - The task's `[NO-TEST-NEEDED]` justification is documented and accepted by the spec-compliance reviewer.
 
-If production code changed without a corresponding test-file change and no accepted `[NO-TEST-NEEDED]` justification exists, stop and report that the IMPLEMENT gate fails.
+If production code changed without a corresponding test-file change and no accepted `[NO-TEST-NEEDED]` justification exists, stop and report that the IMPLEMENT gate fails. Apply the `tdd-gate` skill to mechanically check the diff for test-first compliance before declaring the gate passed.
 
 ## Output Format
 ```markdown

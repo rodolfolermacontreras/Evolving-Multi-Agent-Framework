@@ -4,7 +4,7 @@ description: "EXAMPLE (Day-to-Day Agent host project). Use when running tests in
 argument-hint: "Which pytest target or failure should I run or diagnose?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
   status: example
   origin: day-to-day-agent

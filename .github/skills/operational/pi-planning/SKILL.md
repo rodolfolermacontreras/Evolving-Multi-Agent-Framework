@@ -4,7 +4,7 @@ description: "Use for PI planning ceremony: review backlog, define 3-5 PI object
 argument-hint: "What backlog, objective, or PI planning input should I use?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.1'
 ---
 
@@ -105,7 +105,7 @@ Total: 8 SP
 ### 5. Set Capacity
 
 **Factors**:
-- **Team size**: 1 developer (for Day-to-Day)
+- **Team size**: 1 developer (example)
 - **Availability**: Holidays, PTO, meetings
 - **Velocity**: Historical average (from past sprints)
 
@@ -140,7 +140,7 @@ Write `CURRENT_PI.md` to `spec-driven-development/sprints/PI-{N}/CURRENT_PI.md`:
 # PI-{N}: {Theme}
 
 **Duration**: YYYY-MM-DD to YYYY-MM-DD (6 weeks)
-**Team**: Rodolfo Lerma (L63, WWIC Central Analytics)
+**Team**: {owner from project.config.json}
 
 ## PI Objectives
 
@@ -193,7 +193,7 @@ Write `CURRENT_PI.md` to `spec-driven-development/sprints/PI-{N}/CURRENT_PI.md`:
 - All PI objectives met (3/3)
 - Velocity: 24-28 SP delivered
 - Tech debt: < 10 items remaining
-- Test coverage: 743+ tests passing
+- Test coverage: the recorded test baseline passing
 
 ## Notes
 
@@ -208,7 +208,7 @@ Write `CURRENT_PI.md` to `spec-driven-development/sprints/PI-{N}/CURRENT_PI.md`:
 # PI-1: Automation & Integration
 
 **Duration**: 2026-05-22 to 2026-07-03 (6 weeks)
-**Team**: Rodolfo Lerma
+**Team**: {owner}
 
 ## PI Objectives
 
@@ -277,7 +277,7 @@ Write `CURRENT_PI.md` to `spec-driven-development/sprints/PI-{N}/CURRENT_PI.md`:
 - All 3 PI objectives met
 - Velocity: 24-28 SP delivered
 - Zero P1 bugs carried over
-- Test baseline: 743+ tests passing
+- Test baseline: the recorded test baseline passing
 
 ## Notes
 

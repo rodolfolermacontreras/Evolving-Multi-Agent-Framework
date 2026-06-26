@@ -4,7 +4,7 @@ description: "Use when executing a task from the task list. Follows TDD loop, se
 argument-hint: "Which task from the task list should I implement?"
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.0'
 ---
 
@@ -59,7 +59,7 @@ Follow test-first discipline (see tdd skill for details):
 Before committing, check:
 
 - [ ] All task acceptance criteria met
-- [ ] All tests pass (including baseline 743)
+- [ ] All tests pass (including the recorded baseline)
 - [ ] No lint errors
 - [ ] Error handling complete (try/except, user-friendly messages)
 - [ ] Edge cases handled (null, empty, boundary)

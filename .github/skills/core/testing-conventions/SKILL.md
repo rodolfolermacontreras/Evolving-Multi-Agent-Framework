@@ -1,15 +1,15 @@
 ---
 name: testing-conventions
-description: "Use when writing tests, debugging test failures, or setting up test isolation. Enforces pytest patterns: tmp_path, patched_settings, MockLLMClient, factory helpers, and 743-test baseline."
+description: "Use when writing tests, debugging test failures, or setting up test isolation. Enforces pytest patterns: tmp_path, patched_settings, MockLLMClient, factory helpers, and the recorded test baseline."
 license: MIT
 metadata:
-  author: rodolfolermacontreras
+  author: emf-framework
   version: '1.1'
 ---
 
 # Testing Conventions
 
-Enforces pytest patterns for the Day-to-Day Agent: tmp_path isolation, patched_settings fixture, MockLLMClient, factory helpers, and the 743-test baseline that must never decrease.
+Enforces pytest patterns for the host project: tmp_path isolation, patched_settings fixture, MockLLMClient, factory helpers, and the recorded test baseline that must never decrease.
 
 ## When to Use
 
@@ -87,7 +87,7 @@ def test_quick_log(mock_load):
 
 ### Test Count Baseline
 
-Current baseline: **743 tests** across 36 files. This number must NEVER decrease.
+Current baseline: the test count recorded at sprint start. This number must NEVER decrease.
 
 ```powershell
 # Run full suite - must all pass

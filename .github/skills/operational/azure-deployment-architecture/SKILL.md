@@ -4,7 +4,7 @@ description: Reference patterns for deploying the framework's user-facing surfac
 license: MIT
 argument-hint: none -- this skill is always active when speaking as the Cloud Security Architect
 metadata:
-  author: rodolfolerma
+  author: emf-framework
   version: '1.0'
   origin: SDD-007 cloud-dashboard design exploration (2026-05-16)
 ---

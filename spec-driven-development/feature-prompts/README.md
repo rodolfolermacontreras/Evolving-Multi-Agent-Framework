@@ -242,6 +242,40 @@ DONE-completeness), B-4 CI. SDD-048 (S4) is a later PI-7 sprint and must not be
 pulled in. Stdlib-only (Article V); respect the Article X locked render
 functions. PI-7 CLOSE is a separate owner-approved decision taken after Sprint 17.
 
+### Sprint 17 -- PI-7 Sprint 4 / Maintainability + right-sizing (SDD-048 -- C-1/C-2/C-3/D-2) -- FINAL PI-7 sprint
+
+| Order | File | Owner | Status |
+|-------|------|-------|--------|
+| 0 | [SPRINT-17-KICKOFF.prompt.md](SPRINT-17-KICKOFF.prompt.md) | Sprint Executive Manager (lead) | READY (gated on Sprint 16 close at `e93862d`) |
+
+Prerequisite: **Sprint 16 must be CLOSED at `e93862d`** with SDD-047 (and its
+A-2/A-3/D-1/D-3 per-item IDs) marked DONE in BACKLOG, PI-7 ACTIVE
+([`../sprints/PI-7/CURRENT_PI.md`](../sprints/PI-7/CURRENT_PI.md)) and naming
+Sprint 17 as the final sprint, tests at or above **540 passed / 2 skipped**,
+schema lint + origin lint clean, and `doctor` (7/7) + CI green. Sprint 17 is the
+**fourth and FINAL PI-7 sprint** and ships **one epic feature**: SDD-048
+(Maintainability + right-sizing -- **C-1** split the 3082-line `state_builder.py`
+god-module into modules behind the existing test suite (behavior identical, one
+extraction per commit, no function > ~120 lines), **C-2** record the
+stdlib-vs-templating decision for the dashboard renderer as an ADR (**OWNER
+FORK** -- default: stay stdlib-only), **C-3** replace the hardcoded grandfather
+date `ARTICLE_XI_CUTOVER = "2026-06-08"` with a config/derived value, **D-2** add
+the lightweight-spec path Article VI promises -- one combined doc for <5-file
+features without weakening the Article X validation lock; spec source
+[`../docs/Temp/EMF-HARDENING-PLAN.md`](../docs/Temp/EMF-HARDENING-PLAN.md) Part C
++ D-2). **The #1 design risk is the C-1 / Article X tension**: five
+`state_builder.py` functions (`render_html` + the four load_*) are Article X
+locked; the default approach is to refactor AROUND them and keep
+`TestS1FootprintLockGuard` GREEN -- a worker NEVER silently touches a locked
+function; moving/rewriting one is an Article X re-baseline (ADR + owner approval,
+Level-2). Sprint 17 is **led by the Sprint Executive Manager** agent (reports up
+to the project EM at close; cannot create sprints/PIs -- suggest-only). The live
+PI-7 gates apply: B-1 mandatory-ledger close gate (dogfood Sprint 17's own
+dispatches), B-2 blocking checks (TDD gate + DONE-completeness), B-4 CI.
+Stdlib-only (Article V) unless the owner accepts the C-2 dependency. **Closing
+Sprint 17 does NOT close PI-7** -- Sprint 17 produces a PI-7 close-readiness
+report, and the PI-7 CLOSE is a separate owner-approved decision taken afterward.
+
 ---
 
 ## Shared onboarding

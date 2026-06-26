@@ -191,6 +191,30 @@ SDD-046 (S2), SDD-047 (S3), and SDD-048 (S4) are later PI-7 sprints and must not
 be pulled in. Stdlib-only (Article V); respect the Article X locked render
 functions. PI-7 CLOSE is a separate owner-approved decision taken after Sprint 17.
 
+### Sprint 15 -- PI-7 Sprint 2 / Make promises true (SDD-046 -- ledger + checks + CI)
+
+| Order | File | Owner | Status |
+|-------|------|-------|--------|
+| 0 | [SPRINT-15-KICKOFF.prompt.md](SPRINT-15-KICKOFF.prompt.md) | Sprint Executive Manager (lead) | READY (gated on Sprint 14 close + push at `ecd13b3` / head `7fe1e39`) |
+
+Prerequisite: **Sprint 14 must be closed and pushed at `ecd13b3`** (backfill head
+`7fe1e39`) with SDD-043/044/045 marked DONE in BACKLOG, PI-7 ACTIVE
+([`../sprints/PI-7/CURRENT_PI.md`](../sprints/PI-7/CURRENT_PI.md)), tests at or
+above 481 -> **501 passed / 2 skipped**, and schema lint clean. Sprint 15 is the
+**second PI-7 sprint** and ships **one epic feature**: SDD-046 (Make promises
+true -- **B-1** make the ledger true, **B-2** turn high-payoff rules into
+blocking checks, **B-4** one GitHub Actions CI workflow running the `doctor` set;
+spec source
+[`../docs/Temp/EMF-HARDENING-PLAN.md`](../docs/Temp/EMF-HARDENING-PLAN.md) Part
+B). The B-1 fork is **owner-decided (2026-06-26): MAKE IT REAL** -- mandatory
+dispatch logging at close, NOT retract the claim; CLARIFY only refines HOW.
+Sprint 15 is **led by the Sprint Executive Manager** agent (the sprint-scoped EM
+from SDD-043 / ADR-020), which reports up to the project EM at close and cannot
+create sprints/PIs (suggest-only). SDD-047 (S3) and SDD-048 (S4) are later PI-7
+sprints and must not be pulled in. Stdlib-only (Article V); respect the Article X
+locked render functions. PI-7 CLOSE is a separate owner-approved decision taken
+after Sprint 17.
+
 ---
 
 ## Shared onboarding

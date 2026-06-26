@@ -3,7 +3,7 @@ id: feature-prompts-index
 type: index
 status: active
 owner: principal-executive-manager
-updated: 2026-06-25
+updated: 2026-06-26
 ---
 
 # Feature Prompts -- Index
@@ -170,6 +170,26 @@ PI-4 housekeeping are **deferred to PI-7 hardening** and must not be pulled in.
 Stdlib-only (Article V; vanilla JS drag, no framework); respect the Article X
 locked render functions (additive `inject_*` / helper pattern only). PI-6 CLOSE
 is a separate owner-approved decision taken after Sprint 13 closes.
+
+### Sprint 14 -- PI-7 Sprint 1 / Detach + Orchestration Maturity (SDD-043 + SDD-044 + SDD-045)
+
+| Order | File | Owner | Status |
+|-------|------|-------|--------|
+| 0 | [SPRINT-14-KICKOFF.prompt.md](SPRINT-14-KICKOFF.prompt.md) | Sprint Executive Manager (lead) | READY (gated on PI-6 close + push at `4ad0521`) |
+
+Prerequisite: **PI-6 must be closed and pushed at `4ad0521`** with PI-7 ACTIVE
+([`../sprints/PI-7/CURRENT_PI.md`](../sprints/PI-7/CURRENT_PI.md)), tests at or
+above 481 passed / 2 skipped, and schema lint clean. Sprint 14 is the **first
+PI-7 sprint** and ships **three features**: SDD-043 (two-tier Executive Manager
+-- a new sprint-scoped Sprint EM agent + ADR + kickoff-template activation),
+SDD-044 (plain-language human-facing communication discipline -- skill
+amendment), and SDD-045 (Detach audit epic -- A-1 stop committing `fleet.db` +
+A-4 one setup command + A-5 `doctor` health check + A-6 origin-token/identity
+lint + B-3 governance consistency; spec source
+[`../docs/Temp/EMF-HARDENING-PLAN.md`](../docs/Temp/EMF-HARDENING-PLAN.md)).
+SDD-046 (S2), SDD-047 (S3), and SDD-048 (S4) are later PI-7 sprints and must not
+be pulled in. Stdlib-only (Article V); respect the Article X locked render
+functions. PI-7 CLOSE is a separate owner-approved decision taken after Sprint 17.
 
 ---
 

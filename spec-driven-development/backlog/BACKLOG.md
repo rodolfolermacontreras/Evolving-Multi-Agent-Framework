@@ -72,6 +72,32 @@ Source: Owner direction 2026-06-10 via EM; first dashboard work after PI-5 close
 Source: Owner direction 2026-06-24 via EM -- true drag follow-up to SDD-036 (shipped keyboard-only at db25eec).
 Source: Owner observation at Sprint 12 close 2026-06-25 via EM (SDD-042) -- dashboard-trust drift, same parser-lag class PI-6 exists to fix.
 
+### PI-7 Hardening Bundle (filed 2026-06-26)
+
+PI-7 = "Hardening + Orchestration Maturity". Goal: make the framework
+team-portable (clone -> one setup command -> a teammate builds their own
+project the same day) and fix the two-tier orchestration confusion so a
+sprint session does not drift into project-EM behavior. Owner-approved
+2026-06-26 via Executive Manager as the Alpha-gating priority, following
+PI-6 close (`4ad0521`). Spec source for the audit items is the tracked
+file [`../docs/Temp/EMF-HARDENING-PLAN.md`](../docs/Temp/EMF-HARDENING-PLAN.md)
+(Parts A-D, per-item Acceptance blocks seed each `validation.md`). The four
+audit sprints are filed as epic rows (SDD-045..048) that reference the audit
+item codes; each sprint's CLARIFY assigns per-item SDD-IDs to avoid 16 thin
+rows. Allocation: Sprint 14 (S1 Detach + Orchestration), Sprint 15 (S2 Make
+promises true), Sprint 16 (S3 De-author), Sprint 17 (S4 Maintainability).
+
+| ID | Title | Priority | R | I | C | E | RICE | Sprint | Status | Notes |
+|----|-------|----------|---|---|---|---|------|--------|--------|-------|
+| SDD-043 | Two-tier Executive Manager: Sprint EM agent | P1 | H | H | H | M | -- | PI-7 Sprint 14 | OPEN (allocated) | NEW sprint-scoped orchestrator agent. Runs ONE sprint; routes F-## work to PM / Architect / SW Dev; reports up to the project EM at sprint close. CANNOT create sprints or PIs (may SUGGEST to the project EM only); scoped strictly to its sprint's features. Constraints live in the agent IDENTITY file, not only the kickoff prompt (more reliable). Today the sprint session reuses `principal-executive-manager` and drifts into thinking it is the project EM. Deliverables: new `.github/agents` Sprint EM file, an ADR for the two-tier EM model, update the SPRINT-NN kickoff template to activate the Sprint EM (not the project EM), and a possible `constitution/principles.md` Article II reference update (Level-2, owner approval). |
+| SDD-044 | Plain-language human-facing communication discipline | P1 | H | H | H | S | -- | PI-7 Sprint 14 | OPEN (allocated) | Extend the `em-communication-discipline` skill from EM-only to ALL human-facing principals/EMs. Human-facing output (status, progress, questions to the owner) must be SHORT, PLAIN, to the point, easy to understand; agent-to-agent detail stays allowed. Owner requirement 2026-06-26. Amends a skill (not the constitution). |
+| SDD-045 | PI-7 S1 Detach + Orchestration epic (A-1/A-4/A-5/A-6/B-3) | P1 | H | H | H | M | -- | PI-7 Sprint 14 | OPEN (allocated) | Audit-driven epic; spec source `docs/Temp/EMF-HARDENING-PLAN.md`. Audit items: A-1 gitignore the personal ledger (`fleet.db`) + `git rm --cached` + fresh DB on setup; A-4 one setup command (clone -> productive); A-5 `doctor` / health check; A-6 origin-token + identity lint; B-3 governance consistency (RULES.md article range == principles.md). Highest-trust, demo-first slice. CLARIFY assigns per-item SDD-IDs. |
+| SDD-046 | PI-7 S2 Make-promises-true epic (B-1/B-2/B-4) | P1 | H | H | H | M | -- | PI-7 Sprint 15 | OPEN (allocated) | Audit-driven epic; spec source `docs/Temp/EMF-HARDENING-PLAN.md`. Audit items: B-1 ledger truth (THE priority -- FORK at S2 CLARIFY: Option 1 mandatory logging at close vs Option 2 retract the universal-logging claim); B-2 turn high-payoff rules into blocking checks (TDD gate first); B-4 add CI (one GitHub Actions workflow = the `doctor` set). CLARIFY assigns per-item SDD-IDs. |
+| SDD-047 | PI-7 S3 De-author epic (A-2/A-3/D-1/D-3) | P1 | H | H | H | M | -- | PI-7 Sprint 16 | OPEN (allocated) | Audit-driven epic; spec source `docs/Temp/EMF-HARDENING-PLAN.md`. Audit items: A-2 owner/identity as config (not a hardcoded name); A-3 scrub origin-project leakage (engine.py / FastAPI / Day-to-Day) out of generic files; D-1 wire-or-delete the dead skills; D-3 rename "conflict detection" to "serial CLARIFY/SPEC gate" to match the code. CLARIFY assigns per-item SDD-IDs. |
+| SDD-048 | PI-7 S4 Maintainability epic (C-1/C-2/C-3/D-2) | P1 | H | M | M | L | -- | PI-7 Sprint 17 | OPEN (allocated) | Audit-driven epic; spec source `docs/Temp/EMF-HARDENING-PLAN.md`. Audit items: C-1 split the `state_builder.py` god-module (behind the existing tests); C-2 stdlib-vs-templating ADR (FORK at S4 CLARIFY: keep stdlib-only vs allow one templating dep for the dashboard); C-3 replace the hardcoded grandfather date; D-2 lightweight-spec path for small features. Option B (reorder -> backend re-optimization, Sprint 13 carryover) folds in here IF capacity allows; it is a later PI-7 feature, NOT the anchor. CLARIFY assigns per-item SDD-IDs. |
+
+Source: Owner approval 2026-06-26 via Executive Manager -- PI-7 = "Hardening + Orchestration Maturity", the Alpha-gating priority. Two-tier Sprint EM (SDD-043) is the owner's #1 item; plain-language comms (SDD-044) is the owner communication requirement of 2026-06-26; the audit epics (SDD-045..048) operationalize `docs/Temp/EMF-HARDENING-PLAN.md` (external principal-level repo audit). Three owner forks to resolve at the relevant sprint's CLARIFY: (1) Sprint EM naming/tier -- HANDLED (folded into S1); (2) B-1 mandatory-logging vs retract-claim -> S2 CLARIFY; (3) C-2 stdlib-only vs one templating dep -> S4 CLARIFY.
+
 ## P2 - Should Have
 
 | ID | Title | Priority | Reach | Impact | Confidence | Effort | RICE | Sprint | Status |

@@ -1112,7 +1112,7 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - Date: 2026-06-26
 - Owner: Sprint Executive Manager (lead, reports up to project EM); PM + Architect owned design (F-38); SW Dev + workers owned implementation/QA (F-39) and close prep (F-40)
 - Features completed: F-38, F-39, F-40
-- Commits: close commit (SHA backfilled in the following commit, per Sprint 14 precedent)
+- Commits: 44d546d (close commit)
 - Tests: 501 -> 518 passed, 2 skipped
 - Schema lint: clean (exit 0)
 - Doctor: green; 8 checks PASS incl. 3 new (current-PI dispatch rows PI-7:2, tdd gate, DONE completeness)

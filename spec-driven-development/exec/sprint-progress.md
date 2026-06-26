@@ -1177,7 +1177,7 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 
 - Date: 2026-06-26
 - Owner: Sprint Executive Manager (routing + independent green re-verify at close); principal-software-developer (implementation, EM-routed subagent dispatch -- Article VII context isolation; dispatch rows 14-17 in the ledger).
-- Commits: <Sprint 16 close commit on master; pushed under owner approval>
+- Commits: `e93862d` (Sprint 16 close on master; pushed under owner approval)
 - Ledger dogfood (B-1): dispatch rows 14-17 (T-047-01/06/11/13) logged then marked `success`; decision row 3 records the Level-2 ADR-022 acceptance (decider "Rodolfo Lerma (owner)"). `doctor` current-PI check: PI-7 = 6 rows.
 - Scope honored: de-authored GENERIC instruction surfaces only (`.github/agents/**`, `.github/skills/**`, `.github/prompts/**`, `.github/instructions/**`, `INSTRUCTIONS.md`, `README.md`, `copilot-instructions.md`, `constitution/**`, `GENERALIZATION_SDD.md`, `archetypes/**`). Historical `specs/**` bodies, `sprints/**`, retros, and prior ADRs were NOT touched.
 - A-2 (owner -> config) DONE: created `project.config.json` (owner/team/repo_url) + stdlib reader in `bootstrap.py`; `cli/origin_lint.py` gained `load_config_denylist()` (RECOMMENDED + ORIGIN_TOKENS + config owner-name, regex-escaped); `doctor`'s origin-token check uses it; skill `author:` frontmatter neutralized to `emf-framework` across the skill library; personal-name skill bodies (`weekly-status-report`, `pi-planning`, `testing-conventions`) de-authored; PM agent traces value to "the host project's owner".
@@ -1200,7 +1200,7 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - Date: 2026-06-26
 - Owner: Sprint Executive Manager (lead, reports up to project EM); Sprint EM drove F-41 design; principal-software-developer (subagent) owned F-42 implementation; Sprint EM owned the F-43 close + independent re-verify
 - Features completed: F-41, F-42, F-43
-- Commits: <Sprint 16 close commit SHA>
+- Commits: `e93862d` (Sprint 16 close commit on master)
 - Tests: 518 -> 540 passed, 2 skipped (>= 518 required)
 - Schema lint: clean (exit 0)
 - Validation: SDD-047 per-item A-2 6/6 + A-3 5/5 + D-1 3/3 + D-3 3/3 REQUIRED checked with real-run evidence + manual checks

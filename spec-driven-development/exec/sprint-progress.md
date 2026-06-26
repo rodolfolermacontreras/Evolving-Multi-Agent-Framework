@@ -925,3 +925,22 @@ Kickoff: `SPRINT-13-KICKOFF.prompt.md` (committed `65d2d05`). Scope: SDD-042 (F-
 - OPEN (owner manual check): the actual in-browser drag *feel* (cursor drag, drop-target highlight, reload-on-drop, 409 tooltip) is NOT machine-verifiable. Requires the owner to run `python spec-driven-development/cli/state_builder.py serve` and drag a card. SDD-041 is IMPLEMENTED + logic-verified but should not be marked DONE in BACKLOG until the owner confirms the in-browser interaction. This is a UI Lifecycle Variant acceptance step, not a blocking gate.
 - Notes: Architecture resolved before dispatch -- a static HTML file cannot POST, so true drag required an additive serve-mode `do_POST` onto the existing safeguarded `move()`; the keyboard controls remain the static-file path. No reorder logic was forked. Pill-nav PI-7 follow-up captured in IDEAS.md in the same change.
 - Next: owner in-browser acceptance of SDD-041; then mark SDD-041/042/039 DONE in BACKLOG and proceed to the F-33 Sprint 13 close (a separate owner-approved step); PI-6 close is a further separate owner decision.
+
+### Sprint 13 -- CLOSED
+
+- Date: 2026-06-26
+- Owner: Principal Executive Manager (lead/routing + verification); principal-architect (ADR-018 draft); principal-software-developer + developer-cli-specialist-1 (implementation, subagent dispatches)
+- Features completed: F-30 (SDD-042), F-31/rebuild (SDD-041 Option A), F-32 (SDD-039), F-33 (this close)
+- Commits: `ac1ccf0` (SDD-042), `699d8bb` (SDD-039), `afbfe47` (SDD-041 Option A) + this close commit
+- Tests: 450 -> 481 passed, 2 skipped
+- Schema lint: clean (exit 0)
+- ADRs: ADR-018 (SDD-039 Article VII context-isolation wording, Accepted), ADR-019 (SDD-041 dashboard reorder POST endpoint, Accepted)
+- principles.md version: 1.3.0 -> 1.4.0 (SDD-039, MINOR -- clarification of existing intent)
+- PI-6 status: ACTIVE -> READY TO CLOSE (the PI-6 CLOSE is a separate owner-approved decision and is NOT stamped here)
+- SDD-042: DONE (dashboard `Current PI:` header + HTML title surface the newest ACTIVE PI via additive `resolve_display_pi`; Article X lock held; pill-nav residual -> PI-7)
+- SDD-041: DONE (working OPEN-only "Backlog -- drag to reprioritize" section, Option A; owner-accepted in-browser; drag + up/down round-trip through the safeguarded `move()`; DONE rows hidden; cross-project IAI contamination removed; Option B reorder re-optimization -> PI-7)
+- SDD-039: DONE (Article VII context-isolation corollary reworded + ADR-018 + principles.md version bump; applied only after recorded owner approval)
+- Deferred to PI-7: SDD-038 (aesthetic tokens) + SDD-034 (content-shingle dedup) + PI-4 housekeeping (domain-skill annotations, GH Actions Node.js bump); SDD-041 Option B reorder re-optimization; Current Sprint widget repoint (deprecated `Management/PI-N/Sprint-N-*/SPEC.md` source); SDD-042 pill-nav; SDD-039 incidental "fresh session" wording cleanup (SPRINT-05 L35 / SPRINT-06 L202). SDD-035 (Azure) out-of-band.
+- Owner ratification: **APPROVED FOR COMMIT + PUSH** (owner direction 2026-06-26 via Executive Manager: "yes, lets close this")
+- Notes: Sprint 13 delivered the three highest-value remaining PI-6 items under owner delegation, but SDD-041 was the sprint's hard lesson. It first shipped broken at `efefc92`: the drag was bolted to the lifecycle cards, which are keyed by spec-dir names that the safeguarded `move()` rejects, and the synthetic-id unit tests gave a false green that masked the defect. The break was caught only by the owner testing the drag in-browser, then rebuilt as Option A -- a dedicated OPEN-only "Backlog -- drag to reprioritize" section keyed by SDD-xxx, validated by a real-pipeline integration test (DA-Evidence Discipline) instead of synthetic ids. The rebuild also removed cross-project IAI contamination that had been leaking into the exec surfaces. The close additionally surfaced a deprecated Current Sprint widget source (`load_sprint_table` reads abandoned `Management/PI-N/Sprint-N-*/SPEC.md` subdirs) -> filed to PI-7.
+- Next: PI-6 close decision (separate owner-approved step); PI-7 hardening kickoff (carryovers above).

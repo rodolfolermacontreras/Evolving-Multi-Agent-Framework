@@ -3,13 +3,13 @@ id: SDD-PI-6-CURRENT_PI-sprint
 type: sprint
 status: active
 owner: principal-product-manager
-updated: 2026-06-24
+updated: 2026-06-26
 sprint: PI-6
 ---
 
 # PI-6: Dashboard Reinvestment + Carryover Cleanup
 
-- Status: **ACTIVE** (Sprint 1 / Sprint 10 CLOSED locally 2026-06-10; Sprint 2 / Sprint 11 CLOSED 2026-06-24 with owner-approved commit + push; Sprint 3 / Sprint 12 / SDD-037 CLOSED 2026-06-25 with owner-approved commit + push; Sprint 4 / Sprint 13 SDD-038 + carryovers is a contingency pending a Highest-Executive pull-in decision)
+- Status: **ACTIVE -> READY TO CLOSE** (Sprint 1 / Sprint 10 CLOSED locally 2026-06-10; Sprint 2 / Sprint 11 CLOSED 2026-06-24 with owner-approved commit + push; Sprint 3 / Sprint 12 / SDD-037 CLOSED 2026-06-25 with owner-approved commit + push; Sprint 4 / Sprint 13 CLOSED 2026-06-26 with scope SDD-042 + SDD-041 + SDD-039 and owner-approved commit + push -- SDD-038/034/PI-4 housekeeping deferred to PI-7. The PI-6 CLOSE itself remains a separate owner-approved decision and is NOT stamped here.)
 - Theme: Ship dashboard patterns that make the framework's state visible and useful at a glance, then clear the carryover backlog accumulated across PI-3..PI-5.
 - Started: 2026-06-10
 - Owner: principal-executive-manager
@@ -85,23 +85,27 @@ respect the same refresh model SDD-040 ships.
 
 ---
 
-### 4. Aesthetic Tokens + Carryover Cleanup (SDD-038 + carryovers)
-**Why**: SDD-038 defines our own lifecycle-state color tokens (consistent
-across dashboard + rendered Markdown views + agent UIs) so the visual
-language matches the conceptual one Article XII established. The carryover
-bundle finally closes SDD-034 (content-shingle dedup upgrade), SDD-039
-(Article VII wording clarification; requires ADR), and the PI-4
-housekeeping (domain-skill annotations + GH Actions Node.js bump) that
-PI-5 closed DONE-WITH-CARRYOVER.
+### 4. Final PI-6 Value Sprint -- Dashboard + Governance (SDD-042 + SDD-041 + SDD-039)
+**Why**: Sprint 13 was pulled in under owner delegation 2026-06-26 and
+delivered the three highest-value remaining items, NOT the originally-framed
+SDD-038 aesthetic-tokens contingency. SDD-042 fixes the stale dashboard
+PI-label parser; SDD-041 ships a working OPEN-only Backlog drag-to-reorder
+(Option A); SDD-039 rewords the Article VII context-isolation corollary and
+bumps `principles.md` 1.3.0 -> 1.4.0 via ADR-018. The aesthetic-tokens +
+dedup + PI-4 housekeeping bundle (SDD-038, SDD-034, PI-4 housekeeping) was
+NOT pulled in and is deferred to PI-7.
 
-**Success Criteria**: Lifecycle-state token palette defined and applied
-to at least one dashboard surface + one rendered Markdown view; SDD-034
-content-shingle upgrade lands in `cli/dedup.py`; SDD-039 Article VII
-wording amended via ADR; PI-4 housekeeping committed.
+**Success Criteria**: Dashboard header + HTML title surface the newest
+ACTIVE PI (SDD-042, DONE); a dedicated OPEN-only "Backlog -- drag to
+reprioritize" section keyed by SDD-xxx round-trips drag + up/down through
+the safeguarded `move()` with DONE rows hidden and cross-project IAI
+contamination removed (SDD-041, DONE); Article VII corollary reworded with
+`principles.md` 1.3.0 -> 1.4.0 via ADR-018 (SDD-039, DONE).
 
-**Features**: SDD-038, SDD-034, SDD-039, PI-4-carry-over (domain-skill
-annotations, GH Actions Node.js bump). Pulled in only if Sprint 13 has
-capacity; Sprint 13 is a contingency sprint, not a guarantee.
+**Features**: SDD-042, SDD-041, SDD-039. **CLOSED 2026-06-26.** Deferred to
+PI-7: SDD-038 (aesthetic tokens), SDD-034 (content-shingle dedup), PI-4
+housekeeping (domain-skill annotations, GH Actions Node.js bump), plus the
+SDD-041 Option B reorder re-optimization.
 
 ---
 
@@ -112,7 +116,7 @@ capacity; Sprint 13 is a contingency sprint, not a guarantee.
 | **PI-6 Sprint 1** | Sprint 10 | Dashboard Parser Fix + Auto-Refresh | SDD-040 | S | **CLOSED locally 2026-06-10.** Highest-trust-payoff fix shipped in local working tree; active focus no longer points at stale azure-decommission work and serve-mode refresh is verified. Commit pending; no push performed. |
 | **PI-6 Sprint 2** | Sprint 11 | Lifecycle Pipeline + Drag-to-Reorder (with Safeguards) | SDD-036 | L | **CLOSED 2026-06-24.** Shipped SDD-036 (lifecycle pipeline + 4-card docs row + reorder safeguards); tests 349 -> 412; schema lint clean; 10/10 REQUIRED + ADR-017 (proposed); owner-approved commit + push. Unblocks SDD-037, whose Dispatches card sits on the same dashboard surface as the SDD-036 lifecycle pipeline. |
 | **PI-6 Sprint 3** | Sprint 12 | Dispatches Card + Health Pills | SDD-037 | M | **CLOSED 2026-06-25.** Shipped SDD-037 (Dispatches card + 4 header health pills) as additive `inject_*` post-processors on the SDD-036 surface; tests 412 -> 450; schema lint clean; 13/13 REQUIRED; Article X lock held; owner-approved commit + push. Sprint 13 (SDD-038 + carryovers) pull-in is a Highest-Executive decision, not authored at this close. |
-| **PI-6 Sprint 4** | Sprint 13 | Aesthetic Tokens + Carryover Cleanup | SDD-038 + carryovers (SDD-034 dedup, SDD-039 Article VII wording, PI-4 housekeeping) | M | Contingency sprint. Pulled in only if Sprints 10-12 hold velocity. Aesthetic tokens are P3 polish; the carryover items are the long tail of PI-5 DONE-WITH-CARRYOVER and should not block PI-7 planning. |
+| **PI-6 Sprint 4** | Sprint 13 | Final PI-6 Value Sprint (Dashboard + Governance) | SDD-042 (dashboard PI-label fix) + SDD-041 (OPEN-only Backlog reorder, Option A) + SDD-039 (Article VII wording + version bump) | M | **CLOSED 2026-06-26.** Pulled in under owner delegation; delivered the three highest-value items. SDD-038 aesthetic tokens + SDD-034 dedup + PI-4 housekeeping deferred to PI-7. |
 
 **Unscheduled** (out of PI-6 scope):
 
@@ -224,14 +228,16 @@ capacity; Sprint 13 is a contingency sprint, not a guarantee.
 
 **Retro**: Sprint 11 landed the largest CLARIFY surface in PI-6 without scope leakage -- `depends_on` shipped optional (no flag-day backfill), reorder writes an append-only overlay + audit trail rather than mutating BACKLOG, and force-override is governed as a Level-2 runtime gate. The UI Lifecycle Variant (Article XII) split kept the schema/ledger items strict while letting the three visual surfaces (R-1/R-2/R-8) close as-locked with zero delta entries. DA-Evidence Discipline was honored: every close claim came from a real run, and the reorder smoke ran against an isolated temp tree so no real `display-order.json`/`reorder-audit.jsonl` was mutated. SDD-037 (Dispatches card + health pills) is unblocked on the same dashboard surface and is the Sprint 12 anchor.
 
-### Sprint 3 -- Dispatches Card + Health Pills -- PLANNED
-**Status**: **PLANNED** (scope locked at SDD-037; kickoff prompt authored at Sprint 11 close).
-**Planned scope**: SDD-037.
+### Sprint 3 -- Dispatches Card + Health Pills -- CLOSED
+**Status**: **CLOSED** 2026-06-25 (owner-approved commit + push; SDD-037 DONE). See sprint-progress.md "Sprint 12 -- CLOSED".
+**Scope**: SDD-037.
 **Sprint kickoff**: [`../../feature-prompts/SPRINT-12-KICKOFF.prompt.md`](../../feature-prompts/SPRINT-12-KICKOFF.prompt.md)
 
-### Sprint 4 -- Aesthetic Tokens + Carryover Cleanup -- CONTINGENCY
-**Status**: **CONTINGENCY** (pulled in only if Sprints 10-12 hold velocity; kickoff prompt to be authored at Sprint 12 close if pull-in is approved)
-**Planned scope**: SDD-038 + carryovers (SDD-034 dedup, SDD-039 Article VII wording, PI-4 housekeeping).
+### Sprint 4 -- Final PI-6 Value Sprint (Dashboard + Governance) -- CLOSED
+**Status**: **CLOSED** 2026-06-26 (pulled in under owner delegation; owner-approved commit + push). See sprint-progress.md "Sprint 13 -- CLOSED".
+**Scope**: SDD-042 (dashboard PI-label fix; `ac1ccf0`) + SDD-041 (working OPEN-only Backlog reorder, Option A; `afbfe47`) + SDD-039 (Article VII wording + ADR-018 + `principles.md` 1.3.0 -> 1.4.0; `699d8bb`).
+**Deferred to PI-7**: SDD-038 (aesthetic tokens), SDD-034 (content-shingle dedup), PI-4 housekeeping (domain-skill annotations, GH Actions Node.js bump), SDD-041 Option B reorder re-optimization.
+**Sprint kickoff**: [`../../feature-prompts/SPRINT-13-KICKOFF.prompt.md`](../../feature-prompts/SPRINT-13-KICKOFF.prompt.md)
 
 ---
 

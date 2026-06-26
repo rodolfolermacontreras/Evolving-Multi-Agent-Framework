@@ -215,6 +215,33 @@ sprints and must not be pulled in. Stdlib-only (Article V); respect the Article 
 locked render functions. PI-7 CLOSE is a separate owner-approved decision taken
 after Sprint 17.
 
+### Sprint 16 -- PI-7 Sprint 3 / De-author the content (SDD-047 -- A-2/A-3/D-1/D-3)
+
+| Order | File | Owner | Status |
+|-------|------|-------|--------|
+| 0 | [SPRINT-16-KICKOFF.prompt.md](SPRINT-16-KICKOFF.prompt.md) | Sprint Executive Manager (lead) | READY (gated on Sprint 15 close + push at `44d546d` / head `db98dbd`) |
+
+Prerequisite: **Sprint 15 must be closed and pushed at `44d546d`** (backfill head
+`db98dbd`) with SDD-046 (and its B-1/B-2/B-4 per-item IDs) marked DONE in
+BACKLOG, PI-7 ACTIVE
+([`../sprints/PI-7/CURRENT_PI.md`](../sprints/PI-7/CURRENT_PI.md)), tests at or
+above **518 passed / 2 skipped**, schema lint clean, and `doctor` + CI green.
+Sprint 16 is the **third PI-7 sprint** and ships **one epic feature**: SDD-047
+(De-author the content -- **A-2** owner/identity becomes a config value (not a
+hardcoded name), **A-3** scrub origin-project leakage (`engine.py` / FastAPI /
+Day-to-Day tokens) out of the 22 generic framework files, **D-1** wire-or-delete
+the 10 dead skills (`tdd-gate` first), **D-3** rename "conflict detection" to the
+"serial CLARIFY/SPEC gate" the code implements; spec source
+[`../docs/Temp/EMF-HARDENING-PLAN.md`](../docs/Temp/EMF-HARDENING-PLAN.md) Parts
+A + D). **De-author the GENERIC files only -- historical `specs/`/`sprints/`/
+retros/ADRs keep their record.** Sprint 16 is **led by the Sprint Executive
+Manager** agent (reports up to the project EM at close; cannot create sprints/PIs
+-- suggest-only). The live Sprint 15 gates apply: B-1 mandatory-ledger close gate
+(dogfood Sprint 16's own dispatches), B-2 blocking checks (TDD gate +
+DONE-completeness), B-4 CI. SDD-048 (S4) is a later PI-7 sprint and must not be
+pulled in. Stdlib-only (Article V); respect the Article X locked render
+functions. PI-7 CLOSE is a separate owner-approved decision taken after Sprint 17.
+
 ---
 
 ## Shared onboarding

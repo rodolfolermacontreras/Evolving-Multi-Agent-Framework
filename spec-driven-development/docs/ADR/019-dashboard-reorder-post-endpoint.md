@@ -3,7 +3,7 @@ id: ADR-019
 type: spec
 status: accepted
 owner: principal-architect
-updated: 2026-06-26
+updated: 2026-06-27
 feature: SDD-041
 ---
 
@@ -46,6 +46,28 @@ Until now `DashboardHandler` was read-only (`do_GET` only). A drag gesture needs
 - Positive: `render_html` and the S1 lock are untouched (`TestS1FootprintLockGuard` stays PASS); all new behavior lives in additive helpers, `inject_drag_html`, and the HTTP handler.
 - Negative: the dashboard is no longer strictly read-only -- it has one mutating route. Mitigated by localhost-only binding, strict input validation, the single-route allowlist, and reuse of the safeguarded mutator.
 - Negative: live drag interaction cannot be proven by the Python test suite -- the visual feel requires a human in a browser. The tests prove the wire contract (validation, status codes, audit delegation, force-never-sent), the single-script invariant, the CSP widening, and the static inertness; in-browser drag acceptance is a human step.
+
+## Correction (rebuild)
+
+- Date: 2026-06-27
+- Status: still **Accepted** -- this corrects the render surface only; the write endpoint, validation helper, safeguarded mutator, CSP hash-pin, and force-free wire contract above are all unchanged and correct.
+
+The first SDD-041 increment wired the drag layer onto the **lifecycle cards**. Three render-side defects made it non-functional for the owner, none of them in the endpoint:
+
+1. **Wrong key.** Draggable lifecycle cards carried spec-directory names, not the canonical `SDD-xxx` ids. The posted `item` failed `handle_reorder_request`'s `^[A-Z]{2,}-\d{2,3}$` gate, so every drop returned **400**.
+2. **Wrong targets.** The cards surfaced already-DONE features, so even a valid move had no prioritization value.
+3. **Dead buttons.** The up/down controls did not post to `/reorder`.
+
+The endpoint (`handle_reorder_request`, `do_POST`), `backlog_reorder.move`, the CSP hash-pin, and the force policy were all correct -- the fault was purely the render/key surface. The rebuild therefore:
+
+- Adds a **dedicated, visible Backlog section** (`inject_backlog_reorder_html`, `<section class="zone-backlog-reorder">` with `<h2 id="backlog-reorder-heading">`) injected into the assembled document, keyed by the **canonical `SDD-xxx` ids** from `backlog_reorder.load_order` (overlay-aware, includes DONE for rank-correctness).
+- Makes the section an **OPEN-only priorities view**: it renders **only OPEN rows** (`<div class="backlog-row" draggable="true" data-pid="SDD-xxx" data-rank="N">`), each carrying a **real description** -- `id + title + priority + status` (`backlog-title`/`backlog-priority`/`backlog-status` spans, never a bare duplicated id) -- plus a working `data-to-rank` up/down button pair (`_render_backlog_buttons`). **DONE rows are not rendered at all** (Option A); the section is a clean list of work that still needs ranking.
+- **Descriptions come from an additive metadata helper.** `_backlog_reorder_meta(sdd_root)` seeds titles/priority/status from the canonical `load_backlog` items, then positionally parses every BACKLOG.md table row (tolerant of the variable 10-vs-11 column `--`-RICE rows) so even rows `load_backlog`'s numeric-RICE regex skips still get a real title and status. This is why no shown row falls back to a bare id. `load_backlog` itself is left untouched (no markdown-view scope creep).
+- **Button targets use full-order indices.** `data-rank` is each item's absolute index in the full overlay-aware `load_order` (DONE included, for rank-correctness); the up/down buttons point at the **adjacent OPEN item's full-order index**, so a move skips over any interleaved DONE id and still posts a valid absolute `to_rank` to `move()`.
+- **Removes lifecycle-card drag entirely** -- lifecycle cards are static again; the reorder affordance lives only in the Backlog section. `inject_backlog_reorder_html` runs immediately before `inject_drag_html` (still the last inject) so its draggable rows arm the existing drag + CSP layer; the drag script selector is `.backlog-row[draggable="true"]` and button wiring is `.backlog-up,.backlog-down`.
+- **OPEN/DONE rule (stated assumption):** a row is OPEN (shown + draggable) iff its BACKLOG.md line does not contain the token `DONE` -- the same rule `backlog_reorder.load_backlog_entries` uses. IMPLEMENTED/Approved/Design/Pending all count as OPEN; only `DONE` is excluded from the render.
+- **Cross-project ids removed from source.** Six `IAI-0x` rows (insights_ai retrospective intake) were stale contamination in `backlog/BACKLOG.md` and in the `backlog/display-order.json` overlay; both sources are cleaned so the regenerated `exec/state.{md,html}` and `exec/work-index.md` carry only `SDD-xxx` ids.
+- **Real-pipeline integration test (`TestSdd041BacklogReorderSection`).** It builds the dashboard via `build(sdd_root=..., write=False)["html"]`, extracts the real rendered `data-pid`s from the Backlog section, and asserts each returns **200/ok** from the actual `handle_reorder_request` (no monkeypatch), that a drag move persists to `display-order.json` + appends `reorder-audit.jsonl` on disk, that up/down buttons carry the adjacent OPEN item's full-order rank, that **DONE rows are not rendered** (and a DONE id interleaved in the order is skipped while full-order ranks stay correct), that every shown row carries a **non-empty title** (no bare-id fallback, including for `--`-RICE rows), and that a dependency-locked move returns **409/blocked** -- closing the original 400 gap by binding render output to the live endpoint.
 
 ## Alternatives Considered
 

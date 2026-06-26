@@ -74,7 +74,12 @@ from schema_lint import (  # noqa: E402  -- module-bootstrap import per ADR-012
 # import follows the same in-tree sibling bootstrap as schema_lint (ADR-012).
 # ---------------------------------------------------------------------------- #
 
-from backlog_reorder import move as _reorder_move, ReorderError as _ReorderError
+from backlog_reorder import (
+    move as _reorder_move,
+    ReorderError as _ReorderError,
+    load_order as _reorder_load_order,
+    load_backlog_entries as _reorder_load_entries,
+)
 
 # ---------------------------------------------------------------------------- #
 # SDD root + path helpers
@@ -2536,44 +2541,6 @@ def render_docs_row(feature: Feature, sdd_root: Path) -> str:
     )
 
 
-def render_reorder_control(item_id: str, rank: int, total: int) -> str:
-    """Render the keyboard-accessible reorder control (AC-8, no JS framework).
-
-    Up/down are native ``<button>`` elements (keyboard-focusable by default).
-    Each carries the exact ``backlog_reorder.py move`` command the operator
-    runs (``data-cmd``); the up control is disabled at rank 0 and the down
-    control at the last rank. Display order itself reflects the overlay (see
-    ``order_features_for_display``).
-    """
-    up_disabled = rank <= 0
-    down_disabled = rank >= total - 1
-    up_cmd = f"python cli/backlog_reorder.py move --item {item_id} --to-rank {rank - 1}"
-    down_cmd = f"python cli/backlog_reorder.py move --item {item_id} --to-rank {rank + 1}"
-
-    def _btn(direction: str, glyph: str, label: str, cmd: str, disabled: bool) -> str:
-        if disabled:
-            return (
-                f'<button type="button" class="reorder-btn reorder-{direction}" '
-                f'aria-label="{h(label)}" disabled>{glyph}</button>'
-            )
-        return (
-            f'<button type="button" class="reorder-btn reorder-{direction}" '
-            f'aria-label="{h(label)}" data-cmd="{h(cmd)}">{glyph}</button>'
-        )
-
-    up_btn = _btn("up", "&#9650;", f"Move {item_id} up to rank {rank - 1}",
-                  up_cmd, up_disabled)
-    down_btn = _btn("down", "&#9660;", f"Move {item_id} down to rank {rank + 1}",
-                    down_cmd, down_disabled)
-    return (
-        f'<div class="reorder-control" role="group" '
-        f'aria-label="Reorder {h(item_id)} (current rank {rank})">'
-        f'{up_btn}{down_btn}'
-        f'<span class="reorder-rank">rank {rank + 1} of {total}</span>'
-        f'</div>'
-    )
-
-
 def _feature_display_id(feature: Feature) -> str:
     """Best-effort SDD feature ID for a feature.
 
@@ -2667,16 +2634,6 @@ _LIFECYCLE_STYLE = (
     ".docs-card{font-size:.78em;padding:.2rem .55rem;border:1px solid "
     "var(--line,#333);border-radius:4px;text-decoration:none}"
     ".docs-card-missing{opacity:.4;border-style:dashed}"
-    ".reorder-control{display:flex;gap:.3rem;align-items:center;margin-top:.3rem}"
-    ".reorder-btn{font-size:.8em;padding:.1rem .45rem;cursor:pointer}"
-    ".reorder-btn[disabled]{opacity:.4;cursor:not-allowed}"
-    ".reorder-rank{font-size:.72em;opacity:.6}"
-    ".lifecycle-card[draggable=\"true\"]{cursor:grab}"
-    ".drag-handle{font-size:.85em;opacity:.45;cursor:grab;user-select:none;"
-    "margin-right:.1rem}"
-    ".lifecycle-card.drag-over{border-color:currentColor;"
-    "box-shadow:0 0 0 2px var(--line,#444) inset}"
-    ".lifecycle-card.drag-rejected{border-color:#f08a8a}"
     "</style>"
 )
 
@@ -2691,14 +2648,16 @@ def inject_lifecycle_html(
     """Inject the SDD-036 lifecycle section into the dashboard (AC-1/AC-2/AC-8).
 
     Builds, for the current sprint and each feature (ordered by the display
-    overlay), a card containing the lifecycle pipeline, the four-card docs row,
-    and -- for features -- the keyboard reorder control. The section is appended
-    after the user-gates marker / main open, mirroring inject_user_gates_html.
-    Kept outside render_html because that function has an Article X footprint
-    lock from SDD-FDC-001.
+    overlay), a card containing the lifecycle pipeline and the four-card docs
+    row. The section is appended after the user-gates marker / main open,
+    mirroring inject_user_gates_html. Kept outside render_html because that
+    function has an Article X footprint lock from SDD-FDC-001.
+
+    SDD-041 rebuild: the reorder surface lives in the dedicated Backlog section
+    (inject_backlog_reorder_html), keyed by canonical SDD-xxx ids. Lifecycle
+    cards are therefore static here -- no drag affordances, no reorder control.
     """
     ordered = order_features_for_display(features, sdd_root)
-    total = len(ordered)
 
     sprint_block = ""
     if current_sprint:
@@ -2717,22 +2676,18 @@ def inject_lifecycle_html(
         )
 
     feature_blocks: list[str] = []
-    for rank, (fid, feature) in enumerate(ordered):
+    for fid, feature in ordered:
         pipeline = render_lifecycle_pipeline(
             feature.stage, aria_label=f"{feature.name} lifecycle")
         docs = render_docs_row(feature, sdd_root)
-        control = render_reorder_control(fid, rank, total)
         feature_blocks.append(
             f'<article class="lifecycle-card" '
-            f'draggable="true" data-pid="{h(fid)}" data-rank="{rank}" '
             f'aria-label="{h(feature.name)} lifecycle">'
             f'<div class="lifecycle-head">'
-            f'<span class="drag-handle" aria-hidden="true" title="Drag to reorder">'
-            f'\u2630</span>'
             f'<span class="lifecycle-id">{h(fid)}</span>'
             f'<span class="lifecycle-name">{h(feature.name)}</span>'
             f'<span class="lifecycle-stage">{h(feature.stage)}</span></div>'
-            f'{pipeline}{docs}{control}</article>'
+            f'{pipeline}{docs}</article>'
         )
 
     body = sprint_block + "".join(feature_blocks)
@@ -2752,28 +2707,229 @@ def inject_lifecycle_html(
 
 
 # ---------------------------------------------------------------------------- #
+# SDD-041 (F-31 rebuild): the Backlog reorder surface
+#
+# The original SDD-041 attached drag affordances to the lifecycle cards, keyed
+# by feature DIRECTORY names. Those names are not the SDD-xxx ids the POST
+# /reorder endpoint (and backlog_reorder.move) accept, so every drop 400'd; the
+# cards also pointed at whatever features happened to have specs, including
+# DONE work. This section replaces that surface with a dedicated, visible
+# Backlog list keyed by the canonical SDD-xxx ids.
+#
+# Ordering is taken VERBATIM from backlog_reorder.load_order (overlay-aware,
+# includes DONE rows so ranks line up with the mutator's index space). The
+# done-flag for each row is the same one the mutator uses
+# (backlog_reorder.load_backlog_entries); title/priority are enriched from
+# load_backlog when the row is in a numeric-RICE table, else fall back to the
+# id. We never fork load_order.
+#
+# OPEN rows (the backlog row does not contain the token DONE -- the exact rule
+# backlog_reorder uses) are draggable and carry working up/down buttons. DONE
+# rows are shown de-emphasized for rank-correctness but are not draggable.
+# ---------------------------------------------------------------------------- #
+
+_BACKLOG_REORDER_STYLE = (
+    "<style>"
+    ".zone-backlog-reorder{grid-column:1/-1;margin-top:1rem}"
+    ".backlog-list{display:flex;flex-direction:column;gap:.35rem;margin:.5rem 0}"
+    ".backlog-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;"
+    "border:1px solid var(--line,#333);border-radius:6px;padding:.4rem .6rem}"
+    ".backlog-row[draggable=\"true\"]{cursor:grab}"
+    ".backlog-row.backlog-done{opacity:.5}"
+    ".backlog-handle{font-size:.85em;opacity:.45;cursor:grab;user-select:none}"
+    ".backlog-id{font-weight:700;letter-spacing:.03em}"
+    ".backlog-title{flex:1 1 12rem;min-width:8rem}"
+    ".backlog-priority{font-size:.78em;opacity:.7}"
+    ".backlog-status{font-size:.78em;opacity:.7}"
+    ".backlog-rank{font-size:.72em;opacity:.55}"
+    ".backlog-btns{display:flex;gap:.3rem;margin-left:auto}"
+    ".backlog-btn{font-size:.8em;padding:.1rem .45rem;cursor:pointer}"
+    ".backlog-btn[disabled]{opacity:.4;cursor:not-allowed}"
+    ".backlog-row.drag-over{border-color:currentColor;"
+    "box-shadow:0 0 0 2px var(--line,#444) inset}"
+    ".backlog-row.drag-rejected{border-color:#f08a8a}"
+    "</style>"
+)
+
+
+_BACKLOG_META_PID_RE = re.compile(r"[A-Z]{2,}-\d{2,3}")
+
+
+def _backlog_reorder_meta(sdd_root: Path) -> dict[str, dict[str, str]]:
+    """Best-effort ``{pid: {title, priority, status}}`` for the reorder view.
+
+    ``load_backlog`` only parses numeric-RICE rows; many OPEN rows use a ``--``
+    RICE placeholder (and some carry an extra trailing notes column), so they
+    would render with a bare, duplicated id. This tolerant pass splits every
+    ID row positionally on ``|`` -- title = col 1, priority = col 2, status =
+    col 9 (the Status column in both 10- and 11-column rows) -- so every shown
+    row has a real description. Canonical ``BacklogItem`` values from
+    ``load_backlog`` take precedence; this only fills rows it missed.
+    """
+    meta: dict[str, dict[str, str]] = {
+        b.pid: {"title": b.title, "priority": b.priority, "status": b.status}
+        for b in load_backlog(sdd_root)
+    }
+    path = sdd_root / "backlog" / "BACKLOG.md"
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return meta
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("|"):
+            continue
+        cells = [c.strip() for c in stripped.strip("|").split("|")]
+        if not cells:
+            continue
+        pid = cells[0]
+        if not _BACKLOG_META_PID_RE.fullmatch(pid) or pid in meta:
+            continue
+        title = cells[1] if len(cells) > 1 else pid
+        priority = cells[2] if len(cells) > 2 else ""
+        status = cells[9] if len(cells) > 9 else (cells[-1] if cells else "")
+        meta[pid] = {"title": title or pid, "priority": priority,
+                     "status": status}
+    return meta
+
+
+def _render_backlog_buttons(item_id: str, *, up_rank: int | None,
+                            down_rank: int | None) -> str:
+    """Render JS-driven up/down reorder buttons for one OPEN backlog row.
+
+    ``up_rank`` / ``down_rank`` are the absolute indices in the FULL
+    ``load_order`` of the previous / next OPEN item -- the value ``move()``
+    expects. They are ``None`` when there is no adjacent OPEN item (first / last
+    open row), which renders the button disabled. DONE rows are hidden, so
+    adjacency is computed over OPEN items only while the POSTed rank stays in
+    full-order space, keeping button and drag moves consistent with ``move()``.
+    CSP blocks inline ``onclick``; click wiring is done in the single
+    hash-pinned script.
+    """
+    def _btn(direction: str, glyph: str, label: str,
+             to_rank: int | None) -> str:
+        if to_rank is None:
+            return (
+                f'<button type="button" class="backlog-btn backlog-{direction}" '
+                f'aria-label="{h(label)}" disabled>{glyph}</button>'
+            )
+        return (
+            f'<button type="button" class="backlog-btn backlog-{direction}" '
+            f'aria-label="{h(label)}" data-item="{h(item_id)}" '
+            f'data-to-rank="{to_rank}">{glyph}</button>'
+        )
+
+    up_btn = _btn("up", "&#9650;", f"Move {item_id} up", up_rank)
+    down_btn = _btn("down", "&#9660;", f"Move {item_id} down", down_rank)
+    return f'<span class="backlog-btns">{up_btn}{down_btn}</span>'
+
+
+def inject_backlog_reorder_html(html_doc: str, *, sdd_root: Path) -> str:
+    """Inject the SDD-041 Backlog reorder section (OPEN-only priorities view).
+
+    Renders ONLY OPEN backlog ids (a row is OPEN when its BACKLOG.md line does
+    not contain the token ``DONE`` -- the exact rule ``backlog_reorder`` uses).
+    DONE rows are not shown at all. Each open row carries ``data-pid`` and
+    ``data-rank`` (its index in the FULL ``load_order``, so the value
+    ``move()`` expects survives the DONE rows being hidden). Up/down buttons
+    target the adjacent OPEN item's full-order index. Every row shows a real
+    id + title + priority + status via ``_backlog_reorder_meta`` (so no row
+    renders as a bare duplicated id). No-op when there are no open items.
+    Article X safe -- post-processes render_html output.
+    """
+    order = _reorder_load_order(sdd_root)
+    if not order:
+        return html_doc
+
+    done_map = {e.id: e.done for e in _reorder_load_entries(sdd_root)}
+    meta = _backlog_reorder_meta(sdd_root)
+
+    open_ids = [pid for pid in order if not done_map.get(pid, False)]
+    if not open_ids:
+        return html_doc
+    open_total = len(open_ids)
+    full_rank = {pid: i for i, pid in enumerate(order)}
+
+    rows: list[str] = []
+    for pos, pid in enumerate(open_ids):
+        info = meta.get(pid, {})
+        title = info.get("title") or pid
+        priority = info.get("priority", "")
+        status_text = info.get("status") or "OPEN"
+        rank_label = f"rank {pos + 1} of {open_total}"
+
+        up_rank = full_rank[open_ids[pos - 1]] if pos > 0 else None
+        down_rank = (full_rank[open_ids[pos + 1]]
+                     if pos < open_total - 1 else None)
+        buttons = _render_backlog_buttons(pid, up_rank=up_rank,
+                                          down_rank=down_rank)
+        rows.append(
+            f'<div class="backlog-row" draggable="true" '
+            f'data-pid="{h(pid)}" data-rank="{full_rank[pid]}" '
+            f'aria-label="{h(pid)} {h(title)} (drag or use buttons to '
+            f'reorder)">'
+            f'<span class="backlog-handle" aria-hidden="true" '
+            f'title="Drag to reorder">\u2630</span>'
+            f'<span class="backlog-id">{h(pid)}</span>'
+            f'<span class="backlog-title">{h(title)}</span>'
+            f'<span class="backlog-priority">{h(priority)}</span>'
+            f'<span class="backlog-status">{h(status_text)}</span>'
+            f'<span class="backlog-rank">{h(rank_label)}</span>'
+            f'{buttons}'
+            f'</div>'
+        )
+
+    section = (
+        '<section class="zone-backlog-reorder" '
+        'aria-labelledby="backlog-reorder-heading">'
+        + _BACKLOG_REORDER_STYLE
+        + '<h2 id="backlog-reorder-heading">Backlog &mdash; drag to '
+        'reprioritize</h2>'
+        + '<div class="backlog-list">'
+        + "".join(rows)
+        + '</div></section>'
+    )
+    marker = '<main id="main" role="main" class="grid-v3">'
+    if marker in html_doc:
+        return html_doc.replace(marker, marker + section, 1)
+    return html_doc + section
+
+
+# ---------------------------------------------------------------------------- #
 # SDD-041 (F-31): true browser drag-and-drop reorder
 #
-# A single, hash-pinned vanilla-JS block turns the lifecycle cards into a
-# native HTML5 drag surface. The script is:
-#   - additive: emitted only when draggable cards exist; injected by
-#     inject_drag_html AFTER inject_lifecycle_html so the locked render_html
-#     footprint (Article X) is untouched.
+# A single, hash-pinned vanilla-JS block turns the Backlog rows into a native
+# HTML5 drag surface AND wires the per-row up/down buttons. The script is:
+#   - additive: emitted only when draggable rows exist; injected by
+#     inject_drag_html AFTER inject_backlog_reorder_html so the locked
+#     render_html footprint (Article X) is untouched.
 #   - inert as a static file: it no-ops unless location.protocol is http(s),
-#     so the file:// state.html stays keyboard-only (render_reorder_control).
+#     so the file:// state.html stays read-only.
 #   - CSP-pinned: we widen ONLY for this exact script via its sha256 hash --
 #     never 'unsafe-inline'. The hash is computed at import time over the exact
 #     body, so editing the body re-pins automatically (and a mismatch fails
 #     closed by browser CSP enforcement).
-#   - force-free: the drop handler posts {item, to_rank} only. Forcing past a
+#   - force-free: the handlers post {item, to_rank} only. Forcing past a
 #     dependency lock is a Level-2 human decision (ADR-017) and is NEVER sent
-#     by a drag gesture; a 409 surfaces the reason and tells the user to use
-#     the CLI with --force.
+#     by a drag or button gesture; a 409 surfaces the reason.
 # ---------------------------------------------------------------------------- #
 
 _DRAG_SCRIPT_BODY = (
     "(function(){"
     "if(location.protocol!=='http:'&&location.protocol!=='https:')return;"
+    "function postReorder(item,toRank,el){"
+    "if(!item||isNaN(toRank))return;"
+    "fetch('/reorder',{method:'POST',"
+    "headers:{'Content-Type':'application/json'},"
+    "body:JSON.stringify({item:item,to_rank:toRank})})"
+    ".then(function(r){return r.json().then(function(d){"
+    "return {s:r.status,d:d};});})"
+    ".then(function(res){if(res.s===200){location.reload();return;}"
+    "var reason=(res.d&&res.d.reason)?res.d.reason:'reorder rejected';"
+    "if(el){el.classList.add('drag-rejected');"
+    "el.setAttribute('title','blocked: '+reason+"
+    "' -- forcing is a Level-2 decision; use the CLI with --force');}})"
+    ".catch(function(){});}"
     "var dragId=null;"
     "function onStart(e){dragId=e.currentTarget.getAttribute('data-pid');"
     "e.dataTransfer.effectAllowed='move';}"
@@ -2784,24 +2940,21 @@ _DRAG_SCRIPT_BODY = (
     "t.classList.remove('drag-over');"
     "var toRank=parseInt(t.getAttribute('data-rank'),10);"
     "var item=dragId;dragId=null;"
-    "if(!item||isNaN(toRank))return;"
-    "fetch('/reorder',{method:'POST',"
-    "headers:{'Content-Type':'application/json'},"
-    "body:JSON.stringify({item:item,to_rank:toRank})})"
-    ".then(function(r){return r.json().then(function(d){"
-    "return {s:r.status,d:d};});})"
-    ".then(function(res){if(res.s===200){location.reload();return;}"
-    "var reason=(res.d&&res.d.reason)?res.d.reason:'reorder rejected';"
-    "t.classList.add('drag-rejected');"
-    "t.setAttribute('title','blocked: '+reason+"
-    "' -- forcing is a Level-2 decision; use the CLI with --force');})"
-    ".catch(function(){});}"
-    "var cards=document.querySelectorAll('.lifecycle-card[draggable=\"true\"]');"
-    "for(var i=0;i<cards.length;i++){var c=cards[i];"
+    "postReorder(item,toRank,t);}"
+    "var rows=document.querySelectorAll('.backlog-row[draggable=\"true\"]');"
+    "for(var i=0;i<rows.length;i++){var c=rows[i];"
     "c.addEventListener('dragstart',onStart);"
     "c.addEventListener('dragover',onOver);"
     "c.addEventListener('dragleave',onLeave);"
     "c.addEventListener('drop',onDrop);}"
+    "function onBtn(e){var el=e.currentTarget;"
+    "var item=el.getAttribute('data-item');"
+    "var toRank=parseInt(el.getAttribute('data-to-rank'),10);"
+    "var row=el.closest?el.closest('.backlog-row'):null;"
+    "postReorder(item,toRank,row);}"
+    "var btns=document.querySelectorAll('.backlog-up,.backlog-down');"
+    "for(var j=0;j<btns.length;j++){"
+    "btns[j].addEventListener('click',onBtn);}"
     "})();"
 )
 
@@ -3345,7 +3498,8 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
         sprint_goal=sprint_goal, decisions=decisions,
     )
     htm = inject_user_gates_html(htm, user_gates)
-    # SDD-036: lifecycle pipeline + four-card docs row + reorder control.
+    # SDD-036: lifecycle pipeline + four-card docs row (static; reorder moved
+    # to the dedicated Backlog section below).
     htm = inject_lifecycle_html(
         htm, features=features, sdd_root=sdd_root, current_sprint=current_sprint)
     # SDD-037 (F-28): Dispatches card then health-pills strip. Both are
@@ -3354,9 +3508,13 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
     # strip; neither can alter build()'s exit.
     htm = inject_dispatches_html(htm, ledger=ledger, sdd_root=sdd_root)
     htm = inject_health_pills_html(htm, sdd_root=sdd_root, ledger=ledger)
+    # SDD-041 (F-31 rebuild): the real Backlog reorder surface, keyed by the
+    # canonical SDD-xxx ids the POST /reorder endpoint accepts. Injected before
+    # inject_drag_html so its draggable rows arm the drag + CSP layer.
+    htm = inject_backlog_reorder_html(htm, sdd_root=sdd_root)
     # SDD-041 (F-31): native drag-and-drop layer. Injected LAST so it post-
     # processes the fully assembled doc -- appends one hash-pinned <script> and
-    # widens the CSP for exactly that script. No-op when no draggable cards.
+    # widens the CSP for exactly that script. No-op when no draggable rows.
     htm = inject_drag_html(htm)
 
     result = {

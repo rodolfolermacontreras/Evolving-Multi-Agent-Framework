@@ -58,7 +58,6 @@ from cli.state_builder import (
     order_features_for_display,
     render_docs_row,
     render_lifecycle_pipeline,
-    render_reorder_control,
     resolve_docs_cards,
     _feature_display_id,
     _sprint_stage,
@@ -2591,41 +2590,6 @@ class TestDocsRow:
         assert '<a class="docs-card" href="../specs/feat-a/spec.md">' in out
 
 
-class TestReorderControl:
-    """AC-8: keyboard-accessible reorder control (no JS framework)."""
-
-    def test_control_present_with_buttons(self) -> None:
-        out = render_reorder_control("SDD-036", rank=1, total=3)
-        assert 'class="reorder-control"' in out
-        assert out.count('<button type="button"') == 2
-        assert "rank 2 of 3" in out
-
-    def test_up_disabled_at_top(self) -> None:
-        out = render_reorder_control("SDD-036", rank=0, total=3)
-        assert 'class="reorder-btn reorder-up" aria-label="Move SDD-036 up' in out
-        assert "reorder-up" in out and "disabled>" in out
-        # down active -> carries data-cmd
-        assert "reorder-down" in out
-        assert "--to-rank 1" in out
-
-    def test_down_disabled_at_bottom(self) -> None:
-        out = render_reorder_control("SDD-036", rank=2, total=3)
-        # up active
-        assert "--to-rank 1" in out
-        # down disabled
-        assert 'reorder-down" aria-label="Move SDD-036 down' in out
-        assert out.rstrip().count("disabled>") == 1
-
-    def test_command_targets_backlog_reorder(self) -> None:
-        out = render_reorder_control("SDD-036", rank=1, total=3)
-        assert "python cli/backlog_reorder.py move --item SDD-036 --to-rank 0" in out
-        assert "python cli/backlog_reorder.py move --item SDD-036 --to-rank 2" in out
-
-    def test_no_script_tag(self) -> None:
-        out = render_reorder_control("SDD-036", rank=1, total=3)
-        assert "<script" not in out.lower()
-
-
 class TestDisplayOrderOverlay:
     """AC-8: display-order overlay reader + feature ordering."""
 
@@ -2746,7 +2710,9 @@ class TestInjectLifecycleHtml:
             self.DOC, features=self._features(), sdd_root=tmp_path,
             current_sprint=None)
         assert out.count('class="docs-row"') == 2
-        assert out.count('class="reorder-control"') == 2
+        # SDD-041 rebuild: reorder moved to the dedicated Backlog section; the
+        # lifecycle cards are static and carry no reorder control.
+        assert 'class="reorder-control"' not in out
 
     def test_overlay_order_reflected_in_section(self, tmp_path: Path) -> None:
         (tmp_path / "backlog").mkdir()
@@ -3194,28 +3160,32 @@ class TestSdd037IndicatorsNotGates:
 
 # ===========================================================================
 # SDD-041 (F-31): true browser drag-and-drop reorder
-# Additive over SDD-036. The keyboard reorder control (render_reorder_control)
-# stays intact; this layer adds native HTML5 drag affordances, one hash-pinned
-# vanilla-JS block, and the POST /reorder write endpoint. Force is never
-# auto-applied by a drag gesture (ADR-017 / ADR-019).
+# Rebuild: the drag surface and reorder buttons live in the dedicated Backlog
+# section (inject_backlog_reorder_html), keyed by canonical SDD-xxx ids -- the
+# exact ids the POST /reorder endpoint accepts. The lifecycle cards are now
+# static. Force is never auto-applied by a drag/button gesture (ADR-017 /
+# ADR-019).
 # ===========================================================================
 
 import io  # noqa: E402
+import re  # noqa: E402
 
 import cli.state_builder as _sb  # noqa: E402  -- module handle for monkeypatch
 from cli.state_builder import (  # noqa: E402
     DashboardHandler,
     Feature,
     handle_reorder_request,
+    inject_backlog_reorder_html,
     inject_drag_html,
     inject_lifecycle_html,
     _DRAG_SCRIPT_BODY,
     _DRAG_SCRIPT_CSP,
 )
+from cli.backlog_reorder import load_order  # noqa: E402
 
 
 class TestSdd041DragAffordance:
-    """AC: lifecycle cards become draggable; keyboard control survives."""
+    """AC: lifecycle cards are static; the drag surface is the Backlog section."""
 
     DOC = ('<main id="main" role="main" class="grid-v3">'
            '<section class="zone-next"><h2>Next</h2></section></main>')
@@ -3232,19 +3202,20 @@ class TestSdd041DragAffordance:
         out = inject_lifecycle_html(
             self.DOC, features=self._features(), sdd_root=tmp_path,
             current_sprint=None)
-        # data-pid is unique to feature cards (the CSS selector also contains
-        # the literal draggable="true", so count by data-pid instead).
-        assert out.count('data-pid="') == 2
-        assert 'draggable="true"' in out and 'data-rank="0"' in out
-        assert 'class="drag-handle"' in out
+        # SDD-041 rebuild: lifecycle cards no longer drag (the Backlog section
+        # owns the SDD-xxx-keyed drag surface). Cards must be static here.
+        assert 'draggable="true"' not in out
+        assert 'class="drag-handle"' not in out
+        assert 'data-pid="' not in out
 
     def test_keyboard_reorder_control_survives(self, tmp_path: Path) -> None:
         out = inject_lifecycle_html(
             self.DOC, features=self._features(), sdd_root=tmp_path,
             current_sprint=None)
-        # SDD-036 keyboard affordance is untouched: two reorder controls.
-        assert out.count('class="reorder-control"') == 2
-        assert "reorder-btn" in out
+        # SDD-041 rebuild: the lifecycle reorder control is retired; reorder is
+        # the Backlog section's job.
+        assert 'class="reorder-control"' not in out
+        assert "reorder-btn" not in out
 
     def test_lifecycle_injector_stays_script_free(self, tmp_path: Path) -> None:
         out = inject_lifecycle_html(
@@ -3301,6 +3272,220 @@ class TestSdd041DragScript:
     def test_noop_without_draggable_cards(self) -> None:
         plain = "<html><body><p>no cards</p></body></html>"
         assert inject_drag_html(plain) == plain
+
+
+def test_repo_backlog_has_no_cross_project_iai_ids() -> None:
+    """Change 1: insights_ai (IAI-xx) rows must not contaminate the SDD backlog.
+
+    The framework backlog is SDD-only; cross-project intake belongs in its own
+    project, not here. This guard reads the real repo BACKLOG.md.
+    """
+    backlog = Path(__file__).resolve().parent.parent / "backlog" / "BACKLOG.md"
+    text = backlog.read_text(encoding="utf-8")
+    assert "IAI-" not in text
+    assert "insights_ai" not in text
+
+
+class TestSdd041BacklogReorderSection:
+    """AC (rebuild): the Backlog section is the real, working reorder surface.
+
+    DA-Evidence Discipline: every claim below is tied to the production
+    pipeline -- the ids rendered into the section are fed straight into the
+    real ``handle_reorder_request`` (no monkeypatch), and we read the audit /
+    display-order artefacts off disk to prove the write happened.
+    """
+
+    _OPEN_ROW = re.compile(
+        r'<div class="backlog-row" draggable="true" '
+        r'data-pid="([A-Z]+-\d+)" data-rank="(\d+)"'
+    )
+    _DONE_ROW = re.compile(
+        r'<div class="backlog-row backlog-done" data-pid="([A-Z]+-\d+)"'
+    )
+
+    def _build_html(self, sdd: Path) -> str:
+        return _sb.build(sdd_root=sdd, write=False)["html"]
+
+    def test_section_heading_present(self, tmp_path: Path) -> None:
+        html_doc = self._build_html(_seed_sdd_root(tmp_path))
+        assert 'id="backlog-reorder-heading"' in html_doc
+        assert "Backlog" in html_doc
+
+    def test_rendered_ids_are_accepted_by_the_real_endpoint(
+            self, tmp_path: Path) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        html_doc = self._build_html(sdd)
+        rows = self._OPEN_ROW.findall(html_doc)
+        # The seed backlog has 4 OPEN SDD-xxx items -> 4 draggable rows.
+        assert len(rows) == 4
+        order = load_order(sdd)
+        for pid, rank in rows:
+            assert pid in order
+            status, body = handle_reorder_request(
+                sdd, {"item": pid, "to_rank": int(rank)})
+            assert status == 200, f"{pid} rejected: {body}"
+            assert body["status"] == "ok"
+
+    def test_drag_move_persists_to_disk(self, tmp_path: Path) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        html_doc = self._build_html(sdd)
+        rows = self._OPEN_ROW.findall(html_doc)
+        first_pid = rows[0][0]
+        # Move the top item down one rank via the real endpoint.
+        status, _ = handle_reorder_request(sdd, {"item": first_pid, "to_rank": 1})
+        assert status == 200
+        # Artefacts exist on disk (real pipeline, not a prediction).
+        assert (sdd / "backlog" / "display-order.json").exists()
+        assert (sdd / "ledger" / "reorder-audit.jsonl").exists()
+        # And the canonical order now reflects the move.
+        assert load_order(sdd).index(first_pid) == 1
+
+    def test_updown_buttons_carry_adjacent_ranks(self, tmp_path: Path) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        html_doc = self._build_html(sdd)
+        # SDD-003 is rank 1 in the seed natural order: up -> 0, down -> 2.
+        assert 'data-item="SDD-003" data-to-rank="0"' in html_doc
+        assert 'data-item="SDD-003" data-to-rank="2"' in html_doc
+        # The down-button target is a real, accepted move.
+        status, body = handle_reorder_request(sdd, {"item": "SDD-003", "to_rank": 2})
+        assert status == 200 and body["status"] == "ok"
+
+    def test_done_rows_are_not_rendered(self, tmp_path: Path) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        # Append a DONE row to the P2 table.
+        backlog = sdd / "backlog" / "BACKLOG.md"
+        text = backlog.read_text(encoding="utf-8")
+        done_row = (
+            "| SDD-009 | shipped thing | P2 | 8 | 3 | 0.9 | 2 | 10.8 "
+            "| PI-2 Sprint A | DONE |\n"
+        )
+        text = text.replace(
+            "| SDD-004 | qa.py | P2 | 6 | 2 | 0.8 | 2 | 4.8 | PI-2 Sprint B | Approved |\n",
+            "| SDD-004 | qa.py | P2 | 6 | 2 | 0.8 | 2 | 4.8 | PI-2 Sprint B | Approved |\n"
+            + done_row,
+        )
+        backlog.write_text(text, encoding="utf-8")
+
+        html_doc = self._build_html(sdd)
+        # Option A: DONE rows are not shown at all -- not as a done div, not as
+        # a draggable open row.
+        assert self._DONE_ROW.findall(html_doc) == []
+        open_ids = [pid for pid, _ in self._OPEN_ROW.findall(html_doc)]
+        assert "SDD-009" not in open_ids
+        # The four OPEN seed rows remain the complete visible set.
+        assert len(open_ids) == 4
+
+    def test_open_rows_all_carry_non_empty_titles(self, tmp_path: Path) -> None:
+        # Owner acceptance: ONLY open items, each with a NON-EMPTY title (never
+        # a bare duplicated id).
+        sdd = _seed_sdd_root(tmp_path)
+        html_doc = self._build_html(sdd)
+        for pid, _ in self._OPEN_ROW.findall(html_doc):
+            # The title span for this row must not be the id itself.
+            assert f'<span class="backlog-title">{pid}</span>' not in html_doc
+        # Every seed row's real title is present.
+        for title in ("state_builder.py", "fleet.py", "qa.py", "Dashboard"):
+            assert f'<span class="backlog-title">{title}</span>' in html_doc
+
+    def test_dash_rice_open_row_shows_real_title(self, tmp_path: Path) -> None:
+        # Real-shape OPEN row: '--' RICE placeholder AND a trailing notes column
+        # (11 cells). load_backlog cannot parse it; the tolerant meta pass must,
+        # so the row renders with its real title + status rather than a bare id.
+        sdd = _seed_sdd_root(tmp_path)
+        backlog = sdd / "backlog" / "BACKLOG.md"
+        text = backlog.read_text(encoding="utf-8")
+        dash_row = (
+            "| SDD-099 | tolerant title row | P1 | H | H | H | M | -- "
+            "| Out-of-band | Pending Level-2 approval | extra notes column |\n"
+        )
+        text = text.replace(
+            "| SDD-001 | Dashboard | P3 | 4 | 2 | 0.9 | 3 | 2.4 | Unscheduled | Design |\n",
+            "| SDD-001 | Dashboard | P3 | 4 | 2 | 0.9 | 3 | 2.4 | Unscheduled | Design |\n"
+            + dash_row,
+        )
+        backlog.write_text(text, encoding="utf-8")
+
+        html_doc = self._build_html(sdd)
+        assert 'data-pid="SDD-099"' in html_doc
+        assert '<span class="backlog-title">tolerant title row</span>' in html_doc
+        # Status comes from col 9 (the Status column), not the trailing notes.
+        assert "Pending Level-2 approval" in html_doc
+        assert "extra notes column" not in html_doc
+        # No bare-id regression for this row.
+        assert '<span class="backlog-title">SDD-099</span>' not in html_doc
+
+    def test_done_interleave_preserves_full_order_ranks_and_drag(
+            self, tmp_path: Path) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        backlog = sdd / "backlog" / "BACKLOG.md"
+        text = backlog.read_text(encoding="utf-8")
+        # Interleave a DONE row between SDD-002 and SDD-003.
+        done_row = (
+            "| SDD-009 | shipped | P2 | 8 | 3 | 0.9 | 2 | 10.8 "
+            "| PI-2 Sprint A | DONE |\n"
+        )
+        text = text.replace(
+            "| SDD-002 | state_builder.py | P2 | 8 | 3 | 0.9 | 2 | 10.8 | PI-2 Sprint A | Approved |\n",
+            "| SDD-002 | state_builder.py | P2 | 8 | 3 | 0.9 | 2 | 10.8 | PI-2 Sprint A | Approved |\n"
+            + done_row,
+        )
+        backlog.write_text(text, encoding="utf-8")
+
+        order = load_order(sdd)
+        assert order == ["SDD-002", "SDD-009", "SDD-003", "SDD-004", "SDD-001"]
+
+        html_doc = self._build_html(sdd)
+        # DONE row is hidden; the four open rows remain, in full-order sequence.
+        assert self._DONE_ROW.findall(html_doc) == []
+        open_rows = self._OPEN_ROW.findall(html_doc)
+        assert [pid for pid, _ in open_rows] == [
+            "SDD-002", "SDD-003", "SDD-004", "SDD-001"]
+        # data-rank is the FULL load_order index (SDD-003 sits at index 2).
+        assert dict(open_rows)["SDD-003"] == "2"
+        # Buttons target adjacent OPEN items' full-order indices, skipping DONE.
+        assert 'data-item="SDD-003" data-to-rank="0"' in html_doc  # up -> 002
+        assert 'data-item="SDD-003" data-to-rank="3"' in html_doc  # down -> 004
+        # Real drag round-trip: drop SDD-004 (after SDD-003) onto SDD-003's full
+        # index -> SDD-004 lands immediately before SDD-003 in the new order.
+        status, body = handle_reorder_request(
+            sdd, {"item": "SDD-004", "to_rank": 2})
+        assert status == 200 and body["status"] == "ok"
+        new_order = load_order(sdd)
+        assert new_order.index("SDD-004") < new_order.index("SDD-003")
+
+    def test_dependency_blocked_move_returns_409(self, tmp_path: Path) -> None:
+        # A real dependency lock: SDD-100 depends_on SDD-101. Natural order is
+        # [SDD-101, SDD-100]; moving SDD-100 above its blocker must 409.
+        sdd = tmp_path / "dep"
+        (sdd / "backlog").mkdir(parents=True)
+        (sdd / "ledger").mkdir(parents=True)
+        (sdd / "backlog" / "BACKLOG.md").write_text(
+            "# Product Backlog\n\n## P2 - Should Have\n\n"
+            "| ID | Title | Priority | Reach | Impact | Confidence | Effort | RICE | Sprint | Status |\n"
+            "|----|-------|----------|-------|--------|------------|--------|------|--------|--------|\n"
+            "| SDD-101 | base | P2 | 8 | 3 | 0.9 | 2 | 10.8 | PI-2 | Approved |\n"
+            "| SDD-100 | dependent | P2 | 8 | 3 | 0.9 | 2 | 10.8 | PI-2 | Approved |\n",
+            encoding="utf-8",
+        )
+        for name, fid, dep in (
+            ("dep-101", "SDD-101", None),
+            ("dep-100", "SDD-100", "SDD-101"),
+        ):
+            spec = sdd / "specs" / name
+            spec.mkdir(parents=True)
+            front = "---\n"
+            if dep:
+                front += f"depends_on: [{dep}]\n"
+            front += "---\n"
+            (spec / "spec.md").write_text(
+                f"{front}# Feature Spec\n\n- Feature ID: {fid}\n",
+                encoding="utf-8",
+            )
+        assert load_order(sdd) == ["SDD-101", "SDD-100"]
+        status, body = handle_reorder_request(sdd, {"item": "SDD-100", "to_rank": 0})
+        assert status == 409
+        assert body["status"] == "blocked"
+        assert "SDD-101" in body["reason"]
 
 
 class TestSdd041HandleReorder:

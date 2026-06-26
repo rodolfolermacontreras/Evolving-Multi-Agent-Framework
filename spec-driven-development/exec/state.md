@@ -1,6 +1,6 @@
 # Executive State
 
-Generated date: 2026-06-25
+Generated date: 2026-06-26
 Current PI: PI-6 (Dashboard Reinvestment + Carryover Cleanup)
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
 Active focus: Continue current sprint anchor 'state-builder-fixes' (SDD-040)
@@ -74,32 +74,6 @@ PI progress: 0/0 commitments complete (0%)
 | ID | Title | Priority | RICE | Status |
 |----|-------|----------|------|--------|
 | SDD-007 | Cloud-deployed live Bridge dashboard on Azure Container Apps with Entra ID auth, scale-to-zero, OIDC CI/CD | P3 | 0.9 | DEPLOYED (v1 live, see PROVISIONED.md) |
-
-### [AFK]
-
-| ID | Title | Priority | RICE | Status |
-|----|-------|----------|------|--------|
-| IAI-01 | Full 178-leader batch re-run (Sprint 14.5) | P1 | 13.5 | Awaiting batch window |
-| IAI-05 | Azure Static Web App AAD auth deployment | P2 | 2.4 | Config ready, not deployed |
-| IAI-06 | SEGMENT_MAPPING EPS/MG gap (61 sellers) | P4 | 0.375 | Documented, deferred |
-
-### [BLOCKED on IAI-01]
-
-| ID | Title | Priority | RICE | Status |
-|----|-------|----------|------|--------|
-| IAI-03 | Merge 112 commits to dev | P1 | 16.0 | Pending |
-
-### [BLOCKED on ZS]
-
-| ID | Title | Priority | RICE | Status |
-|----|-------|----------|------|--------|
-| IAI-04 | ZS QC second-round validation | P1 | 11.2 | Awaiting ZS feedback |
-
-### [HITL]
-
-| ID | Title | Priority | RICE | Status |
-|----|-------|----------|------|--------|
-| IAI-02 | Nandini CVP demo (May 8) | P1 | 30.0 | Scheduled |
 
 ## Fleet
 

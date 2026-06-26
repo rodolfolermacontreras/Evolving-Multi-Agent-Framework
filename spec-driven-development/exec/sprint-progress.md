@@ -1090,7 +1090,7 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - Date: 2026-06-26
 - Owner: Principal Executive Manager (lead/routing + green re-verify at close); Principal Architect + PM (F-34 design, ADR-020); Principal Software Developer (F-36 implementation + F-37 close); developer-cli-specialist-1 (SDD-045 CLI work).
 - Features completed: F-34 (design SDD-043 + SDD-044), F-35 (design SDD-045), F-36 (implementation of all three), F-37 (this close).
-- Commits: `<this close commit on master>`
+- Commits: `ecd13b3` (Sprint 14 close on master)
 - Tests: 481 -> 501 passed, 2 skipped (+20 from `cli/test_sdd045.py`). EM-reverified at close (exit 0).
 - Schema lint: clean (exit 0). EM-reverified at close.
 - Validation: SDD-043 11/11 REQUIRED + manual (owner ratifies ADR-020); SDD-044 7/7 REQUIRED + manual (owner confirms tone on a live reply); SDD-045 17/17 REQUIRED + manual checks (M-1 confirmed; M-2/M-3/M-4 owner-gated at this close) -- covering per-item A-1/A-4/A-5/A-6/B-3. All real-run evidence on disk (DA-Evidence Discipline).

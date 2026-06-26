@@ -1,7 +1,7 @@
 ---
 id: SDD-PI-6-CURRENT_PI-sprint
 type: sprint
-status: active
+status: done
 owner: principal-product-manager
 updated: 2026-06-26
 sprint: PI-6
@@ -9,7 +9,11 @@ sprint: PI-6
 
 # PI-6: Dashboard Reinvestment + Carryover Cleanup
 
-- Status: **ACTIVE -> READY TO CLOSE** (Sprint 1 / Sprint 10 CLOSED locally 2026-06-10; Sprint 2 / Sprint 11 CLOSED 2026-06-24 with owner-approved commit + push; Sprint 3 / Sprint 12 / SDD-037 CLOSED 2026-06-25 with owner-approved commit + push; Sprint 4 / Sprint 13 CLOSED 2026-06-26 with scope SDD-042 + SDD-041 + SDD-039 and owner-approved commit + push -- SDD-038/034/PI-4 housekeeping deferred to PI-7. The PI-6 CLOSE itself remains a separate owner-approved decision and is NOT stamped here.)
+- Status: **CLOSED 2026-06-26 (owner-approved via Executive Manager)** (Sprint 1 / Sprint 10 CLOSED locally 2026-06-10; Sprint 2 / Sprint 11 CLOSED 2026-06-24 with owner-approved commit + push; Sprint 3 / Sprint 12 / SDD-037 CLOSED 2026-06-25 with owner-approved commit + push; Sprint 4 / Sprint 13 CLOSED 2026-06-26 with scope SDD-042 + SDD-041 + SDD-039 and owner-approved commit + push -- SDD-038/034/PI-4 housekeeping deferred to PI-7.)
+
+## PI-6 Retro
+
+PI-6 closed DONE-WITH-CARRYOVER on 2026-06-26, ratified by the owner via the Executive Manager ("yes, lets close this" / "yes to close"). Across four sprints it shipped six features and resolved the owner-visible dashboard complaint that opened the PI: SDD-040 (parser fix + serve-mode auto-refresh, killing the stale `Active focus: azure-decommission` line), SDD-036 (lifecycle pipeline + 4-card docs row + safeguarded keyboard drag-to-reorder, ADR-017), SDD-037 (Dispatches card + 4-pill dashboard health strip), SDD-042 (newest-ACTIVE-PI header/title fix), SDD-041 (working OPEN-only Backlog drag-reorder, Option A, owner-accepted in-browser), and SDD-039 (Article VII context-isolation wording + ADR-018 + principles.md 1.3.0 -> 1.4.0). Tests grew 337 -> 481, schema lint stayed clean, and the Article X render-function lock held throughout (every new surface landed as an additive `inject_*` post-processor). The Scott UI patterns are now functionally complete. The hard lesson was SDD-041, which first shipped broken (drag bolted to spec-dir-keyed lifecycle cards that the safeguarded `move()` rejects, masked by synthetic-id tests) and was caught only by owner in-browser testing -- reinforcing DA-Evidence Discipline and driving the Option A rebuild with a real-pipeline integration test. Carry-forward to PI-7: SDD-038 (aesthetic tokens), SDD-034 (content-shingle dedup), PI-4 housekeeping (domain-skill annotations, GH Actions Node.js bump), SDD-041 Option B reorder re-optimization, SDD-042 pill-nav, Current Sprint widget repoint, and the SDD-039 incidental "fresh session" wording cleanup. SDD-035 (Azure decommission) remains out-of-band.
 - Theme: Ship dashboard patterns that make the framework's state visible and useful at a glance, then clear the carryover backlog accumulated across PI-3..PI-5.
 - Started: 2026-06-10
 - Owner: principal-executive-manager

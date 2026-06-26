@@ -117,6 +117,21 @@ lifecycle end-to-end on a real feature.
 
 ---
 
+## PI-6: Dashboard Reinvestment + Carryover Cleanup (closed 2026-06-26)
+
+- [x] Sprint 1 / Sprint 10: Dashboard parser fix + serve-mode auto-refresh -- SDD-040 (CLOSED locally 2026-06-10; stale `Active focus: azure-decommission` resolved, stdlib-only refresh)
+- [x] Sprint 2 / Sprint 11: Lifecycle pipeline + 4-card docs row + safeguarded drag-to-reorder -- SDD-036 (CLOSED 2026-06-24; ADR-017; 349 -> 412 tests)
+- [x] Sprint 3 / Sprint 12: Dispatches card + 4-pill dashboard health strip -- SDD-037 (CLOSED 2026-06-25 at `d417c66`; 412 -> 450 tests)
+- [x] Sprint 4 / Sprint 13: Final value sprint -- SDD-042 dashboard PI-label fix (`ac1ccf0`), SDD-041 OPEN-only Backlog drag-reorder Option A (`afbfe47`), SDD-039 Article VII wording + ADR-018 + principles.md 1.3.0 -> 1.4.0 (`699d8bb`) (CLOSED 2026-06-26)
+- [ ] SDD-038 aesthetic tokens -- DEFERRED to PI-7
+- [ ] SDD-034 content-shingle dedup upgrade -- DEFERRED to PI-7 (carried from PI-5)
+- [ ] PI-4 housekeeping (domain-skill annotations, GitHub Actions Node.js bump) -- DEFERRED to PI-7 (carried from PI-4/PI-5)
+- [ ] SDD-041 Option B reorder re-optimization, SDD-042 pill-nav, Current Sprint widget repoint, SDD-039 incidental "fresh session" wording cleanup -- DEFERRED to PI-7
+
+**PI-6 close decision: DONE-WITH-CARRYOVER.** Ratified by owner 2026-06-26 via Executive Manager (owner direction "yes, lets close this" / "yes to close"). All four planned PI-6 sprints closed with full validation contracts and owner-approved commit + push; six features shipped (SDD-040, SDD-036, SDD-037, SDD-042, SDD-041, SDD-039). Tests 337 -> 481 across the PI. The Scott UI patterns (lifecycle pipeline, docs cards, dispatches, health pills, working drag-reorder) are now functionally complete. No PI-6 commitment was loosened; the deferred items (SDD-038, SDD-034, PI-4 housekeeping, plus the Sprint 13 residuals) are explicit carry-forward to PI-7.
+
+---
+
 ## Tech Debt Backlog
 
 These items are tracked and prioritized but not yet scheduled.

@@ -1,11 +1,11 @@
 # Executive State
 
 Generated date: 2026-06-26
-Current PI: PI-6 (Dashboard Reinvestment + Carryover Cleanup)
+Current PI: PI-4 (Alpha Release)
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
-Active focus: Continue current sprint anchor 'state-builder-fixes' (SDD-040)
+Active focus: Finish implementation of 'azure-decommission'
 
-PI progress: 0/0 commitments complete (0%)
+PI progress: 4/6 commitments complete (67%)
 
 ## Spec Pipeline
 
@@ -121,7 +121,8 @@ _none -- no dispatches without outcome older than 24h_
 
 ## Next Milestones
 
-_no PI commitments registered_
+- Domain skills marked as reference examples (DEFERRED to PI-5)
+- GitHub Actions Node.js deprecation resolved (DEFERRED to PI-5)
 
 ---
 

@@ -7,7 +7,7 @@ any new work. Consult this file BEFORE writing a spec, planning a sprint,
 or dispatching a worker, to ensure you are not duplicating completed work
 or introducing conflicts with in-flight work.
 
-Current PI: **PI-6 (Dashboard Reinvestment + Carryover Cleanup)**
+Current PI: **PI-4 (Alpha Release)**
 
 ---
 

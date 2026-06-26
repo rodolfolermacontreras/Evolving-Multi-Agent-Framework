@@ -944,3 +944,25 @@ Kickoff: `SPRINT-13-KICKOFF.prompt.md` (committed `65d2d05`). Scope: SDD-042 (F-
 - Owner ratification: **APPROVED FOR COMMIT + PUSH** (owner direction 2026-06-26 via Executive Manager: "yes, lets close this")
 - Notes: Sprint 13 delivered the three highest-value remaining PI-6 items under owner delegation, but SDD-041 was the sprint's hard lesson. It first shipped broken at `efefc92`: the drag was bolted to the lifecycle cards, which are keyed by spec-dir names that the safeguarded `move()` rejects, and the synthetic-id unit tests gave a false green that masked the defect. The break was caught only by the owner testing the drag in-browser, then rebuilt as Option A -- a dedicated OPEN-only "Backlog -- drag to reprioritize" section keyed by SDD-xxx, validated by a real-pipeline integration test (DA-Evidence Discipline) instead of synthetic ids. The rebuild also removed cross-project IAI contamination that had been leaking into the exec surfaces. The close additionally surfaced a deprecated Current Sprint widget source (`load_sprint_table` reads abandoned `Management/PI-N/Sprint-N-*/SPEC.md` subdirs) -> filed to PI-7.
 - Next: PI-6 close decision (separate owner-approved step); PI-7 hardening kickoff (carryovers above).
+
+---
+
+### PI-6 -- CLOSED
+
+- Date: 2026-06-26
+- PI: PI-6 (Dashboard Reinvestment + Carryover Cleanup)
+- Close decision: **DONE-WITH-CARRYOVER**
+- Owner ratification: APPROVED. Owner direction 2026-06-26 via Executive Manager ("yes, lets close this" / "yes to close"). This block stamps the separate, owner-approved PI-6 CLOSE that Sprint 13 deliberately left unstamped.
+- Tests: 481 passed, 2 skipped (PI floor 337 at PI-5 baseline -> 481 at close)
+- Schema lint: clean (exit 0)
+- Sprints (all 4 CLOSED):
+  - Sprint 1 / Sprint 10 -- SDD-040 (parser fix + serve-mode auto-refresh). CLOSED locally 2026-06-10 (owner: no-push close prep); commit pending, no push generated. 337 -> 349.
+  - Sprint 2 / Sprint 11 -- SDD-036 (lifecycle pipeline + 4-card docs row + safeguarded drag-to-reorder; ADR-017). CLOSED 2026-06-24, owner-approved commit + push. 349 -> 412.
+  - Sprint 3 / Sprint 12 -- SDD-037 (Dispatches card + 4-pill dashboard health strip). CLOSED 2026-06-25 at `d417c66` (+ close `84db2de`), owner-approved commit + push. 412 -> 450.
+  - Sprint 4 / Sprint 13 -- SDD-042 `ac1ccf0` (PI-label fix), SDD-041 `afbfe47` (OPEN-only Backlog drag-reorder, Option A), SDD-039 `699d8bb` (Article VII wording + ADR-018). CLOSED 2026-06-26, owner-approved commit + push. 450 -> 481.
+- Features shipped (6): SDD-040, SDD-036, SDD-037, SDD-042, SDD-041, SDD-039
+- ADRs: ADR-017 (reorder safeguards), ADR-018 (Article VII context-isolation wording), ADR-019 (dashboard reorder POST endpoint)
+- principles.md: 1.3.0 -> 1.4.0 (SDD-039, MINOR -- clarification of existing intent)
+- Article X lock: HELD across the entire PI -- the five SHA-pinned render functions were never edited; every PI-6 surface is an additive `inject_*` post-processor. `TestS1FootprintLockGuard` goldens PASS.
+- Carryover to PI-7: SDD-038 (aesthetic tokens), SDD-034 (content-shingle dedup), PI-4 housekeeping (domain-skill annotations, GitHub Actions Node.js bump), SDD-041 Option B reorder re-optimization, SDD-042 pill-nav, Current Sprint widget repoint (deprecated `Management/PI-N/Sprint-N-*/SPEC.md` source), SDD-039 incidental "fresh session" wording cleanup. SDD-035 (Azure decommission) out-of-band.
+- Notes: PI-6 reinvested in the live dashboard after the trust defect that opened it, shipping the Scott UI patterns to functional completeness without ever breaching the Article X render lock. Four sprints, six features, 337 -> 481 tests, schema lint clean throughout. The PI's hard lesson (SDD-041's broken-first drag, caught only by owner in-browser testing) reinforced DA-Evidence Discipline and drove a real-pipeline-validated Option A rebuild. No PI-6 commitment was loosened; all deferrals are explicit PI-7 carry-forward.

@@ -1107,3 +1107,26 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - Owner ratification: **APPROVED FOR COMMIT + PUSH** (owner direction 2026-06-26 via Executive Manager: "accept and approve" = ACCEPT ADR-020 + APPROVE commit + push to close Sprint 14).
 - Notes: Sprint 14 opened PI-7 with the highest-trust hardening slice -- the clone-and-run portability story becomes real (personal ledger detached, fresh DB on setup, one setup command, a doctor health check, origin-token and governance lints), and the orchestration layer matures (a sprint-scoped Sprint EM agent plus a plain-language comms discipline that now binds every human-facing principal). All three features were implemented in F-36 with real-run evidence on disk and left uncommitted for owner pre-push review; F-37 flipped ADR-020 to Accepted, marked the BACKLOG rows DONE, regenerated the exec dashboard, and committed + pushed under owner approval. No constitution edit was required and the Article X render lock was never breached. Two out-of-scope untracked artifacts (`backlog/display-order.json`, `ledger/reorder-audit.jsonl`, both from SDD-041 reorder work) were left UNSTAGED and flagged to the owner -- not part of this close.
 - Next: SPRINT-15 kickoff (PI-7 Sprint 2 -- SDD-046, "Make promises true").
+
+### Sprint 15 -- CLOSED
+- Date: 2026-06-26
+- Owner: Sprint Executive Manager (lead, reports up to project EM); PM + Architect owned design (F-38); SW Dev + workers owned implementation/QA (F-39) and close prep (F-40)
+- Features completed: F-38, F-39, F-40
+- Commits: close commit (SHA backfilled in the following commit, per Sprint 14 precedent)
+- Tests: 501 -> 518 passed, 2 skipped
+- Schema lint: clean (exit 0)
+- Doctor: green; 8 checks PASS incl. 3 new (current-PI dispatch rows PI-7:2, tdd gate, DONE completeness)
+- Validation: SDD-046 per-item B-1/B-2/B-4 -- 19/19 REQUIRED checked with real-run evidence + 6/6 manual; O-1 (file-scope) deferred
+- B-1 decision: MAKE-REAL (Option 1) -- owner-locked 2026-06-26; mandatory dispatch logging at close; doctor warns/fails on zero current-PI rows
+- B-2 blocking checks shipped: TDD gate (cli/tdd_gate_check.py) + DONE-completeness (cli/done_check.py); prose skills point at the scripts
+- B-4 CI: .github/workflows/doctor.yml runs `make doctor` on push + PR; entrypoint identical to local; ADR-009 superseded by ADR-021
+- Per-item SDD-IDs for SDD-046: B-1, B-2, B-4 (B-3 was delivered in SDD-045/Sprint 14)
+- Ledger dogfood: 2 real PI-7 rows (architect F-38, software-developer F-39); doctor current-PI check PASS
+- Article X: TestS1FootprintLockGuard PASS (locked render fns byte-identical)
+- PI-7 status: ACTIVE -> continues into Sprint 16
+- SDD-046: DONE (B-1 ledger truth + B-2 blocking checks + B-4 CI)
+- Deferred to later PI-7 sprints: SDD-047 (S16), SDD-048 (S17); SDD-035 (Azure decommission) out-of-band
+- Owner ratification: APPROVED FOR COMMIT + PUSH (owner, 2026-06-26)
+- Notes: Credibility sprint. The ledger is now genuinely true (logging is a required close step, dogfooded on Sprint 15 itself), the TDD gate and DONE-completeness rules block on violation instead of being prose, and one CI workflow runs the doctor set for everyone on push/PR. Three subagent dispatches (F-38 architect, F-39 sw-dev, F-40 sw-dev) ran with 100% success; the first two are logged in the ledger.
+- Next: SPRINT-16 kickoff (PI-7 Sprint 3 -- De-author: SDD-047 A-2/A-3/D-1/D-3)
+- Reported up to project EM: YES (2026-06-26)

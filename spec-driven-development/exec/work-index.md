@@ -38,6 +38,7 @@ Current PI: **PI-7 (Hardening + Orchestration Maturity)**
 | 2026-05-16 | retro-closure | TASKS | `specs/2026-05-16-retro-closure/` |
 | 2026-06-08 | azure-decommission | IMPLEMENT | `specs/2026-06-08-azure-decommission/` |
 | 2026-06-26 | detach-clone-and-run-hardening | IMPLEMENT | `specs/2026-06-26-detach-clone-and-run-hardening/` |
+| 2026-06-26 | make-promises-true | IMPLEMENT | `specs/2026-06-26-make-promises-true/` |
 | 2026-06-26 | plain-language-comms-discipline | IMPLEMENT | `specs/2026-06-26-plain-language-comms-discipline/` |
 | 2026-06-26 | two-tier-executive-manager | IMPLEMENT | `specs/2026-06-26-two-tier-executive-manager/` |
 

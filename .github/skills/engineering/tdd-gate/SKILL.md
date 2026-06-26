@@ -66,3 +66,10 @@ Return one of:
 
 For failures, list each production-code file that triggered the gate and the
 missing test or missing justification required to pass.
+
+## Enforced by
+
+This skill's mechanical check is automated by
+`spec-driven-development/cli/tdd_gate_check.py`, which `make doctor` runs as the
+`tdd gate` check on every push and pull request. The skill is the human-readable
+rationale; the script is the blocking gate.

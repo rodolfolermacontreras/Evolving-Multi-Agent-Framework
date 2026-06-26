@@ -602,5 +602,112 @@ class TestStaleSymlinkDistinction(unittest.TestCase):
             self.assertTrue(is_real_dir, "Should detect real directory")
 
 
+# --------------------------------------------------------------------------- #
+# SDD-046 B-1 -- current-PI dispatch-rows doctor check + current_pi_name helper
+# --------------------------------------------------------------------------- #
+
+import sqlite3  # noqa: E402
+
+
+def _make_sdd_root(tmp: Path, *, pi: str | None, rows_for: str | None) -> Path:
+    """Build a minimal framework-shaped root.
+
+    pi: when given, write sprints/<pi>/CURRENT_PI.md marked active.
+    rows_for: when given, insert one dispatches row for that PI into fleet.db.
+    """
+    root = tmp / "tree"
+    sdd = root / "spec-driven-development"
+    sprints = sdd / "sprints"
+    ledger = sdd / "ledger"
+    sprints.mkdir(parents=True)
+    ledger.mkdir(parents=True)
+    if pi is not None:
+        marker_dir = sprints / pi
+        marker_dir.mkdir()
+        (marker_dir / "CURRENT_PI.md").write_text(
+            f"---\nstatus: active\nsprint: {pi}\n---\n\n# {pi}\n\n"
+            "Status: **ACTIVE**\n",
+            encoding="utf-8",
+        )
+    db = ledger / "fleet.db"
+    conn = sqlite3.connect(str(db))
+    try:
+        conn.execute(
+            "CREATE TABLE dispatches ("
+            "id INTEGER PRIMARY KEY AUTOINCREMENT, dispatched_at TEXT NOT NULL, "
+            "pi TEXT NOT NULL, sprint TEXT, feature_dir TEXT, task_id TEXT NOT NULL, "
+            "task_title TEXT NOT NULL, agent_id TEXT NOT NULL, agent_role TEXT NOT NULL, "
+            "outcome TEXT, outcome_at TEXT, notes TEXT)"
+        )
+        if rows_for is not None:
+            conn.execute(
+                "INSERT INTO dispatches "
+                "(dispatched_at, pi, task_id, task_title, agent_id, agent_role, outcome) "
+                "VALUES (?,?,?,?,?,?,?)",
+                ("2026-06-26T00:00:00Z", rows_for, "T-1", "demo", "dev", "developer", "success"),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+    return root
+
+
+class TestCurrentPiDispatchRowsCheck(unittest.TestCase):
+    def test_fails_on_zero_rows_for_active_pi(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = _make_sdd_root(Path(tmp), pi="PI-7", rows_for=None)
+            result = bootstrap.check_current_pi_dispatch_rows(root)
+            self.assertIsNotNone(result)
+            label, ok, detail = result
+            self.assertEqual(label, "current-PI dispatch rows")
+            self.assertFalse(ok)
+            self.assertIn("PI-7", detail)
+
+    def test_passes_with_a_row(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = _make_sdd_root(Path(tmp), pi="PI-7", rows_for="PI-7")
+            result = bootstrap.check_current_pi_dispatch_rows(root)
+            self.assertIsNotNone(result)
+            _, ok, _ = result
+            self.assertTrue(ok)
+
+    def test_skips_with_no_marker(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = _make_sdd_root(Path(tmp), pi=None, rows_for=None)
+            self.assertIsNone(bootstrap.current_pi_name(root))
+            self.assertIsNone(bootstrap.check_current_pi_dispatch_rows(root))
+
+
+class TestCurrentPiName(unittest.TestCase):
+    def test_returns_pi7_for_current_tree(self):
+        self.assertEqual(
+            bootstrap.current_pi_name(bootstrap.framework_root()), "PI-7"
+        )
+
+    def test_picks_highest_numbered_active_pi(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = _make_sdd_root(Path(tmp), pi="PI-7", rows_for=None)
+            # add a lower active PI marker; resolver must prefer PI-7.
+            lower = root / "spec-driven-development" / "sprints" / "PI-5"
+            lower.mkdir()
+            (lower / "CURRENT_PI.md").write_text(
+                "---\nstatus: active\n---\n# PI-5\nStatus: **ACTIVE**\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(bootstrap.current_pi_name(root), "PI-7")
+
+
+class TestDoctorPrintsNewCheckLines(unittest.TestCase):
+    def test_doctor_output_lists_three_new_checks(self):
+        rc, out, err = run_main(["doctor", "--skip-tests"])
+        combined = out + err
+        self.assertIn("current-PI dispatch rows", combined)
+        self.assertIn("tdd gate", combined)
+        self.assertIn("DONE completeness", combined)
+        # rc may be non-zero before the Sprint dogfood adds PI-7 rows; we only
+        # assert the new check lines are present.
+        self.assertIn(rc, (0, 1))
+
+
 if __name__ == "__main__":
     unittest.main()

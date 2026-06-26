@@ -60,6 +60,16 @@ Review as relevant:
 - Mention the 743-test baseline when regression scope matters.
 - If the spec itself is weak or contradictory, say so explicitly.
 
+## Ledger Close (required before DONE)
+Before a feature or sprint is marked DONE, the dispatch outcome must be written
+to the ledger so the framework's promise matches reality:
+
+- Close each open dispatch: `python spec-driven-development/cli/fleet.py mark --dispatch-id <N> --outcome success`
+- Confirm the active PI now has rows: `python spec-driven-development/cli/bootstrap.py doctor` shows `[PASS] current-PI dispatch rows`.
+
+DONE completeness (spec.md present, validation.md with every REQUIRED box checked,
+and a RETRO file in the feature dir) is Enforced by: `spec-driven-development/cli/done_check.py`.
+
 
 ## Project Rules
 - Read `.github/copilot-instructions.md` first when project context is needed.

@@ -18,6 +18,13 @@ Produce a focused retrospective that captures what happened, what mattered, and 
 - Separate delivery review from process improvement.
 - Note carryover work and systemic blockers.
 
+## Ledger Check (before finalizing)
+- Confirm this sprint's dispatches are closed before writing the retro: run
+  `python spec-driven-development/cli/fleet.py mark --dispatch-id <N> --outcome <success|failed|blocked>`
+  for any open row, then verify `python spec-driven-development/cli/bootstrap.py doctor`
+  shows `[PASS] current-PI dispatch rows`. A sprint is not retro-ready while the
+  active PI has zero ledger rows.
+
 ## Areas to Cover
 1. What was planned
 2. What was delivered

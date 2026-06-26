@@ -232,7 +232,14 @@ class TestDoctor(unittest.TestCase):
 class TestStdlibOnly(unittest.TestCase):
     """R-15: the new/edited modules import stdlib + sibling modules only."""
 
-    LOCAL_OK = {"bootstrap", "origin_lint", "governance_check", "schema_lint"}
+    LOCAL_OK = {
+        "bootstrap",
+        "origin_lint",
+        "governance_check",
+        "schema_lint",
+        "tdd_gate_check",
+        "done_check",
+    }
 
     def _assert_stdlib_only(self, module) -> None:
         tree = ast.parse(Path(module.__file__).read_text(encoding="utf-8"))

@@ -1,7 +1,7 @@
 # ADR-009: CI auto-deploys to production via OIDC federation
 
 - Date: 2026-05-16
-- Status: proposed
+- Status: superseded by ADR-021
 
 ## Context
 
@@ -80,3 +80,17 @@ Neutral:
   always-on runner host (cost + patching) for a workload whose whole point
   is scale-to-low; OIDC from GitHub-hosted runners gives the same identity
   guarantees without the runner footprint.
+
+## Superseded by ADR-021
+
+This ADR is superseded by
+[ADR-021: CI runs the doctor validation gate](021-ci-doctor-validation.md).
+
+ADR-009 described an OIDC deploy-to-production workflow that was never
+implemented -- no `deploy.yml` exists and the live dashboard is no longer the
+project's CI concern. SDD-046 ("Make promises true") instead adds a CI workflow
+that runs `make doctor` (validation only: tests, schema lint, governance, origin
+tokens, ledger truth, TDD gate, DONE completeness) with no Azure login, no
+secret, and no production mutation. ADR-021 records that decision and is the
+canonical CI pattern going forward. If a CI deploy is ever needed again, a new
+ADR must supersede ADR-021 and may re-adopt the OIDC pattern recorded here.

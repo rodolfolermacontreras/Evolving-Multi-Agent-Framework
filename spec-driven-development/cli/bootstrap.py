@@ -1066,6 +1066,62 @@ def run_setup(root: Path, owner: str | None = None, *,
     return 0
 
 
+def current_pi_name(root: Path) -> str | None:
+    """Return the highest-numbered active PI name, or None (SDD-046 / R-B1-5).
+
+    Read-only: globs ``sprints/PI-*/CURRENT_PI.md`` and selects markers whose
+    status is active. Touches no Article X function.
+    """
+    sprints = root / "spec-driven-development" / "sprints"
+    if not sprints.is_dir():
+        return None
+    candidates: list[Path] = []
+    for marker in sprints.glob("PI-*/CURRENT_PI.md"):
+        text = marker.read_text(encoding="utf-8", errors="replace")
+        if re.search(r"status:\s*active", text, re.IGNORECASE) or "Status: **ACTIVE**" in text:
+            candidates.append(marker)
+    if not candidates:
+        return None
+
+    def _pi_number(marker: Path) -> int:
+        name = marker.parent.name  # "PI-7"
+        try:
+            return int(name.split("-", 1)[1])
+        except (IndexError, ValueError):
+            return -1
+
+    return sorted(candidates, key=_pi_number, reverse=True)[0].parent.name
+
+
+def check_current_pi_dispatch_rows(root: Path) -> tuple[str, bool, str] | None:
+    """Return a (label, ok, detail) check tuple, or None to skip (SDD-046 / B-1).
+
+    None when there is no active PI marker (doctor stays green). Otherwise the
+    check passes only when the ledger has >=1 dispatch row for the active PI.
+    """
+    pi = current_pi_name(root)
+    if pi is None:
+        return None
+    label = "current-PI dispatch rows"
+    ledger = root / "spec-driven-development" / "ledger" / "fleet.db"
+    if not ledger.is_file():
+        return (label, False, f"{pi}: fleet.db missing")
+    try:
+        connection = sqlite3.connect(str(ledger))
+        try:
+            cursor = connection.execute(
+                "SELECT COUNT(*) FROM dispatches WHERE pi = ?", (pi,)
+            )
+            count = cursor.fetchone()[0]
+        finally:
+            connection.close()
+    except sqlite3.Error as exc:
+        return (label, False, f"{pi}: cannot query dispatches: {exc}")
+    if count > 0:
+        return (label, True, f"{pi}: {count} row(s)")
+    return (label, False, f"{pi}: 0 dispatch rows logged (dogfood the ledger)")
+
+
 def run_doctor(root: Path, *, run_tests: bool = True) -> int:
     """Report framework health on one screen; non-zero exit on any failure (A-5).
 
@@ -1121,6 +1177,39 @@ def run_doctor(root: Path, *, run_tests: bool = True) -> int:
         )
         checks.append(("tests pass", code == 0,
                        output.splitlines()[-1] if output else ("ok" if code == 0 else "failed")))
+
+    # (f) current-PI dispatch rows: promises must become real ledger entries.
+    if is_framework:
+        pi_check = check_current_pi_dispatch_rows(root)
+        if pi_check is not None:
+            checks.append(pi_check)
+
+    # (g) tdd gate: production changes must be test-paired (SDD-046 B-2 rule 1).
+    if is_framework:
+        import tdd_gate_check
+        changed = tdd_gate_check.changed_files(root)
+        gate_ok, offenders = tdd_gate_check.evaluate(changed)
+        checks.append((
+            "tdd gate",
+            gate_ok,
+            "ok" if gate_ok else f"untested production change(s): {', '.join(offenders)}",
+        ))
+
+    # (h) DONE completeness: closed features of the active PI must be complete.
+    if is_framework:
+        import done_check
+        pi = current_pi_name(root)
+        if pi is not None:
+            problems = done_check.audit_pi(
+                root / "spec-driven-development" / "specs", pi
+            )
+            checks.append((
+                "DONE completeness",
+                not problems,
+                "ok" if not problems else "; ".join(problems),
+            ))
+        else:
+            checks.append(("DONE completeness", True, "no active PI to audit"))
 
     print("SDD doctor -- framework health")
     all_ok = True

@@ -1,0 +1,29 @@
+name: doctor
+
+# Validation-only CI for the SDD framework. Runs the same `make doctor` gate
+# that a developer runs locally: tests, schema lint, governance, origin tokens,
+# ledger truth, the TDD gate, and DONE completeness. It only reads the
+# repository and reports pass/fail -- no cloud login, no credentials, no
+# production mutation. See ADR-021.
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  doctor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run doctor
+        run: make doctor

@@ -45,6 +45,7 @@ PI progress: 0/0 commitments complete (0%)
 | dashboard-dispatches-health-pills | REVIEW | active | validation 97% (35/36) |
 | dashboard-lifecycle-reorder | REVIEW | active | validation 84% (16/19) |
 | detach-clone-and-run-hardening | IMPLEMENT | active | validation 0% (0/23) |
+| make-promises-true | IMPLEMENT | active | validation 0% (0/26) |
 | plain-language-comms-discipline | IMPLEMENT | active | validation 0% (0/12) |
 | two-tier-executive-manager | IMPLEMENT | active | validation 0% (0/17) |
 
@@ -90,6 +91,8 @@ PI progress: 0/0 commitments complete (0%)
 
 | When | Feature | Task | Agent |
 |------|---------|------|-------|
+| 2026-06-26T18:42:17Z | spec-driven-development/specs/2026-06-26-make-promises-true | SDD-046 implement: make promises true (B-1/B-2/B-4) | principal-software-developer |
+| 2026-06-26T18:42:16Z | spec-driven-development/specs/2026-06-26-make-promises-true | SDD-046 design: lock validation contract (make promises true) | principal-architect |
 | 2026-06-08T15:06:06+00:00 | None | Dedup scan (all) | dedup-scanner |
 | 2026-06-08T15:06:06+00:00 | None | [SOFT] Cross-feature deduplication pass at triage and clarify | dedup-scanner |
 | 2026-06-08T15:06:06+00:00 | None | [SOFT] Map Microsoft self-improving skills paper against our skill mechanism | dedup-scanner |
@@ -98,8 +101,6 @@ PI progress: 0/0 commitments complete (0%)
 | 2026-06-08T15:06:06+00:00 | None | [ADVISORY] Feature Spec: Sprint 6 Completion Bundle (SDD-032) | dedup-scanner |
 | 2026-06-08T15:06:06+00:00 | None | [ADVISORY] Feature Spec: UI Lifecycle Variant (SDD-018) | dedup-scanner |
 | 2026-05-16T20:35:57Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-05-16-retro-closure | Write RETRO.md for qa-cli feature (SDD-004). | developer-general |
-| 2026-05-16T20:35:57Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-05-16-retro-closure | Write RETRO.md for retro-cli feature (SDD-005). | developer-general |
-| 2026-05-16T20:35:56Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-05-16-retro-closure | Write RETRO.md for fleet-cli feature (SDD-003). | developer-general |
 
 ## Blockers
 

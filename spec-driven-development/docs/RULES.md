@@ -1,7 +1,7 @@
 ---
-version: '1.1.0'
+version: '1.2.0'
 ratified: 2026-05-25
-last_amended: 2026-05-25
+last_amended: 2026-06-26
 owner: principal-executive-manager
 amendable_by: human-only
 binding_source: constitution/principles.md
@@ -15,7 +15,7 @@ authoritative source so disputes resolve against a single canonical document.
 
 **Hierarchy of authority**, top to bottom:
 
-1. `constitution/principles.md` (Articles I-X, semver'd, ADR to amend)
+1. `constitution/principles.md` (Articles I-XII, semver'd, ADR to amend)
 2. `constitution/decision-policy.md` (Level 0/1/2 authority)
 3. `constitution/quality-policy.md` (test baseline, two-stage review, DoD)
 4. This file (`RULES.md`) -- the agent-facing distillation
@@ -199,7 +199,7 @@ This file is amendable only by the human (the executive sponsor).
 Process to amend:
 
 1. Propose change via PR or `/constitution` command.
-2. If the change affects an Article (I-X) in `principles.md`, amend the
+2. If the change affects an Article (I-XII) in `principles.md`, amend the
    constitution FIRST and let `RULES.md` follow downstream.
 3. Bump the `version:` field in this file's frontmatter (semver: MAJOR for
    removing a rule, MINOR for adding, PATCH for clarification).

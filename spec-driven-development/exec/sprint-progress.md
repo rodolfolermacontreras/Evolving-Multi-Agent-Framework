@@ -910,6 +910,58 @@ Kickoff: `SPRINT-13-KICKOFF.prompt.md` (committed `65d2d05`). Scope: SDD-042 (F-
 - Date: 2026-06-25
 - Owner: Principal Executive Manager (architecture analysis + routing + verification); principal-software-developer (implementation, subagent dispatch)
 - Owner authorization: "item 3, start it autonomously" (2026-06-25 via Executive Manager).
+
+---
+
+## Sprint 14 (PI-7 Sprint 1)
+
+Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms discipline), SDD-045 (detach + clone-and-run hardening). Owner mandate at F-36: "implement all three features per their spec/plan/tasks, with real-run evidence per each validation.md, keep the suite green, and STOP before any push (owner approves the push at close, F-37)."
+
+### F-36 -- SDD-043 + SDD-044 + SDD-045 implementation + QA -- DONE (local only; uncommitted; push deferred to F-37)
+
+- Date: 2026-06-26
+- Owner: Principal Software Developer (serialized session; DA-Evidence Discipline -- every external-facing claim below comes from a real run with artifacts on disk, not a harness)
+- Push status: NOTHING COMMITTED, NOTHING PUSHED. All changes left uncommitted on `master` for owner pre-push review at F-37. No `git add -A`/`git add .` used; staging (when F-37 runs) is by explicit path.
+
+- SDD-043 (two-tier executive manager) -- DONE
+  - Files: created `.github/agents/sprint-executive-manager.agent.md` (Authority Level 0; default context `exec/sprint-progress.md` + sprint feature spec dirs; 10-item "What you do NOT do"); additive paragraph in `.github/agents/principal-executive-manager.agent.md` (kickoff MAY optionally delegate one sprint to a Sprint Executive Manager, per ADR-020); appended "## 11. Sprint Executive Manager activation" to `feature-prompts/_SHARED_ONBOARDING.md`; ADR-020 authored (status **Proposed** -- intentionally NOT flipped this feature).
+  - Validation (T-043-01..05 + O-1/T-043-06): all checked. Real evidence: the new agent file exists and is well-formed (schema lint exit 0 covers agent frontmatter); the Highest-Executive paragraph is additive (no existing authority removed); the onboarding section is append-only. ADR-020 remains Proposed -- flips to Accepted at the Sprint 14 close gate (F-37) with owner ratification.
+  - Manual/pending: M-1/M-2/U-1 (owner reads the two-tier wording + ratifies ADR-020 at F-37).
+
+- SDD-044 (plain-language comms discipline) -- DONE
+  - Files: fully edited `.github/skills/operational/em-communication-discipline/SKILL.md` (frontmatter `metadata.version: '1.1'`; binds ALL human-facing principals/EMs; agent-to-agent carve-out; SDD-044 provenance); added the loaded-skill line `- em-communication-discipline: Short, plain, lead-with-answer output -- active whenever addressing the owner directly (SDD-044)` to `principal-product-manager.agent.md`, `principal-architect.agent.md`, and `principal-software-developer.agent.md` (each placed right after `pre-work-check` in `## Skills Loaded`).
+  - Validation (R-1..R-5): all checked with real evidence. The skill frontmatter is valid (schema lint exit 0 includes skill checks via `check_skill`); each of the three principal agents now lists the discipline skill; the carve-out preserves verbose agent-to-agent dispatch briefs.
+  - Manual/pending: M-1/M-2/U-1 (owner confirms tone on a live owner-facing reply).
+
+- SDD-045 (detach + clone-and-run hardening, T-045-01..T-045-12) -- DONE
+  - Files: `cli/origin_lint.py` (~290 lines, new), `cli/governance_check.py` (~230 lines, new), `cli/test_sdd045.py` (20 tests, new), `cli/bootstrap.py` (setup/doctor hardening), `.gitignore` (ledger db globs + new `.owner` line -- see DE-01), `Makefile` (setup/doctor targets), `docs/RULES.md` (version `1.2.0`, Articles I-XII), `README.md` (clone -> `make setup` -> `make doctor` quickstart + "Adopt SDD on another project"); `ledger/fleet.db` stop-tracked via `git rm --cached` (D in index; local file preserved).
+  - Validation R-1..R-17, all real-run evidence on disk:
+    - R-1 fleet.db untracked: PASS (`git ls-files` for fleet.db empty after `git rm --cached`).
+    - R-2 .gitignore excludes db: PASS (block contains `fleet.db`, `*.db`, `*.db-wal`, `*.db-shm`).
+    - R-3 fresh DB has 0 rows: PASS (fresh init -> tables [decisions, dispatches, sqlite_sequence], 0 dispatch / 0 decision rows).
+    - R-4 tracked-db guard fails: PASS (`git add -f fleet.db` -> `make doctor` exit 1 "[FAIL] ledger untracked: tracked db(s): ...fleet.db (run git rm --cached)" + guard test red; restored via `git rm --cached`).
+    - R-5 one-command e2e: PASS (`make setup` exit 0, ends green-ready).
+    - R-6 idempotent: PASS (second `make setup` exit 0; suite 501/2).
+    - R-7 README quickstart: PASS (README diff shows clone-first quickstart).
+    - R-8 doctor green + broken: PASS (green doctor exit 0 with 5 checks PASS; the R-4 tracked-db run is the deliberately-broken doctor -> non-zero, names the failed check).
+    - R-9 doctor == CI checks: PASS by documented intent -- no CI workflow exists yet; spec FR-3 mandates "the doctor checks MUST be the same checks CI runs"; CI, when added, calls the single `doctor` entrypoint, so the sets are identical by construction.
+    - R-10 origin leak fails: PASS (temp root with `.github/leak.md` containing a real `C:\Users\...` path -> `origin_lint` exit 1, "ORIGIN TOKEN: .github\leak.md:1: 'C:\Users\\' ..." + "origin-lint: FAIL (1 origin token(s)...)").
+    - R-11 labeled example escapes: PASS (same token wrapped in `<!-- example: ... -->` -> exit 0, "origin-lint: clean...").
+    - R-12 RULES.md Articles I-XII: PASS.
+    - R-13 governance enforces drift: PASS (copied real constitution + RULES.md to a tempdir, injected a 13th article into the principles COPY only -> `governance_check` exit 1 "GOVERNANCE: Article-range drift: principles.md defines 13 articles but RULES.md cites Articles I-12. Update RULES.md to cite Articles I-13." -- real constitution untouched).
+    - R-14 owner approval recorded: see owner-approval notes below.
+    - R-15 stdlib-only: PASS (no third-party imports across new modules).
+    - R-16 schema lint exit 0: PASS.
+    - R-17 no regression / footprint guard PASS / suite green: PASS.
+  - Delta DE-01 (sharpen, not a loosen): added `spec-driven-development/exec/.owner` to `.gitignore`. The setup step writes the adopter's personal name to `exec/.owner`; it was untracked but not ignored, leaving a latent identity foot-gun directly contrary to SDD-045's detach-personal-state purpose (FR-1 / A-1 / A-6). Adding the ignore line removes no required item and is included in the same uncommitted diff the owner reviews under M-2 at F-37. Confirmed: `git check-ignore exec/.owner` exit 0 after the edit; the db globs (R-2) are unchanged; full suite still 501/2.
+  - Owner-approval notes: A-1 (stop-tracking fleet.db = `git rm --cached` ONLY, T-045-02) and B-3 (RULES.md Articles I-XII edit, T-045-11) were authorized at Sprint 14 kickoff. M-1 (`git rm --cached` is not a history rewrite; local fleet.db preserved): CONFIRMED. M-2/M-3 (owner reviews the `.gitignore` + stop-tracking diff and the RULES.md edit before commit) and M-4 (owner pre-push): owner-gated at F-37.
+
+- Suite: full `spec-driven-development/` suite 481 -> 501 passed (+20 from `test_sdd045.py`), 2 skipped, exit 0. Command: `.venv\Scripts\python.exe -m pytest spec-driven-development/ --tb=line -q`.
+- Schema lint: clean (exit 0).
+- Article X lock: HELD. F-36 touches none of the five SHA-pinned `state_builder.py` render functions; `TestS1FootprintLockGuard` PASS.
+- Run artifacts (not deliverables, not committed): `exec/.owner` (now gitignored), `ledger/fleet.db` (gitignored, stop-tracked), `.git/hooks/commit-msg`. Scratch evidence scripts used during capture were deleted.
+- NOT performed (per F-36 directive): no commit, no push, no BACKLOG DONE, no Sprint 14 close, ADR-020 left Proposed.
+- Next: F-37 owns owner pre-push review (M-2/M-3/M-4 + SDD-043 M-1/M-2/U-1 + SDD-044 M-1/M-2/U-1), the ADR-020 Proposed->Accepted flip with owner ratification, commit by explicit path, push, BACKLOG DONE for SDD-043/044/045, and Sprint 14 close.
 - Commits: <pending local commit on master; pushed under owner's start-autonomously authorization>
 - ADR: ADR-019 (dashboard reorder POST endpoint) -- Level-1 architectural decision, authored + Accepted within Principal authority (localhost-only write surface onto the already-safeguarded `move()`; NOT a Level-2 owner-gated dependency/schema/production change).
 - Files changed: 3 + 1 new ADR + regenerated state.html
@@ -966,3 +1018,92 @@ Kickoff: `SPRINT-13-KICKOFF.prompt.md` (committed `65d2d05`). Scope: SDD-042 (F-
 - Article X lock: HELD across the entire PI -- the five SHA-pinned render functions were never edited; every PI-6 surface is an additive `inject_*` post-processor. `TestS1FootprintLockGuard` goldens PASS.
 - Carryover to PI-7: SDD-038 (aesthetic tokens), SDD-034 (content-shingle dedup), PI-4 housekeeping (domain-skill annotations, GitHub Actions Node.js bump), SDD-041 Option B reorder re-optimization, SDD-042 pill-nav, Current Sprint widget repoint (deprecated `Management/PI-N/Sprint-N-*/SPEC.md` source), SDD-039 incidental "fresh session" wording cleanup. SDD-035 (Azure decommission) out-of-band.
 - Notes: PI-6 reinvested in the live dashboard after the trust defect that opened it, shipping the Scott UI patterns to functional completeness without ever breaching the Article X render lock. Four sprints, six features, 337 -> 481 tests, schema lint clean throughout. The PI's hard lesson (SDD-041's broken-first drag, caught only by owner in-browser testing) reinforced DA-Evidence Discipline and drove a real-pipeline-validated Option A rebuild. No PI-6 commitment was loosened; all deferrals are explicit PI-7 carry-forward.
+
+---
+
+## Sprint 14 -- PI-7 Sprint 1 / Hardening Bundle
+
+- Sprint kickoff: [../feature-prompts/SPRINT-14-KICKOFF.prompt.md](../feature-prompts/SPRINT-14-KICKOFF.prompt.md)
+- Prerequisite: PI-6 CLOSED 2026-06-26 at `4ad0521` (DONE-WITH-CARRYOVER); baseline 481 passed / 2 skipped; schema lint clean.
+- Sequence: F-34 (design SDD-043 + SDD-044) -> F-35 (SDD-045) -> F-36 (implement) -> F-37 (close)
+- Owner: Principal Executive Manager (lead); PM + Architect own design (F-34); SW Dev + workers own implementation and close.
+- Owner authorization to start: 2026-06-26 ("lets go").
+
+### F-34 -- two-tier-em + plain-language-comms design -- DONE (design-only)
+
+- Date: 2026-06-26
+- Owner: Principal Architect (with PM hat for CLARIFY)
+- Commits: none in F-34; no commit or push performed (design artifacts only).
+- Scope honored: design-only. No agent file created, no skill body edited, no constitution touched, no CLI/schema/ledger change. Two paired features (SDD-043, SDD-044) carried through CLARIFY -> ADR -> SPEC -> PLAN -> TASKS.
+- Files changed: 11 docs/governance files only:
+  - spec-driven-development/specs/2026-06-26-two-tier-executive-manager/clarify.md
+  - spec-driven-development/specs/2026-06-26-two-tier-executive-manager/spec.md
+  - spec-driven-development/specs/2026-06-26-two-tier-executive-manager/plan.md
+  - spec-driven-development/specs/2026-06-26-two-tier-executive-manager/tasks.md
+  - spec-driven-development/specs/2026-06-26-two-tier-executive-manager/validation.md
+  - spec-driven-development/docs/ADR/020-two-tier-executive-manager.md
+  - spec-driven-development/specs/2026-06-26-plain-language-comms-discipline/clarify.md
+  - spec-driven-development/specs/2026-06-26-plain-language-comms-discipline/spec.md
+  - spec-driven-development/specs/2026-06-26-plain-language-comms-discipline/plan.md
+  - spec-driven-development/specs/2026-06-26-plain-language-comms-discipline/tasks.md
+  - spec-driven-development/specs/2026-06-26-plain-language-comms-discipline/validation.md
+- Tests: 481 passed, 2 skipped (no change; docs/spec artifacts only, no code).
+- Schema lint: `python spec-driven-development/cli/schema_lint.py` -> clean (exit 0).
+- SDD-043 (two-tier Executive Manager): DESIGNED. New sprint-scoped "Sprint Executive Manager" agent -- Level 0, runs ONE sprint, routes feature work to PM/Architect/SW Dev, reports UP to the project EM at sprint close, CANNOT create sprints or PIs (may only SUGGEST), scoped strictly to its sprint's features, NOT a human entry point. Constraints live in the agent IDENTITY file (designed now; file CREATED in F-36). CLARIFY closed Q-A (name + sprint-scope), Q-B (no constitution edit), Q-C (`_SHARED_ONBOARDING.md` forward-only activation, no retrofit). SPEC AC-1..AC-10, validation R-1..R-11 LOCKED for F-36.
+- SDD-044 (plain-language human-facing comms): DESIGNED. Amend the EXISTING `em-communication-discipline` skill so applicability extends from EM-only to ALL human-facing principals/EMs. Human-facing output (status, progress, owner questions, recommendations) must be short and plain; agent-to-agent / internal engineering detail stays allowed (explicit carve-out). Skill amendment only -- no new skill, no constitution edit, name stays matched. CLARIFY closed Q-D (amend existing skill) and Q-E (bind human-facing outputs; carve out agent-to-agent). SPEC AC-1..AC-7, validation R-1..R-7 LOCKED for F-36.
+- ADRs: ADR-020 (two-tier Executive Manager) -- Proposed, pending owner acceptance at the Sprint 14 close gate. Records the Q-B finding (no constitution edit required) and the rejected alternatives.
+- Q-B finding: **NO constitution edit required.** The project Executive Manager remains the single human entry point per Article II; the Sprint EM is a delegated, sprint-scoped orchestrator beneath it that reports up and never becomes the human's project-level entry point, so the two-tier model is additive and non-contradictory. Achieved via ADR-020 + the new agent file + the `_SHARED_ONBOARDING.md` activation block. An optional future Article II clarification is owner-discretion / out-of-scope.
+- OWNER-ATTENTION: none in F-34. ADR-020 acceptance and any push are owner-gated at F-37 close.
+- F-36 implementation handoff (SDD-043): (1) create the new `.github/agents/` Sprint Executive Manager agent file with identity-level constraints (no-create-sprints/PIs, sprint-scope, report-up, Level 0, loads `em-communication-discipline`); (2) edit `_SHARED_ONBOARDING.md` forward-only activation block; (3) optional one-line cross-reference in the project EM file (owner discretion); (4) accept ADR-020 at close; (5) optional presence test. Keep suite >= 481/2.
+- F-36 implementation handoff (SDD-044): edit `em-communication-discipline` SKILL.md applicability/scope (and `description`) so it binds all human-facing principals; keep name matched + version quoted; ensure human-facing agents load it (project EM already does; Sprint EM via SDD-043); optional presence test. Keep suite >= 481/2.
+- Notes: F-34 produced design artifacts for two paired hardening features without any implementation, in line with the design-only dispatch. SDD-043 and SDD-044 are intentionally co-designed: the Sprint EM loads the broadened comms skill, so both implement together in F-36. No `git add -A`/`git add .`; explicit-path staging only at close.
+- Next: F-35 designs SDD-045 (separate spec dir, separate isolated unit); then F-36 implements SDD-043 + SDD-044 (+ SDD-045 if designed); then F-37 closes Sprint 14 with owner approval before any push.
+
+### F-35 -- sdd-045 detach + clone-and-run hardening design -- DONE (design-only)
+
+- Scope honored: DESIGN ONLY (CLARIFY -> SPEC -> PLAN -> TASKS). No code, no `.gitignore` edit, no `git rm`, no ledger init, no constitution edit. All implementation deferred to F-36.
+- Spec dir: `spec-driven-development/specs/2026-06-26-detach-clone-and-run-hardening/`
+- Files created: `clarify.md`, `spec.md`, `plan.md`, `tasks.md`, `validation.md` (5 artifacts).
+- Tests: 481 passed, 2 skipped (no change; docs/spec artifacts only, no code).
+- Schema lint: `python spec-driven-development/cli/schema_lint.py` -> clean (exit 0).
+- Epic SDD-045 decomposed into 5 audit items, each with stable IDs and traceability (FR-1=A-1, FR-2=A-4, FR-3=A-5, FR-4=A-6, FR-5=B-3):
+  - A-1 (detach personal ledger): stop-tracking `fleet.db` via `git rm --cached`, add db globs to `.gitignore`, init fresh DB from `schema.sql`, add tracked-db guard.
+  - A-4 (one setup command): new `bootstrap.py setup` subcommand + `make setup` wrapper, idempotent, README quickstart shrink.
+  - A-5 (doctor): new `bootstrap.py doctor` subcommand, one-screen report, non-zero on fail, same checks as CI.
+  - A-6 (origin-token lint): new stdlib-only `cli/origin_lint.py`, denylist + `<!-- example: ... -->` escape, wired into doctor.
+  - B-3 (governance consistency): article-range/version check + fix RULES.md "Articles I-X" -> "Articles I-XII" at lines 18 + 202.
+- Stale-check results (verified against live repo, DA-Evidence Discipline -- stated explicitly per ground rule):
+  - A-1 CONFIRMED: `git ls-files` lists `fleet.db` (tracked); `.gitignore` excludes only `Thumbs.db`. SHARPENING: `ledger/schema.sql` EXISTS, but `initialize_ledger()` currently only `touch()`es an empty file -> F-36 must init from `schema.sql`, not just touch.
+  - A-4 CONFIRMED: `bootstrap.py` has greenfield/brownfield/host-link only; no `setup`; no `make setup`.
+  - A-5 CONFIRMED: no `doctor` subcommand; no CI.
+  - A-6 CONFIRMED: `schema_lint` validates frontmatter only; no origin-token denylist; no `origin_lint.py`.
+  - B-3 CONFIRMED (with correction): `principles.md` is now v1.4.0 (audit said v1.3.0) but STILL has twelve articles I-XII; `RULES.md` (v1.1.0) still says "Articles I-X" at lines 18 and 202. The finding holds. NOTE: `RULES.md` frontmatter is `amendable_by: human-only`, so the B-3 content edit is OWNER-GATED even though it lives in `docs/` (not constitution).
+- OWNER-ATTENTION (for F-36, not F-35):
+  - B-3 RULES.md content edit is OWNER-GATED (`amendable_by: human-only`) -- requires recorded owner approval before applying (validation M-3 / R-14).
+  - A-1 stop-tracking + `.gitignore` change is OWNER-VISIBLE -- surface the diff for owner review before the F-36 commit (validation M-2).
+- F-36 implementation handoff: execute tasks T-045-01..T-045-12. Order: init-from-schema (T-01) -> detach+gitignore (T-02/03, owner-visible) -> origin_lint (T-08) -> governance check (T-10) -> doctor (T-09) -> setup+make+README (T-05/06/07) -> tracked-db guard (T-04) -> owner-gated RULES.md fix (T-11) -> final verify (T-12). Stdlib-only. Keep suite >= 481/2; footprint guard PASS; no constitution edit; A-1 forward-only (no history rewrite).
+- Notes: F-35 ran as a separate isolated unit per One Feature One Session. No `git add -A`/`git add .`; explicit-path staging only at close.
+- Next: F-36 implements SDD-043 + SDD-044 + SDD-045; then F-37 closes Sprint 14 with owner approval before any push.
+
+### Sprint 14 -- CLOSED
+
+- Date: 2026-06-26
+- Owner: Principal Executive Manager (lead/routing + green re-verify at close); Principal Architect + PM (F-34 design, ADR-020); Principal Software Developer (F-36 implementation + F-37 close); developer-cli-specialist-1 (SDD-045 CLI work).
+- Features completed: F-34 (design SDD-043 + SDD-044), F-35 (design SDD-045), F-36 (implementation of all three), F-37 (this close).
+- Commits: `<this close commit on master>`
+- Tests: 481 -> 501 passed, 2 skipped (+20 from `cli/test_sdd045.py`). EM-reverified at close (exit 0).
+- Schema lint: clean (exit 0). EM-reverified at close.
+- Validation: SDD-043 11/11 REQUIRED + manual (owner ratifies ADR-020); SDD-044 7/7 REQUIRED + manual (owner confirms tone on a live reply); SDD-045 17/17 REQUIRED + manual checks (M-1 confirmed; M-2/M-3/M-4 owner-gated at this close) -- covering per-item A-1/A-4/A-5/A-6/B-3. All real-run evidence on disk (DA-Evidence Discipline).
+- ADRs: ADR-020 (two-tier Executive Manager model) -- **Accepted** (owner ratified 2026-06-26 at this close gate; body Status flipped Proposed -> Accepted, frontmatter `status: draft` retained as the schema-lint carrier).
+- principles.md version: 1.4.0 -> 1.4.0 (UNCHANGED). Q-B finding held: no constitution edit required -- the project EM remains the single human entry point per Article II; the Sprint EM is an additive, delegated, sprint-scoped orchestrator beneath it.
+- Per-item SDD-IDs (SDD-045): A-1 (detach personal ledger), A-4 (one setup command), A-5 (doctor), A-6 (origin-token lint), B-3 (governance consistency) -- all DONE.
+- PI-7 status: ACTIVE -> continues into Sprint 15 (PI-7 Sprint 2 -- "Make promises true", SDD-046). PI-7 is NOT closed here; the PI-7 CLOSE is a separate owner-approved decision after Sprint 17.
+- SDD-043: DONE (new `.github/agents/sprint-executive-manager.agent.md` -- Level 0, runs one sprint, routes to PM/Architect/SW Dev, reports up to the project EM, cannot create sprints/PIs, loads em-communication-discipline; additive project-EM cross-reference; `_SHARED_ONBOARDING.md` forward-only activation block; ADR-020 Accepted).
+- SDD-044: DONE (`em-communication-discipline/SKILL.md` v1.1 broadened from EM-only to ALL human-facing principals/EMs with an explicit agent-to-agent carve-out; discipline-skill line added to PM, Architect, SW Dev agent files; name/dir preserved).
+- SDD-045: DONE (`fleet.db` stop-tracked via `git rm --cached` + db globs + `exec/.owner` gitignored [DE-01]; fresh DB inits 0 rows from `schema.sql`; `make setup` + `make doctor` stdlib-only targets; `bootstrap.py` setup/doctor hardening; `cli/origin_lint.py` + `cli/governance_check.py` new; RULES.md v1.2.0 Articles I-XII; README clone -> `make setup` -> `make doctor` quickstart).
+- Clone-and-run smoke: PASS (`make setup` exit 0 + idempotent re-run exit 0; `make doctor` 5 checks PASS exit 0; deliberately-broken tracked-db doctor exit 1 names the failed check).
+- Article X lock: HELD. F-36 touches none of the five SHA-pinned `state_builder.py` render functions; `TestS1FootprintLockGuard` PASS.
+- Deferred to later PI-7 sprints: SDD-046 (Sprint 15), SDD-047 (Sprint 16), SDD-048 (Sprint 17) per CURRENT_PI allocation; SDD-035 (Azure decommission) out-of-band.
+- Owner ratification: **APPROVED FOR COMMIT + PUSH** (owner direction 2026-06-26 via Executive Manager: "accept and approve" = ACCEPT ADR-020 + APPROVE commit + push to close Sprint 14).
+- Notes: Sprint 14 opened PI-7 with the highest-trust hardening slice -- the clone-and-run portability story becomes real (personal ledger detached, fresh DB on setup, one setup command, a doctor health check, origin-token and governance lints), and the orchestration layer matures (a sprint-scoped Sprint EM agent plus a plain-language comms discipline that now binds every human-facing principal). All three features were implemented in F-36 with real-run evidence on disk and left uncommitted for owner pre-push review; F-37 flipped ADR-020 to Accepted, marked the BACKLOG rows DONE, regenerated the exec dashboard, and committed + pushed under owner approval. No constitution edit was required and the Article X render lock was never breached. Two out-of-scope untracked artifacts (`backlog/display-order.json`, `ledger/reorder-audit.jsonl`, both from SDD-041 reorder work) were left UNSTAGED and flagged to the owner -- not part of this close.
+- Next: SPRINT-15 kickoff (PI-7 Sprint 2 -- SDD-046, "Make promises true").

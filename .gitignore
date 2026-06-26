@@ -16,3 +16,12 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+
+# Ledger (local-only runtime state; never tracked)
+spec-driven-development/ledger/fleet.db
+*.db
+*.db-wal
+*.db-shm
+
+# Personalization artifact (per-clone owner identity; never tracked)
+spec-driven-development/exec/.owner

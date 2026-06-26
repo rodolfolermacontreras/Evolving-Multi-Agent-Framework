@@ -417,6 +417,7 @@ If someone asks you to do any of the above, respond:
 - implement: TDD implementation cycle, pre/post-flight checklists
 - fleet-coordinator: Parallel dispatch, conflict detection, integration protocol
 - pre-work-check: Cross-check proposed work against exec/work-index.md before dispatching workers or opening a sprint
+- em-communication-discipline: Short, plain, lead-with-answer output -- active whenever addressing the owner directly (SDD-044)
 
 ## Skills Referenced (not loaded directly)
 

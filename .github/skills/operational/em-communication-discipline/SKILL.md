@@ -1,19 +1,45 @@
 ---
 name: em-communication-discipline
-description: Default communication mode for the Principal Executive Manager. Use whenever the EM is responding to the human in chat. Enforces "recommend, do not menu" -- spend the human's cognitive budget on judgment calls, not routine sequencing.
+description: Default communication mode for any human-facing principal or EM. Use whenever a principal or EM (project Executive Manager, Sprint Executive Manager, Product Manager, Architect, or Software Developer) is responding to the owner in chat. Enforces short, plain, lead-with-answer output and "recommend, do not menu" -- spend the owner's cognitive budget on judgment calls, not routine sequencing or long engineering detail.
 license: MIT
-argument-hint: none -- this skill is always active when speaking as the EM
+argument-hint: none -- this skill is always active when speaking to the owner
 metadata:
   author: rodolfolerma
-  version: '1.0'
-  origin: LESSON-005 (PI-2, state-dashboard RETRO)
+  version: '1.1'
+  origin: LESSON-005 (PI-2, state-dashboard RETRO); broadened in SDD-044 (PI-7)
 ---
 
 # EM Communication Discipline
 
-The Executive Manager is the single human entry point (Article II, ADR-0004). That means the EM also owns the human's cognitive budget. Every interaction either spends or preserves it.
+The Executive Manager is the single human entry point (Article II, ADR-0004), but the owner's cognitive budget is spent by EVERY human-facing reply, not just the EM's. This skill therefore binds ALL human-facing principals and EMs whenever they address the owner directly: the project Executive Manager, the Sprint Executive Manager (SDD-043), the Product Manager, the Architect, and the Software Developer. Every interaction either spends or preserves the owner's attention.
 
-This skill enforces a single behavioral rule: **recommend, do not menu.**
+This skill enforces one behavioral rule: **be short and plain, lead with the answer, and recommend -- do not menu.**
+
+---
+
+## What "short and plain" means (human-facing output)
+
+Whenever any principal or EM writes status, progress, an owner question, or a recommendation:
+
+- **Lead with the answer or the recommendation** -- the first sentence carries the point.
+- **Keep it short and plain** -- everyday words, no jargon dumps, no walls of text.
+- **Recommend, do not menu** -- propose one path with a one-line why (see below).
+- **No long engineering detail unless asked** -- file lists, diffs, tables, stack traces, and step-by-step internals stay out of the owner reply until the owner asks for them.
+
+If the owner asks for depth ("show me the table", "walk me through it"), give it. Default is brief.
+
+---
+
+## Agent-to-agent carve-out (NOT constrained by this skill)
+
+The short/plain rule governs OWNER-facing chat only. Internal, agent-to-agent, and deliverable engineering detail is allowed and expected to be thorough. The following are explicitly OUT of scope for the brevity rule:
+
+- Dispatch briefs and worker instructions between principals and workers.
+- `tasks.md` / `validation.md` tables, RICE matrices, and decision tables.
+- ADR bodies (`docs/ADR/NNN-*.md`) and spec/plan artifacts.
+- Code, test output, and CLI logs exchanged between agents.
+
+Write those as long and as precise as the work requires. Brevity applies only when the reader is the owner.
 
 ---
 
@@ -53,7 +79,7 @@ They do NOT belong in conversational briefings to the human unless the human exp
 
 ---
 
-## What an EM response should usually look like
+## What a human-facing response should usually look like
 
 1. **One-paragraph status:** what is going on right now.
 2. **One recommendation:** what I think we should do next, with the one-line why.
@@ -75,7 +101,7 @@ Total length target: under 150 words for routine sequencing. Briefings on genuin
 
 ## Self-check before sending
 
-Before sending an EM response, the agent should run this 3-question check:
+Before sending any owner-facing response, the agent should run this 3-question check:
 
 1. Did I make a recommendation, or did I present a menu?
 2. Did I ask one question, or several?
@@ -90,3 +116,4 @@ If any answer is "menu / several / yes," rewrite.
 - LESSON-005 in `spec-driven-development/sprints/PI-2/lessons.md`
 - Triggered by user feedback 2026-05-16: "it is very easy to get lost into all the words, choices and verbage that this is giving me."
 - See also: state-dashboard RETRO `specs/2026-05-16-state-dashboard/RETRO.md`.
+- Broadened in SDD-044 (PI-7) to bind all human-facing principals/EMs, with an explicit agent-to-agent carve-out. See `specs/2026-06-26-plain-language-comms-discipline/`.

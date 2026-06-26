@@ -238,6 +238,7 @@ If someone asks you to do any of the above, respond:
 - fleet-coordinator: Identifying parallel work, coordinating with SW Dev for dispatch
 - grill-me: Clarification questioning protocol (one question at a time, with recommendation)
 - pre-work-check: Cross-check proposed work against exec/work-index.md before triaging or scheduling
+- em-communication-discipline: Short, plain, lead-with-answer output -- active whenever addressing the owner directly (SDD-044)
 
 ## Skills Referenced (not loaded directly)
 

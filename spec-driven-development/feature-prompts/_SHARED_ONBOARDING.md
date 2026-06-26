@@ -219,3 +219,28 @@ Do not edit prior blocks. Append-only.
 - Push `origin/master`.
 - Tell the owner (in chat) which feature finished, the commit SHA, and the next
   prompt to paste.
+
+---
+
+## 11. Sprint Executive Manager activation (forward-only, optional per kickoff)
+
+From Sprint 14 onward, a sprint MAY run a delegated Sprint Executive Manager tier
+(`.github/agents/sprint-executive-manager.agent.md`). This is **forward-only**: do
+NOT retrofit any already-shipped `SPRINT-##-KICKOFF.prompt.md`. A NEW kickoff prompt
+that wants the delegated tier copies the block below into its body.
+
+```
+### Sprint Executive Manager (this sprint only)
+
+This sprint runs under the delegated Sprint Executive Manager
+(`.github/agents/sprint-executive-manager.agent.md`). It coordinates ONLY this
+sprint's committed features, summarizes sprint progress, and reports up to the
+project Executive Manager at close. It operates at Level 0: it routes, summarizes,
+and surfaces -- it does not decide, does not implement, and is NOT the human entry
+point. The project Executive Manager remains the single human-facing entry point
+per Article II. The Sprint EM cannot create a sprint or PI and cannot author the
+next kickoff; it may only SUGGEST upward.
+```
+
+If a kickoff does not include this block, the project Executive Manager runs the
+sprint directly, exactly as in Sprints 1-13. Nothing changes for shipped sprints.

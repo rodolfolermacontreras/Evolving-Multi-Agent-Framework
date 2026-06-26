@@ -327,6 +327,7 @@ If someone asks you to do any of the above, respond:
 - improve-architecture: Architecture assessment, tech debt identification, pattern enforcement
 - code-review: Spec compliance review, architectural review (Stage 2 for cross-cutting changes)
 - pre-work-check: Cross-check proposed work against exec/work-index.md before approving any new spec or ADR
+- em-communication-discipline: Short, plain, lead-with-answer output -- active whenever addressing the owner directly (SDD-044)
 
 ## Skills Referenced (not loaded directly)
 

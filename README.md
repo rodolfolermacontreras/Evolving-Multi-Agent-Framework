@@ -14,9 +14,35 @@ Skills are composable, single-purpose Markdown files with YAML frontmatter that 
 
 ## Quick start
 
-The fastest path to adopting SDD on a new project is the **3-Hour Bootstrap** described in `spec-driven-development/GENERALIZATION_SDD.md` Section 3. It walks through archetype selection, constitution authoring, and first-feature delivery.
+Clone, run one setup command, then talk to the Executive Manager:
 
-For interactive guidance, open the **Principal Executive Manager** agent in VS Code Copilot Chat and describe your project. The `archetype-recommender` skill will walk you through 5-6 questions to recommend the best-fit archetype (python-library, python-web-service, data-pipeline, cli-tool, or research-repo) with reasoning and confidence scores. If none fit, it guides you to invent a new archetype via `/evolve`.
+```bash
+# 1. Clone
+git clone <this-repo-url> && cd Evolving-Multi-Agent-Framework
+
+# 2. Set up (creates a fresh local ledger, runs health checks)
+make setup
+#   or, without make:
+#   python spec-driven-development/cli/bootstrap.py setup --owner "Your Name"
+
+# 3. Verify the install is healthy at any time
+make doctor
+```
+
+Then open the **Principal Executive Manager** agent in VS Code Copilot Chat and
+describe what you want to do. The EM is your single entry point -- it routes work,
+reports status, and surfaces decisions.
+
+`make setup` is idempotent (safe to re-run) and gives every clone its own empty
+`fleet.db` ledger; the personal ledger is never shared through git. `make doctor`
+exits non-zero and names the failed check if anything is wrong.
+
+### Adopt SDD on another project
+
+To bootstrap the framework onto a different codebase, use the archetype helper.
+The `archetype-recommender` skill (open the EM and describe your project) walks you
+through 5-6 questions to recommend a best-fit archetype, or see
+`spec-driven-development/GENERALIZATION_SDD.md` Section 3 for the full procedure.
 
 ```bash
 # Greenfield (new project)

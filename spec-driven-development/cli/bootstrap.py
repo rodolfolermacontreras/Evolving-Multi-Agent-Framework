@@ -18,6 +18,7 @@ import json
 import os
 import re
 import shutil
+import sqlite3
 import subprocess
 import sys
 
@@ -166,6 +167,49 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         dest="no_gitignore_check",
         help="Disable .gitignore protection check entirely.",
     )
+
+    setup = subparsers.add_parser(
+        "setup",
+        help="Make a fresh clone of this framework runnable in one idempotent step (SDD-045 A-4).",
+        description=(
+            "Verify Python >= 3.12, create .venv if absent, initialize a fresh "
+            "fleet ledger from schema.sql, install the commit-msg hook, optionally "
+            "record an owner, then run schema_lint and the test suite. Idempotent."
+        ),
+    )
+    setup.add_argument(
+        "--owner",
+        default=None,
+        help="Optional owner name to record for this checkout.",
+    )
+    setup.add_argument(
+        "--skip-venv",
+        action="store_true",
+        dest="skip_venv",
+        help="Do not create a .venv (use the current interpreter).",
+    )
+    setup.add_argument(
+        "--skip-checks",
+        action="store_true",
+        dest="skip_checks",
+        help="Skip the schema_lint + pytest verification steps.",
+    )
+
+    subparsers.add_parser(
+        "doctor",
+        help="Report framework health on one screen; non-zero exit on any failure (SDD-045 A-5).",
+        description=(
+            "Run the same checks CI runs: ledger reachable and untracked, "
+            "schema_lint clean, governance coherence, no origin tokens, and the "
+            "test suite. Emit a one-screen report and exit non-zero on any failure."
+        ),
+    ).add_argument(
+        "--skip-tests",
+        action="store_true",
+        dest="skip_tests",
+        help="Skip the (slow) test-suite check; run the fast checks only.",
+    )
+
     return parser.parse_args(argv)
 
 
@@ -304,9 +348,31 @@ def initialize_backlog(archetype: Path, target: Path, project_name: str, owner: 
 
 
 def initialize_ledger(target: Path) -> None:
+    """Create a fresh fleet ledger from the framework's schema.sql.
+
+    Idempotent: if fleet.db already exists and is non-empty, the existing
+    database is left untouched (a teammate's local dispatch state is
+    preserved). A fresh or empty file is initialized by executing
+    spec-driven-development/ledger/schema.sql, producing the correct tables
+    with zero dispatch rows -- replacing the prior empty-file touch().
+    """
     ledger = target / "spec-driven-development" / "ledger" / "fleet.db"
     ledger.parent.mkdir(parents=True, exist_ok=True)
-    ledger.touch(exist_ok=True)
+    if ledger.exists() and ledger.stat().st_size > 0:
+        return
+    schema_path = framework_root() / "spec-driven-development" / "ledger" / "schema.sql"
+    if not schema_path.is_file():
+        fail(
+            f"Ledger schema not found: {schema_path}",
+            "Restore spec-driven-development/ledger/schema.sql from the framework checkout.",
+        )
+    schema_sql = schema_path.read_text(encoding="utf-8")
+    connection = sqlite3.connect(str(ledger))
+    try:
+        connection.executescript(schema_sql)
+        connection.commit()
+    finally:
+        connection.close()
 
 
 def copy_archetype_skills(archetype: Path, target: Path, force: bool) -> None:
@@ -886,6 +952,186 @@ def run_host_link(args: argparse.Namespace) -> None:
     print("  - Review docs/HOST-INTEGRATION.md for the CI/Actions trade-off and rollback procedure.")
 
 
+# --------------------------------------------------------------------------- #
+# SDD-045 A-4 / A-5: setup (one-command clone-and-run) and doctor (health check)
+# --------------------------------------------------------------------------- #
+
+
+def install_commit_msg_hook(root: Path) -> str:
+    """Install the commit-msg hook into root/.git/hooks. Idempotent.
+
+    Returns a short status string. A no-op (with a note) when there is no
+    .git directory (e.g. running setup before `git init`).
+    """
+    source = root / "spec-driven-development" / "cli" / "hooks" / "commit-msg"
+    git_hooks = root / ".git" / "hooks"
+    if not source.is_file():
+        return f"commit-msg hook source missing ({source}); skipped"
+    if not (root / ".git").is_dir():
+        return "no .git directory; commit-msg hook skipped"
+    git_hooks.mkdir(parents=True, exist_ok=True)
+    destination = git_hooks / "commit-msg"
+    shutil.copyfile(str(source), str(destination))
+    try:
+        destination.chmod(0o755)
+    except OSError:
+        pass
+    return f"commit-msg hook installed at {destination}"
+
+
+def write_owner_config(root: Path, owner: str | None) -> str:
+    """Record the owner name when provided. Idempotent.
+
+    When owner is None the step is skipped (this framework checkout is already
+    personalized via its constitution). When provided, the name is written to
+    spec-driven-development/exec/.owner.
+    """
+    if owner is None:
+        return "owner config skipped (constitution already personalizes ownership)"
+    owner_file = root / "spec-driven-development" / "exec" / ".owner"
+    owner_file.parent.mkdir(parents=True, exist_ok=True)
+    owner_file.write_text(f"{owner}\n", encoding="utf-8")
+    return f"owner recorded at {owner_file}"
+
+
+def _run_check(root: Path, args: list[str]) -> tuple[int, str]:
+    """Run a checker subprocess from root; return (exit_code, combined_output)."""
+    result = subprocess.run(
+        [sys.executable, *args],
+        cwd=str(root), capture_output=True, text=True, check=False,
+    )
+    return result.returncode, (result.stdout + result.stderr).strip()
+
+
+def run_setup(root: Path, owner: str | None = None, *,
+              make_venv: bool = True, run_checks: bool = True) -> int:
+    """Idempotently make a fresh clone of the framework runnable (A-4).
+
+    Returns 0 on success, 1 on any failed step.
+    """
+    print("SDD setup -- making this clone runnable")
+
+    if sys.version_info < (3, 12):
+        print(
+            f"ERROR: Python 3.12+ required; found {sys.version_info.major}."
+            f"{sys.version_info.minor}.",
+            file=sys.stderr,
+        )
+        print("Remediation: install Python 3.12 or newer and re-run setup.", file=sys.stderr)
+        return 1
+    print(f"  [1/6] Python {sys.version_info.major}.{sys.version_info.minor} OK")
+
+    venv_dir = root / ".venv"
+    if not make_venv or venv_dir.exists():
+        reason = "already present" if venv_dir.exists() else "skipped (--skip-venv)"
+        print(f"  [2/6] .venv {reason}")
+    else:
+        code, output = _run_check(root, ["-m", "venv", str(venv_dir)])
+        if code != 0:
+            print(f"ERROR: failed to create .venv: {output}", file=sys.stderr)
+            return 1
+        print(f"  [3/6] .venv created at {venv_dir}")
+
+    try:
+        initialize_ledger(root)
+    except BootstrapError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print("  [3/6] fleet ledger initialized from schema.sql")
+
+    print(f"  [4/6] {install_commit_msg_hook(root)}")
+    print(f"  [5/6] {write_owner_config(root, owner)}")
+
+    if not run_checks:
+        print("  [6/6] schema_lint + tests skipped (--skip-checks)")
+        print("\nSetup complete (checks skipped). Talk to the Executive Manager to begin.")
+        return 0
+
+    schema_lint = root / "spec-driven-development" / "cli" / "schema_lint.py"
+    code, output = _run_check(root, [str(schema_lint)])
+    if code != 0:
+        print(f"ERROR: schema_lint failed:\n{output}", file=sys.stderr)
+        return 1
+    print("  [6/6] schema_lint clean; running test suite...")
+
+    code, output = _run_check(
+        root, ["-m", "pytest", "spec-driven-development", "--tb=no", "-q"]
+    )
+    if code != 0:
+        print(f"ERROR: test suite failed:\n{output}", file=sys.stderr)
+        return 1
+    summary = output.splitlines()[-1] if output else ""
+    print(f"        tests passed: {summary}")
+    print("\nSetup complete. Open VS Code, select the Executive Manager agent, and begin.")
+    return 0
+
+
+def run_doctor(root: Path, *, run_tests: bool = True) -> int:
+    """Report framework health on one screen; non-zero exit on any failure (A-5).
+
+    The set of checks is the single source of truth for what CI runs.
+    """
+    import origin_lint
+    import governance_check
+
+    is_framework = root == framework_root()
+    checks: list[tuple[str, bool, str]] = []
+
+    # (a) ledger reachable AND untracked.
+    ledger = root / "spec-driven-development" / "ledger" / "fleet.db"
+    tracked = origin_lint.find_tracked_dbs(root)
+    if tracked:
+        checks.append(("ledger untracked", False,
+                       f"tracked db(s): {', '.join(tracked)} (run git rm --cached)"))
+    elif not ledger.is_file():
+        checks.append(("ledger reachable", False, "fleet.db missing (run setup)"))
+    else:
+        try:
+            connection = sqlite3.connect(str(ledger))
+            try:
+                connection.execute("SELECT COUNT(*) FROM dispatches")
+            finally:
+                connection.close()
+            checks.append(("ledger reachable + untracked", True, "ok"))
+        except sqlite3.Error as exc:
+            checks.append(("ledger reachable", False, f"cannot query fleet.db: {exc}"))
+
+    # (b) schema_lint clean (framework checkout only).
+    if is_framework:
+        code, output = _run_check(
+            root, [str(root / "spec-driven-development" / "cli" / "schema_lint.py")]
+        )
+        checks.append(("schema_lint clean", code == 0,
+                       "ok" if code == 0 else output.splitlines()[-1] if output else "failed"))
+
+    # (c) governance coherence + article-range match.
+    gov_ok, gov_findings = governance_check.check_governance(root)
+    checks.append(("governance coherent", gov_ok,
+                   "ok" if gov_ok else "; ".join(gov_findings)))
+
+    # (d) no origin tokens.
+    findings = origin_lint.scan_origin_tokens(root, list(origin_lint.DEFAULT_DENYLIST))
+    checks.append(("origin tokens absent", not findings,
+                   "ok" if not findings else f"{len(findings)} token(s) found"))
+
+    # (e) tests pass.
+    if run_tests and is_framework:
+        code, output = _run_check(
+            root, ["-m", "pytest", "spec-driven-development", "--tb=no", "-q"]
+        )
+        checks.append(("tests pass", code == 0,
+                       output.splitlines()[-1] if output else ("ok" if code == 0 else "failed")))
+
+    print("SDD doctor -- framework health")
+    all_ok = True
+    for label, ok, detail in checks:
+        marker = "PASS" if ok else "FAIL"
+        print(f"  [{marker}] {label}: {detail}")
+        all_ok = all_ok and ok
+    print("\nAll checks passed." if all_ok else "\nOne or more checks FAILED.")
+    return 0 if all_ok else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv if argv is not None else sys.argv[1:])
     try:
@@ -898,6 +1144,15 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "host-link":
             run_host_link(args)
             return 0
+        if args.command == "setup":
+            return run_setup(
+                framework_root(),
+                owner=args.owner,
+                make_venv=not args.skip_venv,
+                run_checks=not args.skip_checks,
+            )
+        if args.command == "doctor":
+            return run_doctor(framework_root(), run_tests=not args.skip_tests)
         fail(f"Unsupported command: {args.command}", "Run python bootstrap.py --help for valid commands.")
     except BootstrapError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

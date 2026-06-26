@@ -9,7 +9,7 @@ sprint: PI-7
 
 # PI-7: Hardening + Orchestration Maturity
 
-- Status: **ACTIVE (launched 2026-06-26, owner-approved via Executive Manager)** (Sprint 14 / PI-7 Sprint 1 not yet started.)
+- Status: **ACTIVE (launched 2026-06-26, owner-approved via Executive Manager).** Sprint 14 (PI-7 Sprint 1) CLOSED 2026-06-26 -- owner-approved commit + push; SDD-043/044/045 DONE; tests 481 -> 501; ADR-020 Accepted. PI-7 continues into Sprint 15 (PI-7 Sprint 2 -- "Make promises true", SDD-046). The PI-7 CLOSE is a separate owner-approved decision after Sprint 17.
 - Theme: Make the framework genuinely team-portable -- a teammate clones the
   repo, runs one setup command, and builds their own project the same day with
   no trace of the original author -- and fix the two-tier orchestration
@@ -162,7 +162,7 @@ feature, not the anchor. Per-item SDD-IDs assigned at Sprint 17 CLARIFY.
 
 | Sprint | Overall | Title | Items | Size | Why this order |
 |--------|---------|-------|-------|------|----------------|
-| **PI-7 Sprint 1** | Sprint 14 | Detach + Orchestration Maturity | SDD-043 (Sprint EM) + SDD-044 (plain-language comms) + SDD-045 (A-1/A-4/A-5/A-6/B-3) | L | Highest-trust, demo-first slice. Clone-and-run becomes real, governance becomes self-consistent, and the orchestration layer grows up (Sprint EM + plain comms) before the heavier hardening lands. Sprint EM is foundational, so it ships in the first PI-7 sprint. |
+| **PI-7 Sprint 1** | Sprint 14 | Detach + Orchestration Maturity -- **CLOSED 2026-06-26** | SDD-043 (Sprint EM) + SDD-044 (plain-language comms) + SDD-045 (A-1/A-4/A-5/A-6/B-3) -- all DONE | L | Highest-trust, demo-first slice. Clone-and-run becomes real, governance becomes self-consistent, and the orchestration layer grows up (Sprint EM + plain comms) before the heavier hardening lands. Sprint EM is foundational, so it ships in the first PI-7 sprint. CLOSED: tests 481 -> 501, schema lint clean, ADR-020 Accepted, owner-approved commit + push. |
 | **PI-7 Sprint 2** | Sprint 15 | Make promises true | SDD-046 (B-1/B-2/B-4) | M | The credibility sprint. B-1 (ledger truth) is the single most important move; B-2 (TDD gate) and B-4 (CI) make the rules that matter block for everyone on every push. After B-1 the ledger dogfoods the mandatory-logging fix. |
 | **PI-7 Sprint 3** | Sprint 16 | De-author the content | SDD-047 (A-2/A-3/D-1/D-3) | M | No personal fingerprints, no dead skills, no over-claims. Runs after the structural fixes so identity/config moves land on a stable base. |
 | **PI-7 Sprint 4** | Sprint 17 | Maintainability + right-sizing | SDD-048 (C-1/C-2/C-3/D-2) + Option B (reorder re-optimization) if capacity | L | Kill the god-module and add the lightweight-spec path last, behind the existing tests. Sprint 13 carryover Option B folds in here only if capacity allows. PI-7 CLOSE is a separate owner-approved decision after Sprint 17. |

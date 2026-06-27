@@ -734,6 +734,7 @@ class TestStdlibOnly:
             "backlog_reorder",
             "doc_count",
             "dashboard_server",
+            "work_index",
         }
 
         for node in ast.walk(tree):
@@ -1832,6 +1833,7 @@ class TestSecurityAudit:
             "backlog_reorder",
             "doc_count",
             "dashboard_server",
+            "work_index",
         }
         for line in text.splitlines():
             stripped = line.strip()

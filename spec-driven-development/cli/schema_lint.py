@@ -56,6 +56,11 @@ ARTIFACT_TYPE_ENUM = {
     "lessons",
     "index",
     "session",
+    # SDD-048 D-2: the combined lightweight-feature artifact (story +
+    # requirements + plan + validation contract in one file) for <5-file
+    # work. Enum extension sanctioned by the SDD-048 plan.md D-2 decision;
+    # the four-doc types above are unchanged (no regression).
+    "feature",
 }
 
 ARTIFACT_STATUS_ENUM = {

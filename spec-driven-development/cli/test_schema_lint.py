@@ -267,6 +267,31 @@ class ArtifactContractAcceptance(unittest.TestCase):
         findings = schema_lint.check_artifact(p)
         self.assertTrue(any("type 'not-a-real-type' not in enum" in f.issue for f in findings))
 
+    def test_artifact_combined_feature_type_accepted(self):
+        """SDD-048 D-2: the combined lightweight-feature doc uses
+        `type: feature`, which must be a recognized artifact type (no enum
+        finding), while the four-doc types remain valid (no regression)."""
+        good = (
+            "---\nid: SDD-099\ntype: feature\nstatus: active\n"
+            "owner: principal-software-developer\nupdated: 2026-06-26\n---\n# body\n"
+        )
+        p = self._write(self.specs / "feature.md", good)
+        self.assertEqual(
+            schema_lint.check_artifact(p), [],
+            "combined `type: feature` artifact should produce no findings",
+        )
+        # No regression: the four-doc lifecycle types still pass.
+        for t in ("spec", "plan", "tasks", "validation"):
+            c = (
+                f"---\nid: SDD-099\ntype: {t}\nstatus: active\n"
+                "owner: principal-architect\nupdated: 2026-06-26\n---\n# body\n"
+            )
+            q = self._write(self.specs / f"four-{t}.md", c)
+            self.assertEqual(
+                schema_lint.check_artifact(q), [],
+                f"regression: four-doc type '{t}' should still pass",
+            )
+
     def test_artifact_bad_status_enum_reported(self):
         bad = (
             "---\nid: x\ntype: spec\nstatus: wibble\n"

@@ -736,6 +736,7 @@ class TestStdlibOnly:
             "dashboard_server",
             "work_index",
             "state_builder_data",
+            "state_builder_html",
         }
 
         for node in ast.walk(tree):
@@ -1836,6 +1837,7 @@ class TestSecurityAudit:
             "dashboard_server",
             "work_index",
             "state_builder_data",
+            "state_builder_html",
         }
         for line in text.splitlines():
             stripped = line.strip()

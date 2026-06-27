@@ -175,6 +175,17 @@ from state_builder_html import (  # noqa: E402  -- in-tree sibling re-export (AD
 )
 
 # ---------------------------------------------------------------------------- #
+# E6 (SDD-048): markdown renderer (state.md, SDD-002 7-section format) extracted
+# to state_builder_markdown.py and decomposed into per-section helpers via stdlib
+# string.Template (C-2). Re-exported here so build() resolves render_markdown as
+# a module global. In-tree sibling re-export per ADR-012; stdlib-only per ADR-023.
+# ---------------------------------------------------------------------------- #
+
+from state_builder_markdown import (  # noqa: E402  -- in-tree sibling re-export (ADR-012)
+    render_markdown,
+)
+
+# ---------------------------------------------------------------------------- #
 # SDD root + path helpers
 # ---------------------------------------------------------------------------- #
 
@@ -363,141 +374,12 @@ def load_decisions(sdd_root: Path, limit: int = 50) -> list[dict]:
 
 # ---------------------------------------------------------------------------- #
 # Markdown renderer -- SDD-002 7-section format
+#
+# Decomposed into per-section helpers and moved to state_builder_markdown.py
+# under SDD-048 (C-1 split / C-2 stdlib string.Template factoring). render_markdown
+# is re-exported at module top (in-tree sibling, ADR-012) so build() resolves it
+# as a module global. render_html (locked) intentionally stays in this facade.
 # ---------------------------------------------------------------------------- #
-
-def render_markdown(*, generated_date: str, pi: PIBlock | None, features: list[Feature],
-                    backlog: list[BacklogItem], roster: dict, ledger: LedgerView,
-                    next_action: tuple[str, str, str | None],
-                    user_gates: list[UserGate] | None = None) -> str:
-    """Produce state.md in the canonical 7-section format required by SDD-002.
-
-    Sections (in order):
-      1. Header
-      2. Spec Pipeline
-      3. Sprint Plan
-      4. Fleet
-      5. Recently Completed
-      6. Blockers
-      7. Next Milestones
-    """
-    out: list[str] = []
-
-    # ---- 1. Header --------------------------------------------------------
-    pi_label = f"{pi.name} ({pi.title})" if pi else "no PI active"
-    sprint_label = "Symbolic -- AI fleet compresses wall-clock time"
-    focus_line = next_action[0] if next_action else ""
-    out += ["# Executive State", "",
-            f"Generated date: {generated_date}",
-            f"Current PI: {pi_label}",
-            f"Active sprint: {sprint_label}",
-            f"Active focus: {focus_line}", ""]
-    if pi:
-        out += [f"PI progress: {pi.done}/{pi.total} commitments complete ({pi.pct}%)", ""]
-
-    # ---- 2. Spec Pipeline -------------------------------------------------
-    out += ["## Spec Pipeline", "",
-            "| Feature | Stage | Status | Notes |",
-            "|---------|-------|--------|-------|"]
-    if features:
-        for f in features:
-            out.append(f"| {f.name} | {f.stage} | {f.status_line or '-'} | {f.notes} |")
-    else:
-        out.append("| _(no features)_ | -- | -- | -- |")
-    out.append("")
-
-    # ---- 3. Sprint Plan ---------------------------------------------------
-    out += ["## Sprint Plan", ""]
-    if backlog:
-        by_sprint: dict[str, list[BacklogItem]] = {}
-        for item in backlog:
-            key = item.sprint or "Unassigned"
-            by_sprint.setdefault(key, []).append(item)
-        for sprint_key in sorted(by_sprint.keys()):
-            if sprint_key.lower() in ("unscheduled", "unassigned"):
-                continue
-            out.append(f"### {sprint_key}")
-            out.append("")
-            out.append("| ID | Title | Priority | RICE | Status |")
-            out.append("|----|-------|----------|------|--------|")
-            for it in by_sprint[sprint_key]:
-                out.append(f"| {it.pid} | {it.title} | {it.priority} | {it.rice} | {it.status} |")
-            out.append("")
-    else:
-        out += ["_no items_", ""]
-
-    # ---- 4. Fleet ---------------------------------------------------------
-    out += ["## Fleet", "",
-            f"- Principals: {roster['principals']}",
-            f"- Generic workers: {roster['generic']}",
-            f"- Specialists: {roster['specialist']}",
-            f"- Total agents: {roster['total_agents']}",
-            f"- Skills: {roster['total_skills']} across {roster.get('skill_categories', 0)} categories", ""]
-
-    # ---- 5. Recently Completed -------------------------------------------
-    out += ["## Recently Completed", ""]
-    if not ledger.available:
-        out += ["_fleet.db not initialized; no ledger data to summarize_", ""]
-    elif not ledger.recent_success:
-        out += ["_no successful dispatches yet_", ""]
-    else:
-        out += ["| When | Feature | Task | Agent |",
-                "|------|---------|------|-------|"]
-        for d in ledger.recent_success:
-            when = d.get("outcome_at") or d.get("dispatched_at") or ""
-            out.append(f"| {when} | {d.get('feature_dir','')} | {d.get('task_title','')} | {d.get('agent_id','')} |")
-        out.append("")
-
-    # ---- 6. Blockers ------------------------------------------------------
-    out += ["## Blockers", ""]
-    blocking_gates = active_user_gates(user_gates or [])
-    if blocking_gates:
-        out += [
-            "### Pending User Gates",
-            "",
-            "| Feature | Gate | Blocks | Evidence Need | Next Action |",
-            "|---------|------|--------|---------------|-------------|",
-        ]
-        for gate in blocking_gates:
-            out.append(
-                f"| {gate.feature} | {gate.gate_id} (`{gate.gate_type}`) | "
-                f"`{gate.blocking_scope}` | {gate.evidence_type or '-'} | "
-                f"{gate.next_action or '-'} |"
-            )
-        out += [
-            "",
-            "_Generated executive surfaces are visibility only; they are not approval evidence._",
-            "",
-        ]
-    if not ledger.available:
-        out += ["_fleet.db not initialized; no blockers known_", ""]
-    elif not ledger.blockers:
-        out += ["_none -- no dispatches without outcome older than 24h_", ""]
-    else:
-        out += ["| Dispatched | Feature | Task | Agent | Age |",
-                "|-----------|---------|------|-------|-----|"]
-        for d in ledger.blockers:
-            out.append(f"| {d.get('dispatched_at','')} | {d.get('feature_dir','')} | "
-                       f"{d.get('task_title','')} | {d.get('agent_id','')} | stale |")
-        out.append("")
-
-    # ---- 7. Next Milestones ----------------------------------------------
-    out += ["## Next Milestones", ""]
-    if pi and pi.checkboxes:
-        unstarted = [label for done, label in pi.checkboxes if not done]
-        if unstarted:
-            for label in unstarted[:5]:
-                out.append(f"- {label}")
-        else:
-            out.append("_all PI commitments complete -- plan next PI_")
-    else:
-        out.append("_no PI commitments registered_")
-    out += ["",
-            "---",
-            "",
-            "_Auto-generated by `cli/state_builder.py`. SDD-002 contract: 7-section format. "
-            "Visual dashboard: `python state_builder.py serve`._",
-            ""]
-    return "\n".join(out)
 
 
 # ---------------------------------------------------------------------------- #

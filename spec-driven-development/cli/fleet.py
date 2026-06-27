@@ -42,7 +42,39 @@ ROSTER_PATH = SDD_ROOT / "roster" / "agents.json"
 # Spec dirs whose CLARIFY/SPEC frontmatter `updated` field is strictly older
 # than this date are treated as grandfathered lock holders and are not
 # retroactively blocked. See specs/2026-06-09-sprint-6-completion/.
+#
+# SDD-048 C-3: the live cutover is sourced from `project.config.json`
+# (`article_xi_cutover`) so a host-project owner can override it without
+# editing CLI code. This constant is the FALLBACK used only when the config
+# file or field is absent or unreadable; do not delete it.
 ARTICLE_XI_CUTOVER = "2026-06-08"
+
+# Repo-root config (sibling of SDD_ROOT) holding host-project identity + knobs.
+_PROJECT_CONFIG = SDD_ROOT.parent / "project.config.json"
+
+
+def _resolve_article_xi_cutover(config_path: Path | None = None) -> str:
+    """Resolve the Article XI grandfather cutover (``YYYY-MM-DD``).
+
+    Reads the ``article_xi_cutover`` field from ``project.config.json`` via the
+    stdlib ``json`` module. Falls back to the :data:`ARTICLE_XI_CUTOVER`
+    constant when the config file or field is missing or unreadable, so the
+    scanner never crashes on a host project that has not set the field.
+    """
+    path = config_path if config_path is not None else _PROJECT_CONFIG
+    try:
+        with open(path, encoding="utf-8") as fh:
+            data = json.load(fh)
+    except (OSError, ValueError):
+        return ARTICLE_XI_CUTOVER
+    value = data.get("article_xi_cutover") if isinstance(data, dict) else None
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+    return ARTICLE_XI_CUTOVER
+
+
+# Config-sourced cutover used as the default everywhere the scanner runs.
+RESOLVED_ARTICLE_XI_CUTOVER = _resolve_article_xi_cutover()
 
 
 # Exception ----------------------------------------------------------------- #
@@ -469,7 +501,7 @@ def _compute_queue_order(
 
 def _is_grandfathered(
     spec_dir: Path,
-    cutover: str = ARTICLE_XI_CUTOVER,
+    cutover: str = RESOLVED_ARTICLE_XI_CUTOVER,
 ) -> bool:
     """Return True if *spec_dir* predates the Article XI cutover.
 

@@ -497,5 +497,74 @@ class TestGrandfather(unittest.TestCase):
             self.assertFalse(fleet._is_grandfathered(missing))
 
 
+# --------------------------------------------------------------------------- #
+# SDD-048 C-3 -- config-sourced Article XI cutover (replaces hardcoded date)
+# --------------------------------------------------------------------------- #
+
+
+class TestArticleXICutoverConfig(unittest.TestCase):
+    """C-3: cutover resolved from project.config.json with a constant fallback."""
+
+    def _write_config(self, parent: Path, payload: dict) -> Path:
+        cfg = parent / "project.config.json"
+        cfg.write_text(json.dumps(payload), encoding="utf-8")
+        return cfg
+
+    def test_resolve_from_config_field(self) -> None:
+        """R-1: a present config field is used verbatim."""
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = self._write_config(Path(tmp), {"article_xi_cutover": "2030-01-15"})
+            self.assertEqual(fleet._resolve_article_xi_cutover(cfg), "2030-01-15")
+
+    def test_fallback_when_field_absent(self) -> None:
+        """R-2: a config lacking the field falls back to the module constant."""
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = self._write_config(Path(tmp), {"owner": "Someone"})
+            self.assertEqual(
+                fleet._resolve_article_xi_cutover(cfg), fleet.ARTICLE_XI_CUTOVER
+            )
+
+    def test_fallback_when_file_missing(self) -> None:
+        """R-2: a nonexistent config path falls back to the constant (no crash)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            missing = Path(tmp) / "nope.json"
+            self.assertEqual(
+                fleet._resolve_article_xi_cutover(missing), fleet.ARTICLE_XI_CUTOVER
+            )
+
+    def test_fallback_when_malformed_json(self) -> None:
+        """R-2: malformed JSON falls back to the constant rather than raising."""
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = Path(tmp) / "project.config.json"
+            cfg.write_text("{ not json", encoding="utf-8")
+            self.assertEqual(
+                fleet._resolve_article_xi_cutover(cfg), fleet.ARTICLE_XI_CUTOVER
+            )
+
+    def test_resolved_constant_matches_project_config(self) -> None:
+        """R-1: the module-level resolved cutover equals the shipped config value."""
+        self.assertEqual(fleet.RESOLVED_ARTICLE_XI_CUTOVER, "2026-06-08")
+        self.assertEqual(fleet.ARTICLE_XI_CUTOVER, "2026-06-08")
+
+    def test_grandfather_verdict_unchanged_config_vs_fallback(self) -> None:
+        """R-4: config-sourced default and explicit fallback agree on verdicts."""
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_p = Path(tmp)
+            sd_pre = _grandfather_spec_dir(tmp_p, "feat-pre", "2026-06-01")
+            sd_post = _grandfather_spec_dir(tmp_p, "feat-post", "2026-06-09")
+            # Default uses config-sourced RESOLVED_ARTICLE_XI_CUTOVER.
+            self.assertTrue(fleet._is_grandfathered(sd_pre))
+            self.assertFalse(fleet._is_grandfathered(sd_post))
+            # Explicit fallback constant -- identical verdicts.
+            self.assertEqual(
+                fleet._is_grandfathered(sd_pre),
+                fleet._is_grandfathered(sd_pre, cutover=fleet.ARTICLE_XI_CUTOVER),
+            )
+            self.assertEqual(
+                fleet._is_grandfathered(sd_post),
+                fleet._is_grandfathered(sd_post, cutover=fleet.ARTICLE_XI_CUTOVER),
+            )
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

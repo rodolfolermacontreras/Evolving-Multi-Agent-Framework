@@ -1222,3 +1222,37 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - Notes: The de-author sprint. The framework no longer carries the fingerprints of its author or origin project on any generic surface a teammate reads as instruction: owner/identity is a config value, origin examples are stack-neutral or relocated to the archetype, the origin story is preserved only as labeled history, every shipped skill is wired to an agent/prompt (none orphaned), and no doc claims a "conflict detection" the code does not perform. The A-6 lint now reads the owner name from config and doctor fails on a re-added personal name. F-42 ran as an EM-routed subagent dispatch (Article VII isolation) with the Sprint EM independently re-running every gate at close (DA-Evidence Discipline) rather than trusting the subagent's report. The one Level-2 surface (three constitution files) landed under owner-accepted ADR-022.
 - Next: SPRINT-17 kickoff (PI-7 Sprint 4 -- Maintainability + right-sizing: SDD-048 C-1/C-2/C-3/D-2)
 - Reported up to project EM: YES (2026-06-26)
+
+---
+
+## Sprint 17 -- PI-7 Sprint 4 / Maintainability + right-sizing (FINAL PI-7 sprint)
+
+- Sprint kickoff: [../feature-prompts/SPRINT-17-KICKOFF.prompt.md](../feature-prompts/SPRINT-17-KICKOFF.prompt.md)
+- Lead: Sprint Executive Manager (Level 0, routes; reports up to project EM at close)
+- HARD PREREQUISITE: verified PASS 8/8 at HEAD `67d95d9` -- Sprint 16 CLOSED at `e93862d` (PI-7 ACTIVE, Sprint 17 named final, SDD-047 DONE); tests 540 passed / 2 skipped; schema lint exit 0; origin lint 0 hits; doctor 8/8 PASS incl. TestS1FootprintLockGuard 3/3; SDD-048 OPEN (allocated PI-7 Sprint 17); audit source `docs/Temp/EMF-HARDENING-PLAN.md` present; live B-1/B-2/B-4 gates in force (doctor: PI-7 6 dispatch rows).
+- Owner start approval: 2026-06-26 ("when done with onboarding lets go. Yes to recommended actions").
+- Owner decisions locked at start (all kickoff defaults accepted): Q-A approach (a) refactor-AROUND the 5 Article X locked functions (no re-baseline); Q-B proposed module split, one extraction per commit; **Q-C C-2 = STAY STDLIB-ONLY** (string.Template helpers, no new dependency -- Article V preserved); Q-D C-3 cutover date -> config source; Q-E D-2 combined-doc lightweight path (Article X validation lock NOT weakened); Q-F max-function-length lint = optional nice-to-have (do not block sprint).
+- Hard constraint reaffirmed: NO push without recorded owner pre-push approval; the C-2 default keeps the sprint stdlib-only (no Level-2 dependency surface); the 5 locked render functions are immutable under approach (a) -- a worker NEVER touches a locked function silently.
+- Sequence: F-44 (CLARIFY -> SPEC -> PLAN -> TASKS, PM + Architect) -> F-45 (IMPLEMENT + QA, SW Dev) -> F-46 (Sprint 17 close + PI-7 close-readiness report, Sprint EM + SW Dev)
+- Status: **STARTED** -- F-44 design dispatched.
+
+### F-44 -- sdd-048 maintainability design (CLARIFY -> SPEC -> PLAN -> TASKS) -- DONE (design-only; local)
+
+- Date: 2026-06-26
+- Owner: Sprint Executive Manager (routing + green re-verify); principal-architect (design, EM-routed subagent dispatch -- Article VII context isolation; PM hat for CLARIFY)
+- Commits: none in F-44; no commit or push (design artifacts only).
+- Scope honored: DESIGN ONLY. No CLI/code edit, no constitution edit, no ADR flip, no implementation. SDD-048 carried through CLARIFY -> SPEC -> PLAN -> TASKS with per-item validation contracts.
+- Spec dir: `spec-driven-development/specs/2026-06-26-sdd-048-maintainability/`
+- Files created: 8 design artifacts + 1 ADR draft:
+  - `clarify.md`, `spec.md`, `plan.md`, `tasks.md`
+  - `validation-C1.md`, `validation-C2.md`, `validation-C3.md`, `validation-D2.md`
+  - `docs/ADR/023-dashboard-render-stdlib-only.md` (NEW; status proposed -- C-2 stdlib-only decision, owner-ratified at close)
+- Tests: 540 passed, 2 skipped (no change; docs/spec artifacts only). EM-reverified.
+- Schema lint: clean (exit 0). EM-reverified.
+- Owner decisions recorded (all kickoff defaults accepted): Q-A approach (a) refactor-around (no re-baseline); Q-B 6-module split, one extraction/commit; Q-C C-2 stay stdlib-only (string.Template, ADR-023); Q-D C-3 -> `project.config.json` `article_xi_cutover` field with fallback constant + comment; Q-E D-2 combined-doc; Q-F optional `ast` length lint (non-blocking).
+- C-1 module plan: 6 sibling modules + `state_builder.py` facade (holds the 5 locked fns byte-identical + re-exports). Extraction order, suite-green-after-each: `doc_count` -> `dashboard_server` -> `work_index` -> `state_builder_data` -> `state_builder_html` -> `state_builder_markdown`.
+- Stale-check (DA-Evidence, verified live): `state_builder.py` grew to ~4153 lines / ~79 funcs (audit said 3082/56) -- STRENGTHENS C-1, not stale; `render_markdown`=762, `render_html`=658, `ARTICLE_XI_CUTOVER="2026-06-08"` all match audit. No item stale enough to drop.
+- Per-item validation counts: C-1 7 REQUIRED + 3 manual; C-2 4 REQUIRED + 2 manual; C-3 4 REQUIRED + 2 manual; D-2 4 REQUIRED + 2 manual.
+- Article X: approach (a) preserves the 5 locked render fns; `render_html` stays the documented stdlib exception (DE-2). No locked fn touched.
+- OWNER-ATTENTION: none. ADR-023 stays proposed until owner ratifies at F-46 close.
+- Next: F-45 implements C-1 (6-module split, one extraction/commit) + C-2 (string.Template factoring) + C-3 (config date) + D-2 (combined-doc, proven on a real <5-file feature) + optional Q-F lint; dogfoods the B-1 ledger gate; keeps suite >= 540/2 and the Article X lock green. NO push until owner pre-push approval at F-46.

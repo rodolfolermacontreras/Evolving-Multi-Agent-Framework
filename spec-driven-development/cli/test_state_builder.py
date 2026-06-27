@@ -735,6 +735,7 @@ class TestStdlibOnly:
             "doc_count",
             "dashboard_server",
             "work_index",
+            "state_builder_data",
         }
 
         for node in ast.walk(tree):
@@ -1834,6 +1835,7 @@ class TestSecurityAudit:
             "doc_count",
             "dashboard_server",
             "work_index",
+            "state_builder_data",
         }
         for line in text.splitlines():
             stripped = line.strip()

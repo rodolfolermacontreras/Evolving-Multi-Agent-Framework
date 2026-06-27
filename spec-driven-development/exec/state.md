@@ -44,10 +44,12 @@ PI progress: 0/0 commitments complete (0%)
 | state-builder-fixes | REVIEW | done | Status: done but RETRO missing |
 | dashboard-dispatches-health-pills | REVIEW | active | validation 97% (35/36) |
 | dashboard-lifecycle-reorder | REVIEW | active | validation 84% (16/19) |
+| d2-proof-config-cutover | BACKLOG | - | directory exists, no artifacts yet |
 | detach-clone-and-run-hardening | IMPLEMENT | active | validation 0% (0/23) |
 | make-promises-true | REVIEW | active | validation 96% (25/26) |
 | plain-language-comms-discipline | IMPLEMENT | active | validation 0% (0/12) |
 | sdd-047-de-author | REVIEW | done | Status: done but RETRO missing |
+| sdd-048-maintainability | TASKS | active | tasks.md present |
 | two-tier-executive-manager | IMPLEMENT | active | validation 0% (0/17) |
 
 ## Sprint Plan

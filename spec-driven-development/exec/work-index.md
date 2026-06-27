@@ -39,6 +39,7 @@ Current PI: **PI-7 (Hardening + Orchestration Maturity)**
 | 2026-06-08 | azure-decommission | IMPLEMENT | `specs/2026-06-08-azure-decommission/` |
 | 2026-06-26 | detach-clone-and-run-hardening | IMPLEMENT | `specs/2026-06-26-detach-clone-and-run-hardening/` |
 | 2026-06-26 | plain-language-comms-discipline | IMPLEMENT | `specs/2026-06-26-plain-language-comms-discipline/` |
+| 2026-06-26 | sdd-048-maintainability | TASKS | `specs/2026-06-26-sdd-048-maintainability/` |
 | 2026-06-26 | two-tier-executive-manager | IMPLEMENT | `specs/2026-06-26-two-tier-executive-manager/` |
 
 ## 2A. USER GATES -- Human approvals and blocked transitions

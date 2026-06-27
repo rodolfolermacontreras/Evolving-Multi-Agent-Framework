@@ -732,6 +732,7 @@ class TestStdlibOnly:
             # bootstrap (ADR-012 / SDD-FDC-001). Not third-party deps.
             "schema_lint",
             "backlog_reorder",
+            "doc_count",
         }
 
         for node in ast.walk(tree):
@@ -1828,6 +1829,7 @@ class TestSecurityAudit:
             # bootstrap (ADR-012 / SDD-FDC-001). Not third-party deps.
             "schema_lint",
             "backlog_reorder",
+            "doc_count",
         }
         for line in text.splitlines():
             stripped = line.strip()

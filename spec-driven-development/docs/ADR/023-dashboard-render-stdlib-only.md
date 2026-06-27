@@ -90,7 +90,7 @@ Neutral:
 - [x] No new dependencies (stdlib `string.Template` only) -- Article V preserved.
 - [x] Backward compatible: render output is byte-equivalent (pure refactor).
 - [ ] Tests updated to cover new pattern -- N/A for design; F-45 keeps the suite
-      at 540/2 with no assertion changes.
+      green at 546/2 with no assertion changes (pure refactor; output byte-equivalent).
 - [x] No convention change to `.github/copilot-instructions.md` required.
 - Note: Status is **proposed** at F-44 (design). The owner ratifies to **accepted**
   at SDD-048 close (F-46) after the factoring is implemented and verified.

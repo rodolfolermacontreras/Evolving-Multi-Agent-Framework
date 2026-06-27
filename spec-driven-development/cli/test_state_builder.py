@@ -733,6 +733,7 @@ class TestStdlibOnly:
             "schema_lint",
             "backlog_reorder",
             "doc_count",
+            "dashboard_server",
         }
 
         for node in ast.walk(tree):
@@ -1830,6 +1831,7 @@ class TestSecurityAudit:
             "schema_lint",
             "backlog_reorder",
             "doc_count",
+            "dashboard_server",
         }
         for line in text.splitlines():
             stripped = line.strip()
@@ -3185,6 +3187,12 @@ from cli.state_builder import (  # noqa: E402
 )
 from cli.backlog_reorder import load_order  # noqa: E402
 
+# handle_reorder_request now lives in the dashboard_server sibling (SDD-048
+# C1-E2). Patch its source module -- the bare module the facade re-exports
+# from -- not the facade ("patch at source, not import site").
+import sys as _sys  # noqa: E402
+_ds = _sys.modules[handle_reorder_request.__module__]  # noqa: E402
+
 
 class TestSdd041DragAffordance:
     """AC: lifecycle cards are static; the drag surface is the Backlog section."""
@@ -3500,7 +3508,7 @@ class TestSdd041HandleReorder:
 
     def test_invalid_item_is_400(self, tmp_path: Path, monkeypatch) -> None:
         calls = []
-        monkeypatch.setattr(_sb, "_reorder_move",
+        monkeypatch.setattr(_ds, "_reorder_move",
                             lambda *a, **k: calls.append(k) or {})
         status, body = handle_reorder_request(tmp_path, {"item": "nope", "to_rank": 0})
         assert status == 400
@@ -3508,7 +3516,7 @@ class TestSdd041HandleReorder:
 
     def test_negative_rank_is_400(self, tmp_path: Path, monkeypatch) -> None:
         calls = []
-        monkeypatch.setattr(_sb, "_reorder_move",
+        monkeypatch.setattr(_ds, "_reorder_move",
                             lambda *a, **k: calls.append(k) or {})
         status, _ = handle_reorder_request(tmp_path, {"item": "SDD-041", "to_rank": -1})
         assert status == 400
@@ -3517,7 +3525,7 @@ class TestSdd041HandleReorder:
     def test_bool_rank_is_rejected(self, tmp_path: Path, monkeypatch) -> None:
         # bool is an int subclass -- must not slip through as rank 1/0.
         calls = []
-        monkeypatch.setattr(_sb, "_reorder_move",
+        monkeypatch.setattr(_ds, "_reorder_move",
                             lambda *a, **k: calls.append(k) or {})
         status, _ = handle_reorder_request(tmp_path, {"item": "SDD-041", "to_rank": True})
         assert status == 400
@@ -3531,7 +3539,7 @@ class TestSdd041HandleReorder:
             recorded.update(sdd_root=sdd_root, item=item, to_rank=to_rank, force=force)
             return fake_row
 
-        monkeypatch.setattr(_sb, "_reorder_move", fake_move)
+        monkeypatch.setattr(_ds, "_reorder_move", fake_move)
         status, body = handle_reorder_request(tmp_path, {"item": "SDD-041", "to_rank": 2})
         assert status == 200
         assert body == {"status": "ok", "audit": fake_row}
@@ -3546,7 +3554,7 @@ class TestSdd041HandleReorder:
             seen["force"] = force
             raise _sb._ReorderError("SDD-041 depends on SDD-040")
 
-        monkeypatch.setattr(_sb, "_reorder_move", fake_move)
+        monkeypatch.setattr(_ds, "_reorder_move", fake_move)
         status, body = handle_reorder_request(tmp_path, {"item": "SDD-041", "to_rank": 0})
         assert status == 409
         assert body["status"] == "blocked"
@@ -3557,7 +3565,7 @@ class TestSdd041HandleReorder:
         def fake_move(sdd_root, *, item, to_rank, force):
             raise ValueError("to_rank 99 out of range")
 
-        monkeypatch.setattr(_sb, "_reorder_move", fake_move)
+        monkeypatch.setattr(_ds, "_reorder_move", fake_move)
         status, body = handle_reorder_request(tmp_path, {"item": "SDD-041", "to_rank": 99})
         assert status == 400
         assert "out of range" in body["reason"]
@@ -3598,7 +3606,7 @@ class TestSdd041DoPost:
     def test_valid_post_delegates_and_returns_200(
             self, tmp_path: Path, monkeypatch) -> None:
         fake_row = {"item": "SDD-041", "to_rank": 1}
-        monkeypatch.setattr(_sb, "_reorder_move",
+        monkeypatch.setattr(_ds, "_reorder_move",
                             lambda sdd_root, *, item, to_rank, force: fake_row)
         body = json.dumps({"item": "SDD-041", "to_rank": 1}).encode("utf-8")
         h = _CapturingHandler(tmp_path, body,

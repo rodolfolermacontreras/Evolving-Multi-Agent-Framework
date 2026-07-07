@@ -1314,3 +1314,18 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - Deferred / carry-forward to a future PI (NOT PI-7 blockers): PI-6 carryovers (SDD-038 color tokens, SDD-034 content-shingle dedup, PI-4 housekeeping domain-skill annotations + GH Actions Node.js bump, SDD-042 pill-nav, SDD-039 incidental wording cleanup, Current Sprint widget repoint), SDD-041 Option B (reorder -> backend re-optimization), SDD-049 (true file-overlap detector, P3). SDD-035 (Azure decommission) remains out-of-band.
 - Close posture recommendation: DONE-WITH-CARRYOVER (all four PI-7 objectives shipped; the carry-forward items above are non-blocking cosmetics/enhancements filed honestly, not loosened commitments).
 - Escalation: the PI-7 CLOSE itself is a Level-2 owner decision. This report is reported UP to the project Executive Manager, who owns the owner conversation about stamping PI-7 CLOSED.
+
+### PI-7 -- CLOSED
+
+- Date: 2026-07-07
+- Owner ratification: **APPROVED** by owner 2026-07-07 via the project Executive Manager (owner direction: "lets close, but lets do it right"), acting on the Sprint 17 PI-7 close-readiness report (recommendation: READY TO CLOSE).
+- Close posture: **DONE-WITH-CARRYOVER.**
+- Theme delivered: "Hardening + Orchestration Maturity" -- the framework is now genuinely team-portable and its promises are true.
+- Sprints (all 4 CLOSED):
+  - Sprint 14 -- SDD-043/044/045; ADR-020; close commit `ecd13b3`; tests 481 -> 501. Clone-and-run portability + two-tier Sprint EM + plain-language comms.
+  - Sprint 15 -- SDD-046 (B-1/B-2/B-4); ADR-021 supersedes ADR-009; close commit `44d546d`; tests 501 -> 518. Ledger truth, blocking TDD/DONE gates, CI.
+  - Sprint 16 -- SDD-047 (A-2/A-3/D-1/D-3); ADR-022; tests 518 -> 540. Identity as config, origin fingerprints removed, all skills wired.
+  - Sprint 17 -- SDD-048 (C-1/C-2/C-3/D-2); ADR-023; close chain `3429662`..`37c49bb` then Sprint 17 close commit `71bba51`; tests 540 -> 558. God-module split, stdlib-only render, config date, lightweight-spec path.
+- Health at PI-7 close: suite 558 passed / 2 skipped; schema lint clean; origin lint 0 hits; `doctor` all PASS; Article X render lock HELD across the entire PI; B-1 ledger real (PI-7 = 10 dispatch rows); B-4 CI green.
+- Carry-forward to a future PI (NOT PI-7 blockers, filed honestly -- not loosened): PI-6 carryovers (SDD-038 color tokens, SDD-034 content-shingle dedup, PI-4 housekeeping domain-skill annotations + GH Actions Node.js bump, SDD-042 pill-nav, SDD-039 incidental wording cleanup, Current-Sprint widget repoint), SDD-041 Option B (reorder -> backend re-optimization), SDD-049 (true file-overlap detector, P3). SDD-035 (Azure decommission) remains out-of-band.
+- Notes: PI-7 closed cleanly on the owner's ratification. The two-tier Executive Manager model proved itself in practice -- Sprint EMs ran Sprints 15-17 and reported up to the project EM at each close -- and the ledger-truth gate (B-1) caught a real subagent miss in Sprint 17 (the implementation subagent claimed a dogfood it had not done; the Sprint EM verified the artifact directly and logged the rows), confirming the credibility gate works when you read the file, not the report. This close also gitignores two per-user runtime scratch artifacts (`backlog/display-order.json`, `ledger/reorder-audit.jsonl`) that are generated, not source.

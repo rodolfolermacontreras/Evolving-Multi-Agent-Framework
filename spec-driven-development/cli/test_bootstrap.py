@@ -679,9 +679,11 @@ class TestCurrentPiDispatchRowsCheck(unittest.TestCase):
 
 
 class TestCurrentPiName(unittest.TestCase):
-    def test_returns_pi7_for_current_tree(self):
-        self.assertEqual(
-            bootstrap.current_pi_name(bootstrap.framework_root()), "PI-7"
+    def test_returns_none_when_no_active_pi_on_current_tree(self):
+        # PI-7 closed 2026-07-07 (status: done); no PI is marked active until
+        # the next PI opens. The resolver must return None in this interim state.
+        self.assertIsNone(
+            bootstrap.current_pi_name(bootstrap.framework_root())
         )
 
     def test_picks_highest_numbered_active_pi(self):
@@ -701,7 +703,12 @@ class TestDoctorPrintsNewCheckLines(unittest.TestCase):
     def test_doctor_output_lists_three_new_checks(self):
         rc, out, err = run_main(["doctor", "--skip-tests"])
         combined = out + err
-        self.assertIn("current-PI dispatch rows", combined)
+        # 'current-PI dispatch rows' prints only while a PI is active. After a
+        # PI closes with no successor open (e.g. post-PI-7 close 2026-07-07),
+        # the check is skipped and the doctor reports "no active PI to audit".
+        # Assert the dispatch-rows line only when a PI is active.
+        if "no active PI to audit" not in combined:
+            self.assertIn("current-PI dispatch rows", combined)
         self.assertIn("tdd gate", combined)
         self.assertIn("DONE completeness", combined)
         # rc may be non-zero before the Sprint dogfood adds PI-7 rows; we only

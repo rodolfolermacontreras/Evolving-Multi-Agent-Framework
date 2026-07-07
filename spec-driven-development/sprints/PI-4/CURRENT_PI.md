@@ -1,15 +1,15 @@
 ---
 id: SDD-PI-4-CURRENT_PI-sprint
 type: sprint
-status: active
+status: done
 owner: principal-product-manager
-updated: 2026-06-06
+updated: 2026-07-07
 sprint: PI-4
 ---
 
 # PI-4: Alpha Release
 
-- Status: **Active** (Sprints 1-4 DONE, 2 PI-4 commitments deferred to PI-5; PI-4 close = DONE-WITH-DEFERRED, ratified by owner 2026-06-06)
+- Status: **Closed** (Sprints 1-4 DONE, 2 PI-4 commitments deferred to PI-5; PI-4 close = DONE-WITH-DEFERRED, ratified by owner 2026-06-06; status frontmatter finalized to `done` on 2026-07-07 during PI-7 close)
 - Theme: Ship the Live UI v2 dashboard, update roadmap, create root README, release alpha-quality framework
 - Started: 2026-06-02
 - Owner: principal-executive-manager

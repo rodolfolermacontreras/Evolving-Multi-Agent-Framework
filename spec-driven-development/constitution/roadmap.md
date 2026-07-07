@@ -1,7 +1,7 @@
 ---
 version: '1.1.0'
 ratified: 2026-05-12
-last_amended: 2026-06-26
+last_amended: 2026-07-07
 ---
 
 # Roadmap
@@ -102,7 +102,7 @@ lifecycle end-to-end on a real feature.
 
 ---
 
-## PI-5: Brownfield Adoption + Anti-Conflict + Stakeholder Discipline (current, closed 2026-06-09)
+## PI-5: Brownfield Adoption + Anti-Conflict + Stakeholder Discipline (closed 2026-06-09)
 
 - [x] Sprint 1: Brownfield portability -- SDD-016 host-link and SDD-017 dev-env-manager hire
 - [x] Sprint 2: Anti-conflict gates and host integration hardening -- SDD-019, SDD-020, SDD-027, SDD-028, SDD-029
@@ -114,6 +114,20 @@ lifecycle end-to-end on a real feature.
 - [ ] PI-4 housekeeping remains open and carried forward: domain-skill annotations and GitHub Actions Node.js deprecation bump
 
 **PI-5 close decision: DONE-WITH-CARRYOVER.** Ratified by owner 2026-06-09 via Executive Manager. Evidence: owner message "Approve" in response to the Executive Manager recommendation to approve Sprint 9 push and close PI-5 as DONE-WITH-CARRYOVER. All planned PI-5 sprints and primary Sprint 9 validation contracts are closed; SDD-034, SDD-039, and PI-4 housekeeping remain open and explicit carry-forward.
+
+---
+
+## PI-7: Hardening + Orchestration Maturity (current, closed 2026-07-07)
+
+- [x] Sprint 14: Detach + Orchestration Maturity -- SDD-043 (two-tier Sprint EM), SDD-044 (plain-language comms), SDD-045 (clone-and-run: detach ledger, one setup command, doctor, origin lint, governance consistency). ADR-020 Accepted; tests 481 -> 501.
+- [x] Sprint 15: Make promises true -- SDD-046 (B-1 ledger truth, B-2 blocking TDD/DONE gates, B-4 CI). ADR-021 supersedes ADR-009; tests 501 -> 518.
+- [x] Sprint 16: De-author -- SDD-047 (A-2 config-driven identity, A-3 origin-token scrub, D-1 wire/remove dead skills, D-3 rename over-claimed "conflict detection"). ADR-022 Accepted; tests 518 -> 540.
+- [x] Sprint 17: Maintainability + right-sizing -- SDD-048 (C-1 god-module split, C-2 stdlib-only render ADR, C-3 config-driven cutover date, D-2 lightweight-spec path). ADR-023 Accepted; tests 540 -> 558.
+- [ ] PI-6 carryovers remain open and carried forward: SDD-038 (color tokens), SDD-034 (content-shingle dedup), PI-4 housekeeping (domain-skill annotations + GH Actions Node.js bump), SDD-042 (pill-nav follow-up), SDD-039 (incidental wording cleanup), Current-Sprint widget repoint.
+- [ ] SDD-041 Option B (reorder -> backend re-optimization) remains open and carried forward.
+- [ ] SDD-049 (true file-overlap detector, P3) remains open and carried forward. SDD-035 (Azure decommission) remains out-of-band.
+
+**PI-7 close decision: DONE-WITH-CARRYOVER.** Ratified by owner 2026-07-07 via Executive Manager (owner direction: "lets close, but lets do it right"), on the Sprint 17 close-readiness report (recommendation: READY TO CLOSE). All four PI-7 objectives shipped across four sprints (ADRs 020-023); the suite grew 481 -> 558 (2 skipped) with the Article X render lock HELD across the entire PI. The framework is now clone-and-run portable, self-checking (doctor + CI + ledger truth), and de-authored -- team-ready. The carry-forward items above are non-blocking cosmetics/enhancements filed honestly, not loosened commitments.
 
 ---
 

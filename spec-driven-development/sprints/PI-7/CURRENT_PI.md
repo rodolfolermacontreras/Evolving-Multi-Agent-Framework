@@ -1,7 +1,7 @@
 ---
 id: SDD-PI-7-CURRENT_PI-sprint
 type: sprint
-status: active
+status: done
 owner: principal-product-manager
 updated: 2026-07-07
 sprint: PI-7
@@ -9,7 +9,11 @@ sprint: PI-7
 
 # PI-7: Hardening + Orchestration Maturity
 
-- Status: **ACTIVE (launched 2026-06-26, owner-approved via Executive Manager).** Sprint 14 (PI-7 Sprint 1) CLOSED 2026-06-26 -- owner-approved commit + push; SDD-043/044/045 DONE; tests 481 -> 501; ADR-020 Accepted. Sprint 15 (PI-7 Sprint 2 -- "Make promises true") CLOSED 2026-06-26 -- owner-approved commit + push; SDD-046 (B-1/B-2/B-4) DONE; tests 501 -> 518; ADR-021 supersedes ADR-009. Sprint 16 (PI-7 Sprint 3 -- "De-author") CLOSED 2026-06-26 -- owner-approved commit + push; SDD-047 (A-2/A-3/D-1/D-3) DONE; tests 518 -> 540; ADR-022 Accepted (constitution de-author). Sprint 17 (PI-7 Sprint 4 -- "Maintainability + right-sizing") CLOSED 2026-07-07 -- owner-approved commit + push; SDD-048 (C-1/C-2/C-3/D-2) DONE; tests 540 -> 558; ADR-023 Accepted (dashboard render stays stdlib-only). PI-7 remains ACTIVE after Sprint 17 (its final sprint); the PI-7 CLOSE is a SEPARATE owner-approved decision, informed by the Sprint 17 close PI-7 close-readiness report (recommendation: READY TO CLOSE).
+- Status: **CLOSED 2026-07-07 / DONE-WITH-CARRYOVER (owner-approved via Executive Manager).** Sprint 14 (PI-7 Sprint 1) CLOSED 2026-06-26 -- owner-approved commit + push; SDD-043/044/045 DONE; tests 481 -> 501; ADR-020 Accepted. Sprint 15 (PI-7 Sprint 2 -- "Make promises true") CLOSED 2026-06-26 -- owner-approved commit + push; SDD-046 (B-1/B-2/B-4) DONE; tests 501 -> 518; ADR-021 supersedes ADR-009. Sprint 16 (PI-7 Sprint 3 -- "De-author") CLOSED 2026-06-26 -- owner-approved commit + push; SDD-047 (A-2/A-3/D-1/D-3) DONE; tests 518 -> 540; ADR-022 Accepted (constitution de-author). Sprint 17 (PI-7 Sprint 4 -- "Maintainability + right-sizing") CLOSED 2026-07-07 -- owner-approved commit + push; SDD-048 (C-1/C-2/C-3/D-2) DONE; tests 540 -> 558; ADR-023 Accepted (dashboard render stays stdlib-only). PI-7 CLOSED 2026-07-07 by owner via the Executive Manager ("lets close, but lets do it right"), posture DONE-WITH-CARRYOVER, on the Sprint 17 close-readiness report (recommendation: READY TO CLOSE).
+
+## PI-7 retrospective (close)
+
+All four PI-7 objectives shipped across four sprints (Sprint 14-17): clone-and-run portability + two-tier Sprint EM (ADR-020), ledger truth + blocking TDD/DONE gates + CI (ADR-021), de-author to config-driven identity (ADR-022), and god-module split + stdlib-only render + config-driven cutover date + lightweight-spec path (ADR-023). The suite grew 481 -> 558 (2 skipped) with the Article X render lock HELD across the entire PI. The two-tier Executive Manager model proved itself: Sprint EMs ran Sprints 15-17 and reported up cleanly to the project EM at each close. The ledger-truth gate (B-1) earned its keep -- in Sprint 17 an implementation subagent claimed it had dogfooded the ledger when it had not; the Sprint EM checked the artifact directly, found it empty, and logged the rows properly (the credibility gate is only real if you read the file, not the report). Carryover (non-blocking, filed honestly -- not loosened): PI-6 leftovers (SDD-038 color tokens, SDD-034 dedup, PI-4 housekeeping, SDD-042 pill-nav, SDD-039 wording, Current-Sprint widget repoint), SDD-041 Option B, SDD-049 (P3 file-overlap detector); SDD-035 (Azure decommission) remains out-of-band.
 - Theme: Make the framework genuinely team-portable -- a teammate clones the
   repo, runs one setup command, and builds their own project the same day with
   no trace of the original author -- and fix the two-tier orchestration

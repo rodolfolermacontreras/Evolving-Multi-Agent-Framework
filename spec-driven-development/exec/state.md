@@ -5,7 +5,7 @@ Current PI: PI-7 (Hardening + Orchestration Maturity)
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
 Active focus: Continue current sprint anchor 'two-tier-executive-manager' (SDD-043)
 
-PI progress: 0/0 commitments complete (0%)
+PI progress: 4/7 commitments complete (57%)
 
 ## Spec Pipeline
 
@@ -128,7 +128,9 @@ _none -- no dispatches without outcome older than 24h_
 
 ## Next Milestones
 
-_no PI commitments registered_
+- PI-6 carryovers remain open and carried forward: SDD-038 (color tokens), SDD-034 (content-shingle dedup), PI-4 housekeeping (domain-skill annotations + GH Actions Node.js bump), SDD-042 (pill-nav follow-up), SDD-039 (incidental wording cleanup), Current-Sprint widget repoint.
+- SDD-041 Option B (reorder -> backend re-optimization) remains open and carried forward.
+- SDD-049 (true file-overlap detector, P3) remains open and carried forward. SDD-035 (Azure decommission) remains out-of-band.
 
 ---
 

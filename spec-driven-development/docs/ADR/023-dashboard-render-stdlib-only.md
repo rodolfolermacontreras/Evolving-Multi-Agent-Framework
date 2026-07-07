@@ -1,7 +1,7 @@
 # ADR-023: Dashboard render stays stdlib-only via string.Template
 
 - Date: 2026-06-26
-- Status: proposed
+- Status: accepted (owner ratified 2026-07-07 at Sprint 17 close, F-46)
 
 ## Context
 

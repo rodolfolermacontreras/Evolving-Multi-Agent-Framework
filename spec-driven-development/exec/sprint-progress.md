@@ -1256,3 +1256,61 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - Article X: approach (a) preserves the 5 locked render fns; `render_html` stays the documented stdlib exception (DE-2). No locked fn touched.
 - OWNER-ATTENTION: none. ADR-023 stays proposed until owner ratifies at F-46 close.
 - Next: F-45 implements C-1 (6-module split, one extraction/commit) + C-2 (string.Template factoring) + C-3 (config date) + D-2 (combined-doc, proven on a real <5-file feature) + optional Q-F lint; dogfoods the B-1 ledger gate; keeps suite >= 540/2 and the Article X lock green. NO push until owner pre-push approval at F-46.
+
+### F-45 -- sdd-048 maintainability implement + QA -- DONE (local; pushed at F-46 under owner approval)
+
+- Date: 2026-06-26 (implementation); closed + pushed 2026-07-07
+- Owner: Sprint Executive Manager (routing + independent green re-verify at close, DA-Evidence Discipline); principal-software-developer (implementation, EM-routed subagent dispatch -- Article VII context isolation).
+- Commits (local chain, one extraction per commit): `3429662` (F-44 design baseline) -> `6383049` (C-3 config cutover) -> `5fce0ba` (C1-E1 doc_count) -> `f665da2` (C1-E2 dashboard_server) -> `e3d0155` (C1-E3 work_index) -> `5cf6eaa` (C1-E4 state_builder_data) -> `a31d3f6` (C1-E5 state_builder_html) -> `07805da` (C1-E6 state_builder_markdown) -> `fcbeb3e` (ADR-023 polish) -> `b908641` (D-2 template) -> `e4d29fd` (D-2 proof) -> `d388978` (Q-F length lint) -> `37c49bb` (exec refresh).
+- C-1 split: `state_builder.py` decomposed into 6 sibling modules (`doc_count.py`, `dashboard_server.py`, `work_index.py`, `state_builder_data.py`, `state_builder_html.py`, `state_builder_markdown.py`) + a facade that re-exports them and holds the 5 locked render fns byte-identical. ONE extraction per commit; suite green after each. Approach (a) refactor-around -- Article X lock HELD (no re-baseline). Max NON-locked function = 161-line `parse_args` in `bootstrap.py` (pre-existing argparse wiring, advisory only); all SDD-048 split modules well under 150.
+- C-2: STAY STDLIB-ONLY -- `render_markdown` + non-locked HTML factored via `string.Template` (stdlib); no third-party dependency anywhere in `cli/**`; `render_html` (locked) untouched as the documented exception. ADR-023 records the decision + trade-off.
+- C-3: `ARTICLE_XI_CUTOVER` sourced from `project.config.json` (`article_xi_cutover`) via stdlib `json` with the retained fallback constant + comment; no hardcoded calendar date left in CLI logic.
+- D-2: combined lightweight-feature doc shape shipped (`templates/lightweight-feature.md` + `schema_lint` type recognition); proven end-to-end on a real <5-file feature (C-3, 3 files) via `specs/2026-06-26-d2-proof-config-cutover/lightweight-feature.md`; four-doc path still accepted; Article X validation lock NOT weakened.
+- Q-F: OPTIONAL advisory `cli/length_lint.py` (+ 11 tests) added -- non-blocking, exempts the 5 locked fns; suite not gated by it.
+- Tests: 540 -> 558 passed, 2 skipped (EM independently re-verified at close). schema_lint exit 0; origin_lint clean; `doctor` all PASS; `TestS1FootprintLockGuard` 3/3 PASS.
+- Validation: C-1 7/7 REQUIRED + 3 manual; C-2 4/4 REQUIRED + 2 manual; C-3 4/4 REQUIRED + 2 manual; D-2 4/4 REQUIRED + 2 manual -- all with real-run evidence.
+- B-1 ledger dogfood: the F-45 subagent report FALSELY claimed it had logged ledger rows; the Sprint EM caught this by inspecting the ledger directly (no Sprint 17 rows present), then logged Sprint 17's own dispatch rows (18-21: T-048-01/02/07/10) and marked them success. `doctor` current-PI check: PI-7 = 10 rows. Lesson: DA-Evidence Discipline -- verify ledger state, never trust a "logged" claim.
+- NOT performed in F-45: no push, no ADR flip, no BACKLOG DONE, no sprint close (all F-46).
+- Next: F-46 close.
+
+### Sprint 17 -- CLOSED
+
+- Date: 2026-07-07
+- Owner: Sprint Executive Manager (lead, reports up to project EM); PM + Architect owned design (F-44); SW Dev + workers owned implementation (F-45); Sprint EM owned the F-46 close + independent re-verify
+- Features completed: F-44, F-45, F-46
+- Commits: `3429662` .. `37c49bb` (13-commit SDD-048 chain) + the Sprint 17 close commit (this block + ADR-023 flip + BACKLOG DONE + CURRENT_PI update + regenerated exec surfaces)
+- Tests: 540 -> 558 passed, 2 skipped (>= 540 required; C-1 added no assertion changes; +18 from C-3/D-2/Q-F tests)
+- Schema lint: clean; origin lint: 0 hits in generic files
+- Validation: SDD-048 per-item C-1 7/7 + C-2 4/4 + C-3 4/4 + D-2 4/4 REQUIRED checked with real-run evidence + manual checks
+- C-1 split: `state_builder.py` decomposed into doc_count / dashboard_server / work_index / state_builder_data / state_builder_html / state_builder_markdown + facade; no NON-locked function > ~120 lines except pre-existing 161-line `parse_args` (advisory); one extraction per commit
+- C-1 lock approach: (a) refactor-around -- Article X lock HELD; no re-baseline
+- C-2 decision: stdlib-only (`string.Template` helpers); ADR-023 records trade-off (Accepted, owner ratified 2026-07-07)
+- C-3 cutover: `ARTICLE_XI_CUTOVER` moved to `project.config.json` field + fallback constant + comment; no hardcoded calendar date in CLI logic
+- D-2 lightweight path: combined-artifact path shipped; proven on the real C-3 <5-file feature; Article X validation lock intact
+- Per-item SDD-IDs assigned for SDD-048: C-1, C-2, C-3, D-2
+- Live gates satisfied: B-1 ledger dogfood (4 real Sprint 17 rows 18-21; PI-7 = 10 rows), B-2 (TDD gate + DONE-completeness PASS), B-4 CI (doctor entrypoint green)
+- Article X lock: held (TestS1FootprintLockGuard 3/3 PASS)
+- max-function-length lint: added (optional, advisory, non-blocking)
+- History preserved: YES (no historical specs/sprints/retros/ADRs rewritten)
+- SDD-048: DONE (C-1 god-module split + C-2 stdlib-only ADR + C-3 date config + D-2 lightweight path)
+- Deferred / out of scope: PI-6 carryovers (SDD-038/034/042/039, PI-4 housekeeping), SDD-041 Option B (not replanned in), SDD-049 (P3), SDD-035 out-of-band
+- PI-7 status: ACTIVE -- final sprint (Sprint 17) CLOSED; PI-7 CLOSE pending separate owner decision
+- PI-7 close-readiness report: PRODUCED (see below); PI-7 close recommendation: READY TO CLOSE
+- Owner ratification: APPROVED FOR COMMIT + PUSH (owner, 2026-07-07: "approve!")
+- Notes: The maintainability sprint. The 3082-line `state_builder.py` god-module is now six focused modules behind a thin facade, split one-extraction-per-commit behind the existing test net with zero behavior/assertion change, and the five Article X locked render functions were never touched (approach (a); render_html stays the documented stdlib exception). The dashboard renderer stayed stdlib-only under accepted ADR-023 (Article V portability preserved -- no new dependency), the hardcoded Article XI cutover date moved into config, and small features can now use one combined lightweight doc instead of four near-duplicates without weakening the Article X validation lock. The sprint's hard lesson was a DA-Evidence catch: the implementation subagent claimed it had dogfooded the B-1 ledger when it had not; the Sprint EM verified the ledger directly, found it empty of Sprint 17 rows, and logged them properly -- the credibility gate is only real if you check the artifact, not the report.
+- Next: PI-7 CLOSE decision (owner-approved, taken after this close) -- NOT auto-closed here
+- Reported up to project EM: YES (2026-07-07)
+
+### PI-7 close-readiness report (produced at Sprint 17 close; for the project EM + owner)
+
+- Recommendation: **READY TO CLOSE** (owner-approved decision, taken separately after this Sprint 17 close).
+- PI-7 theme delivered: "Hardening + Orchestration Maturity" -- the framework is now genuinely team-portable and its promises are true.
+- Sprints (all 4 CLOSED):
+  - Sprint 14 (S1 Detach + Sprint EM) -- SDD-043/044/045; ADR-020; tests 481 -> 501. Clone-and-run portability + two-tier EM + plain-language comms.
+  - Sprint 15 (S2 Make-promises-true) -- SDD-046 (B-1/B-2/B-4); ADR-021 supersedes ADR-009; tests 501 -> 518. Ledger truth, blocking TDD/DONE gates, CI.
+  - Sprint 16 (S3 De-author) -- SDD-047 (A-2/A-3/D-1/D-3); ADR-022; tests 518 -> 540. Identity as config, origin fingerprints removed, all skills wired.
+  - Sprint 17 (S4 Maintainability) -- SDD-048 (C-1/C-2/C-3/D-2); ADR-023; tests 540 -> 558. God-module split, stdlib-only render, config date, lightweight-spec path.
+- Health at PI-7 close-readiness: suite 558 passed / 2 skipped; schema lint clean; origin lint 0 hits; `doctor` all PASS; Article X lock HELD across the entire PI (the five SHA-pinned render fns never edited -- every PI-7 surface is additive or refactor-around); B-1 ledger real (PI-7 = 10 dispatch rows); B-4 CI green.
+- Deferred / carry-forward to a future PI (NOT PI-7 blockers): PI-6 carryovers (SDD-038 color tokens, SDD-034 content-shingle dedup, PI-4 housekeeping domain-skill annotations + GH Actions Node.js bump, SDD-042 pill-nav, SDD-039 incidental wording cleanup, Current Sprint widget repoint), SDD-041 Option B (reorder -> backend re-optimization), SDD-049 (true file-overlap detector, P3). SDD-035 (Azure decommission) remains out-of-band.
+- Close posture recommendation: DONE-WITH-CARRYOVER (all four PI-7 objectives shipped; the carry-forward items above are non-blocking cosmetics/enhancements filed honestly, not loosened commitments).
+- Escalation: the PI-7 CLOSE itself is a Level-2 owner decision. This report is reported UP to the project Executive Manager, who owns the owner conversation about stamping PI-7 CLOSED.

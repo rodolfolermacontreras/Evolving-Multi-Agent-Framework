@@ -1,6 +1,6 @@
 # Executive State
 
-Generated date: 2026-06-26
+Generated date: 2026-07-07
 Current PI: PI-7 (Hardening + Orchestration Maturity)
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
 Active focus: Continue current sprint anchor 'two-tier-executive-manager' (SDD-043)
@@ -94,16 +94,16 @@ PI progress: 0/0 commitments complete (0%)
 
 | When | Feature | Task | Agent |
 |------|---------|------|-------|
+| 2026-06-27T02:10:33Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-06-26-sdd-048-maintainability | Extract `state_builder_markdown.py`: decompose `render_markdown` (762 lines) into per-section helpers (header/lifecycle/features/backlog/dispatches/decisions/footer) via `string.Template` (stdlib). Re-import. | principal-software-developer |
+| 2026-06-27T02:10:33Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-06-26-sdd-048-maintainability | Prove the lightweight path on ONE real <5-file feature end-to-end; its lock holder validates (Article X intact). | principal-software-developer |
+| 2026-06-27T02:10:32Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-06-26-sdd-048-maintainability | Add `"article_xi_cutover": "2026-06-08"` to config; in `fleet.py` resolve cutover via stdlib `json` with `ARTICLE_XI_CUTOVER` fallback constant + retained comment; keep `_is_grandfathered` default sourced from resolved value. | principal-software-developer |
+| 2026-06-27T02:10:32Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-06-26-sdd-048-maintainability | Extract `doc_count.py` (leaf): `_iter_in_scope_artifacts`, `_resolve_sprint_id`, `build_doc_count`, `build_doc_count_by_sprint`, `render_count_table`, `cmd_count`. Re-import into `state_builder.py`. | principal-software-developer |
 | 2026-06-26T23:06:41Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-06-26-sdd-047-de-author | **LEVEL-2 (owner-gated)** constitution de-author under ADR-022 | principal-software-developer |
 | 2026-06-26T23:06:39Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-06-26-sdd-047-de-author | schema_lint rule: orphan skill fails (TDD first) | principal-software-developer |
 | 2026-06-26T23:06:37Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-06-26-sdd-047-de-author | A-6 lint reads config-derived personal-name denylist (TDD first) | principal-software-developer |
 | 2026-06-26T23:06:36Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-06-26-sdd-047-de-author | Create `project.config.json` (owner/team/repo_url) + stdlib reader helper | principal-software-developer |
 | 2026-06-26T18:42:17Z | spec-driven-development/specs/2026-06-26-make-promises-true | SDD-046 implement: make promises true (B-1/B-2/B-4) | principal-software-developer |
 | 2026-06-26T18:42:16Z | spec-driven-development/specs/2026-06-26-make-promises-true | SDD-046 design: lock validation contract (make promises true) | principal-architect |
-| 2026-06-08T15:06:06+00:00 | None | Dedup scan (all) | dedup-scanner |
-| 2026-06-08T15:06:06+00:00 | None | [SOFT] Cross-feature deduplication pass at triage and clarify | dedup-scanner |
-| 2026-06-08T15:06:06+00:00 | None | [SOFT] Map Microsoft self-improving skills paper against our skill mechanism | dedup-scanner |
-| 2026-06-08T15:06:06+00:00 | None | [SOFT] Model upgrades as Level-2 decisions with regression-test branch | dedup-scanner |
 
 ## Blockers
 

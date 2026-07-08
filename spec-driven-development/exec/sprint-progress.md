@@ -1446,3 +1446,30 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - History preserved: YES -- no historical specs/sprints/retros/ADRs scrubbed; only frontmatter `status` flips + additive roadmap sections.
 - Deviation surfaced: working branch is `master` (repo dogfoods on `master` per its own history); local commit only, push gated at F-55.
 - Next: F-55 (Sprint EM) -- pre-push gate + sprint close.
+
+### Sprint 20 -- CLOSED
+- Date: 2026-07-08
+- Owner: Sprint Executive Manager (lead, reports up to project EM); PM + Architect owned design (F-53); SW Dev + workers owned implementation and close (F-54/F-54b/F-55)
+- Features completed: F-53, F-54, F-54b (corrective), F-55
+- Commits: e9fabd9 (roadmap repair + status flips + ADR-024 + 1.2.0), 4485a33 (052C checklist backfill), 83fb34e (close)
+- Tests: 590 -> 590 (2 skipped; no regression)
+- Schema lint: clean; origin lint: 0 hits in generic files; stale-doc lint: green
+- Validation: SDD-052 14/14 REQUIRED + manual checks at close
+- Roadmap repair: PI-6 section backfilled (closed marker); PI-7 header fixed (no "current"); PI-8 section added; closed-PI convention written (matches state_builder_data.py load_pis)
+- Roadmap edit gating: ADR-024 (Closed-PI roadmap semantics) accepted + roadmap version 1.1.0 -> 1.2.0 (Architect call, owner-ratified); owner pre-push approval recorded -- YES
+- Spec-dir status backfill: 5 PI-7 dirs (24 artifact lines) flipped active -> done: SDD-043 two-tier-executive-manager, SDD-044 plain-language-comms-discipline, SDD-045 detach-clone-and-run-hardening, SDD-046 make-promises-true, SDD-048 sdd-048-maintainability; SDD-047 already done (no-op)
+- PI-7 4-feature checklists ticked with evidence: SDD-043 11/11 (S14 ecd13b3), SDD-044 7/7 (S14 ecd13b3), SDD-045 17/17 (S14 ecd13b3), SDD-048 19/19 (S17 71bba51) -- PASS
+- ADR count corrected: none remaining in live text (already corrected by SDD-051 in Sprint 19); 052D = verified no-op; frozen S19 kickoff left as-is
+- 6-features-DONE smoke test: dashboard renders SDD-043..048 all DONE, PI-6 renders, every closed PI 100%, PI-7 not current, PI-8 has roadmap entry -- PASS
+- Per-item SDD-IDs assigned for SDD-052: 052A (roadmap), 052B (status backfill), 052C (checklist backfill), 052D (ADR-count verify)
+- Live gates satisfied: B-1 ledger dogfood (Sprint 20 rows 25/26 + F-54b corrective row 27), B-2 (TDD gate + DONE-completeness), B-4 CI green
+- Article X lock: held (TestS1FootprintLockGuard PASS); render_html / render_markdown byte-identical
+- History preserved: YES (no historical specs/sprints/retros/ADRs/frozen prompts rewritten)
+- SDD-052: DONE (roadmap repaired + status backfilled + 4-feature checklists ticked + ADR count verified)
+- Process note: F-53 design wrote a mistaken non-goal excluding the 052C checklist ticks (conflated PI-level closed marker with per-feature detect_stage); caught at F-54 QA by the Sprint EM, corrected in F-54b with owner approval. Lesson: the 6-features-DONE smoke test must run before close, not be assumed.
+- Deferred / out of scope: Sprint 21 owner-pick (SDD-049 file-overlap detector OR SDD-041 Option B), PI-6 carryover features, SDD-035 out-of-band
+- PI-8 status: ACTIVE -- Sprint 20 CLOSED; continues to Sprint 21
+- Owner ratification: APPROVED FOR COMMIT + PUSH
+- Notes: SDD-052 finishes "dashboard truth" -- the roadmap now tells one self-consistent story (PI-6 present, PI-7 closed/not-current, PI-8 entry, closed-PI convention) and all six PI-7 features render DONE with evidence-backed checklists.
+- Next: Sprint 21 (PI-8 Sprint 4 owner-pick: SDD-049 file-overlap detector OR SDD-041 Option B)
+- Reported up to project EM: PENDING

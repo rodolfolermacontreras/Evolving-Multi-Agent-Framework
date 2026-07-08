@@ -41,8 +41,23 @@ def find_retro(feature_dir: Path) -> Path | None:
 
 def required_unchecked(validation_path: Path) -> list[str]:
     """Return labels of unchecked checkboxes under ``## Required Items``."""
+    return _required_items(validation_path, want_checked=False)
+
+
+def required_checked(validation_path: Path) -> list[str]:
+    """Return labels of checked checkboxes under ``## Required Items`` (SDD-050)."""
+    return _required_items(validation_path, want_checked=True)
+
+
+def _required_items(validation_path: Path, *, want_checked: bool) -> list[str]:
+    """Return labels of REQUIRED checkboxes matching the requested state.
+
+    ``want_checked=False`` returns unchecked ``- [ ]`` items; ``True`` returns
+    checked ``- [x]``/``- [X]`` items. Only the ``## Required Items`` section is
+    considered; ``## Optional Items`` is ignored.
+    """
     text = validation_path.read_text(encoding="utf-8", errors="replace")
-    unchecked: list[str] = []
+    labels: list[str] = []
     in_required = False
     for line in text.splitlines():
         stripped = line.strip()
@@ -53,10 +68,40 @@ def required_unchecked(validation_path: Path) -> list[str]:
         if not in_required:
             continue
         match = CHECKBOX.match(stripped)
-        if match and match.group(1) == " ":
+        if not match:
+            continue
+        is_checked = match.group(1) in ("x", "X")
+        if is_checked == want_checked:
             label = match.group(2).strip() or "(unlabeled item)"
-            unchecked.append(label.split(":", 1)[0].strip())
-    return unchecked
+            labels.append(label.split(":", 1)[0].strip())
+    return labels
+
+
+def validation_files(feature_dir: Path) -> list[Path]:
+    """Return sorted ``validation*.md`` files in ``feature_dir`` (SDD-050).
+
+    Supports both the single ``validation.md`` convention and split files
+    (``validation-a.md``, ``validation-b.md``, ...). Returned sorted by name
+    so callers get a deterministic order.
+    """
+    if not feature_dir.is_dir():
+        return []
+    return sorted(feature_dir.glob("validation*.md"))
+
+
+def validation_complete(feature_dir: Path) -> bool:
+    """True when ``feature_dir`` has validation file(s) with no unchecked
+    REQUIRED items across all of them (SDD-050 shared truth helper).
+
+    A directory with no validation file is not complete. Optional items are
+    ignored (only ``## Required Items`` are enforced by ``required_unchecked``).
+    This is the single source of truth shared with ``state_builder`` so the
+    dashboard and the B-2 gate agree on "is this dir DONE?".
+    """
+    files = validation_files(feature_dir)
+    if not files:
+        return False
+    return all(not required_unchecked(f) for f in files)
 
 
 def check_feature_dir(feature_dir: Path) -> list[str]:
@@ -64,14 +109,14 @@ def check_feature_dir(feature_dir: Path) -> list[str]:
     problems: list[str] = []
     name = feature_dir.name
     spec = feature_dir / "spec.md"
-    validation = feature_dir / "validation.md"
+    v_files = validation_files(feature_dir)
     if not spec.is_file():
         problems.append(f"{name}: missing spec.md")
-    if not validation.is_file():
+    if not v_files:
         problems.append(f"{name}: missing validation.md")
     if find_retro(feature_dir) is None:
         problems.append(f"{name}: missing RETRO file")
-    if validation.is_file():
+    for validation in v_files:
         for item in required_unchecked(validation):
             problems.append(f"{name}: unchecked REQUIRED box {item}")
     return problems
@@ -88,10 +133,12 @@ def discover_pi_dirs(specs_root: Path, pi: str) -> list[Path]:
         if find_retro(feature_dir) is None:
             continue
         haystack = ""
-        for filename in ("validation.md", "spec.md"):
-            candidate = feature_dir / filename
-            if candidate.is_file():
-                haystack += candidate.read_text(encoding="utf-8", errors="replace")
+        candidates = list(validation_files(feature_dir))
+        spec = feature_dir / "spec.md"
+        if spec.is_file():
+            candidates.append(spec)
+        for candidate in candidates:
+            haystack += candidate.read_text(encoding="utf-8", errors="replace")
         if pi in haystack:
             found.append(feature_dir)
     return found

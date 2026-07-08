@@ -679,11 +679,12 @@ class TestCurrentPiDispatchRowsCheck(unittest.TestCase):
 
 
 class TestCurrentPiName(unittest.TestCase):
-    def test_returns_none_when_no_active_pi_on_current_tree(self):
-        # PI-7 closed 2026-07-07 (status: done); no PI is marked active until
-        # the next PI opens. The resolver must return None in this interim state.
-        self.assertIsNone(
-            bootstrap.current_pi_name(bootstrap.framework_root())
+    def test_returns_active_pi_on_current_tree(self):
+        # PI-8 opened 2026-07-08 as the first act of Sprint 18 (its
+        # sprints/PI-8/CURRENT_PI.md is marked active). The resolver must return
+        # the highest-numbered active PI marker on the real tree.
+        self.assertEqual(
+            bootstrap.current_pi_name(bootstrap.framework_root()), "PI-8"
         )
 
     def test_picks_highest_numbered_active_pi(self):

@@ -111,5 +111,103 @@ class TestDoneCheck(unittest.TestCase):
             self.assertEqual(problems, [])
 
 
+# ---------------------------------------------------------------------------
+# SDD-050 (Dashboard truth): split-validation support + shared completeness
+# helper. done_check and state_builder must agree on "is this dir DONE?".
+# ---------------------------------------------------------------------------
+
+def _make_split_dir(parent, name, *, files, spec=True, retro=True):
+    """Write a feature dir with one or more validation*.md files.
+
+    files: dict of {filename: contents}. Enables validation-a.md / validation-b.md
+    split-file fixtures the single-file _make_dir cannot express.
+    """
+    feature = parent / name
+    feature.mkdir(parents=True)
+    if spec:
+        (feature / "spec.md").write_text("# spec\n", encoding="utf-8")
+    for fname, contents in files.items():
+        (feature / fname).write_text(contents, encoding="utf-8")
+    if retro:
+        (feature / "RETRO.md").write_text("# retro\n", encoding="utf-8")
+    return feature
+
+
+class TestSdd050SharedCompleteness(unittest.TestCase):
+    """SDD-050 Defect 1: shared validation_files/validation_complete helpers
+    and split-file support in check_feature_dir."""
+
+    def test_validation_files_globs_split_files_sorted(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            feature = _make_split_dir(
+                Path(tmp), "feat",
+                files={
+                    "validation-b.md": VALIDATION_COMPLETE,
+                    "validation-a.md": VALIDATION_COMPLETE,
+                },
+            )
+            files = done_check.validation_files(feature)
+            names = [p.name for p in files]
+            self.assertEqual(names, ["validation-a.md", "validation-b.md"])
+
+    def test_validation_complete_true_single_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            feature = _make_dir(Path(tmp), "feat", validation=VALIDATION_COMPLETE)
+            self.assertTrue(done_check.validation_complete(feature))
+
+    def test_validation_complete_true_across_split_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            feature = _make_split_dir(
+                Path(tmp), "feat",
+                files={
+                    "validation-a.md": VALIDATION_COMPLETE,
+                    "validation-b.md": VALIDATION_COMPLETE,
+                },
+            )
+            self.assertTrue(done_check.validation_complete(feature))
+
+    def test_validation_complete_false_when_any_required_unchecked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            feature = _make_split_dir(
+                Path(tmp), "feat",
+                files={
+                    "validation-a.md": VALIDATION_COMPLETE,
+                    "validation-b.md": VALIDATION_UNCHECKED,
+                },
+            )
+            self.assertFalse(done_check.validation_complete(feature))
+
+    def test_validation_complete_false_when_no_validation_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            feature = Path(tmp) / "feat"
+            feature.mkdir()
+            (feature / "spec.md").write_text("# spec\n", encoding="utf-8")
+            self.assertFalse(done_check.validation_complete(feature))
+
+    def test_split_validation_unchecked_required_is_flagged(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            feature = _make_split_dir(
+                Path(tmp), "feat",
+                files={
+                    "validation-a.md": VALIDATION_COMPLETE,
+                    "validation-b.md": VALIDATION_UNCHECKED,
+                },
+            )
+            problems = done_check.check_feature_dir(feature)
+            self.assertTrue(any("R-2" in p for p in problems), problems)
+
+    def test_split_validation_all_complete_passes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            feature = _make_split_dir(
+                Path(tmp), "feat",
+                files={
+                    "validation-a.md": VALIDATION_COMPLETE,
+                    "validation-b.md": VALIDATION_COMPLETE,
+                },
+            )
+            problems = done_check.check_feature_dir(feature)
+            self.assertEqual(problems, [])
+
+
 if __name__ == "__main__":
     unittest.main()

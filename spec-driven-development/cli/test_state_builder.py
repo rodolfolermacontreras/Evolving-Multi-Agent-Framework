@@ -3627,3 +3627,193 @@ class TestSdd041DoPost:
         assert hasattr(DashboardHandler, "do_GET")
         assert hasattr(DashboardHandler, "do_POST")
 
+
+# ===========================================================================
+# SDD-050 (Dashboard truth): detect_stage reconciled with done_check.
+#   Defect 1: DONE is driven by REQUIRED-item completeness (via the shared
+#   done_check.validation_complete helper), not by an all-boxes ratio that
+#   also counts optional items, and not gated on a per-dir RETRO.md.
+#   Split validation-*.md files must be recognized like done_check does.
+# ===========================================================================
+
+from cli.state_builder import detect_stage  # noqa: E402
+
+
+def _write_feature(root: Path, name: str, *, spec_status=None,
+                   validation_files=None, retro=False, extra=None):
+    """Seed a specs/<name> dir for detect_stage.
+
+    validation_files: dict of {filename: contents} (supports split validation).
+    """
+    feat = root / name
+    feat.mkdir(parents=True)
+    spec_body = "# Feature Spec: demo\n\n"
+    if spec_status is not None:
+        spec_body += f"- Status: {spec_status}\n"
+    (feat / "spec.md").write_text(spec_body, encoding="utf-8")
+    for fname, contents in (validation_files or {}).items():
+        (feat / fname).write_text(contents, encoding="utf-8")
+    if retro:
+        (feat / "RETRO.md").write_text("# retro\n", encoding="utf-8")
+    for fname, contents in (extra or {}).items():
+        (feat / fname).write_text(contents, encoding="utf-8")
+    return feat
+
+
+_REQ_COMPLETE = (
+    "# VALIDATION: demo\n\n## Required Items\n\n"
+    "- [x] R-1: first item.\n- [x] R-2: second item.\n"
+)
+_REQ_COMPLETE_WITH_OPTIONAL = (
+    _REQ_COMPLETE + "\n## Optional Items\n\n- [ ] O-1: optional, still open.\n"
+)
+_REQ_UNCHECKED = (
+    "# VALIDATION: demo\n\n## Required Items\n\n"
+    "- [x] R-1: first item.\n- [ ] R-2: second item still open.\n"
+)
+
+
+class TestSdd050DetectStage:
+    """Defect 1: detect_stage renders truth for shipped/carryover features."""
+
+    def test_validation_required_complete_is_done_without_retro(
+        self, tmp_path: Path
+    ) -> None:
+        # Stale status + all REQUIRED items checked + NO RETRO -> DONE.
+        feat = _write_feature(
+            tmp_path, "2026-06-26-shipped",
+            spec_status="Implementing",
+            validation_files={"validation.md": _REQ_COMPLETE},
+            retro=False,
+        )
+        stage, _status, _notes = detect_stage(feat)
+        assert stage == "DONE"
+
+    def test_explicit_done_no_validation_file_is_done(self, tmp_path: Path) -> None:
+        # Status: done, no validation file, no RETRO -> trust the status -> DONE.
+        feat = _write_feature(
+            tmp_path, "2026-06-26-de-author",
+            spec_status="done",
+            validation_files=None,
+            retro=False,
+        )
+        stage, _status, _notes = detect_stage(feat)
+        assert stage == "DONE"
+
+    def test_done_status_with_incomplete_required_is_review(
+        self, tmp_path: Path
+    ) -> None:
+        # Status: done but REQUIRED items still unchecked -> not truthfully DONE.
+        feat = _write_feature(
+            tmp_path, "2026-06-26-carryover",
+            spec_status="done",
+            validation_files={"validation.md": _REQ_UNCHECKED},
+            retro=False,
+        )
+        stage, _status, _notes = detect_stage(feat)
+        assert stage == "REVIEW"
+
+    def test_split_validation_required_complete_is_done(self, tmp_path: Path) -> None:
+        # Split validation files, all REQUIRED complete, stale status, no RETRO.
+        feat = _write_feature(
+            tmp_path, "2026-06-26-split",
+            spec_status="Implementing",
+            validation_files={
+                "validation-a.md": _REQ_COMPLETE,
+                "validation-b.md": _REQ_COMPLETE,
+            },
+            retro=False,
+        )
+        stage, _status, _notes = detect_stage(feat)
+        assert stage == "DONE"
+
+    def test_optional_unchecked_still_done(self, tmp_path: Path) -> None:
+        # REQUIRED complete, OPTIONAL unchecked, stale status -> DONE
+        # (optional boxes must not demote a required-complete feature).
+        feat = _write_feature(
+            tmp_path, "2026-06-26-optional",
+            spec_status="Implementing",
+            validation_files={"validation.md": _REQ_COMPLETE_WITH_OPTIONAL},
+            retro=False,
+        )
+        stage, _status, _notes = detect_stage(feat)
+        assert stage == "DONE"
+
+    def test_carryover_unchecked_required_stays_in_progress(
+        self, tmp_path: Path
+    ) -> None:
+        # No explicit status; many REQUIRED unchecked -> IMPLEMENT/REVIEW, never DONE.
+        feat = _write_feature(
+            tmp_path, "2026-06-26-real-carryover",
+            spec_status=None,
+            validation_files={"validation.md": _REQ_UNCHECKED},
+            retro=False,
+        )
+        stage, _status, _notes = detect_stage(feat)
+        assert stage in {"IMPLEMENT", "REVIEW"}
+        assert stage != "DONE"
+
+
+class TestSdd050PiClosed:
+    """Defect 2: closed PIs render at 100% and never masquerade as current;
+    the header falls back to the newest PI, not the oldest."""
+
+    def _write_roadmap(self, tmp_path: Path, body: str) -> Path:
+        sdd = _seed_sdd_root(tmp_path)
+        (sdd / "constitution" / "roadmap.md").write_text(body, encoding="utf-8")
+        return sdd
+
+    def test_load_pis_marks_closed_pi(self, tmp_path: Path) -> None:
+        sdd = self._write_roadmap(
+            tmp_path,
+            "# Roadmap\n\n## PI-1: Bootstrap (closed 2026-05-13)\n\n- [x] a\n",
+        )
+        pis = load_pis(sdd)
+        assert pis[0].is_closed is True
+
+    def test_closed_and_current_title_closed_wins(self, tmp_path: Path) -> None:
+        # PI-7 header says "(current, closed ...)" -> closed wins; not current.
+        sdd = self._write_roadmap(
+            tmp_path,
+            "# Roadmap\n\n## PI-7: Hardening (current, closed 2026-07-07)\n\n- [ ] a\n",
+        )
+        pis = load_pis(sdd)
+        assert pis[0].is_closed is True
+        assert pis[0].is_current is False
+
+    def test_closed_pi_pct_is_100_even_with_unchecked(self, tmp_path: Path) -> None:
+        pi = PIBlock(
+            name="PI-1", title="Bootstrap", is_current=False,
+            checkboxes=[(True, "a"), (False, "b")], is_closed=True,
+        )
+        assert pi.pct == 100
+
+    def test_current_pi_fallback_returns_newest_when_all_closed(
+        self, tmp_path: Path
+    ) -> None:
+        # PI-1..PI-5 closed, PI-6 absent, PI-7 closed -> header = PI-7 (newest).
+        sdd = self._write_roadmap(
+            tmp_path,
+            "# Roadmap\n\n"
+            "## PI-1: Bootstrap (closed 2026-05-13)\n\n- [x] a\n\n"
+            "## PI-5: Adoption (closed 2026-06-09)\n\n- [x] a\n\n"
+            "## PI-7: Hardening (current, closed 2026-07-07)\n\n- [ ] a\n",
+        )
+        pis = load_pis(sdd)
+        picked = current_pi(pis)
+        assert picked is not None
+        assert picked.name == "PI-7"
+
+    def test_current_pi_unchecked_fallback_skips_closed(self, tmp_path: Path) -> None:
+        # A closed PI with unchecked boxes must NOT be picked by the
+        # unchecked-fallback branch; an open PI wins.
+        pis = [
+            PIBlock(name="PI-1", title="Old", is_current=False,
+                    checkboxes=[(False, "a")], is_closed=True),
+            PIBlock(name="PI-2", title="Open", is_current=False,
+                    checkboxes=[(False, "b")], is_closed=False),
+        ]
+        picked = current_pi(pis)
+        assert picked is not None
+        assert picked.name == "PI-2"
+

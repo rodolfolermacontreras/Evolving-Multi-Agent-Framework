@@ -37,6 +37,24 @@ CLI_DIR = Path(__file__).resolve().parent
 if str(CLI_DIR) not in sys.path:
     sys.path.insert(0, str(CLI_DIR))
 
+# SDD-050 (Dashboard truth): share the DONE-completeness definition with the
+# B-2 gate (done_check) so the dashboard and the gate never disagree on
+# "is this dir DONE?". Dual-import (ADR-012) for package/bare import parity.
+try:  # pragma: no cover - import shim
+    from cli.done_check import (
+        required_checked,
+        required_unchecked,
+        validation_complete,
+        validation_files,
+    )
+except ImportError:  # pragma: no cover - import shim
+    from done_check import (
+        required_checked,
+        required_unchecked,
+        validation_complete,
+        validation_files,
+    )
+
 
 def repo_root_for(sdd_root: Path) -> Path:
     return sdd_root.parent
@@ -88,16 +106,22 @@ def _normalize_status_to_stage(status: str) -> str | None:
 def detect_stage(feature_dir: Path) -> tuple[str, str, str]:
     """Return (stage, status_line, notes).
 
-    Order of precedence (SDD-002 AC4):
-      1. Explicit `Status:` line in spec.md frontmatter -> primary source
-      2. validation.md checkbox ratio -> infer IMPLEMENT/REVIEW/DONE
-      3. Artifact presence (tasks/plan/spec/design) -> coarse stage
+    Order of precedence (SDD-002 AC4, reconciled by SDD-050 with the B-2 gate):
+      1. REQUIRED-item completeness (shared ``done_check.validation_complete``)
+         -> DONE, regardless of a stale Status line and WITHOUT requiring a
+         per-dir RETRO.md. Only ``## Required Items`` count; optional items and
+         split ``validation-*.md`` files are handled by the shared helper.
+      2. Explicit ``Status:`` line in spec.md -> trusted, except a ``done``
+         status with unchecked REQUIRED items is demoted to REVIEW (not truth).
+      3. REQUIRED-item ratio -> infer IMPLEMENT/REVIEW (never DONE from a ratio).
+      4. Artifact presence (tasks/plan/spec/design) -> coarse stage.
     """
     has_design = (feature_dir / "DESIGN.md").is_file()
     has_spec = (feature_dir / "spec.md").is_file()
     has_plan = (feature_dir / "plan.md").is_file()
     has_tasks = (feature_dir / "tasks.md").is_file()
-    has_validation = (feature_dir / "validation.md").is_file()
+    v_files = validation_files(feature_dir)
+    has_validation = bool(v_files)
     has_retro = (feature_dir / "RETRO.md").is_file()
 
     status_line = ""
@@ -107,35 +131,41 @@ def detect_stage(feature_dir: Path) -> tuple[str, str, str]:
         if m:
             status_line = m.group(1).strip()
 
-    # 1. Evidence-first: RETRO.md + 100% validation == DONE, regardless of stale Status line.
-    #    Prevents stale "status: implementing" from masking shipped features.
-    if has_retro and has_validation:
-        v = (feature_dir / "validation.md").read_text(encoding="utf-8", errors="replace")
-        if not re.findall(r"^\s*- \[ \]", v, re.MULTILINE):
-            return "DONE", status_line or "done", "validation 100%, RETRO present"
+    # 1. Evidence-first (SDD-050): all REQUIRED items checked == DONE, even if
+    #    the Status line is stale and even with no RETRO.md. This is the shared
+    #    truth used by the B-2 gate (done_check.validation_complete).
+    if has_validation and validation_complete(feature_dir):
+        note = "validation required-complete"
+        if has_retro:
+            note += ", RETRO present"
+        return "DONE", status_line or "done", note
 
     explicit = _normalize_status_to_stage(status_line)
     if explicit:
         if explicit == "DONE":
-            if has_retro:
-                return "DONE", status_line, "Status: done, RETRO present"
-            # Status says done but no RETRO -> fall back to REVIEW
-            return "REVIEW", status_line, "Status: done but RETRO missing"
-        # For all other explicit stages, trust the spec line
+            if not has_validation:
+                # No validation file to contradict the claim -> trust the status.
+                note = "Status: done (no validation file)"
+                if has_retro:
+                    note += ", RETRO present"
+                return "DONE", status_line, note
+            # Validation present but REQUIRED items still open -> not truthfully done.
+            return "REVIEW", status_line, "Status: done but validation required items unchecked"
+        # For all other explicit stages, trust the spec line.
         return explicit, status_line, f"Status: {status_line}"
 
-    # 2. Validation.md checkbox ratio
+    # 2. REQUIRED-item ratio (known incomplete here -> never DONE).
     if has_validation:
-        v = (feature_dir / "validation.md").read_text(encoding="utf-8", errors="replace")
-        unchecked = re.findall(r"^\s*- \[ \]", v, re.MULTILINE)
-        checked = re.findall(r"^\s*- \[x\]", v, re.MULTILINE | re.IGNORECASE)
-        total = len(unchecked) + len(checked)
+        unchecked = 0
+        checked = 0
+        for f in v_files:
+            unchecked += len(required_unchecked(f))
+            checked += len(required_checked(f))
+        total = unchecked + checked
         if total > 0:
-            pct = round(len(checked) * 100 / total)
-            if pct == 100 and has_retro:
-                return "DONE", status_line, "validation 100%, RETRO present"
+            pct = round(checked * 100 / total)
             stage = "REVIEW" if pct >= 80 else "IMPLEMENT"
-            return stage, status_line, f"validation {pct}% ({len(checked)}/{total})"
+            return stage, status_line, f"validation required {pct}% ({checked}/{total})"
 
     # 3. Artifact-presence fallback
     if has_tasks:    return "TASKS", status_line, "tasks.md present"
@@ -175,13 +205,19 @@ class PIBlock:
     title: str
     is_current: bool
     checkboxes: list[tuple[bool, str]] = field(default_factory=list)
+    is_closed: bool = False
 
     @property
     def done(self) -> int:    return sum(1 for c, _ in self.checkboxes if c)
     @property
     def total(self) -> int:   return len(self.checkboxes)
     @property
-    def pct(self) -> int:     return round(self.done * 100 / self.total) if self.total else 0
+    def pct(self) -> int:
+        # A closed PI is complete by definition: the dashboard shows 100%
+        # regardless of any stray unchecked roadmap boxes.
+        if self.is_closed:
+            return 100
+        return round(self.done * 100 / self.total) if self.total else 0
 
 
 def load_pis(sdd_root: Path) -> list[PIBlock]:
@@ -195,7 +231,11 @@ def load_pis(sdd_root: Path) -> list[PIBlock]:
     for i, m in enumerate(matches):
         name = m.group(1)
         title = m.group(2).strip()
-        is_current = "(current" in title.lower()
+        low = title.lower()
+        # A PI header may read "(current, closed YYYY-MM-DD)". "closed" wins:
+        # a closed PI is never treated as the live/current PI.
+        is_closed = "closed" in low
+        is_current = ("(current" in low) and not is_closed
         title_clean = re.sub(r"\s*\([^)]*\)\s*$", "", title).strip()
         start = m.end()
         end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
@@ -205,8 +245,14 @@ def load_pis(sdd_root: Path) -> list[PIBlock]:
             cm = re.match(r"\s*-\s+\[([ xX])\]\s+(.+?)\s*$", line)
             if cm:
                 checkboxes.append((cm.group(1).lower() == "x", cm.group(2)))
-        blocks.append(PIBlock(name=name, title=title_clean, is_current=is_current, checkboxes=checkboxes))
+        blocks.append(PIBlock(name=name, title=title_clean, is_current=is_current, checkboxes=checkboxes, is_closed=is_closed))
     return blocks
+
+
+def _pi_number(pi: PIBlock) -> int:
+    """Trailing integer from a PI name/title, for newest-PI selection."""
+    m = re.search(r"(\d+)", pi.name or "") or re.search(r"(\d+)", pi.title or "")
+    return int(m.group(1)) if m else -1
 
 
 def current_pi(pis: list[PIBlock], override: str | None = None) -> PIBlock | None:
@@ -220,9 +266,14 @@ def current_pi(pis: list[PIBlock], override: str | None = None) -> PIBlock | Non
         if p.is_current:
             return p
     for p in pis:
-        if any(not c for c, _ in p.checkboxes):
+        if not p.is_closed and any(not c for c, _ in p.checkboxes):
             return p
-    return pis[0] if pis else None
+    if not pis:
+        return None
+    # Every PI is closed (or fully checked): fall back to the NEWEST PI by
+    # number, not the oldest (pis[0]), so the header never shows a stale PI-1.
+    open_pis = [p for p in pis if not p.is_closed]
+    return max(open_pis or pis, key=_pi_number)
 
 
 # ---------------------------------------------------------------------------- #

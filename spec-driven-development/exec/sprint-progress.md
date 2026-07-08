@@ -1329,3 +1329,38 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - Health at PI-7 close: suite 558 passed / 2 skipped; schema lint clean; origin lint 0 hits; `doctor` all PASS; Article X render lock HELD across the entire PI; B-1 ledger real (PI-7 = 10 dispatch rows); B-4 CI green.
 - Carry-forward to a future PI (NOT PI-7 blockers, filed honestly -- not loosened): PI-6 carryovers (SDD-038 color tokens, SDD-034 content-shingle dedup, PI-4 housekeeping domain-skill annotations + GH Actions Node.js bump, SDD-042 pill-nav, SDD-039 incidental wording cleanup, Current-Sprint widget repoint), SDD-041 Option B (reorder -> backend re-optimization), SDD-049 (true file-overlap detector, P3). SDD-035 (Azure decommission) remains out-of-band.
 - Notes: PI-7 closed cleanly on the owner's ratification. The two-tier Executive Manager model proved itself in practice -- Sprint EMs ran Sprints 15-17 and reported up to the project EM at each close -- and the ledger-truth gate (B-1) caught a real subagent miss in Sprint 17 (the implementation subagent claimed a dogfood it had not done; the Sprint EM verified the artifact directly and logged the rows), confirming the credibility gate works when you read the file, not the report. This close also gitignores two per-user runtime scratch artifacts (`backlog/display-order.json`, `ledger/reorder-audit.jsonl`) that are generated, not source.
+
+---
+
+## Sprint 18 -- PI-8 / Truth in the Window / Dashboard truth (fix stale detectors)
+
+- Sprint kickoff: [../feature-prompts/SPRINT-18-KICKOFF.prompt.md](../feature-prompts/SPRINT-18-KICKOFF.prompt.md)
+- Prerequisite: PI-7 CLOSED at `7088f35` (pushed); PI-8 drafted; baseline 558/2 green; doctor + lock guard green. All 8 start-gate checks verified GREEN at Sprint EM kickoff.
+- Leader: Sprint Executive Manager (Level 0 -- routed the build to the principal-software-developer subagent, verified all gates against real artifacts, owned activation + close). Owner delegated full autonomy 2026-07-08 ("work autonomously, review later").
+- Sequence: F-47 (design) -> F-48 (implement + QA) -> F-49 (close). One anchor feature: SDD-050.
+
+### Sprint 18 -- CLOSED
+
+- Date: 2026-07-08
+- Owner: Sprint Executive Manager (lead, reports up to project EM); design + TDD implementation routed to `principal-software-developer` subagent; Sprint EM independently verified every close criterion against regenerated artifacts (DA-Evidence discipline) and owned PI-8 activation + close.
+- Features completed: F-47, F-48, F-49.
+- Commits: LOCAL CLOSE PREP ONLY -- staged with explicit paths, committed locally, NOT pushed (owner pre-push approval mandatory and still pending; owner reviewing later).
+- Tests: 558 -> 576 passed, 2 skipped (new detector + done_check tests added).
+- Schema lint: clean (exit 0); origin lint: 0 hits in generic files.
+- Validation: SDD-050 spec dir `specs/2026-07-08-dashboard-truth` REQUIRED items complete; `done_check` on that dir PASS.
+- Defect 1: `detect_stage()` in `cli/state_builder_data.py` now globs `validation*.md`, treats REQUIRED-complete as DONE with NO per-dir `RETRO.md` required, and demotes a `status: done` dir with unchecked REQUIRED validation to REVIEW (truthful). Stale `status: active` backfill: DEFERRED to SDD-052 (see FINDING below; Q-A "one place").
+- Defect 2: `PIBlock.is_closed` reads the `(closed ...)` marker -> closed PIs render done / 100%; `is_current` hardened so `(current, closed ...)` is NOT current (closed wins); PI-6 read defensively (option (a), no constitution edit). Regenerated dashboard header reads "Current PI: PI-8 (Truth in the Window)" -- PI-7 no longer flagged current; PI-7 renders 4/7 (100%).
+- Single source of truth: `detect_stage()` and `cli/done_check.py` share `validation_complete` / `validation_files` glob helpers. B-2 behavior change SURFACED (not silent): `done_check` now reads split `validation*.md` files -- a strengthening (reads more), not a regression; the artifact + RETRO enforcement in `check_feature_dir` is unchanged.
+- DONE-features smoke: PARTIAL. `make-promises-true` (SDD-046) and `sdd-047-de-author` (SDD-047) render DONE -- proving the evidence-first path AND the split-`validation-*.md` glob (sdd-047 uses split files). SDD-043/044/045/048 render IMPLEMENT (0% per-dir REQUIRED validation). Closed PIs render 100%. This is the TRUE state -- see FINDING.
+- FINDING (escalation, reported up): the audit's Section-3 smoke-test premise that SDD-043..048 would ALL render DONE was FALSE. Their per-dir `validation*.md` REQUIRED boxes are entirely unchecked because THIS framework records validation evidence at PI/sprint level, not per spec dir. The SDD-050 detector is correct and faithful (it renders a genuinely validation-complete feature as DONE). Making the other 4 render DONE requires an evidence-gated per-dir validation checkoff sourced from the PI-7 close record -- NEW work outside the original Sprint 18 scope. No checkmarks were fabricated (DA-Evidence). DECISION (Sprint EM, under delegated autonomy, pending owner ratification): defer the PI-7 spec-dir backfill (frontmatter `status` + per-dir validation checkoff) to SDD-052 (Sprint 20) as ONE coherent unit per Q-A "one place." SDD-052's backlog row already owns the status backfill; this adds the per-dir validation checkoff to it. SDD-050 (the detector) is complete and DONE.
+- Per-item SDD-IDs assigned for SDD-050: none required (single-module detector fix; the two defects are cohesive; per-item IDs would add ceremony without value -- surfaced for the record).
+- Live gates satisfied: B-1 ledger dogfood (PI-8 dispatch row 22, marked success), B-2 (TDD gate + DONE-completeness both PASS in doctor), B-4 CI (doctor set green locally; GitHub Actions to confirm on the eventual push).
+- Article X lock: HELD -- `TestS1FootprintLockGuard` 3/3 PASS; `render_html` / `render_markdown` and the four locked load_* functions byte-identical. All work in the `state_builder_data.py` leaf module.
+- History preserved: YES -- no historical specs/sprints/retros/ADRs rewritten (only the 5 stale status lines were LEFT untouched and deferred, not scrubbed).
+- SDD-050: DONE (Defect 1 stage detector + Defect 2 closed-PI percentage + single source of truth). Marked DONE in BACKLOG with evidence + the finding.
+- Deferred / out of scope: PI-7 spec-dir status + per-dir validation backfill -> SDD-052 (S20); SDD-051 (S19); SDD-049 / SDD-041 Option B (S21 owner-pick); SDD-035 (Azure) out-of-band.
+- PI-8 status: ACTIVE -- Sprint 18 CLOSED; continues to Sprint 19. Sprint 18 did NOT close PI-8.
+- Owner ratification: LOCAL CLOSE PREP ONLY -- pending owner pre-push approval AND ratification of the deferral decision (owner delegated autonomy and will review later).
+- Notes: The Sprint EM verified the subagent's claims against regenerated artifacts rather than trusting the report -- the same B-1-style discipline PI-7 relied on. That verification is what surfaced the false smoke-test premise. The honest outcome (2 features prove the fix; 4 correctly render not-DONE pending an evidence-gated backfill) is stronger than a fabricated pass.
+- Next: Sprint 19 (SDD-051 doc-freshness sweep + stale-doc doctor check).
+- Reported up to project EM: PENDING (this close block + the sprint-close summary are the report-up payload; the project EM owns the owner conversation about ratifying the deferral and approving the push).

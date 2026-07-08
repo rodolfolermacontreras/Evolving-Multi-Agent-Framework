@@ -1,7 +1,7 @@
 ---
 id: SDD-PI-8-CURRENT_PI-sprint
 type: sprint
-status: draft
+status: active
 owner: principal-product-manager
 updated: 2026-07-08
 sprint: PI-8
@@ -9,14 +9,12 @@ sprint: PI-8
 
 # PI-8: Truth in the Window
 
-- Status: **QUEUED — drafted 2026-07-08 (owner-approved via Executive Manager:
-  "yes, this is critical").** PI-8 opens when Sprint 18 (PI-8 Sprint 1) starts:
-  the Sprint EM's FIRST act is to flip this marker's status field to `active`
-  and log
-  the first PI-8 ledger dispatch (dogfood the ledger — doctor's current-PI
-  dispatch-rows check requires it). Until then PI-8 stays drafted so the
-  post-PI-7-close interim invariant (no active PI, doctor green) holds. Follows
-  PI-7 CLOSED 2026-07-07 / DONE-WITH-CARRYOVER (Sprint 17 close at `7088f35`).
+- Status: **ACTIVE — opened 2026-07-08 at the start of Sprint 18 (PI-8 Sprint 1;
+  owner-approved via Executive Manager: "yes, this is critical").** The Sprint EM
+  flipped this marker from `draft` to `active` as the first act of Sprint 18 and
+  logged the first PI-8 ledger dispatch (row 22, pi=PI-8) so doctor's current-PI
+  dispatch-rows check (B-1) is satisfied. Follows PI-7 CLOSED 2026-07-07 /
+  DONE-WITH-CARRYOVER (Sprint 17 close at `7088f35`).
 
 - Theme: Make the human-facing surfaces (dashboard, onboarding docs, roadmap) as
   trustworthy as the engine. PI-7 hardened the engine — the ledger is real, the

@@ -1,7 +1,7 @@
 ---
-version: '1.1.0'
+version: '1.2.0'
 ratified: 2026-05-12
-last_amended: 2026-07-07
+last_amended: 2026-07-08
 ---
 
 # Roadmap
@@ -117,7 +117,22 @@ lifecycle end-to-end on a real feature.
 
 ---
 
-## PI-7: Hardening + Orchestration Maturity (current, closed 2026-07-07)
+## PI-6: Dashboard Reinvestment + Carryover Cleanup (closed 2026-06-26)
+
+- [x] Sprint 10: Dashboard parser fix + serve-mode auto-refresh -- SDD-040 (killed the stale `Active focus: azure-decommission` line that opened the PI). Tests 337 -> 349.
+- [x] Sprint 11: Lifecycle pipeline + docs row + safeguarded reorder -- SDD-036 (lifecycle pipeline, 4-card docs row, keyboard drag-to-reorder). ADR-017 Accepted; tests 349 -> 412.
+- [x] Sprint 12: Dashboard visibility -- SDD-037 (Dispatches card + 4-pill dashboard health strip). Tests 412 -> 450.
+- [x] Sprint 13: True drag + PI-label fix + Article VII wording -- SDD-042 (`ac1ccf0`, newest-ACTIVE-PI header fix), SDD-041 (`afbfe47`, OPEN-only Backlog drag-reorder, Option A), SDD-039 (`699d8bb`, Article VII context-isolation wording). ADR-018 + ADR-019 Accepted; principles.md 1.3.0 -> 1.4.0; tests 450 -> 481.
+- [ ] SDD-038 (aesthetic/color tokens) remains open and carried forward to PI-7.
+- [ ] SDD-034 (content-shingle dedup) remains open and carried forward to PI-7.
+- [ ] PI-4 housekeeping (domain-skill annotations + GitHub Actions Node.js bump) remains open and carried forward to PI-7.
+- [ ] SDD-041 Option B (reorder backend re-optimization), SDD-042 pill-nav, and the Current-Sprint widget repoint remain open and carried forward to PI-7.
+
+**PI-6 close decision: DONE-WITH-CARRYOVER.** Ratified by owner 2026-06-26 via Executive Manager (owner direction: "yes, lets close this" / "yes to close"), on the Sprint 13 close-readiness report. Six features shipped across four sprints (SDD-040, SDD-036, SDD-037, SDD-042, SDD-041, SDD-039; ADRs 017-019); the suite grew 337 -> 481 (2 skipped) with the Article X render lock HELD (every new surface landed as an additive `inject_*` post-processor). Close commit `4ad0521`. The carry-forward items above are non-blocking cosmetics/enhancements filed honestly, not loosened commitments.
+
+---
+
+## PI-7: Hardening + Orchestration Maturity (closed 2026-07-07)
 
 - [x] Sprint 14: Detach + Orchestration Maturity -- SDD-043 (two-tier Sprint EM), SDD-044 (plain-language comms), SDD-045 (clone-and-run: detach ledger, one setup command, doctor, origin lint, governance consistency). ADR-020 Accepted; tests 481 -> 501.
 - [x] Sprint 15: Make promises true -- SDD-046 (B-1 ledger truth, B-2 blocking TDD/DONE gates, B-4 CI). ADR-021 supersedes ADR-009; tests 501 -> 518.
@@ -128,6 +143,30 @@ lifecycle end-to-end on a real feature.
 - [ ] SDD-049 (true file-overlap detector, P3) remains open and carried forward. SDD-035 (Azure decommission) remains out-of-band.
 
 **PI-7 close decision: DONE-WITH-CARRYOVER.** Ratified by owner 2026-07-07 via Executive Manager (owner direction: "lets close, but lets do it right"), on the Sprint 17 close-readiness report (recommendation: READY TO CLOSE). All four PI-7 objectives shipped across four sprints (ADRs 020-023); the suite grew 481 -> 558 (2 skipped) with the Article X render lock HELD across the entire PI. The framework is now clone-and-run portable, self-checking (doctor + CI + ledger truth), and de-authored -- team-ready. The carry-forward items above are non-blocking cosmetics/enhancements filed honestly, not loosened commitments.
+
+---
+
+## PI-8: Truth in the Window (current)
+
+Opened 2026-07-08. ACTIVE. Closes the gap between what the framework's own records claim and
+what its live dashboard shows -- the roadmap, spec-dir statuses, and PI markers must be true
+before they are read.
+
+- [ ] Sprint 20: Roadmap repair + status backfill -- SDD-052 (PI-6 roadmap backfill, PI-7 `(current,` header cleanup, PI-8 section + closed-PI convention; 5 stale PI-7 spec dirs flipped to done; PI-7 4-feature checklist backfill; ADR-count verify). ADR-024 (Closed-PI Roadmap Semantics) Accepted.
+
+---
+
+## PI Status Conventions
+
+These conventions govern how the PI sections above are written and read. They are mechanical:
+the dashboard reader (`cli/state_builder_data.py::load_pis`) parses the markers literally.
+
+- Exactly one PI carries the `(current)` marker at any time -- the single ACTIVE increment.
+- Every completed PI carries a `(closed YYYY-MM-DD)` marker with its real owner-ratified close date.
+- The two markers are never combined. A PI header is either `(current)` or `(closed YYYY-MM-DD)` -- never both in a single marker. (This is exactly the defect SDD-052 repaired: a PI-7 header that read "current, closed".)
+- A closed PI renders at 100% completion in the dashboard regardless of any unchecked boxes in its section.
+- Unchecked `[ ]` boxes under a closed PI are honest carryover (deferred to a later PI), not incomplete work. Carryover is tracked forward, never silently reimplemented.
+- Marker text is load-bearing: `load_pis` treats any header containing "closed" as a closed PI (100%) and a header containing "(current" without "closed" as the active PI. Do not alter marker wording without updating the reader.
 
 ---
 

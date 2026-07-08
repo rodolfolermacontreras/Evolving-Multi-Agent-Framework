@@ -5,7 +5,7 @@ Current PI: PI-8 (Truth in the Window)
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
 Active focus: Continue current sprint anchor 'dashboard-truth' (SDD-050)
 
-PI progress: 0/0 commitments complete (0%)
+PI progress: 0/1 commitments complete (0%)
 
 ## Spec Pipeline
 
@@ -45,13 +45,15 @@ PI progress: 0/0 commitments complete (0%)
 | dashboard-dispatches-health-pills | DONE | active | validation required-complete |
 | dashboard-lifecycle-reorder | DONE | active | validation required-complete |
 | d2-proof-config-cutover | BACKLOG | - | directory exists, no artifacts yet |
-| detach-clone-and-run-hardening | IMPLEMENT | active | validation required 0% (0/17) |
-| make-promises-true | DONE | active | validation required-complete |
-| plain-language-comms-discipline | IMPLEMENT | active | validation required 0% (0/7) |
+| detach-clone-and-run-hardening | REVIEW | done | Status: done but validation required items unchecked |
+| make-promises-true | DONE | done | validation required-complete |
+| plain-language-comms-discipline | REVIEW | done | Status: done but validation required items unchecked |
 | sdd-047-de-author | DONE | done | validation required-complete |
-| sdd-048-maintainability | IMPLEMENT | active | validation required 0% (0/19) |
-| two-tier-executive-manager | IMPLEMENT | active | validation required 0% (0/11) |
+| sdd-048-maintainability | REVIEW | done | Status: done but validation required items unchecked |
+| two-tier-executive-manager | REVIEW | done | Status: done but validation required items unchecked |
 | dashboard-truth | DONE | done | validation required-complete, RETRO present |
+| doc-freshness-staledoc-guard | DONE | done | validation required-complete |
+| roadmap-repair-status-backfill | DONE | done | validation required-complete |
 
 ## Sprint Plan
 
@@ -95,16 +97,16 @@ PI progress: 0/0 commitments complete (0%)
 
 | When | Feature | Task | Agent |
 |------|---------|------|-------|
+| 2026-07-08T20:26:44Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-07-08-roadmap-repair-status-backfill | SDD-052 IMPLEMENT+QA: roadmap 1.1.0->1.2.0, 24 status flips, ADR-024 ratified, self-close | principal-software-developer |
+| 2026-07-08T20:26:37Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-07-08-roadmap-repair-status-backfill | SDD-052 CLARIFY->SPEC->PLAN->TASKS + ADR-024 draft (052A/B/C/D) | principal-architect |
+| 2026-07-08T16:40:10Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-07-08-doc-freshness-staledoc-guard | SDD-051 IMPLEMENT+QA: staledoc guard + doctor wiring + refresh 4 docs | principal-software-developer |
+| 2026-07-08T16:20:05Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-07-08-doc-freshness-staledoc-guard | SDD-051 CLARIFY->SPEC->PLAN->TASKS (per-item SDD-051A/051B validation) | principal-architect |
 | 2026-07-08T15:47:35Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-07-08-dashboard-truth | Widen `done_check.py` validation reader to glob `validation*.md`; expose `required_checked`/`required_unchecked`/`validation_complete`/`validation_files` for shared import | principal-software-developer |
 | 2026-06-27T02:10:33Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-06-26-sdd-048-maintainability | Extract `state_builder_markdown.py`: decompose `render_markdown` (762 lines) into per-section helpers (header/lifecycle/features/backlog/dispatches/decisions/footer) via `string.Template` (stdlib). Re-import. | principal-software-developer |
 | 2026-06-27T02:10:33Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-06-26-sdd-048-maintainability | Prove the lightweight path on ONE real <5-file feature end-to-end; its lock holder validates (Article X intact). | principal-software-developer |
 | 2026-06-27T02:10:32Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-06-26-sdd-048-maintainability | Add `"article_xi_cutover": "2026-06-08"` to config; in `fleet.py` resolve cutover via stdlib `json` with `ARTICLE_XI_CUTOVER` fallback constant + retained comment; keep `_is_grandfathered` default sourced from resolved value. | principal-software-developer |
 | 2026-06-27T02:10:32Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-06-26-sdd-048-maintainability | Extract `doc_count.py` (leaf): `_iter_in_scope_artifacts`, `_resolve_sprint_id`, `build_doc_count`, `build_doc_count_by_sprint`, `render_count_table`, `cmd_count`. Re-import into `state_builder.py`. | principal-software-developer |
 | 2026-06-26T23:06:41Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-06-26-sdd-047-de-author | **LEVEL-2 (owner-gated)** constitution de-author under ADR-022 | principal-software-developer |
-| 2026-06-26T23:06:39Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-06-26-sdd-047-de-author | schema_lint rule: orphan skill fails (TDD first) | principal-software-developer |
-| 2026-06-26T23:06:37Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-06-26-sdd-047-de-author | A-6 lint reads config-derived personal-name denylist (TDD first) | principal-software-developer |
-| 2026-06-26T23:06:36Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-06-26-sdd-047-de-author | Create `project.config.json` (owner/team/repo_url) + stdlib reader helper | principal-software-developer |
-| 2026-06-26T18:42:17Z | spec-driven-development/specs/2026-06-26-make-promises-true | SDD-046 implement: make promises true (B-1/B-2/B-4) | principal-software-developer |
 
 ## Blockers
 
@@ -129,7 +131,7 @@ _none -- no dispatches without outcome older than 24h_
 
 ## Next Milestones
 
-_no PI commitments registered_
+- Sprint 20: Roadmap repair + status backfill -- SDD-052 (PI-6 roadmap backfill, PI-7 `(current,` header cleanup, PI-8 section + closed-PI convention; 5 stale PI-7 spec dirs flipped to done; PI-7 4-feature checklist backfill; ADR-count verify). ADR-024 (Closed-PI Roadmap Semantics) Accepted.
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 id: SDD-20260626TWOTIEREM-validation
 type: validation
-status: active
+status: done
 owner: principal-architect
 updated: 2026-06-26
 feature: 2026-06-26-two-tier-executive-manager

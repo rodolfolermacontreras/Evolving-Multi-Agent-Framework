@@ -1,7 +1,7 @@
 ---
 id: SDD-20260626MAINT-clarify
 type: clarification
-status: active
+status: done
 owner: principal-product-manager
 updated: 2026-06-26
 feature: 2026-06-26-sdd-048-maintainability

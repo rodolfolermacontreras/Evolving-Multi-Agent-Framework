@@ -44,6 +44,8 @@ Current PI: **PI-8 (Truth in the Window)**
 | 2026-06-26 | make-promises-true | `specs/2026-06-26-make-promises-true/` |
 | 2026-06-26 | sdd-047-de-author | `specs/2026-06-26-sdd-047-de-author/` |
 | 2026-07-08 | dashboard-truth | `specs/2026-07-08-dashboard-truth/` |
+| 2026-07-08 | doc-freshness-staledoc-guard | `specs/2026-07-08-doc-freshness-staledoc-guard/` |
+| 2026-07-08 | roadmap-repair-status-backfill | `specs/2026-07-08-roadmap-repair-status-backfill/` |
 
 ## 2. IN-FLIGHT -- Currently being worked on (coordinate before touching)
 
@@ -53,10 +55,6 @@ Current PI: **PI-8 (Truth in the Window)**
 | 2026-05-16 | cloud-dashboard | CLARIFY | `specs/2026-05-16-cloud-dashboard/` |
 | 2026-05-16 | retro-closure | TASKS | `specs/2026-05-16-retro-closure/` |
 | 2026-06-08 | azure-decommission | IMPLEMENT | `specs/2026-06-08-azure-decommission/` |
-| 2026-06-26 | detach-clone-and-run-hardening | IMPLEMENT | `specs/2026-06-26-detach-clone-and-run-hardening/` |
-| 2026-06-26 | plain-language-comms-discipline | IMPLEMENT | `specs/2026-06-26-plain-language-comms-discipline/` |
-| 2026-06-26 | sdd-048-maintainability | IMPLEMENT | `specs/2026-06-26-sdd-048-maintainability/` |
-| 2026-06-26 | two-tier-executive-manager | IMPLEMENT | `specs/2026-06-26-two-tier-executive-manager/` |
 
 ## 2A. USER GATES -- Human approvals and blocked transitions
 

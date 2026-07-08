@@ -1400,3 +1400,49 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - Notes: Owner unavailable at CLARIFY and close; Sprint EM proceeded on the kickoff's default recommendations and surfaced two live-source findings (ADR 23 not 24; CONTEXT enumeration) for owner review. Guard-first TDD: the deliberate-red proof existed before the refresh, so the refresh was validated by a green guard. Scope held: no Azure, no constitution edits, no locked-function edits, clean docs untouched.
 - Next: Sprint 20 (SDD-052 roadmap repair + status backfill + PI-7 4-feature checklist backfill)
 - Reported up to project EM: YES (2026-07-08) -- this close block is the report-up payload; owner ratified the close and the push in the same turn. PI-8 continues to Sprint 20 (SDD-052).
+
+---
+
+## Sprint 20 -- PI-8 / Truth in the Window (Roadmap repair + status backfill)
+
+- Sprint kickoff: SDD-052 -- roadmap structural repair (052A) + spec-dir status backfill (052B) + closed-PI carry-forward convention (052C) + ADR-count verify (052D)
+- Prerequisite: Sprint 19 CLOSED at `4feee24`; PI-8 ACTIVE; 590 tests; doctor/schema/origin/staledoc green.
+- Sequence: F-53 (design) -> F-54 (implement + QA) -> F-55 (close)
+- Owner: Sprint Executive Manager (lead, reports up to project EM); PM + Architect owned design; SW Dev owned implementation and QA
+
+### F-54 -- sdd-052-implement -- DONE (local only; NOT pushed)
+
+- Date: 2026-07-08
+- Owner: Principal Software Developer
+- Commits: <this commit> (LOCAL ONLY -- pre-push gate deferred to F-55 / Sprint EM)
+- Owner ratification (G-R2 / gate G-2, constitution-edit): recorded verbatim 2026-07-08 --
+  "ADR-024 is accepted, `constitution/roadmap.md` bumps 1.1.0 -> 1.2.0, and you are greenlit to make local edits."
+  The greenlight is LOCAL EDITS + LOCAL COMMIT only; push (F-55) remains gated.
+- Gate G-1 (adr-acceptance): APPROVED -- ADR-024 flipped `proposed` -> `accepted` with an
+  "Owner ratification" section quoting the 2026-07-08 verbatim above; all 4 Compliance boxes ticked.
+- Files changed (explicit-path scope):
+  - `constitution/roadmap.md` (052A structural repair + 052C convention note; frontmatter `1.1.0` -> `1.2.0`, `last_amended: 2026-07-08`)
+  - 24 spec-dir artifact lines flipped `status: active` -> `done` across the 5 closed PI-7 dirs:
+    SDD-043 (two-tier-executive-manager, 4), SDD-044 (plain-language-comms-discipline, 4),
+    SDD-045 (detach-clone-and-run-hardening, 4), SDD-046 (make-promises-true, 4), SDD-048 (sdd-048-maintainability, 8)
+  - `docs/ADR/024-closed-pi-roadmap-semantics.md` (new; accepted + ratified)
+  - `specs/2026-07-08-roadmap-repair-status-backfill/` (SDD-052 spec dir; self-closed to `done`)
+  - regenerated `exec/state.md`, `exec/state.html`, `exec/work-index.md`
+- 052A evidence (A-R1..A-R5): roadmap has 8 PI headers -- PI-1..PI-7 `(closed YYYY-MM-DD)` + PI-8 `(current)`;
+  PI-6 restored at line 120 `(closed 2026-06-26)`; PI-7 line 135 `(closed 2026-07-07)` no `current`;
+  PI-8 line 149 present; exactly one PI header `(current)` (PI-8 via `load_pis`); `(current, closed` literal count = 0; `version: '1.2.0'`.
+- 052B evidence (B-R1..B-R3): `grep "^status: active"` across the 5 dirs = 0; 24 lines flipped to `done`;
+  SDD-047 dir NOT in `git status` (untouched, already done); `schema_lint.py` exit 0.
+- 052C evidence (C-R1..C-R3): "## PI Status Conventions" note present in roadmap (spec C-1 a-e + C-2);
+  convention cross-references `cli/state_builder_data.py::load_pis` (`is_closed = "closed" in low`; closed => 100% render; `is_current` guarded by `not is_closed`);
+  NO reader diff (`state_builder_data.py` absent from `git status`); `TestS1FootprintLockGuard` 3/3 GREEN.
+- 052D evidence (D-R1, no-op): no LIVE forward-looking doc asserts "24 ADRs"; the literal survives only in frozen `SPRINT-19-KICKOFF.prompt.md`; SDD-051 already corrected live docs to 23. No edit required.
+- Explicit non-goal HONORED: the SDD-043/044/045/046/048 carry-forward / per-dir validation checkboxes were NOT ticked (only the artifact `status:` frontmatter was flipped). Honest partial checkbox ratios preserved (PI-6 4/8, PI-7 4/7, etc.).
+- QA battery (DA-Evidence, all GREEN): `pytest spec-driven-development/` **590 passed, 2 skipped** (baseline unchanged, no regression);
+  `TestS1FootprintLockGuard` 3/3 PASS (Article X HELD); `schema_lint.py` exit 0; `origin_lint.py` clean; `staledoc_lint.py` clean;
+  `bootstrap.py doctor` 9/9 PASS (current-PI dispatch rows PI-8: 3); `state_builder.py` regen OK (Current PI: PI-8).
+- PI-parse smoke (`load_pis`): 8 PIs; PI-1..PI-7 `closed=True`, `current=False`; PI-8 `current=True`, `closed=False` -- exactly one current, PI-7 no longer "current, closed".
+- Article X lock: HELD -- no locked function touched; all edits are docs/frontmatter + regenerated leaf artifacts.
+- History preserved: YES -- no historical specs/sprints/retros/ADRs scrubbed; only frontmatter `status` flips + additive roadmap sections.
+- Deviation surfaced: working branch is `master` (repo dogfoods on `master` per its own history); local commit only, push gated at F-55.
+- Next: F-55 (Sprint EM) -- pre-push gate + sprint close.

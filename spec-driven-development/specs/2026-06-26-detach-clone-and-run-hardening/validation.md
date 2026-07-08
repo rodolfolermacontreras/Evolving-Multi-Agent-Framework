@@ -1,7 +1,7 @@
 ---
 id: SDD-20260626DETACHHARDENING-validation
 type: validation
-status: active
+status: done
 owner: principal-architect
 updated: 2026-06-26
 feature: 2026-06-26-detach-clone-and-run-hardening

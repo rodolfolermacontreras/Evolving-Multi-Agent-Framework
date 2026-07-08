@@ -1,7 +1,7 @@
 ---
 id: SDD-20260626MAKEPROMISESTRUE-spec
 type: spec
-status: active
+status: done
 owner: principal-architect
 updated: 2026-06-26
 feature: 2026-06-26-make-promises-true

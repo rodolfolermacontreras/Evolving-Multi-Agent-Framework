@@ -1,7 +1,7 @@
 ---
 id: SDD-20260626MAINT-tasks
 type: tasks
-status: active
+status: done
 owner: principal-software-developer
 updated: 2026-06-26
 feature: 2026-06-26-sdd-048-maintainability

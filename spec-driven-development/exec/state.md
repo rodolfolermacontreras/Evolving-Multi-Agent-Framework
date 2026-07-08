@@ -45,12 +45,12 @@ PI progress: 0/1 commitments complete (0%)
 | dashboard-dispatches-health-pills | DONE | active | validation required-complete |
 | dashboard-lifecycle-reorder | DONE | active | validation required-complete |
 | d2-proof-config-cutover | BACKLOG | - | directory exists, no artifacts yet |
-| detach-clone-and-run-hardening | REVIEW | done | Status: done but validation required items unchecked |
+| detach-clone-and-run-hardening | DONE | done | validation required-complete |
 | make-promises-true | DONE | done | validation required-complete |
-| plain-language-comms-discipline | REVIEW | done | Status: done but validation required items unchecked |
+| plain-language-comms-discipline | DONE | done | validation required-complete |
 | sdd-047-de-author | DONE | done | validation required-complete |
-| sdd-048-maintainability | REVIEW | done | Status: done but validation required items unchecked |
-| two-tier-executive-manager | REVIEW | done | Status: done but validation required items unchecked |
+| sdd-048-maintainability | DONE | done | validation required-complete |
+| two-tier-executive-manager | DONE | done | validation required-complete |
 | dashboard-truth | DONE | done | validation required-complete, RETRO present |
 | doc-freshness-staledoc-guard | DONE | done | validation required-complete |
 | roadmap-repair-status-backfill | DONE | done | validation required-complete |

@@ -22,17 +22,19 @@ This contract is LOCKED at F-34. F-36 may CHECK items with evidence; it may NOT 
 
 ## Required Items (Strict)
 
-- [ ] **R-1 (agent file created, correct shape).** Exactly one new `.github/agents/` file for the Sprint Executive Manager exists, mirroring the project EM section skeleton (frontmatter `description` + handoffs; Identity; Default Context Source; Responsibilities; Communication style; "What you do NOT do"; Skills; Decision authority; Session start; Error handling). (AC-1)
-- [ ] **R-2 (scope lock).** The agent file states the Sprint EM operates only within its sprint's features and does not comment on, re-prioritize, or start work outside the sprint. (AC-2)
-- [ ] **R-3 (no sprint/PI creation; suggest-only).** The "What you do NOT do" section states the Sprint EM cannot create a sprint/PI, cannot author the next kickoff, cannot make PI-level commitments, and may only SUGGEST upward. (AC-3)
-- [ ] **R-4 (report up at close).** The Responsibilities section states the Sprint EM produces a sprint-close summary and reports up to the project EM at sprint close. (AC-4)
-- [ ] **R-5 (Article II preserved; not human entry point).** The agent file states the project EM remains the single human entry point per Article II and the Sprint EM defers project-wide human Q&A to it. (AC-5)
-- [ ] **R-6 (Level 0 authority).** The Decision authority section pins the Sprint EM to Level 0 (route / summarize / surface), no Level 1/2 decisions, escalation per `decision-policy.md`. (AC-6)
-- [ ] **R-7 (forward-only kickoff activation).** `_SHARED_ONBOARDING.md` contains a Sprint-EM activation block; no already-shipped `SPRINT-##-KICKOFF.prompt.md` is retrofitted. (AC-7)
-- [ ] **R-8 (comms skill loaded).** The agent file loads `em-communication-discipline` as always-active. (AC-8)
-- [ ] **R-9 (schema-lint clean).** `python spec-driven-development/cli/schema_lint.py` -> exit 0 with the new agent file present. (AC-9)
-- [ ] **R-10 (no regression / no Level-2 trigger).** Full pytest >= 481 passed / 2 skipped; no constitution edit, no dependency, no schema change, no Article X locked-function edit. (AC-10)
-- [ ] **R-11 (ADR-020 accepted at close).** ADR-020 transitions Proposed -> Accepted at the Sprint 14 close gate with recorded owner ratification.
+> Evidence backfill -- F-54b / SDD-052 item 052C (owner-approved 2026-07-08). All 11 REQUIRED items below were validated at the **Sprint 14 close (commit `ecd13b3`)**, whose close record in `exec/sprint-progress.md` states "SDD-043 11/11 REQUIRED" with real-run evidence and ADR-020 Accepted (owner-ratified 2026-06-26). This corrective pass ticks the boxes to match the authoritative close record; it CHECKS with evidence only -- no REQUIRED item is added, removed, or weakened (Lock Statement honored).
+
+- [x] **R-1 (agent file created, correct shape).** Exactly one new `.github/agents/` file for the Sprint Executive Manager exists, mirroring the project EM section skeleton (frontmatter `description` + handoffs; Identity; Default Context Source; Responsibilities; Communication style; "What you do NOT do"; Skills; Decision authority; Session start; Error handling). (AC-1)
+- [x] **R-2 (scope lock).** The agent file states the Sprint EM operates only within its sprint's features and does not comment on, re-prioritize, or start work outside the sprint. (AC-2)
+- [x] **R-3 (no sprint/PI creation; suggest-only).** The "What you do NOT do" section states the Sprint EM cannot create a sprint/PI, cannot author the next kickoff, cannot make PI-level commitments, and may only SUGGEST upward. (AC-3)
+- [x] **R-4 (report up at close).** The Responsibilities section states the Sprint EM produces a sprint-close summary and reports up to the project EM at sprint close. (AC-4)
+- [x] **R-5 (Article II preserved; not human entry point).** The agent file states the project EM remains the single human entry point per Article II and the Sprint EM defers project-wide human Q&A to it. (AC-5)
+- [x] **R-6 (Level 0 authority).** The Decision authority section pins the Sprint EM to Level 0 (route / summarize / surface), no Level 1/2 decisions, escalation per `decision-policy.md`. (AC-6)
+- [x] **R-7 (forward-only kickoff activation).** `_SHARED_ONBOARDING.md` contains a Sprint-EM activation block; no already-shipped `SPRINT-##-KICKOFF.prompt.md` is retrofitted. (AC-7)
+- [x] **R-8 (comms skill loaded).** The agent file loads `em-communication-discipline` as always-active. (AC-8)
+- [x] **R-9 (schema-lint clean).** `python spec-driven-development/cli/schema_lint.py` -> exit 0 with the new agent file present. (AC-9)
+- [x] **R-10 (no regression / no Level-2 trigger).** Full pytest >= 481 passed / 2 skipped; no constitution edit, no dependency, no schema change, no Article X locked-function edit. (AC-10)
+- [x] **R-11 (ADR-020 accepted at close).** ADR-020 transitions Proposed -> Accepted at the Sprint 14 close gate with recorded owner ratification.
 
 ## Optional Items
 

@@ -41,8 +41,12 @@ Current PI: **PI-8 (Truth in the Window)**
 | 2026-06-10 | state-builder-fixes | `specs/2026-06-10-state-builder-fixes/` |
 | 2026-06-24 | dashboard-dispatches-health-pills | `specs/2026-06-24-dashboard-dispatches-health-pills/` |
 | 2026-06-24 | dashboard-lifecycle-reorder | `specs/2026-06-24-dashboard-lifecycle-reorder/` |
+| 2026-06-26 | detach-clone-and-run-hardening | `specs/2026-06-26-detach-clone-and-run-hardening/` |
 | 2026-06-26 | make-promises-true | `specs/2026-06-26-make-promises-true/` |
+| 2026-06-26 | plain-language-comms-discipline | `specs/2026-06-26-plain-language-comms-discipline/` |
 | 2026-06-26 | sdd-047-de-author | `specs/2026-06-26-sdd-047-de-author/` |
+| 2026-06-26 | sdd-048-maintainability | `specs/2026-06-26-sdd-048-maintainability/` |
+| 2026-06-26 | two-tier-executive-manager | `specs/2026-06-26-two-tier-executive-manager/` |
 | 2026-07-08 | dashboard-truth | `specs/2026-07-08-dashboard-truth/` |
 | 2026-07-08 | doc-freshness-staledoc-guard | `specs/2026-07-08-doc-freshness-staledoc-guard/` |
 | 2026-07-08 | roadmap-repair-status-backfill | `specs/2026-07-08-roadmap-repair-status-backfill/` |

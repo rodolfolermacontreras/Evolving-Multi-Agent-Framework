@@ -312,6 +312,40 @@ DONE-completeness), B-4 CI. Stdlib-only (Article V). **Closing Sprint 18 does
 NOT close PI-8** -- Sprint 18 continues PI-8 to Sprint 19, and the PI-8 CLOSE is
 a separate owner-approved decision taken after the final PI-8 sprint.
 
+### Sprint 19 -- PI-8 Sprint 2 / Doc-freshness sweep + stale-doc guard (SDD-051)
+
+| Order | File | Owner | Status |
+|-------|------|-------|--------|
+| 0 | [SPRINT-19-KICKOFF.prompt.md](SPRINT-19-KICKOFF.prompt.md) | Sprint Executive Manager (lead) | READY (gated on Sprint 18 close at `2cafe8b`) |
+
+Prerequisite: **Sprint 18 must be CLOSED at `2cafe8b`** with SDD-050 (and its
+per-item IDs) marked DONE in BACKLOG, PI-8 ACTIVE
+([`../sprints/PI-8/CURRENT_PI.md`](../sprints/PI-8/CURRENT_PI.md)), tests at or
+above **576 passed / 2 skipped**, schema lint + origin lint clean, and `doctor`
++ CI green with the Article X lock (`TestS1FootprintLockGuard`) held. Sprint 19
+is the **second sprint of PI-8 ("Truth in the Window")** and ships **one anchor
+feature**: SDD-051 (Doc-freshness sweep + automated stale-doc guard -- **(1)**
+refresh the four stale session-start docs (`docs/HIGH_LEVEL_DEV_TRACKER.md`
+frozen at PI-3 / "60 tests"; `INSTRUCTIONS.md` + `docs/ONBOARDING_KICK_OFF.md`
+"10 articles" -> 12; `CONTEXT.md` "four Principal agents" -> five roles) to the
+live counts, and **(2)** add an automated `doctor`/lint check that flags a
+session-start doc carrying a stale hardcoded PI/test/article count so the rot
+cannot return silently -- proven by a deliberate red; spec source
+[`../docs/Temp/PI-8-TRUTH-IN-THE-WINDOW-AUDIT.md`](../docs/Temp/PI-8-TRUTH-IN-THE-WINDOW-AUDIT.md)
+Section 4). `docs/RULES.md` and root `README.md` are already clean and are
+verified-only (do not touch). The four target docs are NOT `constitution/**`
+files -- no ADR needed to refresh them; the stale-doc check reads counts from
+`principles.md` but must not modify it. Sprint 19 is **led by the Sprint
+Executive Manager** agent (reports up to the project EM at close; cannot create
+sprints/PIs -- suggest-only). The live PI-8 gates apply: B-1 mandatory-ledger
+close gate (dogfood Sprint 19's own dispatches), B-2 blocking checks (TDD gate +
+DONE-completeness), B-4 CI. Stdlib-only (Article V); the Article X locked render
+functions are out of scope. **SDD-052** (roadmap repair + status backfill,
+including the PI-7 4-feature checklist backfill) is Sprint 20 and must not be
+pulled in. **Closing Sprint 19 does NOT close PI-8** -- Sprint 19 continues PI-8
+to Sprint 20, and the PI-8 CLOSE is a separate owner-approved decision taken
+after the final PI-8 sprint.
+
 ---
 
 ## Shared onboarding

@@ -1,6 +1,6 @@
 # Onboarding & Kick-Off Guide -- Evolving Multi-Agent Framework
 
-**Date:** 2026-05-25 (originally 2026-05-21; renamed from `kick_off.md` and amended for onboarding role on PI-3 kickoff)
+**Date:** 2026-05-25, maintained current through PI-8 (originally 2026-05-21; renamed from `kick_off.md` and amended for its onboarding role at the PI-3 kickoff)
 **Owner:** Rodolfo Lerma, Senior Data Scientist (L63), Microsoft WWIC Central Analytics
 **Repo:** [rodolfolermacontreras/Evolving-Multi-Agent-Framework](https://github.com/rodolfolermacontreras/Evolving-Multi-Agent-Framework)
 **License:** MIT
@@ -60,7 +60,7 @@ before touching code. In order:
 | 5 | Your sprint's [`Management/PI-N/Sprint-N-{title}/SPEC.md`](Management/) | Sprint spec, tasks, validation contract |
 
 If you are a Principal, also read:
-- `constitution/principles.md` -- the 10 binding articles
+- `constitution/principles.md` -- the 12 binding articles
 - `constitution/decision-policy.md` -- Level 0/1/2 authority
 - `INSTRUCTIONS.md` at repo root and `.github/copilot-instructions.md`
 
@@ -77,7 +77,7 @@ The Evolving Multi-Agent Framework is a **portable, replicable system for orches
 **It is:**
 
 - A **process** -- a defined lifecycle from idea to merged code with quality gates between phases
-- A **team structure** -- four Principal agents (strategic) plus a fleet of generic Worker agents (tactical) that specialize on demand
+- A **team structure** -- four Principal agents plus a sprint-scoped Sprint Executive Manager (five roles; ADR-020, the two-tier EM) (strategic) plus a fleet of generic Worker agents (tactical) that specialize on demand
 - A **file convention** -- Markdown files, YAML schemas, SQLite ledger, and conventions that operate inside VS Code with GitHub Copilot
 - A **traceable system** -- every dispatch, decision, and handoff is recorded in a SQLite ledger
 
@@ -117,7 +117,7 @@ The solution was to formalize the development process itself: a team of speciali
 | 2026-05-07 | **Asset Creation** -- 81 files, 12,663 lines created in a single commit: agents, skills, prompts, constitution, templates, CLI scaffolds |
 | 2026-05-10 | **Format Conversion** -- Principal agents converted from `.chatmode.md` to `.agent.md` for VS Code auto-discovery |
 | 2026-05-12 | **Extraction** -- All SDD files migrated from Day-to-Day repo to this standalone repository |
-| 2026-05-12--13 | **PI-1: Generalization and First Pilot** -- Constitution generalized, first feature (fleet ledger) shipped through full SDD lifecycle, bootstrap CLI created, 7 ADRs, 10 binding articles, lessons captured |
+| 2026-05-12--13 | **PI-1: Generalization and First Pilot** -- Constitution generalized, first feature (fleet ledger) shipped through full SDD lifecycle, bootstrap CLI created, 7 ADRs, 10 binding articles, lessons captured | <!-- staledoc-ok: PI-1 historical milestone (10 articles was the count at PI-1; XI/XII added later) -->
 | 2026-05-16 | **PI-2: Fleet Maturity and CLI** -- 5 CLI tools shipped (`state_builder.py`, `fleet.py`, `qa.py`, `retro.py`, `schema_lint.py`), live Azure Bridge dashboard deployed, first specialist promoted (`developer-cli-specialist-1`), PI-2 retrospective with 6 lessons |
 | 2026-05-16 | **PI-3 approved** -- Day-to-Day brownfield bootstrap selected as portability validation target |
 
@@ -219,6 +219,8 @@ Worker Agents (the actual hands) --> TACTICS layer (DO the work)
 | 8 | Constitution is immutable without an ADR | VIII |
 | 9 | Human holds final approval on Level 2 decisions (irreversible, high-risk) | IX |
 | 10 | Validation is a pre-implementation contract (tests before code) | X |
+| 11 | Cross-feature serial gate at CLARIFY and SPEC (no two features share a file mid-flight) | XI |
+| 12 | UI lifecycle variant of the validation contract | XII |
 
 Full text: `spec-driven-development/constitution/principles.md`
 
@@ -284,7 +286,7 @@ Six immutable files in `spec-driven-development/constitution/` define the projec
 |------|----------|
 | `mission.md` | Project identity, owner, vision, core values, non-negotiables |
 | `tech-stack.md` | Approved technologies (Markdown, YAML, SQLite, Python stdlib for CLI) |
-| `principles.md` | Ten binding architectural articles (I-X) |
+| `principles.md` | Twelve binding architectural articles (I-XII) |
 | `roadmap.md` | Completed phases, current PI, tech debt backlog |
 | `decision-policy.md` | Level 0/1/2 decision authority and escalation path |
 | `quality-policy.md` | Test baseline, two-stage review, security conventions, Definition of Done |
@@ -345,7 +347,7 @@ Evolving-Multi-Agent-Framework/
     |   +-- CHEAT-SHEET.html              <-- Visual SVG workflow diagram
     |   +-- CLI-PATTERN.md                <-- Canonical Python stdlib CLI pattern
     |   +-- SCORECARD.md                  <-- Sprint-level process metrics
-    |   +-- ADR/                          <-- 9 Architecture Decision Records + template
+|   |   +-- ADR/                          <-- Architecture Decision Records (see docs/ADR/) + template
     +-- cli/                              <-- Python automation (stdlib-only, all operational)
     |   +-- state_builder.py              <-- Generates exec/state.md + state.html dashboard
     |   +-- fleet.py                      <-- Dispatch, mark, status commands
@@ -385,7 +387,7 @@ The framework was generalized from Day-to-Day-specific to project-agnostic, and 
 
 **Deliverables:**
 - Constitution generalized (mission, tech-stack, principles, CONTEXT decoupled from Day-to-Day)
-- 10 binding architectural articles (I-X) with semver frontmatter
+- 10 binding architectural articles (I-X) with semver frontmatter <!-- staledoc-ok: PI-1 historical deliverable (articles XI/XII added in later PIs) -->
 - 7 ADRs documenting key decisions
 - Bootstrap CLI (`bootstrap.py greenfield` + `bootstrap.py brownfield`)
 - 5 starter archetypes (python-library, python-web-service, data-pipeline, cli-tool, research-repo)
@@ -441,28 +443,31 @@ Each lives in its own directory under `specs/YYYY-MM-DD-feature-name/` with co-l
 
 ## 10. Current State and Metrics
 
-**As of 2026-05-21:**
+**As of 2026-05-21 (historical snapshot -- see the live dashboard [`exec/state.html`](../exec/state.html) and the ledger [`exec/sprint-progress.md`](../exec/sprint-progress.md) for current metrics):**
 
 | Metric | Value |
 |--------|-------|
 | Total commits | 40+ on master |
-| Test count | **70 passing** (12.60s) across 5 CLI tool test suites + ledger tests |
+| Test count | See the live count in [`exec/state.md`](../exec/state.md) and the ledger |
 | Agent definitions | 10 (5 Principals + 4 generic workers + 1 specialist) |
 | Skills | 29 across 5 categories |
 | Slash commands | 17 |
-| ADRs | 9 |
+| ADRs | 23 (`001`-`023`; see [`docs/ADR/`](ADR/)) |
 | Features delivered through SDD lifecycle | 8 DONE, 5 in various stages |
 | Fleet dispatch success rate | 100% |
-| Constitution articles | 10 binding (I-X) |
+| Constitution articles | 12 binding (I-XII) |
 | CLI tools operational | 6 (`state_builder`, `fleet`, `qa`, `retro`, `schema_lint`, `bootstrap`) |
 | Archetypes | 5 starter constitutions |
 | Lessons captured | 10 (4 from PI-1, 6 from PI-2) |
 
-### Current PI: PI-3 (Portability Validation)
+### Current PI: PI-8 (Truth in the Window)
 
-**Goal:** Bootstrap SDD onto the Day-to-Day Agent project (brownfield) to validate that the framework works on a real second project with a different role (host vs. origin).
-
-**In-flight feature:** Dashboard About + Freshness (SDD-009/010) -- spec, plan, tasks, validation all approved. Blocked on HITL Azure provisioning (9 manual steps for OIDC federated credential).
+**For current state, read the live source.** The current PI, sprint, in-flight
+feature, and test count live in the dashboard [`exec/state.html`](../exec/state.html),
+the ledger [`exec/sprint-progress.md`](../exec/sprint-progress.md), and the roadmap
+[`../constitution/roadmap.md`](../constitution/roadmap.md). PI-1..PI-7 are closed;
+PI-8 ("Truth in the Window") is active -- making the human-facing surfaces
+(dashboard, onboarding docs, roadmap) as trustworthy as the engine.
 
 ---
 
@@ -508,7 +513,7 @@ These documents are ordered by priority for someone getting up to speed. Section
 
 | Document | Purpose | Size |
 |----------|---------|------|
-| `spec-driven-development/constitution/principles.md` | 10 binding articles that govern the framework | 6 KB |
+| `spec-driven-development/constitution/principles.md` | 12 binding articles that govern the framework | 6 KB |
 | `spec-driven-development/constitution/mission.md` | Vision, core values, non-negotiables | 3 KB |
 | `spec-driven-development/constitution/decision-policy.md` | Level 0/1/2 decision authority | 3 KB |
 | `spec-driven-development/constitution/quality-policy.md` | Test baseline, two-stage review, DoD | 3 KB |

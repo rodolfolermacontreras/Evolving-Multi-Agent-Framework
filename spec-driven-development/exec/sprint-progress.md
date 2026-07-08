@@ -1364,3 +1364,39 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - Notes: The Sprint EM verified the subagent's claims against regenerated artifacts rather than trusting the report -- the same B-1-style discipline PI-7 relied on. That verification is what surfaced the false smoke-test premise. The honest outcome (2 features prove the fix; 4 correctly render not-DONE pending an evidence-gated backfill) is stronger than a fabricated pass.
 - Next: Sprint 19 (SDD-051 doc-freshness sweep + stale-doc doctor check).
 - Reported up to project EM: YES (2026-07-08) -- this close block + the sprint-close summary are the report-up payload; owner ratified the close, the SDD-052 deferral, and the push in the same turn.
+
+---
+
+## Sprint 19 -- PI-8 / Truth in the Window (Doc-freshness sweep + stale-doc guard)
+
+- Sprint kickoff: [../feature-prompts/SPRINT-19-KICKOFF.prompt.md](../feature-prompts/SPRINT-19-KICKOFF.prompt.md)
+- Prerequisite: Sprint 18 CLOSED at `2cafe8b`; PI-8 ACTIVE; 576 tests; doctor/schema/origin green.
+- Sequence: F-50 (design) -> F-51 (implement + QA) -> F-52 (close)
+- Owner: Sprint Executive Manager (lead, reports up to project EM); PM + Architect owned design; SW Dev owned implementation and close
+
+### Sprint 19 -- CLOSED (owner-approved for commit + push 2026-07-08)
+
+- Date: 2026-07-08
+- Owner: Sprint Executive Manager (lead, reports up to project EM); PM + Architect owned design; SW Dev + workers owned implementation and close
+- Features completed: F-50, F-51, F-52
+- Commits: <pending owner pre-push approval; local close prep>
+- Tests: 576 -> 590 passed, 2 skipped (+14: `test_staledoc_lint.py` 13 + 1 bootstrap stdlib test)
+- Schema lint: clean (exit 0); origin lint: 0 hits in generic files
+- Validation: SDD-051A 7/7 REQUIRED + 1 manual; SDD-051B 6/6 REQUIRED + 2 manual -- all real-run evidence
+- Docs refreshed: HIGH_LEVEL_DEV_TRACKER (Snapshot -> PI-8 + live pointers, no PI-3/60-tests as current; PI-3 board marked historical; PI history extended PI-4..PI-8), INSTRUCTIONS (12 articles), ONBOARDING_KICK_OFF (12 articles I-XII everywhere; header reframed; Current PI subsection -> PI-8 pointer; PI-1 milestones marked historical; metrics -> live pointers + 23 ADRs), CONTEXT (five roles incl Sprint EM in the Principal def + roles table)
+- Stale-doc guard: mechanism mixed/verify-against-source -- article count (vs `principles.md`) + current PI (vs active `CURRENT_PI.md`); moving test totals handled by durable fix (drop + point at live), not regex, to avoid Q-C false positives; home `cli/staledoc_lint.py` wired into the doctor set (new check "session-start docs fresh"); `<!-- staledoc-ok -->` marker exempts historical lines
+- Deliberate-red proof: 9 live stale findings before refresh -> 0 after refresh; guard test `test_main_nonzero_on_stale` asserts RED on a planted count -- PASS
+- Clean docs untouched: RULES.md + root README.md byte-unchanged (not in `git status --short`) -- YES
+- Durable fix: docs that dropped hardcoded counts and point at live source: HIGH_LEVEL_DEV_TRACKER (tests, current sprint, branch), ONBOARDING (test count, metrics section, Current PI subsection, ADR structure-diagram line)
+- Per-item SDD-IDs assigned for SDD-051: SDD-051A (doc-freshness sweep), SDD-051B (stale-doc guard)
+- Findings surfaced (report-up): (1) ADR count is 23 (`001`-`023`), NOT the kickoff literal's 24 -- docs write 23 or a pointer (Q-E verify-against-source). (2) CONTEXT.md carried no literal "four Principal agents" string -- it enumerated exactly four Principals in two places; both now list the Sprint EM as the fifth role.
+- Live gates satisfied: B-1 ledger dogfood (Sprint 19 dispatch rows 23 + 24, both success), B-2 (TDD gate + DONE-completeness PASS in doctor), B-4 CI (doctor set green locally incl the new check; GitHub Actions to confirm on the eventual push)
+- Article X lock: HELD -- `TestS1FootprintLockGuard` 3/3 PASS; `render_html` / `render_markdown` and the four locked load_* functions byte-identical; no locked function touched (guard is a new leaf module + additive doctor wiring)
+- History preserved: YES -- no historical specs/sprints/retros/ADRs rewritten; genuine PI-1 historical count lines preserved with `<!-- staledoc-ok -->` markers
+- SDD-051: DONE (four docs refreshed + automated stale-doc guard wired + deliberate-red test). Marked DONE in BACKLOG with evidence.
+- Deferred / out of scope: SDD-052 (S20, incl the PI-7 4-feature checklist backfill), Sprint 21 owner-pick (SDD-049 or SDD-041 Option B), SDD-035 (Azure) out-of-band
+- PI-8 status: ACTIVE -- Sprint 19 CLOSED (local prep); continues to Sprint 20. Sprint 19 did NOT close PI-8.
+- Owner ratification: **APPROVED FOR COMMIT + PUSH** by owner 2026-07-08 ("approve"). CLARIFY + close ran under delegated autonomy on the kickoff defaults while the owner was away; the two surfaced findings (ADR 23 not 24; CONTEXT enumeration) are ratified with the push.
+- Notes: Owner unavailable at CLARIFY and close; Sprint EM proceeded on the kickoff's default recommendations and surfaced two live-source findings (ADR 23 not 24; CONTEXT enumeration) for owner review. Guard-first TDD: the deliberate-red proof existed before the refresh, so the refresh was validated by a green guard. Scope held: no Azure, no constitution edits, no locked-function edits, clean docs untouched.
+- Next: Sprint 20 (SDD-052 roadmap repair + status backfill + PI-7 4-feature checklist backfill)
+- Reported up to project EM: YES (2026-07-08) -- this close block is the report-up payload; owner ratified the close and the push in the same turn. PI-8 continues to Sprint 20 (SDD-052).

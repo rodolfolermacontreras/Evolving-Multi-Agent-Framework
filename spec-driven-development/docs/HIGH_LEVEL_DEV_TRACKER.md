@@ -1,6 +1,6 @@
 ---
-version: '1.1.0'
-last_updated: 2026-05-26
+version: '1.2.0'
+last_updated: 2026-07-08
 owner: principal-executive-manager
 co_owner: principal-product-manager
 discipline: abstraction-not-detail
@@ -22,23 +22,25 @@ Read [`RULES.md`](RULES.md) for the binding rules.
 
 ## Snapshot
 
+> **Live operational view.** The dashboard [`exec/state.html`](../exec/state.html)
+> and the append-only ledger [`exec/sprint-progress.md`](../exec/sprint-progress.md)
+> are the source of truth for "what is happening right now." This tracker points
+> at those live surfaces instead of freezing counts that rot (the root
+> `README.md` no-hardcoded-count pattern). The PI-3 sprint board further down is
+> preserved as the PI-3 historical snapshot, not current state.
+
 | Field | Value |
 |-------|-------|
-| **Current PI** | PI-3 (Portability Validation + Live UI v2 + Navigation Layer) |
-| **PI started** | 2026-05-25 (kickoff today; PI-2 closed 2026-05-16) |
-| **Current sprint** | S4 DONE (Live UI v2 Spec); S3/S5 DONE; S2 HITL-gated; S1 HITL-blocked |
+| **Current PI** | PI-8 (Truth in the Window) -- 7 PIs closed (PI-1..PI-7), PI-8 active |
+| **Current sprint** | See [`exec/sprint-progress.md`](../exec/sprint-progress.md) (read bottom-up) |
 | **Cadence** | Symbolic; ~1 day per sprint, ~5 sprints per PI (ADR-0003) |
-| **Active worktrees** | 0 (S1 awaiting HITL provisioning) |
-| **Tests passing** | 60/60 across CLI suites + ledger (schema_lint clean) |
-| **Branch state** | `master`, **50+ commits ahead of origin** (HITL gate #10) |
-| **Open lessons** | 0 (all curated in S3; LESSON-007 closed in S4 via design-tokens skill) |
-| **HITL pending** | 9 Azure provisioning steps for Sprint 1 |
-| **External feedback in flight** | Addressed -- S5 delivered the navigation layer response |
-| **Navigation layer** | `docs/Management/PI-N/Sprint-N-{title}/` (ADR-0011; **S5 DONE**) |
+| **Tests passing** | See the live count in [`exec/state.md`](../exec/state.md) and the ledger (schema_lint clean) |
+| **Branch state** | See `git status` and the dashboard freshness line |
+| **PI history** | PI-1..PI-7 closed; PI-8 active -- see [`constitution/roadmap.md`](../constitution/roadmap.md) |
 
 ---
 
-## Top 3 Next Moves
+## Top 3 Next Moves (PI-3 historical snapshot -- see the live ledger for current moves)
 
 1. **S2 (Day-to-Day Brownfield Bootstrap) -- human picks dogfood feature.** T-001
    needs the human to pick which Day-to-Day feature to walk through the lifecycle.
@@ -50,7 +52,7 @@ Read [`RULES.md`](RULES.md) for the binding rules.
 
 ---
 
-## PI-3 Sprint Board (5 sprints)
+## PI-3 Sprint Board (historical snapshot -- PI-3)
 
 | # | Title | Status | Owner | Worktree | Deps | Detail Doc |
 |---|-------|--------|-------|----------|------|------------|
@@ -173,4 +175,9 @@ The roadmap is strategic, the backlog is prioritized; the tracker is operational
 |----|--------|---------|---------|-----------|
 | **PI-1** | 2026-05-12 -> 2026-05-13 | Generalization + first pilot (fleet ledger) | 4 captured, 4 curated | [INDEX](Management/PI-1/INDEX.md) / `sprints/PI-1/lessons.md` |
 | **PI-2** | 2026-05-16 (3 sprints same day) | 5 CLIs shipped, live Azure deploy, first specialist promoted | 6 captured, 1 shipped in-PI (LESSON-005), 5 open | [INDEX](Management/PI-2/INDEX.md) / `sprints/PI-2/lessons.md` |
-| **PI-3** | 2026-05-25 -> active | _in flight_ | _open_ | [INDEX](Management/PI-3/INDEX.md) |
+| **PI-3** | 2026-05-25 -> 2026-05-26 | Portability validation + Live UI v2 spec + navigation layer | curated | [INDEX](Management/PI-3/INDEX.md) |
+| **PI-4** | 2026-06 | Alpha release -- filesystem data contracts (SDD-FDC-001) | curated | [`constitution/roadmap.md`](../constitution/roadmap.md) |
+| **PI-5** | 2026-06 | Closed -- see roadmap | curated | [`constitution/roadmap.md`](../constitution/roadmap.md) |
+| **PI-6** | 2026-06 -> 2026-06-25 | Closed -- see roadmap | curated | [`constitution/roadmap.md`](../constitution/roadmap.md) |
+| **PI-7** | -> 2026-07-07 | Hardening + orchestration maturity -- CLOSED (DONE-WITH-CARRYOVER at `7088f35`) | curated | [`constitution/roadmap.md`](../constitution/roadmap.md) |
+| **PI-8** | 2026-07-08 -> active | Truth in the Window (dashboard + docs + roadmap truth) | _in flight_ | [`../sprints/PI-8/CURRENT_PI.md`](../sprints/PI-8/CURRENT_PI.md) |

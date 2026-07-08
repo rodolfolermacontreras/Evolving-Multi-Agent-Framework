@@ -239,6 +239,7 @@ class TestStdlibOnly(unittest.TestCase):
         "schema_lint",
         "tdd_gate_check",
         "done_check",
+        "staledoc_lint",
     }
 
     def _assert_stdlib_only(self, module) -> None:
@@ -269,6 +270,10 @@ class TestStdlibOnly(unittest.TestCase):
 
     def test_governance_check_stdlib_only(self) -> None:
         self._assert_stdlib_only(governance_check)
+
+    def test_staledoc_lint_stdlib_only(self) -> None:
+        import staledoc_lint
+        self._assert_stdlib_only(staledoc_lint)
 
 
 if __name__ == "__main__":

@@ -75,7 +75,7 @@ python spec-driven-development\cli\bootstrap.py --help
   ```
   Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
   ```
-- The 10 binding articles in `spec-driven-development/constitution/principles.md` are immutable without an ADR + `/constitution` semver bump.
+- The 12 binding articles in `spec-driven-development/constitution/principles.md` are immutable without an ADR + `/constitution` semver bump.
 
 ---
 

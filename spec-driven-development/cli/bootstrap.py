@@ -1193,6 +1193,14 @@ def run_doctor(root: Path, *, run_tests: bool = True) -> int:
     checks.append(("origin tokens absent", not findings,
                    "ok" if not findings else f"{len(findings)} token(s) found"))
 
+    # (d2) session-start docs fresh: no stale hardcoded article/current-PI count
+    #      in the four onboarding docs (SDD-051B). Framework checkout only.
+    if is_framework:
+        import staledoc_lint
+        stale = staledoc_lint.scan(root)
+        checks.append(("session-start docs fresh", not stale,
+                       "ok" if not stale else f"{len(stale)} stale count(s)"))
+
     # (e) tests pass.
     if run_tests and is_framework:
         code, output = _run_check(

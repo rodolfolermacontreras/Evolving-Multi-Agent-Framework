@@ -40,7 +40,7 @@ Updated by `grill-with-docs` sessions and ADRs. Acts as a living glossary.
 | **Fleet** | The pool of generic worker agents available for parallel dispatch |
 | **Dispatch** | A single assignment of one task to one worker agent, recorded in the ledger |
 | **Worker** | A generic agent (Developer, UX Designer, Data Scientist, QA Engineer) |
-| **Principal** | A senior agent role with decision authority (Executive Manager, Product Manager, Architect, Software Developer) |
+| **Principal** | A senior agent role with decision authority (Executive Manager, Product Manager, Architect, Software Developer). A fifth role -- the Sprint Executive Manager, a sprint-scoped delegate of the Executive Manager (ADR-020, two-tier EM) -- coordinates a single sprint. |
 | **Skill** | A composable, single-purpose `SKILL.md` file under `.github/skills/` that an agent loads on demand |
 | **Skill Pack** | A bundle of skills granted to a worker that earns specialization in a domain |
 | **Specialization** | The mechanic by which a generic worker earns a permanent identity through demonstrated competence |
@@ -91,6 +91,7 @@ Spec sizing rule (prevents ceremony bloat):
 | Principal Product Manager | Principal | Backlog ownership, RICE scoring, acceptance criteria, sprint and PI planning |
 | Principal Architect | Principal | Specs, plans, ADRs, architectural quality, pattern enforcement |
 | Principal Software Developer | Principal | Task decomposition, fleet dispatch, code review, integration |
+| Sprint Executive Manager | Principal (sprint-scoped) | Delegated entry point for ONE sprint (ADR-020, two-tier EM). Routes the sprint's feature work across the Principals, synthesizes answers, surfaces escalations, and reports up to the project Executive Manager at sprint close. Makes no product, technical, or implementation decisions itself. |
 | Developer (generic) | Worker | Implements tasks; specializes on demand via skill packs |
 | UX Designer (generic) | Worker | Designs flows, wireframes, accessibility checks |
 | QA Engineer (generic) | Worker | Writes and reviews tests, runs validation against specs |

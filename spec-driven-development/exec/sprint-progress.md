@@ -1360,7 +1360,7 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - SDD-050: DONE (Defect 1 stage detector + Defect 2 closed-PI percentage + single source of truth). Marked DONE in BACKLOG with evidence + the finding.
 - Deferred / out of scope: PI-7 spec-dir status + per-dir validation backfill -> SDD-052 (S20); SDD-051 (S19); SDD-049 / SDD-041 Option B (S21 owner-pick); SDD-035 (Azure) out-of-band.
 - PI-8 status: ACTIVE -- Sprint 18 CLOSED; continues to Sprint 19. Sprint 18 did NOT close PI-8.
-- Owner ratification: LOCAL CLOSE PREP ONLY -- pending owner pre-push approval AND ratification of the deferral decision (owner delegated autonomy and will review later).
+- Owner ratification: **APPROVED FOR COMMIT + PUSH** by owner 2026-07-08 ("Push it"); the deferral of the PI-7 per-dir validation backfill to SDD-052 is RATIFIED with an explicit visibility requirement ("ensure there is visibility to them") -- met by naming SDD-043/044/045/048 in the SDD-052 backlog row. Pushed to origin at `489de99`.
 - Notes: The Sprint EM verified the subagent's claims against regenerated artifacts rather than trusting the report -- the same B-1-style discipline PI-7 relied on. That verification is what surfaced the false smoke-test premise. The honest outcome (2 features prove the fix; 4 correctly render not-DONE pending an evidence-gated backfill) is stronger than a fabricated pass.
 - Next: Sprint 19 (SDD-051 doc-freshness sweep + stale-doc doctor check).
-- Reported up to project EM: PENDING (this close block + the sprint-close summary are the report-up payload; the project EM owns the owner conversation about ratifying the deferral and approving the push).
+- Reported up to project EM: YES (2026-07-08) -- this close block + the sprint-close summary are the report-up payload; owner ratified the close, the SDD-052 deferral, and the push in the same turn.

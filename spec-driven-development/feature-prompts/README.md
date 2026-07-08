@@ -346,6 +346,45 @@ pulled in. **Closing Sprint 19 does NOT close PI-8** -- Sprint 19 continues PI-8
 to Sprint 20, and the PI-8 CLOSE is a separate owner-approved decision taken
 after the final PI-8 sprint.
 
+### Sprint 20 -- PI-8 Sprint 3 / Roadmap repair + status & checklist backfill (SDD-052)
+
+| Order | File | Owner | Status |
+|-------|------|-------|--------|
+| 0 | [SPRINT-20-KICKOFF.prompt.md](SPRINT-20-KICKOFF.prompt.md) | Sprint Executive Manager (lead) | READY (gated on Sprint 19 close at `4feee24`) |
+
+Prerequisite: **Sprint 19 must be CLOSED at `4feee24`** (head `ed89193` or later)
+with SDD-051 (and its per-item IDs) marked DONE in BACKLOG, PI-8 ACTIVE
+([`../sprints/PI-8/CURRENT_PI.md`](../sprints/PI-8/CURRENT_PI.md)), tests at or
+above **590 passed / 2 skipped**, schema lint + origin lint + the new stale-doc
+lint clean, and `doctor` + CI green with the Article X lock
+(`TestS1FootprintLockGuard`) held. Sprint 20 is the **third sprint of PI-8
+("Truth in the Window")** and finishes **"dashboard truth"** with **one anchor
+feature**: SDD-052 (Roadmap repair + status backfill -- **(1)** repair
+`constitution/roadmap.md`: backfill the missing PI-6 section, fix PI-7's
+self-contradictory `"(current, closed 2026-07-07)"` header, add a PI-8 entry, and
+define/apply closed-PI semantics so closed PIs render 100%; **(2)** flip the 5-6
+stale PI-7 spec-dir `status: active -> done` (deferred from Sprint 18); **(3)**
+tick the SDD-043/044/045/048 per-folder validation checklists with **real
+sprint-close evidence** (data-hygiene backfill of genuinely-done work, not
+fabricated checkmarks); **(4)** correct any lingering "24 ADRs" figure in live
+planning/audit text to **23 ADRs (001-023)**; spec source
+[`../docs/Temp/PI-8-TRUTH-IN-THE-WINDOW-AUDIT.md`](../docs/Temp/PI-8-TRUTH-IN-THE-WINDOW-AUDIT.md)
+Section 5). **`constitution/roadmap.md` is a `constitution/**` file (Article
+VIII)** -- the ADR-or-not call is an Architect decision at CLARIFY, and recorded
+owner approval before push is mandatory regardless; no worker edits `roadmap.md`
+silently. Sprint 20 is **led by the Sprint Executive Manager** agent (reports up
+to the project EM at close; cannot create sprints/PIs -- suggest-only). The live
+PI-8 gates apply: B-1 mandatory-ledger close gate (dogfood Sprint 20's own
+dispatches), B-2 blocking checks (TDD gate + DONE-completeness), B-4 CI.
+Stdlib-only (Article V); the Article X locked render functions are out of scope.
+The close **smoke test** is the payoff: the regenerated dashboard renders all 6
+PI-7 features (SDD-043..048) as DONE, PI-6 renders, every closed PI is at 100%,
+PI-7 is not current, and PI-8 has a roadmap entry. The **Sprint 21 owner-pick**
+(SDD-049 file-overlap detector OR SDD-041 Option B) and **SDD-035** (out-of-band)
+are NOT in Sprint 20. **Closing Sprint 20 does NOT close PI-8** -- Sprint 20
+continues PI-8 to Sprint 21, and the PI-8 CLOSE is a separate owner-approved
+decision taken after the final PI-8 sprint.
+
 ---
 
 ## Shared onboarding

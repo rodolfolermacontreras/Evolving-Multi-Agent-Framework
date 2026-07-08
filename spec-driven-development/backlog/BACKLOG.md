@@ -98,6 +98,29 @@ promises true), Sprint 16 (S3 De-author), Sprint 17 (S4 Maintainability).
 
 Source: Owner approval 2026-06-26 via Executive Manager -- PI-7 = "Hardening + Orchestration Maturity", the Alpha-gating priority. Two-tier Sprint EM (SDD-043) is the owner's #1 item; plain-language comms (SDD-044) is the owner communication requirement of 2026-06-26; the audit epics (SDD-045..048) operationalize `docs/Temp/EMF-HARDENING-PLAN.md` (external principal-level repo audit). Three owner forks to resolve at the relevant sprint's CLARIFY: (1) Sprint EM naming/tier -- HANDLED (folded into S1); (2) B-1 mandatory-logging vs retract-claim -> S2 CLARIFY; (3) C-2 stdlib-only vs one templating dep -> S4 CLARIFY.
 
+### PI-8 Truth-in-the-Window Bundle (filed 2026-07-08)
+
+PI-8 = "Truth in the Window". PI-7 hardened the engine (ledger real, rules
+block, CI fires, identity is config, god-module split -- 558 tests, `doctor`
+green); PI-8 makes the human-facing surfaces as trustworthy as the engine. The
+dashboard renders closed DONE features at an earlier stage and shows closed PIs
+at a partial percentage; the session-start docs are frozen with stale counts;
+the roadmap is missing PI-6 and calls the just-closed PI-7 "current." Owner-
+approved 2026-07-08 via Executive Manager ("yes, this is critical"), following
+PI-7 close (`7088f35`). Spec source for the three features is the tracked file
+[`../docs/Temp/PI-8-TRUTH-IN-THE-WINDOW-AUDIT.md`](../docs/Temp/PI-8-TRUTH-IN-THE-WINDOW-AUDIT.md)
+(each defect's Acceptance block seeds that feature's `validation.md`).
+Allocation: Sprint 18 (dashboard truth), Sprint 19 (doc sweep), Sprint 20
+(roadmap repair). Each sprint's CLARIFY assigns per-item SDD-IDs.
+
+| ID | Title | Priority | R | I | C | E | RICE | Sprint | Status | Notes |
+|----|-------|----------|---|---|---|---|------|--------|--------|-------|
+| SDD-050 | Dashboard truth: fix stale feature-stage + closed-PI percentage detectors | P1 | H | H | H | M | -- | PI-8 Sprint 18 | OPEN | Anchor. Spec source `docs/Temp/PI-8-TRUTH-IN-THE-WINDOW-AUDIT.md` Section 3. Defect 1: DONE features render REVIEW/IMPLEMENT/TASKS -- fix `detect_stage()` in `cli/state_builder_data.py` so `status: done` + satisfied validation reads DONE with NO per-spec-dir `RETRO.md` required (retros live at PI/sprint level here), and glob `validation*.md` so split per-item validation files count. Defect 2: closed PIs show partial % -- read the `(closed)` marker and render closed PIs done / 100%, harden `is_current` so `"(current, closed ...)"` is not current. Reconcile the dashboard "done" definition with `cli/done_check.py` (single source of truth so dashboard and `doctor` agree; surface any `done_check.py` behavior change -- it feeds the live B-2 gate). LOCK-SAFE: fix is in `state_builder_data.py`, a leaf module with NO Article X locked functions -- `render_html` / `render_markdown` untouched, `TestS1FootprintLockGuard` stays GREEN. CLARIFY decides the 5 stale `status: active` backfill placement (here vs SDD-052, ONE place) and the closed-PI dependency on SDD-052's PI-6 roadmap backfill (default: read closed-state defensively so S18 does not block on S20). |
+| SDD-051 | Doc-freshness sweep + automated stale-doc doctor check | P1 | H | H | H | S | -- | PI-8 Sprint 19 | OPEN | Spec source `docs/Temp/PI-8-TRUTH-IN-THE-WINDOW-AUDIT.md` Section 4. Refresh the four session-start docs that disagree with the repo: `docs/HIGH_LEVEL_DEV_TRACKER.md` (frozen at PI-3 / "60 tests" -- worst, it is onboarding read #3), `INSTRUCTIONS.md` + `docs/ONBOARDING_KICK_OFF.md` ("10 articles" vs 12), `CONTEXT.md` ("four Principal agents" vs five roles since the two-tier EM). ADD a `doctor`/lint check that flags stale PI / test / article claims in the session-start docs (goes RED on a deliberate stale claim) so the rot cannot return silently. `RULES.md` and root `README.md` are already clean -- leave them. |
+| SDD-052 | Roadmap repair + spec-dir status backfill | P1 | H | H | H | M | -- | PI-8 Sprint 20 | OPEN | Spec source `docs/Temp/PI-8-TRUTH-IN-THE-WINDOW-AUDIT.md` Section 5. `constitution/roadmap.md` skips PI-6 entirely (headers jump PI-5 -> PI-7), calls PI-7 `"(current, closed 2026-07-07)"` (self-contradictory), and leaves closed PIs with unchecked boxes the dashboard reads as "% complete." Backfill a PI-6 section with a closed marker; give PI-7 a clean closed marker; define a written closed-PI convention that matches what SDD-050 reads; add a PI-8 roadmap section (so PI-8 does not repeat the PI-6 gap); backfill the 6 spec-dir frontmatter `status: active` -> `done` lines. The `roadmap.md` edit is a `constitution/**` Level-2 change -- ADR + recorded owner approval + version bump, gated at Sprint 20 CLARIFY. Data-prerequisite for SDD-050's closed-PI fix -- see the SDD-050 dependency note. |
+
+Source: Owner approval 2026-07-08 via Executive Manager ("yes, this is critical"). Spec source is the tracked audit `docs/Temp/PI-8-TRUTH-IN-THE-WINDOW-AUDIT.md` (full framework audit). Sequencing note: SDD-052's roadmap PI-6 backfill + closed markers are a data-prerequisite for SDD-050's closed-PI percentage fix -- the Architect resolves the dependency at Sprint 18 CLARIFY (pull the roadmap-marker part earlier OR have SDD-050 read closed-state defensively so Sprint 18 does not hard-block on Sprint 20). Sprint 21 (PI-8 Sprint 4) is an owner-pick capacity slice -- SDD-049 (P3 file-overlap detector) or SDD-041 Option B (reorder -> backend re-optimization) -- picked after the three truth features land; not committed here.
+
 ## P2 - Should Have
 
 | ID | Title | Priority | Reach | Impact | Confidence | Effort | RICE | Sprint | Status |

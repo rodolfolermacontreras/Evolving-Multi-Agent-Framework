@@ -276,6 +276,42 @@ Stdlib-only (Article V) unless the owner accepts the C-2 dependency. **Closing
 Sprint 17 does NOT close PI-7** -- Sprint 17 produces a PI-7 close-readiness
 report, and the PI-7 CLOSE is a separate owner-approved decision taken afterward.
 
+### Sprint 18 -- PI-8 Sprint 1 / Dashboard truth (fix stale detectors) (SDD-050)
+
+| Order | File | Owner | Status |
+|-------|------|-------|--------|
+| 0 | [SPRINT-18-KICKOFF.prompt.md](SPRINT-18-KICKOFF.prompt.md) | Sprint Executive Manager (lead) | READY (gated on PI-7 close at `7088f35`) |
+
+Prerequisite: **PI-7 must be CLOSED at `7088f35`** (2026-07-07, DONE-WITH-
+CARRYOVER) with SDD-048 (and its C-1/C-2/C-3/D-2 per-item IDs) marked DONE in
+BACKLOG, PI-8 DRAFTED/QUEUED ([`../sprints/PI-8/CURRENT_PI.md`](../sprints/PI-8/CURRENT_PI.md),
+`status: draft`) naming Sprint 18 as the first sprint (Sprint 18's first act flips
+PI-8 to active + logs the first ledger dispatch), SDD-050 filed OPEN and allocated to
+Sprint 18, tests at or above **558 passed / 2 skipped**, schema lint + origin
+lint clean, and `doctor` + CI green. Sprint 18 is the **first sprint of PI-8
+("Truth in the Window")** and ships **one anchor feature**: SDD-050 (Dashboard
+truth -- **Defect 1** DONE features render REVIEW/IMPLEMENT/TASKS because
+`detect_stage()` demands a per-spec-dir `RETRO.md` and is blind to split
+`validation-*.md` files; **Defect 2** closed PIs show a partial percentage
+because the logic has no "closed" concept and `is_current` matches
+`"(current, closed ...)"`; plus a single source of truth reconciling the
+dashboard "done" definition with `cli/done_check.py`; spec source
+[`../docs/Temp/PI-8-TRUTH-IN-THE-WINDOW-AUDIT.md`](../docs/Temp/PI-8-TRUTH-IN-THE-WINDOW-AUDIT.md)
+Section 3). **The fix is LOCK-SAFE**: it lives in `cli/state_builder_data.py`, a
+leaf module split out in PI-7 (SDD-048) that holds NONE of the five Article X
+locked functions -- `render_html` / `render_markdown` stay untouched and
+`TestS1FootprintLockGuard` stays GREEN. **The #1 sequencing risk is the SDD-052
+dependency**: SDD-050's closed-PI fix reads the roadmap `(closed)` markers that
+SDD-052 backfills in Sprint 20, so the Architect resolves the dependency at
+CLARIFY -- default is to read closed-state defensively so Sprint 18 does not
+hard-block on Sprint 20. Sprint 18 is **led by the Sprint Executive Manager**
+agent (reports up to the project EM at close; cannot create sprints/PIs --
+suggest-only). The live PI-7 gates apply: B-1 mandatory-ledger close gate
+(dogfood Sprint 18's own dispatches), B-2 blocking checks (TDD gate +
+DONE-completeness), B-4 CI. Stdlib-only (Article V). **Closing Sprint 18 does
+NOT close PI-8** -- Sprint 18 continues PI-8 to Sprint 19, and the PI-8 CLOSE is
+a separate owner-approved decision taken after the final PI-8 sprint.
+
 ---
 
 ## Shared onboarding

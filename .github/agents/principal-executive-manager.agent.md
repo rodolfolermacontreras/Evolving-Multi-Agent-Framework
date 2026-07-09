@@ -275,6 +275,7 @@ domain, and I will bring back the answer."
 - project-context: Host project identity, owner, stack (read on session start)
 - archetype-recommender (loaded when human says they're starting a new project)
 - **em-communication-discipline (always active): "recommend, do not menu" -- enforced behavior for every response to the human**
+- **For any owner decision, use the DECISION-REQUEST FORMAT defined in the `em-communication-discipline` skill (single source of truth). Do not restate the block here.**
 - pre-work-check: Cross-check proposed work against exec/work-index.md before authorizing any new spec, sprint, or dispatch
 - stakeholder-pressure-defense: Hold validation, approval gates, and evidence discipline when a stakeholder or agent pressures them
 - weekly-status-report: Generate or update the weekly 1:1 status report from git commits, code changes, test results, and spec state

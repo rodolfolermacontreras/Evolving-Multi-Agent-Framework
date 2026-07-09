@@ -1473,3 +1473,61 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - Notes: SDD-052 finishes "dashboard truth" -- the roadmap now tells one self-consistent story (PI-6 present, PI-7 closed/not-current, PI-8 entry, closed-PI convention) and all six PI-7 features render DONE with evidence-backed checklists.
 - Next: Sprint 21 (PI-8 Sprint 4 owner-pick: SDD-049 file-overlap detector OR SDD-041 Option B)
 - Reported up to project EM: PENDING
+
+---
+
+## Sprint 21 -- PI-8 / Truth in the Window (Decision-request format for human-facing agents)
+
+- Sprint kickoff: [../feature-prompts/SPRINT-21-KICKOFF.prompt.md](../feature-prompts/SPRINT-21-KICKOFF.prompt.md)
+- Prerequisite: Sprint 20 CLOSED `31a9b81` (pushed `36b7f3e`); head `0e36afb` (files SDD-053 + kickoff); PI-8 ACTIVE; tests 590/2; schema+origin+staledoc lint clean; Article X lock PASS.
+- Anchor: SDD-053 (decision-request format). Sequence: F-56 (design) -> F-57 (implement+QA) -> F-58 (close).
+- Owner: Sprint Executive Manager (lead, reports up to project EM); PM + Architect owned design (F-56); SW Dev + workers owned implementation and close (F-57/F-58).
+
+### F-56 -- SDD-053 CLARIFY -> SPEC -> PLAN -> TASKS -- DONE
+
+- Date: 2026-07-08
+- Owner: Principal Architect (design)
+- Ledger: dispatch row 28 (`T-053-DESIGN`, principal-architect, success)
+- Files created: `specs/2026-07-08-decision-request-format/` (clarify.md, spec.md, plan.md, tasks.md, validation.md)
+- Validation: contract LOCKED with 7 REQUIRED items (R-1..R-7) + 3 manual (M-1..M-3) + tone (U-1) + optional (O-1); tasks T-053-01..05 with per-task allowed/blocked file scoping and a serial dependency graph.
+- CLARIFY answers: Q-A Level-1 (no ADR, no version bump; precedent SDD-044); Q-B lock the format once in the skill, both charters reference it (SSOT, no duplication); Q-C add a stdlib-only structural test (not a prose linter).
+- Notes: design-only; no skill/charter/code edited in F-56. Level-1 call confirmed; no Level-2 escalation.
+
+### F-57 -- SDD-053 IMPLEMENT + QA -- DONE
+
+- Date: 2026-07-08
+- Owner: Principal Software Developer (+ workers)
+- Ledger: dispatch row 29 (`T-053-IMPL`, principal-software-developer, success)
+- Files changed: `.github/skills/operational/em-communication-discipline/SKILL.md` (+30, DECISION-REQUEST FORMAT section, SSOT; `metadata.version` unchanged at `'1.1'`), `.github/agents/sprint-executive-manager.agent.md` (+1 binding line), `.github/agents/principal-executive-manager.agent.md` (+1 binding line)
+- Files created: `spec-driven-development/cli/test_sdd053.py` (stdlib-only unittest, 6 cases)
+- Tests: 590 -> 596 pass / 2 skip (+6 new); new test 6/6 in isolation
+- Schema lint: clean (exit 0); origin lint: 0 hits; stale-doc lint: green
+- Article X: `TestS1FootprintLockGuard` PASS (3/3); no locked render/load function touched
+- Validation: R-1..R-7 checked with evidence; M-1/M-2/U-1 + O-1 checked; M-3 (owner pre-push) held for close
+- Deviation: DE-01 -- B-1 dogfood satisfied via `ledger_cli.py record-dispatch` (the Sprint 18/19/20 precedent), NOT `fleet.py dispatch` (all five SDD-053 tasks are correctly serial / `Fleet Dispatch Eligible: no`). No `is_eligible` gate altered, no locked `tasks.md` loosened, no CLI-behavior change. Resolved at Level 0 by following documented precedent.
+
+### Sprint 21 -- CLOSED
+
+- Date: 2026-07-08
+- Owner: Sprint Executive Manager (lead, reports up to project EM); PM + Architect owned design (F-56); SW Dev + workers owned implementation and close (F-57/F-58)
+- Features completed: F-56, F-57, F-58
+- Commits: <fill at commit>
+- Tests: 590 -> 596 (2 skipped; +6 from `test_sdd053.py`; no regression)
+- Schema lint: clean; origin lint: 0 hits in generic files; stale-doc lint: green
+- Validation: SDD-053 7/7 REQUIRED + M-1/M-2/U-1 + O-1; M-3 (owner pre-push) checked at close
+- Skill edit: `em-communication-discipline` carries DECISION-REQUEST FORMAT (SSOT) -- PASS
+- Charter edits: `sprint-executive-manager` + `principal-executive-manager` reference the format (one-line binding, no duplicated block) -- PASS
+- Structural test: added (`cli/test_sdd053.py`, 6 cases: skill tokens/rules + both charter refs + stdlib audit)
+- Level-1-vs-Level-2 call: Level-1 (no ADR / no version bump), Architect-confirmed -- YES
+- Per-item SDD-IDs assigned for SDD-053: none needed (single feature; Architect decision at CLARIFY)
+- Live gates satisfied: B-1 ledger dogfood (Sprint 21 rows 28 `T-053-DESIGN` + 29 `T-053-IMPL`, both success; doctor B-1 green PI-8 8 rows), B-2 (TDD gate + DONE-completeness), B-4 CI green
+- Article X lock: held (TestS1FootprintLockGuard PASS); render_html / render_markdown byte-identical
+- History preserved: YES (no historical specs/sprints/retros/ADRs/frozen prompts rewritten)
+- SDD-053: DONE (decision-request format in skill + both EM charters + structural test)
+- Process note: F-57 initially recorded B-1 as blocked (DE-01) reading `fleet.py dispatch` as the only ledger path; the Sprint EM found the established sprint-level `ledger_cli.py record-dispatch` precedent (Sprints 18/19/20 log synthetic DESIGN/IMPL rows), resolved B-1 at Level 0, and corrected DE-01. No owner decision was required for that mechanism.
+- Deferred / out of scope: SDD-049 (file-overlap detector) + SDD-041 Option B (reorder -> backend re-optimization) -- open, unallocated candidates; SDD-035 (Azure) out-of-band
+- PI-8 status: ACTIVE -- Sprint 21 CLOSED; PI-8-close decision surfaced to owner (separate owner-approved decision, not taken here)
+- Owner ratification: APPROVED FOR COMMIT + PUSH (owner approved 2026-07-08 via Executive Manager, "option 1")
+- Notes: Sprint 21 fixes the last "truth" gap -- how agents ask the owner to decide. Every human-facing agent now surfaces an owner decision as a short status plus a clearly-marked block at the very end, so the ask, options, and recommendation are readable in seconds. The sprint dogfooded its own rule (this close surfaces the PI-8-close decision in the new format).
+- Next: PI-8 close decision (owner) -- and/or a future sprint for SDD-049 / SDD-041 Option B
+- Reported up to project EM: PENDING (Sprint EM reports up at close)

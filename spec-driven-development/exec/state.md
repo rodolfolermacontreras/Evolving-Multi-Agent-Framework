@@ -52,6 +52,7 @@ PI progress: 0/1 commitments complete (0%)
 | sdd-048-maintainability | DONE | done | validation required-complete |
 | two-tier-executive-manager | DONE | done | validation required-complete |
 | dashboard-truth | DONE | done | validation required-complete, RETRO present |
+| decision-request-format | DONE | done | validation required-complete |
 | doc-freshness-staledoc-guard | DONE | done | validation required-complete |
 | roadmap-repair-status-backfill | DONE | done | validation required-complete |
 
@@ -97,6 +98,9 @@ PI progress: 0/1 commitments complete (0%)
 
 | When | Feature | Task | Agent |
 |------|---------|------|-------|
+| 2026-07-08T22:14:11Z | spec-driven-development/specs/2026-07-08-decision-request-format | SDD-053 IMPLEMENT+QA: skill DECISION-REQUEST FORMAT + 2 EM charter bindings + test_sdd053.py (596 passed) | principal-software-developer |
+| 2026-07-08T22:13:58Z | spec-driven-development/specs/2026-07-08-decision-request-format | SDD-053 CLARIFY->SPEC->PLAN->TASKS (decision-request format; validation R-1..R-7) | principal-architect |
+| 2026-07-08T21:11:55Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-07-08-roadmap-repair-status-backfill | SDD-052 F-54b corrective: backfill 052C checklist ticks (4 PI-7 feature checklists, real close evidence) | principal-software-developer |
 | 2026-07-08T20:26:44Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-07-08-roadmap-repair-status-backfill | SDD-052 IMPLEMENT+QA: roadmap 1.1.0->1.2.0, 24 status flips, ADR-024 ratified, self-close | principal-software-developer |
 | 2026-07-08T20:26:37Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-07-08-roadmap-repair-status-backfill | SDD-052 CLARIFY->SPEC->PLAN->TASKS + ADR-024 draft (052A/B/C/D) | principal-architect |
 | 2026-07-08T16:40:10Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-07-08-doc-freshness-staledoc-guard | SDD-051 IMPLEMENT+QA: staledoc guard + doctor wiring + refresh 4 docs | principal-software-developer |
@@ -104,9 +108,6 @@ PI progress: 0/1 commitments complete (0%)
 | 2026-07-08T15:47:35Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-07-08-dashboard-truth | Widen `done_check.py` validation reader to glob `validation*.md`; expose `required_checked`/`required_unchecked`/`validation_complete`/`validation_files` for shared import | principal-software-developer |
 | 2026-06-27T02:10:33Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-06-26-sdd-048-maintainability | Extract `state_builder_markdown.py`: decompose `render_markdown` (762 lines) into per-section helpers (header/lifecycle/features/backlog/dispatches/decisions/footer) via `string.Template` (stdlib). Re-import. | principal-software-developer |
 | 2026-06-27T02:10:33Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-06-26-sdd-048-maintainability | Prove the lightweight path on ONE real <5-file feature end-to-end; its lock holder validates (Article X intact). | principal-software-developer |
-| 2026-06-27T02:10:32Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-06-26-sdd-048-maintainability | Add `"article_xi_cutover": "2026-06-08"` to config; in `fleet.py` resolve cutover via stdlib `json` with `ARTICLE_XI_CUTOVER` fallback constant + retained comment; keep `_is_grandfathered` default sourced from resolved value. | principal-software-developer |
-| 2026-06-27T02:10:32Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-06-26-sdd-048-maintainability | Extract `doc_count.py` (leaf): `_iter_in_scope_artifacts`, `_resolve_sprint_id`, `build_doc_count`, `build_doc_count_by_sprint`, `render_count_table`, `cmd_count`. Re-import into `state_builder.py`. | principal-software-developer |
-| 2026-06-26T23:06:41Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-06-26-sdd-047-de-author | **LEVEL-2 (owner-gated)** constitution de-author under ADR-022 | principal-software-developer |
 
 ## Blockers
 

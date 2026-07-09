@@ -55,6 +55,36 @@ NOT:
 
 ---
 
+## DECISION-REQUEST FORMAT (mandatory when asking the owner to decide)
+
+When any human-facing response asks the owner to make a decision, surface it in a
+single, clearly-marked block at the very END of the message. This is the CONTAINER
+for the recommendation the skill already mandates -- it is not a return to menuing:
+`Recommendation:` stays mandatory and names one path.
+
+Put a short status ABOVE the block (lead-with-answer, exactly as this skill already
+requires). Then close the message with this exact shape and nothing after it:
+
+```
+DECISION NEEDED: <one line>
+Options:
+  1. <option> -- impact: <one line>
+  2. <option> -- impact: <one line>
+Recommendation: <which + one-line why>
+```
+
+Rules that travel with the format:
+
+- ONE decision block per message -- never bury a question in prose, and never send
+  more than one decision block in a single message.
+- The block sits at the very end of the message; nothing follows it.
+- If no decision is needed, there is NO block -- just a short status.
+- The format is the container for the recommendation, consistent with the
+  "recommend, do not menu" rule above: name one path in `Recommendation:`; the
+  numbered `Options:` exist to show the trade-off, not to punt the choice back.
+
+---
+
 ## When menus ARE allowed
 
 Use a menu (max 3 options) only when ALL of the following are true:

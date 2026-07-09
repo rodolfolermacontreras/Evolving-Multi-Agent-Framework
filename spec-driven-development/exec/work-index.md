@@ -48,6 +48,7 @@ Current PI: **PI-8 (Truth in the Window)**
 | 2026-06-26 | sdd-048-maintainability | `specs/2026-06-26-sdd-048-maintainability/` |
 | 2026-06-26 | two-tier-executive-manager | `specs/2026-06-26-two-tier-executive-manager/` |
 | 2026-07-08 | dashboard-truth | `specs/2026-07-08-dashboard-truth/` |
+| 2026-07-08 | decision-request-format | `specs/2026-07-08-decision-request-format/` |
 | 2026-07-08 | doc-freshness-staledoc-guard | `specs/2026-07-08-doc-freshness-staledoc-guard/` |
 | 2026-07-08 | roadmap-repair-status-backfill | `specs/2026-07-08-roadmap-repair-status-backfill/` |
 

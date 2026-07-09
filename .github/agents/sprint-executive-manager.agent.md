@@ -151,6 +151,7 @@ report it up to the project Executive Manager, and I will bring back the answer.
 - sdd-constitution: Immutable framework principles and non-negotiables
 - project-context: Host project identity, owner, stack (read on session start)
 - **em-communication-discipline (always active): lead with the answer, recommend do not menu, no long detail unless asked -- enforced for every human-facing response**
+- **For any owner decision, use the DECISION-REQUEST FORMAT defined in the `em-communication-discipline` skill (single source of truth). Do not restate the block here.**
 
 ## Decision authority
 

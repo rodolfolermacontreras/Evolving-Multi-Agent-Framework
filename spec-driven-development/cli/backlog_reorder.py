@@ -46,9 +46,15 @@ AUDIT_FIELDS = (
 _FEATURE_ID_RE = re.compile(r"\b([A-Z]{2,}-\d{2,3})\b")
 _BACKLOG_ROW_RE = re.compile(r"^\|\s*([A-Z]{2,}-\d{2,3})\s*\|", re.MULTILINE)
 
+# SDD-054 (Option B): RICE priority weight -- higher is more urgent. Mirrors
+# fleet.py's `_PRIORITY_RANK` intent (P1 most urgent). Used as the recorded
+# secondary signal when the drag order feeds backend re-optimization.
+PRIORITY_WEIGHT = {"P1": 4, "P2": 3, "P3": 2, "P4": 1}
+
 
 class ReorderError(Exception):
     """Raised for a blocked move or an unknown item (exit code 1)."""
+
 
 
 # --------------------------------------------------------------------------- #
@@ -66,6 +72,11 @@ def audit_path(sdd_root: Path) -> Path:
     return sdd_root / "ledger" / "reorder-audit.jsonl"
 
 
+def effective_priority_path(sdd_root: Path) -> Path:
+    return sdd_root / "backlog" / "effective-priority.json"
+
+
+
 def specs_root(sdd_root: Path) -> Path:
     return sdd_root / "specs"
 
@@ -77,13 +88,17 @@ def specs_root(sdd_root: Path) -> Path:
 class BacklogEntry:
     id: str
     done: bool
+    priority: str = "P3"
 
 
 def load_backlog_entries(sdd_root: Path) -> list[BacklogEntry]:
-    """Parse BACKLOG.md table rows into (id, done) in natural (top-down) order.
+    """Parse BACKLOG.md table rows into (id, done, priority) in natural order.
 
     A row is considered complete when its row text contains the token ``DONE``
-    (the BACKLOG status convention, e.g. ``DONE (PI-5 Sprint 3, ...)``).
+    (the BACKLOG status convention, e.g. ``DONE (PI-5 Sprint 3, ...)``). The
+    RICE priority is read from the third table cell (``P1``..``P4``); rows whose
+    priority cell is absent or unparseable fall back to ``P3`` (SDD-054, the
+    least-urgent default, matching fleet.py's `_lookup_backlog_priority`).
     """
     path = backlog_path(sdd_root)
     if not path.is_file():
@@ -98,8 +113,15 @@ def load_backlog_entries(sdd_root: Path) -> list[BacklogEntry]:
         if item_id in seen:
             continue
         seen.add(item_id)
-        entries.append(BacklogEntry(id=item_id, done="DONE" in line))
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        priority = cells[2].upper() if len(cells) > 2 else ""
+        if priority not in PRIORITY_WEIGHT:
+            priority = "P3"
+        entries.append(
+            BacklogEntry(id=item_id, done="DONE" in line, priority=priority)
+        )
     return entries
+
 
 
 def load_order(sdd_root: Path) -> list[str]:
@@ -302,7 +324,7 @@ def move(
         dependency_check = "pass"
 
     write_order(sdd_root, new_order)
-    return append_audit_row(
+    audit_row = append_audit_row(
         sdd_root,
         actor=actor,
         item_id=item,
@@ -312,11 +334,143 @@ def move(
         dependency_check=dependency_check,
         force_override=forced,
     )
+    # SDD-054 (Option B): the drag now feeds backend re-optimization, not only
+    # the display overlay. Recompute and persist the effective-priority ranking
+    # under the SAME dependency-lock + audit governance as the overlay write.
+    reoptimize(sdd_root)
+    return audit_row
+
+
+# --------------------------------------------------------------------------- #
+# Backend re-optimization (SDD-054 / Option B)
+# --------------------------------------------------------------------------- #
+def _dependency_correct_order(
+    order: list[str],
+    depends_map: dict[str, list[str]],
+    done_map: dict[str, bool],
+) -> list[str]:
+    """Return a stable copy of *order* in which no item precedes an incomplete
+    dependency it declares.
+
+    The manual drag order is the primary signal; this pass only demotes an item
+    that would otherwise outrank an incomplete dependency, moving it to just
+    after that dependency (stable, minimal change). Dependency cycles are left
+    untouched (``move`` blocks forming them); the pass is capped to guarantee
+    termination.
+    """
+    result = list(order)
+    max_passes = len(result) + 1
+    for _ in range(max_passes):
+        changed = False
+        for item in list(result):
+            deps = depends_map.get(item, [])
+            for dep in deps:
+                if dep not in result or done_map.get(dep, False):
+                    continue
+                if result.index(item) < result.index(dep):
+                    result.remove(item)
+                    result.insert(result.index(dep) + 1, item)
+                    changed = True
+        if not changed:
+            break
+    return result
+
+
+def compute_effective_priority(
+    order: list[str],
+    entries: list["BacklogEntry"],
+    depends_map: dict[str, list[str]] | None = None,
+) -> list[dict]:
+    """Blend the manual drag *order* with RICE priority + dependency-legality
+    into a single backend-consumable ranking.
+
+    Returns one record per item, in effective-rank order:
+    ``{id, manual_rank, effective_rank, rice_priority, priority_weight,
+       priority_score}``. ``priority_score`` is a descending integer by
+    effective rank (top item highest) -- the single value a prioritization
+    consumer reads. BACKLOG.md RICE scores are NOT mutated (ADR-017 held).
+    """
+    depends_map = depends_map or {}
+    done_map = {e.id: e.done for e in entries}
+    priority_map = {e.id: e.priority for e in entries}
+    manual_rank = {item: i for i, item in enumerate(order)}
+
+    effective = _dependency_correct_order(order, depends_map, done_map)
+    n = len(effective)
+    ranking: list[dict] = []
+    for rank, item in enumerate(effective):
+        rice = priority_map.get(item, "P3")
+        ranking.append(
+            {
+                "id": item,
+                "manual_rank": manual_rank.get(item, rank),
+                "effective_rank": rank,
+                "rice_priority": rice,
+                "priority_weight": PRIORITY_WEIGHT.get(rice, 2),
+                "priority_score": n - rank,
+            }
+        )
+    return ranking
+
+
+def write_effective_priority(sdd_root: Path, ranking: list[dict]) -> Path:
+    """Persist the effective-priority ranking as the backend priority artifact."""
+    path = effective_priority_path(sdd_root)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "ranking": ranking,
+    }
+    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    return path
+
+
+def load_effective_priority(sdd_root: Path) -> list[dict]:
+    """Load the persisted effective-priority ranking, or [] if absent."""
+    path = effective_priority_path(sdd_root)
+    if not path.is_file():
+        return []
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return list(data.get("ranking", []))
+
+
+def reoptimize(sdd_root: Path) -> list[dict]:
+    """Recompute the effective-priority ranking from the current display order
+    and BACKLOG state, persist it, and return it.
+
+    This is the backend re-optimization step: it turns the manual drag order
+    (display overlay) into a dependency-corrected, RICE-annotated, scored
+    ranking that prioritization consumers read via ``effective_priority_order``.
+    """
+    order = load_order(sdd_root)
+    entries = load_backlog_entries(sdd_root)
+    depends_map = load_depends_map(sdd_root)
+    ranking = compute_effective_priority(order, entries, depends_map)
+    write_effective_priority(sdd_root, ranking)
+    return ranking
+
+
+def effective_priority_order(sdd_root: Path) -> list[str]:
+    """Return the backend prioritization order (list of feature IDs).
+
+    Prefers the persisted effective-priority ranking; falls back to a fresh
+    re-optimization when the artifact is absent. This is the function a
+    prioritization consumer calls instead of reading the raw display overlay.
+    """
+    ranking = load_effective_priority(sdd_root)
+    if not ranking:
+        ranking = compute_effective_priority(
+            load_order(sdd_root),
+            load_backlog_entries(sdd_root),
+            load_depends_map(sdd_root),
+        )
+    return [r["id"] for r in ranking]
 
 
 # --------------------------------------------------------------------------- #
 # CLI
 # --------------------------------------------------------------------------- #
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         prog="backlog_reorder",
@@ -348,6 +502,18 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--force",
         action="store_true",
         help="Override a dependency-lock block (requires a non-empty --reason).",
+    )
+
+    ro = sub.add_parser(
+        "reoptimize",
+        help="Recompute + persist the backend effective-priority ranking "
+             "(SDD-054) from the current display order.",
+    )
+    ro.add_argument(
+        "--format",
+        choices=("text", "json"),
+        default="text",
+        help="Output format for the recomputed ranking. Default: text.",
     )
     return parser.parse_args(argv)
 
@@ -387,6 +553,19 @@ def main(argv: list[str] | None = None) -> int:
             f"{row['to_rank']} (dependency_check={row['dependency_check']}, "
             f"force_override={row['force_override']})."
         )
+        return 0
+
+    if args.command == "reoptimize":
+        ranking = reoptimize(args.sdd_root)
+        if args.format == "json":
+            print(json.dumps({"ranking": ranking}, indent=2))
+        else:
+            print(f"Re-optimized backend priority ({len(ranking)} item(s)):")
+            for r in ranking:
+                print(
+                    f"  #{r['effective_rank']} {r['id']} "
+                    f"[{r['rice_priority']}] score={r['priority_score']}"
+                )
         return 0
 
     print(f"ERROR: unknown command '{args.command}'", file=sys.stderr)

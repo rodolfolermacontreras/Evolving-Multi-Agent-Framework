@@ -179,3 +179,70 @@ class UsageErrors(BacklogReorderBase):
     def test_no_subcommand_exits_two(self):
         code, _, _ = self._run([])
         self.assertEqual(code, 2)
+
+
+# SDD-054 (Option B) -- reorder -> backend re-optimization ------------------ #
+
+
+class EffectivePriority(BacklogReorderBase):
+    def test_backlog_entries_parse_rice_priority(self):
+        entries = backlog_reorder.load_backlog_entries(self.root)
+        by_id = {e.id: e for e in entries}
+        self.assertEqual(by_id["SDD-100"].priority, "P1")
+        self.assertTrue(by_id["SDD-100"].done)
+        self.assertFalse(by_id["SDD-101"].done)
+
+    def test_compute_blends_manual_and_rice_into_scored_ranking(self):
+        entries = backlog_reorder.load_backlog_entries(self.root)
+        order = ["SDD-102", "SDD-100", "SDD-101"]
+        ranking = backlog_reorder.compute_effective_priority(order, entries, {})
+        # Scored, descending priority_score; RICE annotated.
+        self.assertEqual([r["id"] for r in ranking], order)
+        self.assertEqual(ranking[0]["priority_score"], 3)
+        self.assertEqual(ranking[-1]["priority_score"], 1)
+        self.assertEqual(ranking[0]["rice_priority"], "P1")
+        self.assertEqual(ranking[0]["manual_rank"], 0)
+
+    def test_dependency_correction_demotes_below_incomplete_dep(self):
+        entries = backlog_reorder.load_backlog_entries(self.root)
+        depends_map = backlog_reorder.load_depends_map(self.root)
+        # Manual order illegally puts SDD-103 above its incomplete dep SDD-101.
+        order = ["SDD-103", "SDD-101", "SDD-102"]
+        ranking = backlog_reorder.compute_effective_priority(order, entries, depends_map)
+        eff = [r["id"] for r in ranking]
+        self.assertLess(eff.index("SDD-101"), eff.index("SDD-103"))
+
+    def test_move_writes_effective_priority_artifact(self):
+        self._run(["move", "--item", "SDD-102", "--to-rank", "0"])
+        path = backlog_reorder.effective_priority_path(self.root)
+        self.assertTrue(path.is_file())
+        ranking = backlog_reorder.load_effective_priority(self.root)
+        self.assertEqual(ranking[0]["id"], "SDD-102")
+        self.assertEqual(ranking[0]["effective_rank"], 0)
+
+    def test_move_still_appends_exactly_one_audit_row(self):
+        # Option B must not double-log: reoptimize writes the artifact, not audit.
+        self._run(["move", "--item", "SDD-102", "--to-rank", "0"])
+        self.assertEqual(len(self._audit_rows()), 1)
+
+    def test_effective_priority_order_reads_persisted_ranking(self):
+        self._run(["move", "--item", "SDD-102", "--to-rank", "0"])
+        self.assertEqual(
+            backlog_reorder.effective_priority_order(self.root)[0], "SDD-102"
+        )
+
+    def test_reoptimize_subcommand_exits_zero_and_writes_artifact(self):
+        code, out, _ = self._run(["reoptimize"])
+        self.assertEqual(code, 0)
+        self.assertIn("Re-optimized", out)
+        self.assertTrue(backlog_reorder.effective_priority_path(self.root).is_file())
+
+    def test_backlog_md_not_mutated_by_reoptimization(self):
+        before = backlog_reorder.backlog_path(self.root).read_text(encoding="utf-8")
+        self._run(["move", "--item", "SDD-102", "--to-rank", "0"])
+        after = backlog_reorder.backlog_path(self.root).read_text(encoding="utf-8")
+        self.assertEqual(before, after)  # ADR-017: RICE source untouched
+
+
+if __name__ == "__main__":
+    unittest.main()

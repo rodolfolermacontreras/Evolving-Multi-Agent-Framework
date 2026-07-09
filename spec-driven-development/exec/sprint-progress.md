@@ -1547,7 +1547,7 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - Owner: Sprint Executive Manager (governance); Architect no-ADR confirmation (documentation-consistency per ADR-024)
 - Ledger: dispatch row 30 (`T-059-PI9-OPEN`, pi=PI-9, sprint-executive-manager, success) -- first PI-9 row, satisfies doctor B-1 for PI-9
 - Files changed (explicit-path scope):
-  - `constitution/roadmap.md` -- PI-8 header `(current)` -> `(closed 2026-07-09)` + full 4-sprint close checklist (SDD-050/051/052/053) + "PI-8 close decision: DONE" paragraph + carryover note; new `## PI-9: Experience Polish (current)` section; frontmatter `last_amended` 2026-07-08 -> 2026-07-09 (NO version bump -- documentation-consistency, no new ADR, ADR-024 precedent). Close commit `F59SHA`.
+  - `constitution/roadmap.md` -- PI-8 header `(current)` -> `(closed 2026-07-09)` + full 4-sprint close checklist (SDD-050/051/052/053) + "PI-8 close decision: DONE" paragraph + carryover note; new `## PI-9: Experience Polish (current)` section; frontmatter `last_amended` 2026-07-08 -> 2026-07-09 (NO version bump -- documentation-consistency, no new ADR, ADR-024 precedent). Close commit `6d981a5`.
   - `sprints/PI-8/CURRENT_PI.md` -- frontmatter `status: active` -> `done` (schema enum has no `closed`; PI-7 precedent uses `done`); Status line -> CLOSED 2026-07-09 (DONE); `updated` 2026-07-09
   - `sprints/PI-9/CURRENT_PI.md` -- NEW, `status: active`, PI-8 shape (theme, goal, 2 objectives SDD-049 + SDD-041 Option B, close criteria)
   - `backlog/BACKLOG.md` -- SDD-053 row flipped OPEN -> **DONE** (the missed Sprint 21 flip, owner-approved 2026-07-09)

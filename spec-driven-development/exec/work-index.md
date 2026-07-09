@@ -51,6 +51,7 @@ Current PI: **PI-9 (Experience Polish)**
 | 2026-07-08 | decision-request-format | `specs/2026-07-08-decision-request-format/` |
 | 2026-07-08 | doc-freshness-staledoc-guard | `specs/2026-07-08-doc-freshness-staledoc-guard/` |
 | 2026-07-08 | roadmap-repair-status-backfill | `specs/2026-07-08-roadmap-repair-status-backfill/` |
+| 2026-07-09 | file-overlap-detector | `specs/2026-07-09-file-overlap-detector/` |
 
 ## 2. IN-FLIGHT -- Currently being worked on (coordinate before touching)
 

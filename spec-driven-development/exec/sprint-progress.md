@@ -1560,3 +1560,19 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - History preserved: YES -- PI-8 closed forward-looking, PI-9 added; no historical specs/sprints/retros/ADRs/frozen prompts rewritten.
 - No-ADR call: Architect-confirmed documentation-consistency (applies existing ADR-024 closed-PI convention; no new rule, no version bump). Owner pre-push approval on the `constitution/roadmap.md` edit: PENDING (consolidated at F-62 close).
 - Next: F-60 (SDD-049 file-overlap detector) CLARIFY -> ... -> IMPLEMENT + QA.
+
+### F-60 -- SDD-049 file-overlap conflict detector -- DONE (local prep; push gated)
+
+- Date: 2026-07-09
+- Owner: Principal Architect (design F-60 CLARIFY/SPEC); Principal Software Developer (TDD implement + QA)
+- Ledger: dispatch row 31 (`T-049-IMPL`, pi=PI-9, principal-software-developer, success)
+- Spec dir created: `specs/2026-07-09-file-overlap-detector/` (clarify.md, spec.md, plan.md, tasks.md, validation.md)
+- CLARIFY answers: Q-C block by default + `--allow-overlap` override (owner default "jump to these two"); scope source = `tasks.md` File Scope column via shared `parse_file_scope`; Article X untouched; Level-1 (no ADR, no version bump, Architect-confirmed).
+- Files changed (explicit-path scope):
+  - `cli/fleet.py` -- new `parse_file_scope`, `detect_file_overlaps`, `format_overlap_report`; pre-dispatch guard wired into `cmd_dispatch` (runs after eligibility, before any `record_dispatch`/brief write); `--allow-overlap` store-true flag added to the `dispatch` subparser. Leaf CLI -- no Article X locked function touched.
+  - `cli/test_fleet.py` -- 12 new tests (`TestFileScopeParsing` 3, `TestDetectFileOverlaps` 5, `TestDispatchOverlapGate` 4) + `OVERLAP_TASKS_MD` fixture. TDD: written failing first, then implemented to green.
+- Behavior: an overlapping dispatch batch blocks with a `FleetError` naming the conflicting task pairs + shared files, writing ZERO ledger rows (pre-dispatch); `--allow-overlap` downgrades to a stderr WARNING and proceeds. Disjoint / single-task dispatch unchanged.
+- QA (DA-Evidence): `test_fleet.py` 43 passed (was 31; +12); schema_lint clean (new spec dir validated); `TestS1FootprintLockGuard` PASS. Full-suite + doctor confirmed at F-62 close.
+- Validation: R-1..R-7 REQUIRED all checked with test evidence; M-1/M-2/M-3 checked at close.
+- Article X lock: HELD. Stdlib-only (Article V) -- no new import. Level-1: no `constitution/**` edit, no ADR, no version bump.
+- Next: F-61 (SDD-041 Option B -- reorder -> backend re-optimization). PM assigns Option B a fresh SDD-ID at CLARIFY.

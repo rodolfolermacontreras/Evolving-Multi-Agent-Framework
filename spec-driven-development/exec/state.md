@@ -55,6 +55,7 @@ PI progress: 0/1 commitments complete (0%)
 | decision-request-format | DONE | done | validation required-complete |
 | doc-freshness-staledoc-guard | DONE | done | validation required-complete |
 | roadmap-repair-status-backfill | DONE | done | validation required-complete |
+| file-overlap-detector | DONE | done | validation required-complete |
 
 ## Sprint Plan
 
@@ -98,6 +99,7 @@ PI progress: 0/1 commitments complete (0%)
 
 | When | Feature | Task | Agent |
 |------|---------|------|-------|
+| 2026-07-09T14:31:58Z | specs/2026-07-09-file-overlap-detector | SDD-049 file-overlap detector (design+TDD impl+QA) | principal-software-developer |
 | 2026-07-09T13:59:03Z | sprints/PI-9 | PI-8 close + PI-9 open (governance) | sprint-executive-manager |
 | 2026-07-08T22:14:11Z | spec-driven-development/specs/2026-07-08-decision-request-format | SDD-053 IMPLEMENT+QA: skill DECISION-REQUEST FORMAT + 2 EM charter bindings + test_sdd053.py (596 passed) | principal-software-developer |
 | 2026-07-08T22:13:58Z | spec-driven-development/specs/2026-07-08-decision-request-format | SDD-053 CLARIFY->SPEC->PLAN->TASKS (decision-request format; validation R-1..R-7) | principal-architect |
@@ -107,7 +109,6 @@ PI progress: 0/1 commitments complete (0%)
 | 2026-07-08T16:40:10Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-07-08-doc-freshness-staledoc-guard | SDD-051 IMPLEMENT+QA: staledoc guard + doctor wiring + refresh 4 docs | principal-software-developer |
 | 2026-07-08T16:20:05Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-07-08-doc-freshness-staledoc-guard | SDD-051 CLARIFY->SPEC->PLAN->TASKS (per-item SDD-051A/051B validation) | principal-architect |
 | 2026-07-08T15:47:35Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-07-08-dashboard-truth | Widen `done_check.py` validation reader to glob `validation*.md`; expose `required_checked`/`required_unchecked`/`validation_complete`/`validation_files` for shared import | principal-software-developer |
-| 2026-06-27T02:10:33Z | C:\Training\Projects\Evolving-Multi-Agent-Framework\spec-driven-development\specs\2026-06-26-sdd-048-maintainability | Extract `state_builder_markdown.py`: decompose `render_markdown` (762 lines) into per-section helpers (header/lifecycle/features/backlog/dispatches/decisions/footer) via `string.Template` (stdlib). Re-import. | principal-software-developer |
 
 ## Blockers
 

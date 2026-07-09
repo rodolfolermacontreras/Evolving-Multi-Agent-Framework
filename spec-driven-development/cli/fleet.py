@@ -159,6 +159,65 @@ def is_eligible(task: dict) -> bool:
     return task.get("fleet_eligible", "").strip().lower() != "no"
 
 
+# File-overlap conflict detector (SDD-049) ---------------------------------- #
+
+# File Scope cell values that name no real file (placeholders / "none").
+_NON_FILE_SCOPE_TOKENS = frozenset(
+    {"(see tasks.md)", "see tasks.md", "none", "n/a", "na", "-", "--", "tbd"}
+)
+
+
+def parse_file_scope(file_scope: str) -> set[str]:
+    """Parse a tasks.md ``File Scope`` cell into a normalized set of file paths.
+
+    Mirrors ``render_brief`` parsing: split on ``,`` or ``;``, strip whitespace
+    and surrounding backticks, drop empties and placeholder/"none" tokens. The
+    result is the task's declared IN-scope file set used for overlap detection.
+    """
+    items: set[str] = set()
+    for raw in re.split(r"[,;]", file_scope or ""):
+        item = raw.strip().strip("`").strip()
+        if not item:
+            continue
+        if item.lower() in _NON_FILE_SCOPE_TOKENS:
+            continue
+        items.add(item)
+    return items
+
+
+def detect_file_overlaps(batch: list[tuple[str, str]]) -> list[dict]:
+    """Detect pairwise IN-scope file overlaps across a dispatch *batch*.
+
+    *batch* is a list of ``(task_id, file_scope_string)`` pairs. Returns one
+    conflict dict per overlapping unordered task pair, in stable order:
+    ``{"task_a": str, "task_b": str, "shared": [sorted file paths]}``.
+    Tasks with empty or placeholder scopes never conflict (the tool cannot
+    know their real footprint).
+    """
+    scopes = [(tid, parse_file_scope(scope)) for tid, scope in batch]
+    conflicts: list[dict] = []
+    for i in range(len(scopes)):
+        tid_a, set_a = scopes[i]
+        for j in range(i + 1, len(scopes)):
+            tid_b, set_b = scopes[j]
+            shared = set_a & set_b
+            if shared:
+                conflicts.append(
+                    {"task_a": tid_a, "task_b": tid_b, "shared": sorted(shared)}
+                )
+    return conflicts
+
+
+def format_overlap_report(conflicts: list[dict]) -> str:
+    """Render *conflicts* (from ``detect_file_overlaps``) as an indented list."""
+    return "\n".join(
+        f"  - {c['task_a']} and {c['task_b']} both declare: "
+        f"{', '.join(c['shared'])}"
+        for c in conflicts
+    )
+
+
+
 # Brief renderer ------------------------------------------------------------ #
 
 
@@ -249,6 +308,30 @@ def cmd_dispatch(args: argparse.Namespace) -> int:
         if not is_eligible(task):
             raise FleetError(f"Task {tid} is not eligible for fleet dispatch.")
         resolved.append((tid, task))
+
+    # SDD-049: pre-dispatch file-overlap conflict detector. Runs BEFORE any
+    # brief or ledger row is written, so a blocked batch leaves no side effects.
+    conflicts = detect_file_overlaps(
+        [(tid, task.get("file_scope", "")) for tid, task in resolved]
+    )
+    if conflicts:
+        report = format_overlap_report(conflicts)
+        if getattr(args, "allow_overlap", False):
+            print(
+                "WARNING: file-overlap conflict(s) detected in this dispatch "
+                "batch; proceeding because --allow-overlap was set:\n"
+                f"{report}",
+                file=sys.stderr,
+            )
+        else:
+            raise FleetError(
+                "file-overlap conflict(s) detected in this dispatch batch -- "
+                "two or more tasks declare the same IN-scope file. Dispatch "
+                "blocked before any brief or ledger row was written:\n"
+                f"{report}\n"
+                "Split the overlapping file(s) into serial tasks, or pass "
+                "--allow-overlap to dispatch anyway (deliberate override)."
+            )
 
     db_path = Path(args.db) if args.db else DEFAULT_DB
     output_dir = Path(args.output_dir) if args.output_dir else None
@@ -668,6 +751,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     p_disp.add_argument("--notes", default=None, help="Optional notes for dispatch rows.")
     p_disp.add_argument("--db", default=None, help="Path to fleet.db.")
     p_disp.add_argument("--roster", default=None, help="Path to agents.json.")
+    p_disp.add_argument(
+        "--allow-overlap",
+        action="store_true",
+        help="Dispatch even if tasks in the batch declare the same IN-scope "
+             "file (deliberate override; default blocks on overlap, SDD-049).",
+    )
 
     # mark
     p_mark = sub.add_parser("mark", help="Update outcome on a dispatch.")

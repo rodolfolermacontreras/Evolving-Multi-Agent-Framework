@@ -497,6 +497,126 @@ class TestGrandfather(unittest.TestCase):
             self.assertFalse(fleet._is_grandfathered(missing))
 
 
+# SDD-049 -- pre-dispatch file-overlap conflict detector ------------------- #
+
+OVERLAP_TASKS_MD = """\
+| Task ID | Tag | Description | File Scope | Acceptance Test | Effort | Deps | Mode | Fleet Dispatch Eligible | Status |
+|---------|-----|-------------|------------|-----------------|--------|------|------|-------------------------|--------|
+| T-A | [S] | Edit shared and alpha | `cli/shared.py`, `cli/alpha.py` | Proves A | S | None | AFK | Yes | pending |
+| T-B | [S] | Edit shared and beta | `cli/shared.py`; `cli/beta.py` | Proves B | S | None | AFK | Yes | pending |
+| T-C | [S] | Edit only gamma | `cli/gamma.py` | Proves C | S | None | AFK | Yes | pending |
+"""
+
+
+class TestFileScopeParsing(unittest.TestCase):
+    """Unit tests for parse_file_scope (SDD-049)."""
+
+    def test_splits_on_comma_and_semicolon(self):
+        self.assertEqual(
+            fleet.parse_file_scope("`cli/a.py`, `cli/b.py`; cli/c.py"),
+            {"cli/a.py", "cli/b.py", "cli/c.py"},
+        )
+
+    def test_strips_backticks_and_whitespace(self):
+        self.assertEqual(fleet.parse_file_scope("  `cli/x.py`  "), {"cli/x.py"})
+
+    def test_placeholder_and_none_tokens_drop_to_empty(self):
+        for token in ("(see tasks.md)", "none", "N/A", "--", "  ", ""):
+            self.assertEqual(
+                fleet.parse_file_scope(token), set(), f"token={token!r}"
+            )
+
+
+class TestDetectFileOverlaps(unittest.TestCase):
+    """Unit tests for detect_file_overlaps (SDD-049)."""
+
+    def test_no_overlap_returns_empty(self):
+        batch = [("T-1", "`cli/a.py`"), ("T-2", "`cli/b.py`")]
+        self.assertEqual(fleet.detect_file_overlaps(batch), [])
+
+    def test_single_task_never_conflicts(self):
+        self.assertEqual(fleet.detect_file_overlaps([("T-1", "`cli/a.py`")]), [])
+
+    def test_detects_shared_file(self):
+        batch = [("T-A", "`cli/shared.py`, `cli/alpha.py`"),
+                 ("T-B", "`cli/shared.py`; `cli/beta.py`")]
+        conflicts = fleet.detect_file_overlaps(batch)
+        self.assertEqual(len(conflicts), 1)
+        self.assertEqual(conflicts[0]["task_a"], "T-A")
+        self.assertEqual(conflicts[0]["task_b"], "T-B")
+        self.assertEqual(conflicts[0]["shared"], ["cli/shared.py"])
+
+    def test_empty_scopes_do_not_conflict(self):
+        batch = [("T-1", "none"), ("T-2", "(see tasks.md)")]
+        self.assertEqual(fleet.detect_file_overlaps(batch), [])
+
+    def test_three_way_reports_each_pair(self):
+        batch = [("T-1", "`cli/x.py`"), ("T-2", "`cli/x.py`"),
+                 ("T-3", "`cli/x.py`")]
+        conflicts = fleet.detect_file_overlaps(batch)
+        self.assertEqual(len(conflicts), 3)  # (1,2),(1,3),(2,3)
+
+
+class TestDispatchOverlapGate(unittest.TestCase):
+    """End-to-end: cmd_dispatch blocks/warns on batch file overlap (SDD-049)."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
+        self.tmp = Path(self._tmp.name)
+        self.db, self.roster, self.feature = make_env(self.tmp, OVERLAP_TASKS_MD)
+
+    def tearDown(self):
+        gc.collect()
+        self._tmp.cleanup()
+
+    def _args(self, tasks, extra=None):
+        base = [
+            "dispatch",
+            "--feature", str(self.feature),
+            "--tasks", tasks,
+            "--agent", "developer-general",
+            "--pi", "PI-9",
+            "--db", str(self.db),
+            "--roster", str(self.roster),
+        ]
+        return base + (extra or [])
+
+    def _row_count(self):
+        with sqlite3.connect(self.db) as conn:
+            return conn.execute("SELECT COUNT(*) FROM dispatches").fetchone()[0]
+
+    def test_overlapping_batch_is_blocked_with_no_side_effects(self):
+        buf = StringIO()
+        with redirect_stderr(buf):
+            rc = fleet.main(self._args("T-A,T-B"))
+        self.assertNotEqual(rc, 0)
+        err = buf.getvalue().lower()
+        self.assertIn("overlap", err)
+        self.assertIn("cli/shared.py", buf.getvalue())
+        # Blocked pre-dispatch: NO ledger rows written.
+        self.assertEqual(self._row_count(), 0)
+
+    def test_non_overlapping_batch_dispatches(self):
+        with redirect_stdout(StringIO()):
+            rc = fleet.main(self._args("T-A,T-C"))
+        self.assertEqual(rc, 0)
+        self.assertEqual(self._row_count(), 2)
+
+    def test_allow_overlap_flag_warns_and_proceeds(self):
+        errbuf = StringIO()
+        with redirect_stdout(StringIO()), redirect_stderr(errbuf):
+            rc = fleet.main(self._args("T-A,T-B", ["--allow-overlap"]))
+        self.assertEqual(rc, 0)
+        self.assertIn("warning", errbuf.getvalue().lower())
+        self.assertEqual(self._row_count(), 2)
+
+    def test_single_task_dispatch_unaffected(self):
+        with redirect_stdout(StringIO()):
+            rc = fleet.main(self._args("T-A"))
+        self.assertEqual(rc, 0)
+        self.assertEqual(self._row_count(), 1)
+
+
 # --------------------------------------------------------------------------- #
 # SDD-048 C-3 -- config-sourced Article XI cutover (replaces hardcoded date)
 # --------------------------------------------------------------------------- #

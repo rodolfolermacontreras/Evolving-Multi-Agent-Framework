@@ -31,7 +31,7 @@ Read [`RULES.md`](RULES.md) for the binding rules.
 
 | Field | Value |
 |-------|-------|
-| **Current PI** | PI-8 (Truth in the Window) -- 7 PIs closed (PI-1..PI-7), PI-8 active |
+| **Current PI** | PI-9 (Experience Polish) -- 8 PIs closed (PI-1..PI-8), PI-9 active |
 | **Current sprint** | See [`exec/sprint-progress.md`](../exec/sprint-progress.md) (read bottom-up) |
 | **Cadence** | Symbolic; ~1 day per sprint, ~5 sprints per PI (ADR-0003) |
 | **Tests passing** | See the live count in [`exec/state.md`](../exec/state.md) and the ledger (schema_lint clean) |

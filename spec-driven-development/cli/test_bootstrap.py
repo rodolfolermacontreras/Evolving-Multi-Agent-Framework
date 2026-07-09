@@ -680,11 +680,12 @@ class TestCurrentPiDispatchRowsCheck(unittest.TestCase):
 
 class TestCurrentPiName(unittest.TestCase):
     def test_returns_active_pi_on_current_tree(self):
-        # PI-8 opened 2026-07-08 as the first act of Sprint 18 (its
-        # sprints/PI-8/CURRENT_PI.md is marked active). The resolver must return
-        # the highest-numbered active PI marker on the real tree.
+        # PI-9 opened 2026-07-09 as the first act of Sprint 22 (its
+        # sprints/PI-9/CURRENT_PI.md is marked active; PI-8 closed the same day).
+        # The resolver must return the highest-numbered active PI marker on the
+        # real tree.
         self.assertEqual(
-            bootstrap.current_pi_name(bootstrap.framework_root()), "PI-8"
+            bootstrap.current_pi_name(bootstrap.framework_root()), "PI-9"
         )
 
     def test_picks_highest_numbered_active_pi(self):

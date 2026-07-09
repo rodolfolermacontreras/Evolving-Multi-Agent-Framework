@@ -1531,3 +1531,32 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - Notes: Sprint 21 fixes the last "truth" gap -- how agents ask the owner to decide. Every human-facing agent now surfaces an owner decision as a short status plus a clearly-marked block at the very end, so the ask, options, and recommendation are readable in seconds. The sprint dogfooded its own rule (this close surfaces the PI-8-close decision in the new format).
 - Next: PI-8 close decision (owner) -- and/or a future sprint for SDD-049 / SDD-041 Option B
 - Reported up to project EM: PENDING (Sprint EM reports up at close)
+
+---
+
+## Sprint 22 -- PI-9 / Experience Polish (Close PI-8, open PI-9, ship the experience pair)
+
+- Sprint kickoff: [../feature-prompts/SPRINT-22-KICKOFF.prompt.md](../feature-prompts/SPRINT-22-KICKOFF.prompt.md)
+- Prerequisite: Sprint 21 CLOSED `07a2296` (push head `37fbdd4`); HEAD `98faa05` (kickoff commit); PI-8 ACTIVE; tests 596/2; schema+origin+staledoc lint clean; doctor green; Article X lock PASS. Start check found the SDD-053 BACKLOG row still OPEN (Sprint 21 close block + `07a2296` + green DONE-completeness all show it DONE -- a missed flip); owner approved proceeding (Option 1, 2026-07-09), folding the one-line flip into F-59.
+- Anchors: SDD-049 (file-overlap detector) + SDD-041 Option B (reorder -> backend re-optimization). Sequence: F-59 (PI-8 close + PI-9 open) -> F-60 (SDD-049) -> F-61 (SDD-041 Option B) -> F-62 (close).
+- Owner: Sprint Executive Manager (lead, reports up to project EM); PM + Architect own design; SW Dev + workers own implementation and close.
+
+### F-59 -- PI-8 close + PI-9 open -- DONE (local prep; push gated)
+
+- Date: 2026-07-09
+- Owner: Sprint Executive Manager (governance); Architect no-ADR confirmation (documentation-consistency per ADR-024)
+- Ledger: dispatch row 30 (`T-059-PI9-OPEN`, pi=PI-9, sprint-executive-manager, success) -- first PI-9 row, satisfies doctor B-1 for PI-9
+- Files changed (explicit-path scope):
+  - `constitution/roadmap.md` -- PI-8 header `(current)` -> `(closed 2026-07-09)` + full 4-sprint close checklist (SDD-050/051/052/053) + "PI-8 close decision: DONE" paragraph + carryover note; new `## PI-9: Experience Polish (current)` section; frontmatter `last_amended` 2026-07-08 -> 2026-07-09 (NO version bump -- documentation-consistency, no new ADR, ADR-024 precedent). Close commit `F59SHA`.
+  - `sprints/PI-8/CURRENT_PI.md` -- frontmatter `status: active` -> `done` (schema enum has no `closed`; PI-7 precedent uses `done`); Status line -> CLOSED 2026-07-09 (DONE); `updated` 2026-07-09
+  - `sprints/PI-9/CURRENT_PI.md` -- NEW, `status: active`, PI-8 shape (theme, goal, 2 objectives SDD-049 + SDD-041 Option B, close criteria)
+  - `backlog/BACKLOG.md` -- SDD-053 row flipped OPEN -> **DONE** (the missed Sprint 21 flip, owner-approved 2026-07-09)
+  - `cli/test_bootstrap.py` -- `test_returns_active_pi_on_current_tree` expected PI-8 -> PI-9 (tracks the live current-PI transition)
+  - `docs/HIGH_LEVEL_DEV_TRACKER.md` + `docs/ONBOARDING_KICK_OFF.md` -- current-PI pointer PI-8 -> PI-9 (SDD-051 staledoc guard requirement on PI transition)
+  - regenerated `exec/state.md`, `exec/state.html`, `exec/work-index.md`
+- Marker check: roadmap has exactly one `(current)` header (PI-9); PI-1..PI-8 all `(closed ...)`; dashboard "Current PI: PI-9".
+- QA (DA-Evidence, all GREEN): `doctor` 9/9 PASS (tests 596 pass / 2 skip; current-PI dispatch rows PI-9: 1; schema/origin/staledoc/governance/ledger/tdd-gate/DONE-completeness all ok); `TestS1FootprintLockGuard` PASS (Article X HELD -- no locked render/load function touched, all edits are docs/frontmatter/test/regenerated leaf artifacts).
+- Article X lock: HELD.
+- History preserved: YES -- PI-8 closed forward-looking, PI-9 added; no historical specs/sprints/retros/ADRs/frozen prompts rewritten.
+- No-ADR call: Architect-confirmed documentation-consistency (applies existing ADR-024 closed-PI convention; no new rule, no version bump). Owner pre-push approval on the `constitution/roadmap.md` edit: PENDING (consolidated at F-62 close).
+- Next: F-60 (SDD-049 file-overlap detector) CLARIFY -> ... -> IMPLEMENT + QA.

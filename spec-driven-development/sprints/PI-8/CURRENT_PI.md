@@ -1,20 +1,27 @@
 ---
 id: SDD-PI-8-CURRENT_PI-sprint
 type: sprint
-status: active
+status: done
 owner: principal-product-manager
-updated: 2026-07-08
+updated: 2026-07-09
 sprint: PI-8
 ---
 
 # PI-8: Truth in the Window
 
-- Status: **ACTIVE — opened 2026-07-08 at the start of Sprint 18 (PI-8 Sprint 1;
-  owner-approved via Executive Manager: "yes, this is critical").** The Sprint EM
-  flipped this marker from `draft` to `active` as the first act of Sprint 18 and
-  logged the first PI-8 ledger dispatch (row 22, pi=PI-8) so doctor's current-PI
-  dispatch-rows check (B-1) is satisfied. Follows PI-7 CLOSED 2026-07-07 /
-  DONE-WITH-CARRYOVER (Sprint 17 close at `7088f35`).
+- Status: **CLOSED 2026-07-09 (DONE) — closed at the start of Sprint 22 (PI-9
+  Sprint 1), owner-approved via Executive Manager ("jump to these two").** All
+  four truth anchors shipped across Sprints 18-21 (SDD-050 dashboard truth,
+  SDD-051 doc freshness, SDD-052 roadmap repair, SDD-053 comms truth); the suite
+  grew 558 -> 596 (2 skipped) with the Article X render lock HELD. SDD-049 and
+  SDD-041 Option B carry forward as PI-9 Sprint 22 anchors. See
+  `constitution/roadmap.md` PI-8 section for the close decision.
+- Prior status: **ACTIVE — opened 2026-07-08 at the start of Sprint 18 (PI-8
+  Sprint 1; owner-approved via Executive Manager: "yes, this is critical").** The
+  Sprint EM flipped this marker from `draft` to `active` as the first act of
+  Sprint 18 and logged the first PI-8 ledger dispatch (row 22, pi=PI-8) so
+  doctor's current-PI dispatch-rows check (B-1) is satisfied. Follows PI-7 CLOSED
+  2026-07-07 / DONE-WITH-CARRYOVER (Sprint 17 close at `7088f35`).
 
 - Theme: Make the human-facing surfaces (dashboard, onboarding docs, roadmap) as
   trustworthy as the engine. PI-7 hardened the engine — the ledger is real, the

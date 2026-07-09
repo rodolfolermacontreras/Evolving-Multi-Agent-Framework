@@ -1,7 +1,7 @@
 ---
 version: '1.2.0'
 ratified: 2026-05-12
-last_amended: 2026-07-08
+last_amended: 2026-07-09
 ---
 
 # Roadmap
@@ -146,13 +146,32 @@ lifecycle end-to-end on a real feature.
 
 ---
 
-## PI-8: Truth in the Window (current)
+## PI-8: Truth in the Window (closed 2026-07-09)
 
-Opened 2026-07-08. ACTIVE. Closes the gap between what the framework's own records claim and
-what its live dashboard shows -- the roadmap, spec-dir statuses, and PI markers must be true
-before they are read.
+Opened 2026-07-08. Closed the gap between what the framework's own records claim and what its
+live dashboard shows -- the roadmap, spec-dir statuses, and PI markers are now true before they
+are read.
 
-- [ ] Sprint 20: Roadmap repair + status backfill -- SDD-052 (PI-6 roadmap backfill, PI-7 `(current,` header cleanup, PI-8 section + closed-PI convention; 5 stale PI-7 spec dirs flipped to done; PI-7 4-feature checklist backfill; ADR-count verify). ADR-024 (Closed-PI Roadmap Semantics) Accepted.
+- [x] Sprint 18: Dashboard truth -- SDD-050 (fix stale feature-stage + closed-PI percentage detectors in `cli/state_builder_data.py`; `detect_stage()` globs `validation*.md`, closed PIs render 100%, `(current, closed ...)` no longer reads current). Article X lock HELD; tests 558 -> 576.
+- [x] Sprint 19: Doc-freshness sweep + stale-doc guard -- SDD-051 (refresh the four session-start docs to PI-8 + live pointers; add `cli/staledoc_lint.py` wired into `doctor`). Deliberate-red proof 9 -> 0; tests 576 -> 590.
+- [x] Sprint 20: Roadmap repair + status backfill -- SDD-052 (PI-6 roadmap backfill, PI-7 `(current,` header cleanup, PI-8 section + closed-PI convention; 5 stale PI-7 spec dirs flipped to done; PI-7 4-feature checklist backfill; ADR-count verify). ADR-024 (Closed-PI Roadmap Semantics) Accepted; tests 590 -> 590.
+- [x] Sprint 21: Decision-request format for human-facing agents -- SDD-053 (mandatory DECISION-REQUEST FORMAT in the `em-communication-discipline` skill + both EM charters; stdlib-only structural test). Level-1 (no ADR); tests 590 -> 596.
+- [ ] SDD-049 (true file-overlap detector, P3) moves forward as a PI-9 Sprint 22 anchor.
+- [ ] SDD-041 Option B (reorder -> backend re-optimization) moves forward as a PI-9 Sprint 22 anchor.
+- [ ] PI-6/PI-7 carryovers remain open and carried forward: SDD-038 (color tokens), SDD-034 (content-shingle dedup), PI-4 housekeeping (domain-skill annotations + GH Actions Node.js bump), SDD-042 (pill-nav follow-up), SDD-039 (incidental wording cleanup), Current-Sprint widget repoint. SDD-035 (Azure decommission) remains out-of-band.
+
+**PI-8 close decision: DONE.** All four truth anchors shipped across four sprints (SDD-050, SDD-051, SDD-052, SDD-053; ADR-024 Accepted); the suite grew 558 -> 596 (2 skipped) with the Article X render lock HELD across the entire PI. The window onto the engine now tells the truth: closed features render DONE, closed PIs render 100%, the session-start docs are fresh and guarded, the roadmap is self-consistent, and human-facing decisions use a structured format. Ratified by owner 2026-07-09 via Executive Manager (owner direction: "jump to these two" -- approving the PI-8 close, the PI-9 open, and the SDD-049 + SDD-041 Option B pair). Close commit `F59SHA`. SDD-049 and SDD-041 Option B move forward as PI-9 Sprint 22 anchors; the remaining carry-forward items above are non-blocking cosmetics/enhancements filed honestly, not loosened commitments.
+
+---
+
+## PI-9: Experience Polish (current)
+
+Opened 2026-07-09. ACTIVE. Turns two long-standing quality-of-life gaps into shipped features:
+the fleet gets an automated pre-dispatch file-overlap check (replacing the manual per-worker
+file-scope discipline), and a backlog reorder re-optimizes the priority order on the backend
+instead of only persisting the visual arrangement.
+
+- [ ] Sprint 22: Close PI-8, open PI-9, and ship the experience pair -- SDD-049 (true pre-dispatch file-overlap conflict detector in `cli/fleet.py`) + SDD-041 Option B (backlog reorder -> backend re-optimization on the safeguarded `move()`/audit path).
 
 ---
 

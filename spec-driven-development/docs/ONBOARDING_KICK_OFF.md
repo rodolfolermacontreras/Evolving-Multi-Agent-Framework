@@ -460,14 +460,15 @@ Each lives in its own directory under `specs/YYYY-MM-DD-feature-name/` with co-l
 | Archetypes | 5 starter constitutions |
 | Lessons captured | 10 (4 from PI-1, 6 from PI-2) |
 
-### Current PI: PI-8 (Truth in the Window)
+### Current PI: PI-9 (Experience Polish)
 
 **For current state, read the live source.** The current PI, sprint, in-flight
 feature, and test count live in the dashboard [`exec/state.html`](../exec/state.html),
 the ledger [`exec/sprint-progress.md`](../exec/sprint-progress.md), and the roadmap
-[`../constitution/roadmap.md`](../constitution/roadmap.md). PI-1..PI-7 are closed;
-PI-8 ("Truth in the Window") is active -- making the human-facing surfaces
-(dashboard, onboarding docs, roadmap) as trustworthy as the engine.
+[`../constitution/roadmap.md`](../constitution/roadmap.md). PI-1..PI-8 are closed;
+PI-9 ("Experience Polish") is active -- shipping two quality-of-life features: an
+automated pre-dispatch file-overlap check and a backlog reorder that re-optimizes
+on the backend.
 
 ---
 

@@ -1511,7 +1511,7 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - Date: 2026-07-08
 - Owner: Sprint Executive Manager (lead, reports up to project EM); PM + Architect owned design (F-56); SW Dev + workers owned implementation and close (F-57/F-58)
 - Features completed: F-56, F-57, F-58
-- Commits: <fill at commit>
+- Commits: 07a2296 (close: skill DECISION-REQUEST FORMAT + 2 EM charter bindings + test_sdd053.py + SDD-053 spec dir + BACKLOG/close-block + regenerated dashboards)
 - Tests: 590 -> 596 (2 skipped; +6 from `test_sdd053.py`; no regression)
 - Schema lint: clean; origin lint: 0 hits in generic files; stale-doc lint: green
 - Validation: SDD-053 7/7 REQUIRED + M-1/M-2/U-1 + O-1; M-3 (owner pre-push) checked at close

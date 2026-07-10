@@ -1613,3 +1613,25 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - Scope explicitly ratified: `constitution/roadmap.md` PI-8 close and PI-9 open; PI-9 name **Experience Polish**; SDD-049 default overlap block with explicit `--allow-overlap` override; SDD-054 `move()` and audit-backed backend priority re-optimization.
 - Report-up to project Executive Manager: **DELIVERED BY THIS CLOSE PAYLOAD**.
 - CI status: **PENDING UNTIL PUSH**; this addendum does not claim CI green.
+
+---
+
+## Pre-Sprint-23 repair -- SDD-055 fresh-checkout CI doctor
+
+- Date: 2026-07-10
+- Classification: out-of-sprint P1 precondition; Sprint 23 not started or altered.
+- Owner authorization: repair, push, and public-CI verification approved.
+- Design commits: PM `44b1abf`; Architect/ADR-025 `07ec0fb`.
+- Implementation commits: `608e0d2` task decomposition; `65a812b` explicit
+  local/CI doctor profiles + workflow; `32581d5` environment-isolated doctor tests.
+- TDD: RED captured before implementation; targeted GREEN **28 passed + 2
+  subtests**; full suite **623 passed / 2 skipped + 2 subtests**.
+- Gates: schema/origin/staledoc clean; Article X 3/3; strict local doctor green;
+  local B-1 PI-9 = 3 real rows; no tracked DB.
+- Fresh clone: explicit CI doctor green with ignored ledger absent; ledger and
+  current-PI checks truthfully reported N/A; every source-controlled check ran.
+- Scope: stdlib-only; no constitution, Sprint 23, dashboard, dependency, schema,
+  tracked DB, locked-function, fabricated ledger-row, or waiver change.
+- Public GitHub Actions: **PENDING PUSH/RUN OBSERVATION**; no green claim yet.
+- Handoff: return to Sprint Executive Manager only after public CI is observed
+  green and repository alignment is verified.

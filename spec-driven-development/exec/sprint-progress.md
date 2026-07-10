@@ -1641,6 +1641,46 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 
 ---
 
+## Sprint 23 -- PI-9 Sprint 2 / Dashboard polish
+
+### F-64 -- SDD-057 Current Sprint truth + SDD-056 PI pill-nav truth -- DONE (local only)
+
+- Date: 2026-07-10
+- Owner: Principal Software Developer; real Developer implementation dispatch;
+  QA Engineer Stage 1 review; independent critic Stage 2 review.
+- Scope: SDD-057 + SDD-056 PI-nav only. SDD-038 lifecycle tokens and Sprint
+  05/06 wording remain untouched for F-65.
+- Implementation commit: `092e4b4`.
+- Behavior: newest/highest ACTIVE `CURRENT_PI.md` supplies explicit overall
+  Sprint 23 through unchanged `detect_current_sprint`; invalid/ambiguous input
+  falls back explicitly to unchanged legacy loading. Additive PI-nav injection
+  renders PI-1..PI-9 once, numeric, with PI-9 solely current.
+- Generated smoke: PASS after `state_builder.py` regeneration -- Sprint 23
+  present; `No active sprint found.` absent; one current + ARIA pill; PI-9
+  current; stale PI-5 current absent.
+- TDD: initial missing helpers RED; review-discovered malformed/status boundary
+  tests also RED before fixes; focused final GREEN 36 passed.
+- Tests: baseline 624 passed / 2 skipped -> 657 passed / 2 skipped / 2 subtests.
+- Gates: schema/origin/staledoc clean; strict local doctor green; B-1 PI-9 has
+  five rows; Article X guard 3/3 and independent five-hash comparison PASS.
+- Ledger: real Sprint 23 outcomes rows 33 (Developer implementation) and 34
+  (QA spec-compliance review), both success.
+- Reviews: Stage 1 COMPLIANT/PASS after two re-reviews; Stage 2 APPROVED after
+  parser-boundary corrections. No critical, important, or suggestion findings
+  remain.
+- Validation completed by F-64: V56-1, V56-2, V56-4, V57-1..V57-4, VX-1,
+  VX-2, VX-3. Open for F-65/F-66: V56-3, V38-1..V38-4, VX-4, VX-5,
+  M-1..M-3.
+- Lock/scope: no locked-function body, `constitution/**`, roadmap, dependency,
+  schema, lifecycle token, or historical kickoff wording change.
+- Push: NOT PERFORMED. Owner pre-push approval remains mandatory at Sprint 23
+  close; local Sprint 23 chain continues.
+- F-65 handoff: implement only SDD-038 lifecycle tokens and the exact two
+  approved historical wording replacements, preserving the F-64 helpers and
+  generated truth. Re-run full close gates after F-65.
+
+---
+
 ## Sprint 23 -- F-63 PM triage -- IN-PROGRESS
 
 - Date: 2026-07-10

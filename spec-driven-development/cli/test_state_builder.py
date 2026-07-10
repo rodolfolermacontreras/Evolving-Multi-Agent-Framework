@@ -3207,7 +3207,9 @@ class TestLifecycleTokensHtml:
             "@media (max-width:640px){.zone-lifecycle .lifecycle-pipeline{"
             "display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}"
             ".zone-lifecycle .pipe-node{text-align:center;"
-            "overflow-wrap:anywhere}}"
+            "overflow-wrap:anywhere}"
+            "main.grid-v3{grid-template-columns:minmax(0,1fr)}"
+            ".zone-agents{min-width:0;overflow-x:auto}}"
             in token_css
         )
         assert (

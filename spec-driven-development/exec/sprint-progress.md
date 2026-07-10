@@ -1576,3 +1576,31 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - Validation: R-1..R-7 REQUIRED all checked with test evidence; M-1/M-2/M-3 checked at close.
 - Article X lock: HELD. Stdlib-only (Article V) -- no new import. Level-1: no `constitution/**` edit, no ADR, no version bump.
 - Next: F-61 (SDD-041 Option B -- reorder -> backend re-optimization). PM assigns Option B a fresh SDD-ID at CLARIFY.
+
+### F-61 -- SDD-054 backlog reorder backend re-optimization -- DONE (local; push gated)
+
+- Date: 2026-07-09
+- Owner: Principal Architect (CLARIFY/SPEC); Principal Software Developer (TDD implementation + QA)
+- Commit: `5fc1a87` (`feat(sprint-22): F-61 SDD-054 backend priority re-optimization`)
+- Ledger: row 32 (`T-054-IMPL`, pi=PI-9, principal-software-developer, success)
+- Spec dir: `specs/2026-07-09-reorder-backend-reoptimization/` (CLARIFY/SPEC/PLAN/TASKS/VALIDATION all done; R-1..R-7 checked)
+- Behavior: safeguarded `move()` still writes the display overlay and exactly one audit row, then persists `backlog/effective-priority.json`; the effective ranking keeps manual order primary, demotes items below incomplete dependencies, records RICE context, and is exposed through `effective_priority_order()` plus the `reoptimize` CLI subcommand. `BACKLOG.md` RICE remains PM-authoritative and unchanged by reorder.
+- Tests: targeted `test_backlog_reorder.py` 22 passed (8 SDD-054 cases); full local suite 616 passed / 2 skipped.
+- Gates: schema/origin/staledoc lint clean; Article X `TestS1FootprintLockGuard` 3 passed; local doctor green. CI pending owner-approved push and not claimed pre-push.
+- Scope: stdlib-only; no `constitution/**` edit, new ADR, version bump, frozen kickoff prompt edit, or historical rewrite.
+
+### Sprint 22 -- CLOSED (local close prepared; push gated)
+
+- Date: 2026-07-09
+- Features completed: F-59 (PI-8 close + PI-9 open), F-60 (SDD-049), F-61 (SDD-054), F-62 (durable close)
+- Local commit chain: `6d981a5` -> `1d85455` -> `7414774` -> parallel-session `c31d4c9` (preserved untouched) -> `5fc1a87` -> F-62 close commit
+- Tests: 596 -> 616 (+20); final local result 616 passed / 2 skipped.
+- Validation: SDD-049 R-1..R-7 + M-1..M-3 checked; SDD-054 R-1..R-7 + M-1..M-3 checked. M-3 records local doctor green and explicitly leaves CI pending push.
+- Lints: schema lint clean; origin lint clean; staledoc lint clean.
+- Article X: HELD (`TestS1FootprintLockGuard` 3 passed, 245 deselected).
+- Ledger: PI-9 rows 30, 31, 32 all success.
+- Dashboard/state: regenerated locally; Current PI = PI-9 (Experience Polish); SDD-049 and SDD-054 render DONE; Sprint 22 is closed locally while PI-9 remains current/active.
+- Backlog: SDD-049 and SDD-054 marked DONE with concrete local evidence and implementation SHAs.
+- CI/push: no push performed; CI is pending the owner-approved push. No CI-green claim is made pre-push.
+- Owner approval still required before push: ratify the F-59 `constitution/roadmap.md` documentation-consistency edit (PI-8 close + PI-9 name "Experience Polish"), the documented CLARIFY defaults used for F-60/F-61, and authorize pushing the complete Sprint 22 local chain. Until then, the close remains local only.
+- Out of scope preserved: the parallel Project EM change in `backlog/IDEAS.md` remains unedited, unstaged, and uncommitted by this close; no next sprint or PI created.

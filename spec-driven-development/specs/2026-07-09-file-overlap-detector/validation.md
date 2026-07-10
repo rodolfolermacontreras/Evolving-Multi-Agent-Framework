@@ -58,7 +58,9 @@ owner via the DECISION-REQUEST FORMAT.
 ## Manual Checks (at close)
 
 - [x] **M-1 (full suite).** `pytest spec-driven-development/` >= 596 passed / 2 skipped,
-  growing by the 12 new SDD-049 cases -- checked at F-62 close.
-- [x] **M-2 (lints).** schema + origin + staledoc lint clean -- checked at F-62 close.
-- [x] **M-3 (doctor + CI).** `doctor` green; CI green on the Sprint 22 head -- checked
-  at F-62 close.
+  growing by the 12 new SDD-049 cases -- 616 passed / 2 skipped locally at F-62
+  close.
+- [x] **M-2 (lints).** schema + origin + staledoc lint clean locally at F-62 close.
+- [x] **M-3 (doctor + CI).** Local doctor green at F-62 close (616 passed / 2
+  skipped; all checks PASS). CI is pending the owner-approved push and is not
+  claimed pre-push.

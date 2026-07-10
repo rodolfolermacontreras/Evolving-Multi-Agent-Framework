@@ -9,12 +9,13 @@ sprint: PI-9
 
 # PI-9: Experience Polish
 
-- Status: **ACTIVE — opened 2026-07-09 at the start of Sprint 22 (PI-9 Sprint 1;
-  owner-approved via Executive Manager: "jump to these two").** The Sprint EM
-  opened PI-9 in the same edit that closed PI-8 (exactly one `(current)` marker at
-  a time) and logged the first PI-9 ledger dispatch so doctor's current-PI
-  dispatch-rows check (B-1) is satisfied for PI-9. Follows PI-8 CLOSED 2026-07-09 /
-  DONE (Sprint 21 close at `07a2296`; PI-8 closed at Sprint 22 open).
+- Status: **ACTIVE; Sprint 22 CLOSED locally 2026-07-09 (push and CI pending owner
+  approval).** Sprint 22 shipped SDD-049 and SDD-054 with 616 passed / 2 skipped,
+  clean schema/origin/staledoc lints, local doctor green, Article X 3/3 PASS, and
+  PI-9 ledger rows 30-32 all success. The Sprint EM opened PI-9 in the same edit
+  that closed PI-8 (exactly one `(current)` marker at a time). No next sprint or
+  PI is created by this close. Follows PI-8 CLOSED 2026-07-09 / DONE (Sprint 21
+  close at `07a2296`; PI-8 closed at Sprint 22 open).
 
 - Theme: Turn two long-standing quality-of-life gaps into shipped features. PI-8
   made the window onto the engine tell the truth; PI-9 polishes the experience of
@@ -48,7 +49,7 @@ machinery (ADR-017).
 
 ## PI Objectives
 
-### 1. File-overlap conflict detector (SDD-049)
+### 1. File-overlap conflict detector (SDD-049) -- DONE
 **Why**: Today `cli/fleet.py` performs only the serial CLARIFY/SPEC gate
 (`_scan_lock_state`, SDD-019). Avoiding same-file dispatch within a batch is a
 manual discipline (explicit per-worker file scopes), not an automated check — the
@@ -65,7 +66,7 @@ locked function; `TestS1FootprintLockGuard` stays GREEN. Stdlib-only; TDD
 
 ---
 
-### 2. Backlog reorder → backend re-optimization (SDD-041 Option B)
+### 2. Backlog reorder → backend re-optimization (SDD-054) -- DONE
 **Why**: SDD-041 Option A (PI-6 Sprint 13) shipped a real in-browser drag that
 round-trips through the safeguarded `move()` and persists a display-order overlay.
 The order is visual only — it does not feed the backend prioritization logic.
@@ -78,7 +79,8 @@ same governance. Confirmed at CLARIFY to touch NO Article X locked render/load
 function (`TestS1FootprintLockGuard` stays GREEN). The PM assigns Option B a fresh
 SDD-ID at CLARIFY. Stdlib-only; TDD.
 
-**Feature**: SDD-041 Option B (PM-assigned SDD-ID). **Sprint**: 22 (PI-9 Sprint 1).
+**Feature**: SDD-054 (PM-assigned ID for SDD-041 Option B). **Sprint**: 22
+(PI-9 Sprint 1).
 
 ---
 
@@ -89,3 +91,9 @@ evidence, the dashboard shows PI-9 current and both features DONE, the suite doe
 not regress (>= 596 passed, 2 skipped, growing with the new feature tests), the
 Article X render lock holds, `doctor` + CI are green, and the owner ratifies the
 close via the Executive Manager.
+
+Sprint 22 local close evidence is complete: both features are DONE, the
+dashboard/state surfaces show PI-9 current and both features DONE, 616 tests passed
+/ 2 skipped, Article X held, local doctor is green, and ledger rows 30-32 are
+success. CI and owner pre-push ratification remain pending; no pre-push CI result
+is claimed. PI-9 remains current/active and no next sprint or PI is created here.

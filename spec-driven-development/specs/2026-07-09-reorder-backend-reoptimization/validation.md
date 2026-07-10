@@ -59,9 +59,10 @@ owner via the DECISION-REQUEST FORMAT.
 
 ## Manual Checks (at close)
 
-- [ ] **M-1 (full suite).** `pytest spec-driven-development/` >= 596 passed / 2
-  skipped, growing by the 8 new SDD-054 cases -- pending F-62 local close gates.
-- [ ] **M-2 (lints).** schema + origin + staledoc lint clean -- pending F-62 local
-  close gates.
-- [ ] **M-3 (doctor + CI).** Local doctor green is required at F-62 close; CI remains
-  pending until the owner-approved push -- pending F-62 local close gates.
+- [x] **M-1 (full suite).** `pytest spec-driven-development/` >= 596 passed / 2
+  skipped, growing by the 8 new SDD-054 cases -- 616 passed / 2 skipped locally
+  at F-62 close.
+- [x] **M-2 (lints).** schema + origin + staledoc lint clean locally at F-62 close.
+- [x] **M-3 (doctor + CI).** Local doctor green at F-62 close (616 passed / 2
+  skipped; all checks PASS). CI is pending the owner-approved push and is not
+  claimed pre-push.

@@ -210,20 +210,20 @@ class TestSetup(unittest.TestCase):
 
 
 class TestDoctor(unittest.TestCase):
-    """R-8: doctor green on the real repo, red on a tree with a leak."""
+    """R-8: source health is green, then red when a tracked input leaks."""
 
-    def test_doctor_green_on_framework(self) -> None:
-        code = bootstrap.run_doctor(FRAMEWORK_ROOT, run_tests=False)
+    def test_ci_doctor_green_on_framework_source(self) -> None:
+        code = bootstrap.run_doctor(FRAMEWORK_ROOT, run_tests=False, mode="ci")
         self.assertEqual(code, 0)
 
-    def test_doctor_red_on_leak(self) -> None:
+    def test_ci_doctor_red_on_leak(self) -> None:
         # Plant a home-path origin token into the otherwise-green framework
         # tree so the origin check is the single isolated reason doctor flips
         # red. Temp file is removed in finally.
         leak = FRAMEWORK_ROOT / ".github" / "_sdd045_leak_probe.md"
         leak.write_text("Saved under C:\\Users\\someone\\notes.md.\n", encoding="utf-8")
         try:
-            code = bootstrap.run_doctor(FRAMEWORK_ROOT, run_tests=False)
+            code = bootstrap.run_doctor(FRAMEWORK_ROOT, run_tests=False, mode="ci")
         finally:
             leak.unlink(missing_ok=True)
         self.assertEqual(code, 1)

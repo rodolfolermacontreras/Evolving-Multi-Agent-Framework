@@ -10,8 +10,10 @@ sprint: PI-9
 # PI-9: Experience Polish
 
 - Status: **ACTIVE; overall Sprint 23 ACTIVE (PI-9 Sprint 2).** F-63 design is
-  complete; F-64 implementation + QA is next. This marker records the approved
-  sprint gate only and does not claim implementation or close. Sprint 22 CLOSED
+  complete; F-64 dashboard truth and F-65 lifecycle/wording implementation + QA
+  are complete locally; F-66 close package is next. This marker records the
+  current sprint gate and does not claim Sprint 23 close. The prior gate was
+  F-64 implementation + QA after F-63 design. Sprint 22 CLOSED
   locally 2026-07-09 and shipped SDD-049 and SDD-054 with 616 passed / 2 skipped,
   clean schema/origin/staledoc lints, local doctor green, Article X 3/3 PASS, and
   PI-9 ledger rows 30-32 all success. The Sprint EM opened PI-9 in the same edit
@@ -40,8 +42,9 @@ sprint: PI-9
 
 ### Overall Sprint 23 -- ACTIVE
 
-- Current gate: F-63 design complete (`CLARIFY -> SPEC -> PLAN -> TASKS`).
-- Next gate: F-64 implementation + QA for the dashboard-truth pair.
+- Current gate: F-65 implementation + two-stage QA complete locally.
+- Next gate: F-66 close package -- remaining close validation, manual UX checks,
+  owner pre-push approval, public CI, and Sprint 23 close.
 - PI status: PI-9 remains ACTIVE.
 - Close state: not closed; no implementation outcome is claimed by this update.
 

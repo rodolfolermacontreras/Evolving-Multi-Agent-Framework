@@ -1681,6 +1681,44 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 
 ---
 
+### F-65 -- SDD-038 lifecycle semantics + SDD-056 exact wording -- DONE (local only)
+
+- Date: 2026-07-10
+- Commits: `8a9402d` lifecycle tokens; `2c606a4` exact wording guard/repairs.
+- TDD: lifecycle import failed RED before implementation; wording guard failed
+  4 tests RED before the two replacements. Final focused GREEN: 13 passed / 4
+  subtests; state-builder regression: 289 passed.
+- Behavior: exactly nine approved lifecycle tokens/classes are injected once
+  immediately after the existing lifecycle injector. Labels and
+  `aria-current="step"` remain; opacity no longer communicates lifecycle state;
+  solid fills use `#0A0A0A`; focus, forced-colors, and narrow rules are present.
+- Ratios against `#1C1B18`: IDEA 7.186, BACKLOG 6.845, CLARIFY 7.297,
+  SPEC 7.250, PLAN 7.425, TASKS 6.245, IMPLEMENT 5.239, REVIEW 5.852,
+  DONE 5.901. Carbon fill text ranges 6.022..8.535.
+- Wording: only the exact Sprint 5 and Sprint 6 phrases changed. Reverse
+  replacement plus before/after whole-file hashes proves all other bytes stayed
+  unchanged; the sequencing prohibition remains with either isolation method.
+- Reviews: Stage 1 independent QA COMPLIANT. Stage 2 critic + UX review found an
+  insufficient current-state outline and weak test assertions; fixes landed,
+  then both independent re-reviews APPROVED.
+- Tests/gates: 668 passed / 2 skipped / 6 subtests; schema/origin/staledoc clean;
+  strict local and explicit CI-profile doctors green; Article X 3/3 plus
+  independent five hashes all match.
+- Ledger: genuine PI-9 rows 35-38 record lifecycle implementation, wording
+  implementation, Stage 1, and Stage 2. SDD-049 overlap assessment: zero
+  cross-packet intersections; state-builder work serialized.
+- Generated smoke: builder-only regeneration preserves Sprint 23, no empty
+  sprint message, and PI-9 as sole current pill; all nine token variables and
+  state classes are present exactly as contracted.
+- Validation completed by F-65: V56-3 and V38-1..V38-4. Still open for F-66:
+  VX-4, VX-5, M-1..M-3, T-X-02, owner pre-push approval, public CI, and close.
+- Push: NOT PERFORMED. Owner pre-push approval remains reserved for F-66.
+- F-66 handoff: perform the close package only. Do not change SDD-057 or token
+  behavior; complete remaining close/manual rows honestly, obtain owner pre-push
+  approval, push once authorized, verify public CI, then close Sprint 23.
+
+---
+
 ## Sprint 23 -- F-63 PM triage -- IN-PROGRESS
 
 - Date: 2026-07-10

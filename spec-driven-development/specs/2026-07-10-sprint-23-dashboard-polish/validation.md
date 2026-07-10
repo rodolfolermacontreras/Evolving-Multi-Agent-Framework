@@ -82,19 +82,19 @@ truth are Strict and cannot be loosened.
 - [ ] **VX-4:** Strict local doctor is green; fresh CI-profile doctor is green in a
   clean checkout; public GitHub Actions CI is green at close. B-1 contains real
   Sprint 23 outcome rows, B-2 is green, and B-4 is green. Proves ACX-1.
-- [ ] **VX-5:** `git diff` proves no `constitution/**` edit; generated executive
+- [x] **VX-5:** `git diff` proves no `constitution/**` edit; generated executive
   files were produced only by `state_builder.py build`; no dependency/schema/API
   addition; no REQUIRED deferral. Proves RX-1..RX-4.
 
 ## Manual / UX evidence
 
-- [ ] **M-1:** Open real generated dashboard: PI-9 is sole current pill; Current
+- [x] **M-1:** Open real generated dashboard: PI-9 is sole current pill; Current
   Sprint says Sprint 23; all nine lifecycle states show their approved semantic
   colors and retain labels/current emphasis.
-- [ ] **M-2:** Record computed contrast table and inspect keyboard/focus,
+- [x] **M-2:** Record computed contrast table and inspect keyboard/focus,
   forced-colors/high-contrast behavior, and narrow viewport wrapping. No state is
   communicated by color alone.
-- [ ] **M-3:** Confirm the two repaired historical instructions still communicate
+- [x] **M-3:** Confirm the two repaired historical instructions still communicate
   their original sequencing prohibition while allowing either isolation method.
 
 ## Definition of Done
@@ -166,3 +166,27 @@ None at lock.
   and wording packets; shared state-builder work remained serialized.
 - Intentionally open for F-66: VX-4, VX-5, M-1, M-2, M-3, T-X-02, public CI,
   owner pre-push approval, and sprint close. No checkbox for those rows changed.
+
+## F-66 Local Close-Readiness Evidence -- 2026-07-10
+
+- M-1: independent QA and UX review of the real generated `state.html` found
+  PI-1..PI-9 once in numeric order, PI-9 as the sole current pill with
+  `aria-current="page"`, Sprint 23 present, the empty-sprint fallback absent,
+  and all nine lifecycle labels/classes/colors with non-color current emphasis.
+- M-2: browser review at 375x812 measured document/header/main width 360px with
+  scroll width 360px (no page overflow), lifecycle section 312px, and a three-by-
+  three lifecycle grid. Wide sections scroll locally. Keyboard focus remains
+  visible; forced-colors uses Canvas/CanvasText and a double Highlight current
+  outline. Surface ratios remain IDEA 7.186, BACKLOG 6.845, CLARIFY 7.297,
+  SPEC 7.250, PLAN 7.425, TASKS 6.245, IMPLEMENT 5.239, REVIEW 5.852, DONE 5.901.
+- M-3: independent review confirms both exact replacements retain the original
+  sequencing prohibition and explicitly allow either a fresh session or an
+  EM-routed subagent dispatch as the context-isolation method.
+- Review finding and repair: QA/UX rows 39-40 genuinely found narrow overflow.
+  The repair followed RED/GREEN assertions and additive CSS only; final UX
+  re-review passed M-1/M-2. Public CI was not assessed or claimed.
+- VX-5: `git diff 1356c33..HEAD` has no `constitution/**`, dependency, schema,
+  migration, or API edit. Executive files were regenerated with the default
+  `state_builder.py` build action after direct source updates; generated diffs
+  were never hand-edited. No REQUIRED item is deferred: VX-4 remains active
+  solely because its locked row requires post-push public CI.

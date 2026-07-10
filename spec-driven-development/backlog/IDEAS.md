@@ -42,6 +42,9 @@ Raw ideas captured here. Triage moves them to BACKLOG.md with RICE scoring.
 - **Incidental "fresh session" wording: CLOSED AS DUPLICATE/FOLDED -> SDD-056.**
 	Scope is only the two previously identified incidental lines in Sprint 5 and
 	Sprint 6 kickoff prompts; no repo-wide historical rewrite.
+- **2026-07-10 close-readiness update:** SDD-038/056/057 are LOCAL CLOSE READY,
+	remain IN-PROGRESS, and await owner pre-push approval plus public CI. The
+	source ideas remain preserved above; this append-only note does not claim DONE.
 - **Excluded from this triage:** SDD-034, the brownfield bootstrap defect, PI-4
 	housekeeping, SDD-035 Azure decommission, and all other work.
 

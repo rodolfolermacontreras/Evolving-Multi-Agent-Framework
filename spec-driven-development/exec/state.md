@@ -101,16 +101,16 @@ PI progress: 0/1 commitments complete (0%)
 
 | When | Feature | Task | Agent |
 |------|---------|------|-------|
+| 2026-07-10T22:54:48Z | spec-driven-development/specs/2026-07-10-sprint-23-dashboard-polish | F-66 independent local close-readiness QA | QA Engineer |
 | 2026-07-10T22:34:14Z | spec-driven-development/specs/2026-07-10-sprint-23-dashboard-polish | F-65 independent code-quality and accessibility review | gem-critic+ux-designer |
 | 2026-07-10T22:30:19Z | spec-driven-development/specs/2026-07-10-sprint-23-dashboard-polish | F-65 Stage 1 spec compliance review | qa-engineer-general |
 | 2026-07-10T22:28:26Z | spec-driven-development/specs/2026-07-10-sprint-23-dashboard-polish | F-65 lifecycle token injector TDD implementation | developer-general |
 | 2026-07-10T22:28:26Z | spec-driven-development/specs/2026-07-10-sprint-23-dashboard-polish | F-65 exact historical wording repair | developer-cli-specialist-1 |
 | 2026-07-10T21:26:59Z | spec-driven-development/specs/2026-07-10-sprint-23-dashboard-polish | F-64 SDD-057 and SDD-056 implementation with focused tests | developer-general |
 | 2026-07-10T21:26:59Z | spec-driven-development/specs/2026-07-10-sprint-23-dashboard-polish | F-64 Stage 1 spec compliance review and re-review | qa-engineer-general |
+| 2026-07-10T00:00:00Z | spec-driven-development/specs/2026-07-10-sprint-23-dashboard-polish | F-66 generated dashboard UX review | UX Designer |
 | 2026-07-09T15:09:43Z | specs/2026-07-09-reorder-backend-reoptimization | SDD-054 reorder backend re-optimization (design+TDD impl+QA) | principal-software-developer |
 | 2026-07-09T14:31:58Z | specs/2026-07-09-file-overlap-detector | SDD-049 file-overlap detector (design+TDD impl+QA) | principal-software-developer |
-| 2026-07-09T13:59:03Z | sprints/PI-9 | PI-8 close + PI-9 open (governance) | sprint-executive-manager |
-| 2026-07-08T22:14:11Z | spec-driven-development/specs/2026-07-08-decision-request-format | SDD-053 IMPLEMENT+QA: skill DECISION-REQUEST FORMAT + 2 EM charter bindings + test_sdd053.py (596 passed) | principal-software-developer |
 
 ## Blockers
 

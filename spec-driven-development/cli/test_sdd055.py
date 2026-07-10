@@ -145,5 +145,19 @@ class TestCommonChecksRemainShared(unittest.TestCase):
                 done.assert_called_once()
 
 
+class TestDoctorWorkflowContract(unittest.TestCase):
+    def test_workflow_installs_test_runner_before_explicit_ci_doctor(self) -> None:
+        workflow = bootstrap.framework_root() / ".github" / "workflows" / "doctor.yml"
+        text = workflow.read_text(encoding="utf-8")
+        install = "python -m pip install pytest"
+        doctor = "python spec-driven-development/cli/bootstrap.py doctor --mode ci"
+        self.assertIn(install, text)
+        self.assertIn(doctor, text)
+        self.assertLess(text.index(install), text.index(doctor))
+        self.assertIn("permissions:\n  contents: read", text)
+        for forbidden in ("secrets.", "azure/login", "deploy", "id-token: write"):
+            self.assertNotIn(forbidden, text.lower())
+
+
 if __name__ == "__main__":
     unittest.main()

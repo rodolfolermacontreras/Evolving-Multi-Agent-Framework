@@ -1,8 +1,16 @@
 # ADR-021: CI runs the doctor validation gate
 
 - Date: 2026-06-26
-- Status: accepted
+- Status: superseded by ADR-025
 - Supersedes: ADR-009
+- Superseded by: ADR-025
+
+## Supersession note
+
+ADR-025 preserves this ADR's validation-only, least-privilege CI posture but
+supersedes the claim that local and CI health are identical. CI validates
+source-controlled health from a fresh checkout; local doctor additionally
+validates clone-local operational ledger health and remains strict under B-1.
 
 ## Context
 

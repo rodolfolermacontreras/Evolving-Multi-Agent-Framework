@@ -211,9 +211,35 @@ Source: Owner ratification 2026-06-08 via Executive Manager routing (Option 3 hy
 
 | ID | Title | Priority | R | I | C | E | RICE | Sprint | Status | Notes |
 |----|-------|----------|---|---|---|---|------|--------|--------|-------|
-| SDD-038 | Local dashboard aesthetic tokens (Scott-pattern-aligned, IDE-native) | P3 | M | L | H | S | -- | PI-9 Sprint 23 | OPEN -- allocated PI-9 Sprint 23 (owner-approved 2026-07-10 via Executive Manager, "recommended option is good"). P3 because aesthetic without structure is bikeshedding | Adopts Scott's pattern 5: monospace dark IDE-native aesthetic, near-zero chrome, color-as-information. Define OUR OWN color tokens for lifecycle states (one color per state, used consistently across dashboard + rendered Markdown views + agent UIs). Do NOT photocopy Scott's specific palette or token names. Adopt the principle of consistent state-colors across surfaces. Lock-safe: land via an additive injector / CSS tokens, NOT by editing the Article X locked `render_html`. |
+| SDD-038 | Local dashboard aesthetic tokens (Scott-pattern-aligned, IDE-native) | P3 | M | L | H | S | -- | PI-9 Sprint 23 | **IN-PROGRESS -- F-63 PM triage complete 2026-07-10; remains allocated to PI-9 Sprint 23.** Owner approved the full experience-polish set via Executive Manager. P3 because aesthetic without structure is bikeshedding. | Adopts Scott's pattern 5: monospace dark IDE-native aesthetic, near-zero chrome, color-as-information. Define OUR OWN color tokens for lifecycle states (one color per state, used consistently across dashboard + rendered Markdown views). Do NOT photocopy Scott's specific palette or token names. Adopt the principle of consistent state-colors across surfaces. Acceptance boundary: each IDEA -> BACKLOG -> CLARIFY -> SPEC -> PLAN -> TASKS -> IMPLEMENT -> REVIEW -> DONE state has one consistent, accessible, IDE-native token across generated dashboard and rendered views; existing content, lifecycle semantics, and accessibility may not regress. Lock-safe: land additively, NOT by editing any Article X locked function. Architect owns the technical spec and token-set review. |
 
 Source: Owner Q&A session via EM 2026-06-08 (Azure decommission Q1; Scott UI re-evaluation Q2; drag-to-reorder correction; SDD-039 timing). See `docs/TEAM-SHARE-ONEPAGER.md` (committed at `22b6d22`) for downstream context.
+
+### Sprint 23 Dashboard Truth Follow-Up (filed 2026-07-10)
+
+Owner approved the full Sprint 23 experience-polish set via the project Executive
+Manager. These two dashboard-trust defects are separate backlog items because
+they have distinct user-visible outcomes and acceptance evidence. The tiny
+SDD-039 wording residual is folded into SDD-056 rather than creating a third ID.
+
+| ID | Title | Priority | Reach | Impact | Confidence | Effort | RICE | Sprint | Status | Notes |
+|----|-------|----------|-------|--------|------------|--------|------|--------|--------|-------|
+| SDD-056 | Dashboard PI pill-nav truth + stale isolation-wording cleanup | P2 | 7 | 2 | 1.0 | S = 1 | 14.0 | PI-9 Sprint 23 | **APPROVED -- [AFK]; F-63 PM triage complete, Architect spec handoff pending.** | User value: the primary dashboard navigation identifies the actual current PI instead of presenting PI-5 as current. Acceptance boundaries: regenerated `state.html` shows the complete PI navigation represented by live PI data with PI-9 as the sole current pill; no stale PI is marked current; current-PI resolution remains data-driven; the two specifically deferred incidental phrases in `SPRINT-05-KICKOFF.prompt.md` and `SPRINT-06-KICKOFF.prompt.md` no longer imply that opening a new session is mandatory and instead preserve the SDD-039 context-isolation choice (fresh session OR routed subagent); no broad historical wording sweep. No constitution edit, locked-function edit, generated-exec edit by hand, or lifecycle-semantic change. Architect defines the additive, Article-X-safe technical contract. RICE = (7 x 2 x 1.0) / 1 = 14.0. |
+| SDD-057 | Current Sprint dashboard widget uses active sprint source | P2 | 8 | 2 | 1.0 | M = 2 | 8.0 | PI-9 Sprint 23 | **APPROVED -- [AFK]; F-63 PM triage complete, Architect spec handoff pending.** | User value: the dashboard identifies the active sprint instead of displaying "No active sprint found" from a deprecated source. Acceptance boundaries: regenerated dashboard surfaces the active Sprint 23 from the newest active `CURRENT_PI.md`; a closed or absent sprint is not presented as active; legacy history remains readable; no change to sprint lifecycle semantics. No constitution edit, locked-function edit, generated-exec edit by hand, or fallback fabrication. Architect defines the additive, Article-X-safe loader contract and source-selection edge cases. RICE = (8 x 2 x 1.0) / 2 = 8.0. |
+
+Scoring rationale:
+
+- SDD-056 Reach 7: every dashboard navigation workflow and stakeholder review
+	benefits; Impact 2: wrong current-PI navigation materially reduces trust;
+	Confidence 1.0: the defect and live current-PI source are reproduced; Effort
+	S = 1: bounded presentation repair plus two exact wording edits.
+- SDD-057 Reach 8: every active-sprint dashboard workflow benefits; Impact 2:
+	the widget currently hides the team's active work; Confidence 1.0: the
+	deprecated and current sources are documented; Effort M = 2: source selection,
+	closed/absent states, and regression evidence require a separate contract.
+
+Explicit exclusions: SDD-034, the brownfield bootstrap defect, PI-4 housekeeping,
+SDD-035 Azure decommission, and all other work remain outside Sprint 23 F-63.
 
 Notes:
 - Design spec pre-built at `specs/2026-05-13-fleet-bridge-dashboard/DESIGN.md`

@@ -31,6 +31,20 @@ Raw ideas captured here. Triage moves them to BACKLOG.md with RICE scoring.
 
 - **[2026-07-09] Triage outcome:** Principal Product Manager scored the brownfield bootstrap defect RICE 8.0 and recommended P1, full spec + ADR, decomposed as B1 preserve edited proposal, B2 reusable-asset allowlist, B3 host-specific scaffolding, and B4 host-mode doctor/documentation. Owner approved Option 1 on 2026-07-09. Corrected target: PI-9 Sprint 23 (PI-9 Sprint 2), the earliest valid slot after Sprint 22. Do not edit Sprint 22-owned backlog rows until that sprint closes.
 
+### Sprint 23 F-63 triage dispositions (2026-07-10)
+
+- **2026-06-25 pill-nav idea: FILED -> BACKLOG P2 as SDD-056.** Owner-approved
+	PI-9 Sprint 23 scope. The tiny SDD-039 residual wording cleanup is folded into
+	SDD-056; no separate ID. Source idea remains above as immutable history.
+- **2026-06-26 Current Sprint deprecated-source idea: FILED -> BACKLOG P2 as
+	SDD-057.** Owner-approved PI-9 Sprint 23 scope. Source idea remains above as
+	immutable history.
+- **Incidental "fresh session" wording: CLOSED AS DUPLICATE/FOLDED -> SDD-056.**
+	Scope is only the two previously identified incidental lines in Sprint 5 and
+	Sprint 6 kickoff prompts; no repo-wide historical rewrite.
+- **Excluded from this triage:** SDD-034, the brownfield bootstrap defect, PI-4
+	housekeeping, SDD-035 Azure decommission, and all other work.
+
 ---
 
 ## Scott Feedback Bundle (captured 2026-06-03)

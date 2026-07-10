@@ -1638,3 +1638,22 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
   https://github.com/rodolfolermacontreras/Evolving-Multi-Agent-Framework/actions/runs/29121800165
 - Handoff: repair complete; return control to Sprint Executive Manager. Sprint
   23 remains unstarted and unchanged by SDD-055.
+
+---
+
+## Sprint 23 -- F-63 PM triage -- IN-PROGRESS
+
+- Date: 2026-07-10
+- Scope completed by PM: confirmed SDD-038 remains allocated; filed pill-nav as
+  SDD-056 and Current Sprint widget as SDD-057; folded the two-line stale
+  isolation wording residual into SDD-056.
+- Product boundary: dashboard truth + lifecycle color consistency only. No
+  constitution, code, generated exec surface, Article X locked function, or spec
+  directory changed by this PM unit.
+- Explicit exclusions preserved: SDD-034, brownfield bootstrap defect, PI-4
+  housekeeping, SDD-035 Azure decommission, and all other work.
+- Status: **IN-PROGRESS -- F-63 PM portion complete only.** This does not claim
+  Architect specification, implementation, QA, or Sprint 23 close.
+- Next: Principal Architect authors the SDD-038/056/057 specs and validation
+  contracts, confirms additive lock-safe boundaries, and hands approved work to
+  the Principal Software Developer.

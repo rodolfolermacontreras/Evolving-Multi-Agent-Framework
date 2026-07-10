@@ -3209,7 +3209,12 @@ class TestLifecycleTokensHtml:
             ".zone-lifecycle .pipe-node{text-align:center;"
             "overflow-wrap:anywhere}"
             "main.grid-v3{grid-template-columns:minmax(0,1fr)}"
-            ".zone-agents{min-width:0;overflow-x:auto}}"
+            "main.grid-v3>section{min-width:0;overflow-x:auto}"
+            "header.topbar{flex-wrap:wrap;min-width:0}"
+            ".topbar-mission{min-width:0}"
+            ".pi-pills{margin-left:0;min-width:0;max-width:100%;"
+            "flex-shrink:1}"
+            ".context-item{white-space:normal;overflow-wrap:anywhere}}"
             in token_css
         )
         assert (

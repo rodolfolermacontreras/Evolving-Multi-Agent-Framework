@@ -48,7 +48,7 @@ the owner-approved disposition.
 - [x] **V-9 (quality baseline).** Full pytest is >= 616 passed / 2 skipped;
   schema/origin/staledoc lints clean; Article X FootprintLockGuard 3/3 PASS;
   local doctor green. (R-10, AC-8)
-- [ ] **V-10 (public CI proof).** The owner-authorized repair commit is pushed
+- [x] **V-10 (public CI proof).** The owner-authorized repair commit is pushed
   and its public GitHub doctor run is green; URL/run ID recorded. (R-9, AC-9)
 - [x] **V-11 (scope integrity).** Diff contains no constitution edit, Sprint 23
   edit, dependency, DB schema change, tracked DB, or gate waiver. (R-9, R-10,
@@ -85,8 +85,11 @@ the owner-approved disposition.
 - Scope review: only doctor implementation/tests/workflow and SDD-055 lifecycle
   evidence changed. No constitution, Sprint 23, dependency, schema, database,
   dashboard, Article X locked function, or waiver change.
-- Public CI: **PENDING PUSH/RUN OBSERVATION**. V-10 remains unchecked until the
-  owner-authorized repair commit's public run is observed green and linked here.
+- Public CI: first pushed run `29121740181` failed honestly because a pristine
+  Python 3.12 runner lacked pytest. A second TDD cycle added a workflow-contract
+  regression test and the explicit `python -m pip install pytest` prerequisite.
+  Repair commit `45a0cc3` run **#25 / 29121800165** completed **SUCCESS** in 41s:
+  https://github.com/rodolfolermacontreras/Evolving-Multi-Agent-Framework/actions/runs/29121800165
 
 ## Close rule
 

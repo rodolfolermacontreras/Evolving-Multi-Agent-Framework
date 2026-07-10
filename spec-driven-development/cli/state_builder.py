@@ -154,6 +154,9 @@ from state_builder_html import (  # noqa: E402  -- in-tree sibling re-export (AD
     order_features_for_display,
     _LIFECYCLE_STYLE,
     inject_lifecycle_html,
+    LIFECYCLE_TOKENS,
+    LIFECYCLE_STATE_CLASSES,
+    inject_lifecycle_tokens_html,
     _BACKLOG_REORDER_STYLE,
     _BACKLOG_META_PID_RE,
     _backlog_reorder_meta,
@@ -1724,6 +1727,7 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
     # to the dedicated Backlog section below).
     htm = inject_lifecycle_html(
         htm, features=features, sdd_root=sdd_root, current_sprint=current_sprint)
+    htm = inject_lifecycle_tokens_html(htm)
     # SDD-037 (F-28): Dispatches card then health-pills strip. Both are
     # read-only indicators consuming the SAME LedgerView (zero new sqlite
     # connections). Pills injected LAST so they render at the top as a header

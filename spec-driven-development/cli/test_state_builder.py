@@ -55,7 +55,10 @@ from cli.state_builder import (
 # SDD-036: lifecycle pipeline + four-card docs row + reorder control surfaces.
 from cli.state_builder import (
     STAGES,
+    LIFECYCLE_TOKENS,
+    LIFECYCLE_STATE_CLASSES,
     inject_lifecycle_html,
+    inject_lifecycle_tokens_html,
     load_display_order,
     order_features_for_display,
     render_docs_row,
@@ -3063,6 +3066,183 @@ class TestInjectLifecycleHtml:
             self.DOC, features=self._features(), sdd_root=tmp_path,
             current_sprint={"num": 1, "title": "T", "status": "Active"})
         assert "<script" not in out.lower()
+
+
+class TestLifecycleTokensHtml:
+    """SDD-038 V38-1..V38-4: semantic tokens and accessible states."""
+
+    TOKENS = {
+        "IDEA": "#B39DDB",
+        "BACKLOG": "#7FA8C9",
+        "CLARIFY": "#58B8B0",
+        "SPEC": "#82B57A",
+        "PLAN": "#C2A85D",
+        "TASKS": "#D48B52",
+        "IMPLEMENT": "#D36F86",
+        "REVIEW": "#B884C4",
+        "DONE": "#6FA37A",
+    }
+
+    @staticmethod
+    def _relative_luminance(hex_color: str) -> float:
+        channels = [int(hex_color[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+        linear = [
+            value / 12.92 if value <= 0.04045
+            else ((value + 0.055) / 1.055) ** 2.4
+            for value in channels
+        ]
+        return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2]
+
+    @classmethod
+    def _contrast(cls, first: str, second: str) -> float:
+        lighter, darker = sorted(
+            (cls._relative_luminance(first), cls._relative_luminance(second)),
+            reverse=True,
+        )
+        return (lighter + 0.05) / (darker + 0.05)
+
+    def _lifecycle_doc(self) -> str:
+        pipelines = "".join(
+            '<article class="lifecycle-card">'
+            f'<span class="lifecycle-stage">{stage}</span>'
+            f'{render_lifecycle_pipeline(stage)}'
+            '</article>'
+            for stage in STAGES
+        )
+        return f'<main><section class="zone-lifecycle">{pipelines}</section></main>'
+
+    def test_exact_nine_tokens_and_canonical_state_mapping(self) -> None:
+        assert LIFECYCLE_TOKENS == self.TOKENS
+        assert LIFECYCLE_STATE_CLASSES == {
+            stage: f"lifecycle-state-{stage.lower()}" for stage in self.TOKENS
+        }
+
+    def test_every_node_and_current_stage_label_gets_matching_state_class(self) -> None:
+        result = inject_lifecycle_tokens_html(self._lifecycle_doc())
+
+        for stage in STAGES:
+            state_class = f"lifecycle-state-{stage.lower()}"
+            nodes = re.findall(
+                rf'<li class="[^"]*\b{state_class}\b[^"]*"[^>]*>{stage}</li>',
+                result,
+            )
+            assert len(nodes) == 9
+            assert (
+                f'class="lifecycle-stage {state_class}">{stage}</span>' in result
+            )
+            assert re.search(
+                rf'<li class="[^"]*\bpipe-current\b[^"]*\b{state_class}\b[^"]*" '
+                rf'aria-current="step">{stage}</li>',
+                result,
+            )
+
+        assert result.count('aria-current="step"') == 9
+        assert all(f'>{stage}</li>' in result for stage in STAGES)
+
+    def test_sprint_status_label_maps_to_pipeline_current_state(self) -> None:
+        source = (
+            '<section class="zone-lifecycle"><article class="lifecycle-card">'
+            '<span class="lifecycle-stage">Active</span>'
+            f'{render_lifecycle_pipeline("IMPLEMENT")}</article></section>'
+        )
+
+        result = inject_lifecycle_tokens_html(source)
+
+        assert (
+            'class="lifecycle-stage lifecycle-state-implement">Active</span>'
+            in result
+        )
+        assert 'aria-current="step">IMPLEMENT</li>' in result
+
+    def test_css_is_injected_once_and_second_pass_is_byte_idempotent(self) -> None:
+        once = inject_lifecycle_tokens_html(self._lifecycle_doc())
+        twice = inject_lifecycle_tokens_html(once)
+
+        assert once.count('id="sdd-lifecycle-tokens"') == 1
+        assert twice == once
+        for stage, color in self.TOKENS.items():
+            assert once.count(f"--lifecycle-{stage.lower()}:{color}") == 1
+
+    def test_non_lifecycle_html_is_unchanged(self) -> None:
+        source = "<main><p>No lifecycle surface.</p></main>"
+        assert inject_lifecycle_tokens_html(source) == source
+
+    def test_locked_tokens_meet_wcag_contrast_thresholds(self) -> None:
+        surface_ratios = {
+            stage: self._contrast(color, "#1C1B18")
+            for stage, color in self.TOKENS.items()
+        }
+        fill_text_ratios = {
+            stage: self._contrast(color, "#0A0A0A")
+            for stage, color in self.TOKENS.items()
+        }
+
+        assert all(ratio >= 4.5 for ratio in surface_ratios.values())
+        assert all(ratio >= 3.0 for ratio in surface_ratios.values())
+        assert all(ratio >= 4.5 for ratio in fill_text_ratios.values())
+
+    def test_css_preserves_non_color_meaning_and_accessibility_modes(self) -> None:
+        result = inject_lifecycle_tokens_html(self._lifecycle_doc())
+        token_css = result.split('<style id="sdd-lifecycle-tokens">', 1)[1].split(
+            "</style>", 1
+        )[0]
+
+        assert "color:#0A0A0A" in token_css
+        assert (
+            ".zone-lifecycle .pipe-node,.zone-lifecycle .lifecycle-stage{opacity:1}"
+            in token_css
+        )
+        assert "opacity:." not in token_css
+        assert (
+            ".zone-lifecycle .pipe-current{font-weight:700;"
+            "outline:2px solid var(--lifecycle-state);outline-offset:1px}"
+            in token_css
+        )
+        assert (
+            ".zone-lifecycle :focus-visible{outline:3px solid "
+            "var(--focus-ring,#E8E4D8);outline-offset:3px}"
+            in token_css
+        )
+        assert (
+            "@media (max-width:640px){.zone-lifecycle .lifecycle-pipeline{"
+            "display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}"
+            ".zone-lifecycle .pipe-node{text-align:center;"
+            "overflow-wrap:anywhere}}"
+            in token_css
+        )
+        assert (
+            "@media (forced-colors:active){"
+            ".zone-lifecycle .pipe-node[class*=\"lifecycle-state-\"],"
+            ".zone-lifecycle .lifecycle-stage[class*=\"lifecycle-state-\"]{"
+            "forced-color-adjust:auto;background:Canvas;color:CanvasText;"
+            "border:1px solid CanvasText}"
+            ".zone-lifecycle .pipe-current{outline:3px double Highlight}}"
+            in token_css
+        )
+
+    def test_build_calls_token_injector_immediately_after_lifecycle_injector(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        from cli import state_builder as sb
+
+        sdd = _seed_sdd_root(tmp_path)
+        calls: list[str] = []
+
+        def lifecycle_spy(html_doc: str, **kwargs) -> str:
+            calls.append("lifecycle")
+            return html_doc
+
+        def tokens_spy(html_doc: str) -> str:
+            calls.append("tokens")
+            return html_doc
+
+        monkeypatch.setattr(sb, "inject_lifecycle_html", lifecycle_spy)
+        monkeypatch.setattr(sb, "inject_lifecycle_tokens_html", tokens_spy)
+
+        sb.build(sdd_root=sdd, write=False, fixed_date="2026-07-10")
+
+        lifecycle_index = calls.index("lifecycle")
+        assert calls[lifecycle_index:lifecycle_index + 2] == ["lifecycle", "tokens"]
 
 
 # ===========================================================================

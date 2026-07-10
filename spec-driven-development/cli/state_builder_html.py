@@ -494,6 +494,123 @@ def inject_lifecycle_html(
     return html_doc + section
 
 
+LIFECYCLE_TOKENS = {
+    "IDEA": "#B39DDB",
+    "BACKLOG": "#7FA8C9",
+    "CLARIFY": "#58B8B0",
+    "SPEC": "#82B57A",
+    "PLAN": "#C2A85D",
+    "TASKS": "#D48B52",
+    "IMPLEMENT": "#D36F86",
+    "REVIEW": "#B884C4",
+    "DONE": "#6FA37A",
+}
+
+LIFECYCLE_STATE_CLASSES = {
+    stage: f"lifecycle-state-{stage.lower()}" for stage in LIFECYCLE_TOKENS
+}
+
+_LIFECYCLE_TOKENS_STYLE_ID = "sdd-lifecycle-tokens"
+_LIFECYCLE_TOKENS_STYLE = (
+    f'<style id="{_LIFECYCLE_TOKENS_STYLE_ID}">'
+    ":root{"
+    + "".join(
+        f"--lifecycle-{stage.lower()}:{color};"
+        for stage, color in LIFECYCLE_TOKENS.items()
+    )
+    + "}"
+    ".zone-lifecycle .pipe-node,.zone-lifecycle .lifecycle-stage{opacity:1}"
+    + "".join(
+        f".zone-lifecycle .{state_class}{{"
+        f"--lifecycle-state:var(--lifecycle-{stage.lower()});}}"
+        for stage, state_class in LIFECYCLE_STATE_CLASSES.items()
+    )
+    + ".zone-lifecycle .pipe-node[class*=\"lifecycle-state-\"],"
+    ".zone-lifecycle .lifecycle-stage[class*=\"lifecycle-state-\"]{"
+    "background:var(--lifecycle-state);color:#0A0A0A;"
+    "border-color:var(--lifecycle-state);opacity:1}"
+    ".zone-lifecycle .pipe-current{font-weight:700;outline:2px solid var(--lifecycle-state);"
+    "outline-offset:1px}"
+    ".zone-lifecycle :focus-visible{outline:3px solid var(--focus-ring,#E8E4D8);"
+    "outline-offset:3px}"
+    "@media (max-width:640px){.zone-lifecycle .lifecycle-pipeline{"
+    "display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}"
+    ".zone-lifecycle .pipe-node{text-align:center;overflow-wrap:anywhere}}"
+    "@media (forced-colors:active){"
+    ".zone-lifecycle .pipe-node[class*=\"lifecycle-state-\"],"
+    ".zone-lifecycle .lifecycle-stage[class*=\"lifecycle-state-\"]{"
+    "forced-color-adjust:auto;background:Canvas;color:CanvasText;"
+    "border:1px solid CanvasText}"
+    ".zone-lifecycle .pipe-current{outline:3px double Highlight}}"
+    "</style>"
+)
+
+_LIFECYCLE_NODE_RE = re.compile(
+    r'(<li\b[^>]*\bclass=")([^"]*\bpipe-node\b[^"]*)("[^>]*>)([^<]+)(</li>)'
+)
+_LIFECYCLE_ARTICLE_RE = re.compile(
+    r'<article\b(?=[^>]*\bclass="[^"]*\blifecycle-card\b)[^>]*>.*?</article>',
+    re.DOTALL,
+)
+_LIFECYCLE_STAGE_RE = re.compile(
+    r'(<span\b[^>]*\bclass=")([^"]*\blifecycle-stage\b[^"]*)("[^>]*>)([^<]+)(</span>)'
+)
+
+
+def _with_state_class(classes: str, stage: str) -> str:
+    """Append one canonical lifecycle state class without disturbing others."""
+    state_class = LIFECYCLE_STATE_CLASSES[stage]
+    values = classes.split()
+    if state_class not in values:
+        values.append(state_class)
+    return " ".join(values)
+
+
+def inject_lifecycle_tokens_html(html_doc: str) -> str:
+    """Add SDD-038 semantic state classes and token CSS to lifecycle HTML.
+
+    The pass is additive, marker-bounded, and byte-idempotent. Existing labels,
+    structural state classes, and ``aria-current=step`` attributes are retained.
+    """
+    if (
+        'class="zone-lifecycle"' not in html_doc
+        or f'id="{_LIFECYCLE_TOKENS_STYLE_ID}"' in html_doc
+    ):
+        return html_doc
+
+    def decorate_node(match: re.Match) -> str:
+        stage = match.group(4).strip().upper()
+        if stage not in LIFECYCLE_STATE_CLASSES:
+            return match.group(0)
+        classes = _with_state_class(match.group(2), stage)
+        return match.group(1) + classes + "".join(match.groups()[2:])
+
+    def decorate_article(match: re.Match) -> str:
+        article = _LIFECYCLE_NODE_RE.sub(decorate_node, match.group(0))
+        current = re.search(
+            r'<li\b[^>]*\bclass="[^"]*\bpipe-current\b[^"]*"[^>]*>'
+            r'([^<]+)</li>',
+            article,
+        )
+        current_stage = current.group(1).strip().upper() if current else ""
+
+        def decorate_label(label_match: re.Match) -> str:
+            label = label_match.group(4).strip().upper()
+            stage = label if label in LIFECYCLE_STATE_CLASSES else current_stage
+            if stage not in LIFECYCLE_STATE_CLASSES:
+                return label_match.group(0)
+            classes = _with_state_class(label_match.group(2), stage)
+            return label_match.group(1) + classes + "".join(label_match.groups()[2:])
+
+        return _LIFECYCLE_STAGE_RE.sub(decorate_label, article)
+
+    decorated = _LIFECYCLE_ARTICLE_RE.sub(decorate_article, html_doc)
+    if "</head>" in decorated:
+        return decorated.replace("</head>", _LIFECYCLE_TOKENS_STYLE + "</head>", 1)
+    marker = '<section class="zone-lifecycle"'
+    return decorated.replace(marker, _LIFECYCLE_TOKENS_STYLE + marker, 1)
+
+
 # ---------------------------------------------------------------------------- #
 # SDD-041 (F-31 rebuild): the Backlog reorder surface
 #

@@ -1604,3 +1604,12 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - CI/push: no push performed; CI is pending the owner-approved push. No CI-green claim is made pre-push.
 - Owner approval still required before push: ratify the F-59 `constitution/roadmap.md` documentation-consistency edit (PI-8 close + PI-9 name "Experience Polish"), the documented CLARIFY defaults used for F-60/F-61, and authorize pushing the complete Sprint 22 local chain. Until then, the close remains local only.
 - Out of scope preserved: the parallel Project EM change in `backlog/IDEAS.md` remains unedited, unstaged, and uncommitted by this close; no next sprint or PI created.
+
+### Sprint 22 owner-ratification addendum (append-only)
+
+- Date: 2026-07-10
+- Ratification: **APPROVED FOR COMMIT + PUSH**.
+- Owner decision: Option 1 -- push the complete Sprint 22 chain.
+- Scope explicitly ratified: `constitution/roadmap.md` PI-8 close and PI-9 open; PI-9 name **Experience Polish**; SDD-049 default overlap block with explicit `--allow-overlap` override; SDD-054 `move()` and audit-backed backend priority re-optimization.
+- Report-up to project Executive Manager: **DELIVERED BY THIS CLOSE PAYLOAD**.
+- CI status: **PENDING UNTIL PUSH**; this addendum does not claim CI green.

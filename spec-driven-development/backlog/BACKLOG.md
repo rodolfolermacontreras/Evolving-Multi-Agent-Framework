@@ -14,6 +14,18 @@ Prioritized backlog with RICE scoring. Managed by Principal Product Manager.
 
 ## P1 - Must Have
 
+### Pre-Sprint-23 CI precondition repair (approved 2026-07-10)
+
+| ID | Title | Priority | R | I | C | E | RICE | Sprint | Status | Notes |
+|----|-------|----------|---|---|---|---|------|--------|--------|-------|
+| SDD-055 | Fresh-checkout CI doctor repair | P1 | 10 | 3 | 1.0 | 1 | 30.0 | Out-of-sprint precondition before PI-9 Sprint 23 | **APPROVED -- [AFK]** Owner approved repair, push, and public-CI verification on 2026-07-10. | Structural defect: GitHub doctor runs #21-#23 fail because a fresh checkout correctly lacks the ignored `ledger/fleet.db` and its local PI-9 rows, while the local baseline at `28f1262` is clean with 616 passed / 2 skipped, clean lints, Article X 3/3, and local doctor green. Repair the fresh-checkout CI contract; do not waive the gate. This is a P1 release precondition outside Sprint 23, not dashboard scope, and does not start or alter Sprint 23. Owner approval evidence (verbatim): "Owner approved Option 1 on 2026-07-10: authorize the pre-Sprint-23 CI repair, push it, verify public CI green, then return control to Sprint EM." RICE = (10 x 3 x 1.0) / 1 = 30.0. |
+
+Classification rationale: Reach 10 because every clean clone and public CI run
+uses this contract; Impact 3 because the failing required gate blocks the next
+sprint; Confidence 1.0 because runs #21-#23 reproduce the same structural cause;
+Effort S = 1 because this is a bounded repair, not a feature. The existing Sprint
+23 allocation remains unchanged.
+
 ### Scott Feedback Bundle (triaged 2026-06-03; PI-4/PI-5 commitment pending human decision)
 
 | ID | Title | Priority | R | I | C | E | RICE | Sprint | Status |

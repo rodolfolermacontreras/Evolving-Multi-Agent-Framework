@@ -1593,7 +1593,7 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 
 - Date: 2026-07-09
 - Features completed: F-59 (PI-8 close + PI-9 open), F-60 (SDD-049), F-61 (SDD-054), F-62 (durable close)
-- Local commit chain: `6d981a5` -> `1d85455` -> `7414774` -> parallel-session `c31d4c9` (preserved untouched) -> `5fc1a87` -> F-62 close commit
+- Local commit chain: `6d981a5` -> `1d85455` -> `7414774` -> parallel-session `c31d4c9` (preserved untouched) -> `5fc1a87` -> `f5663fc` (F-62 close)
 - Tests: 596 -> 616 (+20); final local result 616 passed / 2 skipped.
 - Validation: SDD-049 R-1..R-7 + M-1..M-3 checked; SDD-054 R-1..R-7 + M-1..M-3 checked. M-3 records local doctor green and explicitly leaves CI pending push.
 - Lints: schema lint clean; origin lint clean; staledoc lint clean.

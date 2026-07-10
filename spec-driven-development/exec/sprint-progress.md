@@ -1657,3 +1657,43 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - Next: Principal Architect authors the SDD-038/056/057 specs and validation
   contracts, confirms additive lock-safe boundaries, and hands approved work to
   the Principal Software Developer.
+
+### F-63 -- Architect CLARIFY -> SPEC -> PLAN -> TASKS -- DONE
+
+- Date: 2026-07-10
+- Owner: Principal Architect; Principal UI Designer consulted for SDD-038 token
+  selection; Principal Software Developer receives implementation handoff.
+- Spec bundle: `specs/2026-07-10-sprint-23-dashboard-polish/` with explicit
+  per-ID traceability for SDD-038, SDD-056, and SDD-057.
+- Article XI: HELD. One cohesive bundle is the sole CLARIFY/SPEC unit; all three
+  IDs share the state-builder build/lock surface while retaining independent
+  requirements, validation rows, and tasks.
+- Architecture: APPROVED, Level-1, no ADR. Pill-nav is an additive post-render
+  `inject_*` processor driven by live PI data; Current Sprint uses an additive
+  `CURRENT_PI.md` loader feeding unchanged `detect_current_sprint` through
+  `build()` with legacy/empty fallback; lifecycle colors use an additive CSS/
+  state-class injector after the existing lifecycle injector.
+- Article X: design preserves byte identity of `render_html`, `render_markdown`,
+  `load_sprint_table`, `load_sprint_goal`, `detect_current_sprint`, and
+  `load_decisions`; implementation must prove `TestS1FootprintLockGuard` and
+  independent hashes.
+- Token set locked: IDEA `#B39DDB`, BACKLOG `#7FA8C9`, CLARIFY `#58B8B0`,
+  SPEC `#82B57A`, PLAN `#C2A85D`, TASKS `#D48B52`, IMPLEMENT `#D36F86`,
+  REVIEW `#B884C4`, DONE `#6FA37A`; all measured >=4.5:1 against `#1C1B18`.
+- Wording scope locked to two exact phrases only: Sprint 5 line 35 and the
+  Sprint 6 sentence beginning at line 205; replacements preserve fresh-session
+  OR EM-routed-subagent context isolation. No broad scrub.
+- Validation: 17 REQUIRED + 3 manual rows locked, all unchecked pending
+  implementation. Close requires real PI-9/Sprint-23 generated HTML, contrast
+  evidence, >=623/2 plus new tests, three lints, local + clean-CI doctor, public
+  CI, B-1/B-2/B-4, and locked-function byte identity.
+- File sequencing: all state-builder packets serialized under SDD-049 overlap
+  semantics; only the two-prompt wording packet is parallel-safe. Generated exec
+  surfaces run once at the final serial step via `build()` only.
+- Design checks: schema lint clean; origin lint clean; stale-doc lint clean.
+- Scope guard: no production behavior, constitution, generated exec, locked
+  function, dependency, schema, or ADR change in F-63 Architect unit.
+- Handoff: READY for Principal Software Developer TDD implementation beginning
+  with T-X-01 baseline and T-057-01 RED tests. Sprint EM/PM must add an explicit
+  Sprint 23 ACTIVE marker to PI-9 `CURRENT_PI.md` before the real close smoke;
+  implementation may not infer it.

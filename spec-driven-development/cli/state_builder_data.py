@@ -562,6 +562,161 @@ def resolve_display_pi(
     return active
 
 
+_ACTIVE_SPRINT_WORD_RE = re.compile(
+    r"\b(?:ACTIVE|CURRENT|IN[- ]PROGRESS)\b", re.IGNORECASE
+)
+_NEGATED_ACTIVE_RE = re.compile(
+    r"\b(?:NOT|NO)\s+(?:ACTIVE|CURRENT|IN[- ]PROGRESS)\b", re.IGNORECASE
+)
+_TERMINAL_SPRINT_WORD_RE = re.compile(
+    r"\b(?:CLOSED|DONE|PROPOSED)\b", re.IGNORECASE
+)
+_MALFORMED_SPRINT_TOKEN_RE = re.compile(
+    r"\bSprint\s+(?:\d+[.\-][\w.-]+|\d+[A-Za-z]\w*|[A-Za-z]\w*)\b",
+    re.IGNORECASE,
+)
+_ACTIVE_NUMBER_RE = re.compile(
+    r"\b(?P<overall>overall\s+)?Sprint\s+(?P<num>\d+)(?![\w.])"
+    r"(?:(?!\bSprint\b).){0,80}?"
+    r"\b(?P<status>ACTIVE|CURRENT|IN[- ]PROGRESS)\b",
+    re.IGNORECASE,
+)
+
+
+def _has_malformed_sprint_token(text: str) -> bool:
+    """True when a Sprint marker's numeric token is not a whole integer."""
+    return _MALFORMED_SPRINT_TOKEN_RE.search(text) is not None
+
+
+def _active_numbers(text: str) -> tuple[set[int], set[int]] | None:
+    """Return active ``(overall, local)`` numbers, or None for invalid text."""
+    if _has_malformed_sprint_token(text):
+        return None
+    overall: set[int] = set()
+    local: set[int] = set()
+    for clause in re.split(r"[;|]", text):
+        has_active = _ACTIVE_SPRINT_WORD_RE.search(clause) is not None
+        if not has_active:
+            continue
+        if (_NEGATED_ACTIVE_RE.search(clause)
+                or _TERMINAL_SPRINT_WORD_RE.search(clause)):
+            return None
+        for match in _ACTIVE_NUMBER_RE.finditer(clause):
+            target = overall if match.group("overall") else local
+            target.add(int(match.group("num")))
+    return overall, local
+
+
+def load_active_sprint_from_current_pi(sdd_root: Path) -> list[dict]:
+    """Load the one explicitly active sprint from the newest ACTIVE PI file.
+
+    The highest numeric ``sprints/PI-*/CURRENT_PI.md`` with both active
+    frontmatter and a body PI status beginning ACTIVE is authoritative. Any
+    unreadable, malformed, absent, or conflicting sprint truth returns ``[]``.
+    """
+    sprints_dir = Path(sdd_root) / "sprints"
+    if not sprints_dir.is_dir():
+        return []
+
+    active_pis: list[tuple[int, Path, str]] = []
+    for path in sprints_dir.glob("PI-*/CURRENT_PI.md"):
+        match = re.fullmatch(r"PI-(\d+)", path.parent.name)
+        if not match:
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            return []
+        fm_match = re.match(r"\A---\s*\n(.*?)\n---(?:\s*\n|\Z)", text, re.DOTALL)
+        if not fm_match or not re.search(
+            r"^status\s*:\s*active\s*$", fm_match.group(1), re.IGNORECASE | re.MULTILINE
+        ):
+            continue
+        body = text[fm_match.end():]
+        status_match = re.search(
+            r"^\s*-?\s*Status\s*:\s*(.+?)\s*$", body, re.IGNORECASE | re.MULTILINE
+        )
+        if not status_match:
+            continue
+        status_value = status_match.group(1).replace("**", "").strip()
+        if not re.match(r"ACTIVE\b", status_value, re.IGNORECASE):
+            continue
+        active_pis.append((int(match.group(1)), path, body))
+
+    if not active_pis:
+        return []
+    _, path, body = max(active_pis, key=lambda item: item[0])
+
+    status_line = next(
+        (line for line in body.splitlines()
+         if re.match(r"^\s*-?\s*Status\s*:", line, re.IGNORECASE)),
+        "",
+    )
+    source_lines = [status_line]
+    source_lines.extend(
+        line for line in body.splitlines()
+        if re.match(r"^\s*#{1,6}\s+", line)
+        and re.search(
+            r"\bSprint\b.*\b(?:ACTIVE|CURRENT|IN[- ]PROGRESS|CLOSED|DONE|PROPOSED)\b",
+            line,
+            re.IGNORECASE,
+        )
+    )
+
+    candidates: list[tuple[int, str, bool]] = []
+    for line in source_lines:
+        parsed = _active_numbers(line)
+        if parsed is None:
+            return []
+        overall, local = parsed
+        candidates.extend((number, "", True) for number in overall)
+        candidates.extend((number, "", False) for number in local)
+
+    for line in body.splitlines():
+        if not line.lstrip().startswith("|") or "sprint" not in line.lower():
+            continue
+        cells = [cell.strip().strip("*") for cell in line.strip().strip("|").split("|")]
+        if len(cells) < 4:
+            continue
+        status_text = " ".join(cells[3:])
+        if not _ACTIVE_SPRINT_WORD_RE.search(status_text):
+            continue
+        if (_NEGATED_ACTIVE_RE.search(status_text)
+            or _TERMINAL_SPRINT_WORD_RE.search(status_text)):
+            return []
+        marker_text = " ".join(cells[:2])
+        if _has_malformed_sprint_token(marker_text):
+            return []
+        local_match = re.search(
+            r"\bPI-\d+\s+Sprint\s+(\d+)\b", cells[0], re.IGNORECASE
+        )
+        overall_match = re.search(r"\bSprint\s+(\d+)\b", cells[1], re.IGNORECASE)
+        if not local_match and not overall_match:
+            return []
+        number = int(overall_match.group(1) if overall_match else local_match.group(1))
+        candidates.append((number, cells[2], overall_match is not None))
+
+    overall_candidates = [candidate for candidate in candidates if candidate[2]]
+    selected = overall_candidates or candidates
+    unique_numbers = {number for number, _, _ in selected}
+    if len(unique_numbers) != 1:
+        return []
+    number = unique_numbers.pop()
+    titles = {
+        title for candidate_num, title, _ in selected
+        if candidate_num == number and title
+    }
+    if len(titles) > 1:
+        return []
+    title = next(iter(titles), "")
+    return [{
+        "num": number,
+        "title": title,
+        "status": "ACTIVE",
+        "path": str(path.relative_to(sdd_root)).replace("\\", "/"),
+    }]
+
+
 def _backlog_ids_for_sprint(sdd_root: Path, pi_name: str, sprint_label: str) -> list[str]:
     backlog_path = sdd_root / "backlog" / "BACKLOG.md"
     if not backlog_path.is_file() or not pi_name or not sprint_label:

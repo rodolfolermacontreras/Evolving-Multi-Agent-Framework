@@ -42,12 +42,14 @@ from cli.state_builder import (
     load_roster,
     load_sprint_goal,
     load_sprint_table,
+    load_active_sprint_from_current_pi,
     main,
     parse_args,
     render_html,
     render_markdown,
     resolve_display_pi,
     served_html_with_refresh,
+    inject_pi_pills_html,
 )
 
 # SDD-036: lifecycle pipeline + four-card docs row + reorder control surfaces.
@@ -1232,6 +1234,321 @@ class TestDetectCurrentSprint:
         ]
         result = detect_current_sprint(sprints)
         assert result["num"] == 3
+
+
+# ---------------------------------------------------------------------------
+# SDD-057: CURRENT_PI active-sprint source truth (V57-1..V57-3)
+# ---------------------------------------------------------------------------
+
+
+def _write_current_pi(
+    sdd: Path, pi_num: int, body: str, *, frontmatter_status: str = "active"
+) -> Path:
+    path = sdd / "sprints" / f"PI-{pi_num}" / "CURRENT_PI.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "---\n"
+        f"status: {frontmatter_status}\n"
+        f"sprint: PI-{pi_num}\n"
+        "---\n\n"
+        f"# PI-{pi_num}: Test PI\n\n"
+        f"{body}\n",
+        encoding="utf-8",
+    )
+    return path
+
+
+class TestLoadActiveSprintFromCurrentPi:
+    """V57-1/V57-2: explicit CURRENT_PI marker parsing and rejection."""
+
+    @pytest.mark.parametrize(
+        ("body", "expected_num", "expected_title"),
+        [
+            ("- Status: **ACTIVE; overall Sprint 23 ACTIVE (PI-9 Sprint 2).**", 23, ""),
+            ("- Status: **ACTIVE**\n\n### Sprint 4 -- IN-PROGRESS", 4, ""),
+            (
+                "- Status: **ACTIVE**\n\n## Sprint Allocation\n\n"
+                "| Sprint | Overall | Title | Status |\n"
+                "|--------|---------|-------|--------|\n"
+                "| PI-9 Sprint 2 | Sprint 23 | Dashboard polish | CURRENT |",
+                23,
+                "Dashboard polish",
+            ),
+        ],
+    )
+    def test_accepts_each_explicit_marker_form(
+        self, tmp_path: Path, body: str, expected_num: int, expected_title: str
+    ) -> None:
+        sdd = tmp_path / "sdd"
+        _write_current_pi(sdd, 9, body)
+
+        result = load_active_sprint_from_current_pi(sdd)
+
+        assert result == [{
+            "num": expected_num,
+            "title": expected_title,
+            "status": "ACTIVE",
+            "path": "sprints/PI-9/CURRENT_PI.md",
+        }]
+
+    def test_highest_active_pi_wins_and_overall_beats_local(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "sdd"
+        _write_current_pi(sdd, 7, "- Status: **ACTIVE; overall Sprint 19 ACTIVE.**")
+        _write_current_pi(
+            sdd, 9,
+            "- Status: **ACTIVE; PI-9 Sprint 2 ACTIVE, overall Sprint 23 ACTIVE.**",
+        )
+        _write_current_pi(sdd, 10, "- Status: **CLOSED; Sprint 24 DONE.**")
+
+        result = load_active_sprint_from_current_pi(sdd)
+
+        assert result[0]["num"] == 23
+        assert result[0]["path"] == "sprints/PI-9/CURRENT_PI.md"
+
+    @pytest.mark.parametrize("frontmatter_status", ["done", "draft"])
+    def test_rejects_inactive_frontmatter(
+        self, tmp_path: Path, frontmatter_status: str
+    ) -> None:
+        sdd = tmp_path / "sdd"
+        _write_current_pi(
+            sdd, 9, "- Status: **ACTIVE; Sprint 23 ACTIVE.**",
+            frontmatter_status=frontmatter_status,
+        )
+        assert load_active_sprint_from_current_pi(sdd) == []
+
+    def test_rejects_inactive_body_status(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "sdd"
+        _write_current_pi(sdd, 9, "- Status: **PLANNED; Sprint 23 ACTIVE.**")
+        assert load_active_sprint_from_current_pi(sdd) == []
+
+    @pytest.mark.parametrize("marker_status", ["CLOSED", "DONE", "PROPOSED"])
+    def test_rejects_non_active_sprint_semantics(
+        self, tmp_path: Path, marker_status: str
+    ) -> None:
+        sdd = tmp_path / "sdd"
+        _write_current_pi(
+            sdd, 9,
+            f"- Status: **ACTIVE**\n\n### Overall Sprint 23 -- {marker_status}",
+        )
+        assert load_active_sprint_from_current_pi(sdd) == []
+
+    @pytest.mark.parametrize(
+        "body",
+        [
+            "- Status: **ACTIVE**\n\n### Sprint TBD -- ACTIVE",
+            "- Status: **ACTIVE**\n\n### Sprint 23.5 -- ACTIVE",
+            "- Status: **ACTIVE; overall Sprint 23.5 ACTIVE (PI-9 Sprint 2).**",
+            (
+                "- Status: **ACTIVE**\n\n## Sprint Allocation\n\n"
+                "| Sprint | Overall | Title | Status |\n"
+                "|--------|---------|-------|--------|\n"
+                "| PI-9 Sprint 2 | Sprint 23.5 | Dashboard polish | CURRENT |"
+            ),
+            (
+                "- Status: **ACTIVE**\n\n## Sprint Allocation\n\n"
+                "| Sprint | Overall | Title | Status |\n"
+                "|--------|---------|-------|--------|\n"
+                "| PI-9 Sprint 2.5 | Sprint 23 | Dashboard polish | CURRENT |"
+            ),
+            "- Status: **ACTIVE**\n\nNo sprint marker is declared.",
+            (
+                "- Status: **ACTIVE; overall Sprint 23 ACTIVE.**\n\n"
+                "### Overall Sprint 24 -- CURRENT"
+            ),
+        ],
+    )
+    def test_rejects_malformed_absent_or_conflicting_marker(
+        self, tmp_path: Path, body: str
+    ) -> None:
+        sdd = tmp_path / "sdd"
+        _write_current_pi(sdd, 9, body)
+        assert load_active_sprint_from_current_pi(sdd) == []
+
+    def test_read_error_returns_no_candidate(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        sdd = tmp_path / "sdd"
+        target = _write_current_pi(
+            sdd, 9, "- Status: **ACTIVE; overall Sprint 23 ACTIVE.**"
+        )
+        original_read_text = Path.read_text
+
+        def unreadable(path: Path, *args, **kwargs):
+            if path == target:
+                raise OSError("unreadable")
+            return original_read_text(path, *args, **kwargs)
+
+        monkeypatch.setattr(Path, "read_text", unreadable)
+        assert load_active_sprint_from_current_pi(sdd) == []
+
+    def test_accepts_active_marker_when_same_status_line_mentions_closed_history(
+        self, tmp_path: Path
+    ) -> None:
+        sdd = tmp_path / "sdd"
+        _write_current_pi(
+            sdd, 9,
+            "- Status: **ACTIVE; Sprint 22 CLOSED; overall Sprint 23 ACTIVE.**",
+        )
+        assert load_active_sprint_from_current_pi(sdd)[0]["num"] == 23
+
+    @pytest.mark.parametrize(
+        "body",
+        [
+            "- Status: **ACTIVE; overall Sprint 23 NOT ACTIVE.**",
+            "- Status: **ACTIVE; Sprint 23 ACTIVE; Sprint 24 CURRENT.**",
+            "- Status: **ACTIVE; Sprint 23x ACTIVE.**",
+            "- Status: **ACTIVE**\n\n### Sprint 23-alpha -- ACTIVE",
+            "- Status: **ACTIVE**\n\n### Sprint 23 -- CLOSED ACTIVE",
+            (
+                "- Status: **ACTIVE**\n\n## Sprint Allocation\n\n"
+                "| Sprint | Overall | Title | Status |\n"
+                "|--------|---------|-------|--------|\n"
+                "| PI-9 Sprint 2 | Sprint 23 | Current dashboard | PLANNED |"
+            ),
+            (
+                "- Status: **ACTIVE**\n\n## Sprint Allocation\n\n"
+                "| Sprint | Overall | Title | Status |\n"
+                "|--------|---------|-------|--------|\n"
+                "| PI-9 Sprint 2 | Sprint 23 | Dashboard polish | CLOSED ACTIVE |"
+            ),
+        ],
+    )
+    def test_rejects_negated_conflicting_malformed_or_non_active_sources(
+        self, tmp_path: Path, body: str
+    ) -> None:
+        sdd = tmp_path / "sdd"
+        _write_current_pi(sdd, 9, body)
+        assert load_active_sprint_from_current_pi(sdd) == []
+
+
+class TestActiveSprintBuildIntegration:
+    """V57-3: build selects live, legacy fallback, or the existing empty state."""
+
+    def test_build_passes_live_list_and_skips_legacy(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        from cli import state_builder as sb
+
+        sdd = _seed_sdd_root(tmp_path)
+        _write_current_pi(sdd, 9, "- Status: **ACTIVE; overall Sprint 23 ACTIVE.**")
+        seen: list[list[dict]] = []
+        original_detect = sb.detect_current_sprint
+
+        def detect_spy(sprints: list[dict]) -> dict | None:
+            seen.append(sprints)
+            return original_detect(sprints)
+
+        def legacy_must_not_run(*args, **kwargs):
+            raise AssertionError("legacy loader must not run when live truth exists")
+
+        monkeypatch.setattr(sb, "detect_current_sprint", detect_spy)
+        monkeypatch.setattr(sb, "load_sprint_table", legacy_must_not_run)
+
+        result = sb.build(sdd_root=sdd, write=False, fixed_date="2026-07-10")
+
+        assert seen and seen[0][0]["num"] == 23
+        assert "Sprint 23" in result["html"]
+
+    @pytest.mark.parametrize("legacy", [
+        [{"num": 8, "title": "Legacy", "status": "In-Flight", "path": "legacy"}],
+        [],
+    ])
+    def test_build_uses_legacy_only_when_live_is_empty(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, legacy: list[dict]
+    ) -> None:
+        from cli import state_builder as sb
+
+        sdd = _seed_sdd_root(tmp_path)
+        seen: list[list[dict]] = []
+        original_detect = sb.detect_current_sprint
+
+        def detect_spy(sprints: list[dict]) -> dict | None:
+            seen.append(sprints)
+            return original_detect(sprints)
+
+        monkeypatch.setattr(sb, "detect_current_sprint", detect_spy)
+        monkeypatch.setattr(sb, "load_sprint_table", lambda *args, **kwargs: legacy)
+
+        result = sb.build(sdd_root=sdd, write=False, fixed_date="2026-07-10")
+
+        assert seen == [legacy]
+        if legacy:
+            assert "Sprint 8" in result["html"]
+        else:
+            assert "No active sprint found." in result["html"]
+
+
+# ---------------------------------------------------------------------------
+# SDD-056: PI pill-nav live truth (V56-1/V56-2)
+# ---------------------------------------------------------------------------
+
+
+class TestInjectPiPillsHtml:
+    def test_renders_live_pis_in_numeric_order_with_one_escaped_current(self) -> None:
+        source = (
+            '<header><nav class="pi-pills" aria-label="Program Increments" '
+            'data-owner="render">stale</nav></header>'
+        )
+        pis = [
+            PIBlock(name=f"PI-{num}", title=f"Title {num}", is_current=num == 5)
+            for num in range(9, 0, -1)
+        ]
+        pis[-1] = PIBlock(
+            name="PI-1", title='Alpha <beta> & "truth"', is_current=False
+        )
+
+        result = inject_pi_pills_html(source, pis=pis, active_pi=pis[0])
+
+        assert result.index(">PI-1<") < result.index(">PI-2<") < result.index(">PI-9<")
+        assert all(result.count(f">PI-{num}<") == 1 for num in range(1, 10))
+        assert result.count('class="pill current"') == 1
+        assert result.count('aria-current="page"') == 1
+        assert 'class="pill current" title="Title 9" aria-current="page">PI-9<' in result
+        assert 'title="Alpha &lt;beta&gt; &amp; &quot;truth&quot;"' in result
+        assert '<nav class="pi-pills" aria-label="Program Increments" data-owner="render">' in result
+
+    def test_missing_nav_or_active_pi_returns_original(self) -> None:
+        pis = [PIBlock(name="PI-1", title="One", is_current=False)]
+        no_nav = "<header>plain</header>"
+        nav = '<nav class="pi-pills" aria-label="Program Increments">old</nav>'
+
+        assert inject_pi_pills_html(no_nav, pis=pis, active_pi=pis[0]) == no_nav
+        assert inject_pi_pills_html(nav, pis=pis, active_pi=None) == nav
+
+    def test_second_pass_is_byte_idempotent(self) -> None:
+        pis = [
+            PIBlock(name="PI-2", title="Two", is_current=True),
+            PIBlock(name="PI-1", title="One", is_current=False),
+        ]
+        source = '<nav class="pi-pills" aria-label="Program Increments">old</nav>'
+
+        once = inject_pi_pills_html(source, pis=pis, active_pi=pis[0])
+        twice = inject_pi_pills_html(once, pis=pis, active_pi=pis[0])
+
+        assert twice == once
+
+    def test_build_injects_live_pills_without_writing_source_data(
+        self, tmp_path: Path
+    ) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        roadmap = sdd / "constitution" / "roadmap.md"
+        roadmap.write_text(
+            "# Roadmap\n\n"
+            + "\n".join(
+                f"## PI-{num}: Title {num}{' (current)' if num == 5 else ''}\n\n- [x] item\n"
+                for num in range(1, 10)
+            ),
+            encoding="utf-8",
+        )
+        _write_current_pi(sdd, 9, "- Status: **ACTIVE; overall Sprint 23 ACTIVE.**")
+        before = roadmap.read_bytes()
+
+        result = build(sdd_root=sdd, write=False, fixed_date="2026-07-10")
+
+        nav = result["html"].split('<nav class="pi-pills"', 1)[1].split("</nav>", 1)[0]
+        assert nav.count('class="pill current"') == 1
+        assert 'aria-current="page">PI-9<' in nav
+        assert roadmap.read_bytes() == before
 
 
 # ---------------------------------------------------------------------------

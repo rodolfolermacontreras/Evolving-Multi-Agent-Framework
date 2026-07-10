@@ -114,6 +114,7 @@ from state_builder_data import (  # noqa: E402  -- in-tree sibling re-export (AD
     _active_sprint_pi,
     _read_current_pi_title,
     resolve_display_pi,
+    load_active_sprint_from_current_pi,
     _backlog_ids_for_sprint,
     _feature_for_backlog_id,
     _unchecked_required_count,
@@ -142,6 +143,7 @@ from state_builder_html import (  # noqa: E402  -- in-tree sibling re-export (AD
     _stage_short,
     _next_for,
     inject_user_gates_html,
+    inject_pi_pills_html,
     _SPRINT_STAGE_MAP,
     _sprint_stage,
     render_lifecycle_pipeline,
@@ -1683,7 +1685,10 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
 
     # v3 data-layer additions (Phase 1 functions)
     pi_name_val = pi.name if pi else ""
-    sprint_table = load_sprint_table(sdd_root, pi_name_val) if pi_name_val else []
+    live_sprint_table = load_active_sprint_from_current_pi(sdd_root)
+    sprint_table = live_sprint_table or (
+        load_sprint_table(sdd_root, pi_name_val) if pi_name_val else []
+    )
     current_sprint = detect_current_sprint(sprint_table)
     sprint_num = current_sprint["num"] if current_sprint else 1
     sprint_goal = (
@@ -1713,6 +1718,7 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
         sprint_table=sprint_table, current_sprint=current_sprint,
         sprint_goal=sprint_goal, decisions=decisions,
     )
+    htm = inject_pi_pills_html(htm, pis=pis, active_pi=pi)
     htm = inject_user_gates_html(htm, user_gates)
     # SDD-036: lifecycle pipeline + four-card docs row (static; reorder moved
     # to the dedicated Backlog section below).

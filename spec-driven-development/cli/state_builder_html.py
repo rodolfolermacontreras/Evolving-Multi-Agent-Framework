@@ -181,6 +181,46 @@ def inject_user_gates_html(html_doc: str, user_gates: list[UserGate]) -> str:
     return html_doc.replace(marker, marker + gates_html, 1)
 
 
+_PI_PILLS_NAV_RE = re.compile(
+    r'(<nav\b(?=[^>]*\bclass="[^"]*\bpi-pills\b[^"]*")[^>]*>).*?</nav>',
+    re.DOTALL,
+)
+
+
+def inject_pi_pills_html(
+    html_doc: str, *, pis: list[PIBlock], active_pi: PIBlock | None
+) -> str:
+    """Replace only the rendered PI pill nav with sorted live PI truth."""
+    if active_pi is None or not _PI_PILLS_NAV_RE.search(html_doc):
+        return html_doc
+
+    numbered: dict[int, PIBlock] = {}
+    for pi in pis:
+        match = re.fullmatch(r"PI-(\d+)", pi.name)
+        if match:
+            numbered.setdefault(int(match.group(1)), pi)
+    active_match = re.fullmatch(r"PI-(\d+)", active_pi.name)
+    if not active_match or int(active_match.group(1)) not in numbered:
+        return html_doc
+
+    pills: list[str] = []
+    active_number = int(active_match.group(1))
+    for number in sorted(numbered):
+        pi = numbered[number]
+        current = number == active_number
+        current_attrs = ' current"' if current else '"'
+        aria = ' aria-current="page"' if current else ""
+        title = f' title="{h(pi.title)}"' if pi.title else ""
+        pills.append(
+            f'<span class="pill{current_attrs}{title}{aria}>{h(pi.name)}</span>'
+        )
+
+    def replace_nav(match: re.Match) -> str:
+        return match.group(1) + "".join(pills) + "</nav>"
+
+    return _PI_PILLS_NAV_RE.sub(replace_nav, html_doc, count=1)
+
+
 # ---------------------------------------------------------------------------- #
 # SDD-036: Lifecycle pipeline + four-card docs row + reorder control.
 #

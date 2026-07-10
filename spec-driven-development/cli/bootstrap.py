@@ -214,19 +214,26 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="Skip the schema_lint + pytest verification steps.",
     )
 
-    subparsers.add_parser(
+    doctor = subparsers.add_parser(
         "doctor",
         help="Report framework health on one screen; non-zero exit on any failure (SDD-045 A-5).",
         description=(
-            "Run the same checks CI runs: ledger reachable and untracked, "
-            "schema_lint clean, governance coherence, no origin tokens, and the "
-            "test suite. Emit a one-screen report and exit non-zero on any failure."
+            "Run source-controlled framework checks. Local mode (default) also "
+            "requires clone-local operational ledger health; CI mode explicitly "
+            "omits only those inapplicable local-state checks."
         ),
-    ).add_argument(
+    )
+    doctor.add_argument(
         "--skip-tests",
         action="store_true",
         dest="skip_tests",
         help="Skip the (slow) test-suite check; run the fast checks only.",
+    )
+    doctor.add_argument(
+        "--mode",
+        choices=("local", "ci"),
+        default="local",
+        help="Validation profile: strict clone-local health (default) or fresh-checkout CI health.",
     )
 
     return parser.parse_args(argv)
@@ -1141,23 +1148,30 @@ def check_current_pi_dispatch_rows(root: Path) -> tuple[str, bool, str] | None:
     return (label, False, f"{pi}: 0 dispatch rows logged (dogfood the ledger)")
 
 
-def run_doctor(root: Path, *, run_tests: bool = True) -> int:
+def run_doctor(root: Path, *, run_tests: bool = True, mode: str = "local") -> int:
     """Report framework health on one screen; non-zero exit on any failure (A-5).
 
-    The set of checks is the single source of truth for what CI runs.
+    Both profiles run all source-controlled checks. Local additionally validates
+    ignored operational ledger state; CI reports those checks as inapplicable.
     """
     import origin_lint
     import governance_check
 
     is_framework = root == framework_root()
-    checks: list[tuple[str, bool, str]] = []
+    checks: list[tuple[str, bool | None, str]] = []
 
-    # (a) ledger reachable AND untracked.
+    # (a) Tracked database safety is universal; ignored operational ledger
+    #     reachability is strict locally and inapplicable in a fresh CI clone.
     ledger = root / "spec-driven-development" / "ledger" / "fleet.db"
     tracked = origin_lint.find_tracked_dbs(root)
     if tracked:
-        checks.append(("ledger untracked", False,
+        checks.append(("tracked databases absent", False,
                        f"tracked db(s): {', '.join(tracked)} (run git rm --cached)"))
+    else:
+        checks.append(("tracked databases absent", True, "ok"))
+
+    if mode == "ci":
+        checks.append(("ledger reachable", None, "inapplicable in CI (clone-local operational state)"))
     elif not ledger.is_file():
         checks.append(("ledger reachable", False, "fleet.db missing (run setup)"))
     else:
@@ -1209,8 +1223,14 @@ def run_doctor(root: Path, *, run_tests: bool = True) -> int:
         checks.append(("tests pass", code == 0,
                        output.splitlines()[-1] if output else ("ok" if code == 0 else "failed")))
 
-    # (f) current-PI dispatch rows: promises must become real ledger entries.
-    if is_framework:
+    # (f) Current-PI rows are clone-local operational evidence, strict locally.
+    if mode == "ci":
+        checks.append((
+            "current-PI dispatch rows",
+            None,
+            "inapplicable in CI (clone-local operational state)",
+        ))
+    elif is_framework:
         pi_check = check_current_pi_dispatch_rows(root)
         if pi_check is not None:
             checks.append(pi_check)
@@ -1242,12 +1262,13 @@ def run_doctor(root: Path, *, run_tests: bool = True) -> int:
         else:
             checks.append(("DONE completeness", True, "no active PI to audit"))
 
-    print("SDD doctor -- framework health")
+    print(f"SDD doctor -- framework health ({mode} mode)")
     all_ok = True
     for label, ok, detail in checks:
-        marker = "PASS" if ok else "FAIL"
+        marker = "N/A" if ok is None else "PASS" if ok else "FAIL"
         print(f"  [{marker}] {label}: {detail}")
-        all_ok = all_ok and ok
+        if ok is not None:
+            all_ok = all_ok and ok
     print("\nAll checks passed." if all_ok else "\nOne or more checks FAILED.")
     return 0 if all_ok else 1
 
@@ -1272,7 +1293,11 @@ def main(argv: list[str] | None = None) -> int:
                 run_checks=not args.skip_checks,
             )
         if args.command == "doctor":
-            return run_doctor(framework_root(), run_tests=not args.skip_tests)
+            return run_doctor(
+                framework_root(),
+                run_tests=not args.skip_tests,
+                mode=args.mode,
+            )
         fail(f"Unsupported command: {args.command}", "Run python bootstrap.py --help for valid commands.")
     except BootstrapError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

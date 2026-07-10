@@ -1,10 +1,9 @@
 name: doctor
 
-# Validation-only CI for the SDD framework. Runs the same `make doctor` gate
-# that a developer runs locally: tests, schema lint, governance, origin tokens,
-# ledger truth, the TDD gate, and DONE completeness. It only reads the
-# repository and reports pass/fail -- no cloud login, no credentials, no
-# production mutation. See ADR-021.
+# Validation-only CI for the SDD framework. Explicit CI mode runs every
+# source-controlled doctor check while reporting ignored clone-local ledger
+# checks as inapplicable. It only reads the repository and reports pass/fail --
+# no cloud login, credentials, or production mutation. See ADR-025.
 
 on:
   push:
@@ -26,4 +25,4 @@ jobs:
           python-version: '3.12'
 
       - name: Run doctor
-        run: make doctor
+        run: python spec-driven-development/cli/bootstrap.py doctor --mode ci

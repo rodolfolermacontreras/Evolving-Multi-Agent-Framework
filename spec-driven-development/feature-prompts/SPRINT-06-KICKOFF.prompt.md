@@ -202,6 +202,6 @@ Append to [`../exec/sprint-progress.md`](../exec/sprint-progress.md):
   opt-in. The spec encodes this; the implementation honors it.
 - Do NOT close Sprint 6 without owner approval.
 - Do NOT promote anything to a branch other than `origin/master`.
-- Do NOT start Sprint 7 in this session. It runs in its own fresh session
+- Do NOT start Sprint 7 in this context-isolated unit. Start it in a fresh session or through an EM-routed subagent dispatch
   using `SPRINT-07-KICKOFF.prompt.md` (which F-08 authors if Sprint 3 is
   ready, or defers if not).

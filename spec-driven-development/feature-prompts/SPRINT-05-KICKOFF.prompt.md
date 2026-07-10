@@ -32,7 +32,7 @@ PI-4.
 
 1. Read [_SHARED_ONBOARDING.md](_SHARED_ONBOARDING.md) end to end.
 2. Verify the HARD PREREQUISITE above.
-3. Execute the sprint sequence below. Each F-## runs in its own fresh session.
+3. Execute the sprint sequence below. Each F-## runs in its own context-isolated unit: a fresh session or an EM-routed subagent dispatch.
 4. Append a sprint-close block to `exec/sprint-progress.md` when DONE.
 
 ---

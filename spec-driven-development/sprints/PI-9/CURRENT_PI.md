@@ -3,19 +3,20 @@ id: SDD-PI-9-CURRENT_PI-sprint
 type: sprint
 status: active
 owner: principal-product-manager
-updated: 2026-07-09
+updated: 2026-07-10
 sprint: PI-9
 ---
 
 # PI-9: Experience Polish
 
-- Status: **ACTIVE; Sprint 22 CLOSED locally 2026-07-09 (push and CI pending owner
-  approval).** Sprint 22 shipped SDD-049 and SDD-054 with 616 passed / 2 skipped,
+- Status: **ACTIVE; overall Sprint 23 ACTIVE (PI-9 Sprint 2).** F-63 design is
+  complete; F-64 implementation + QA is next. This marker records the approved
+  sprint gate only and does not claim implementation or close. Sprint 22 CLOSED
+  locally 2026-07-09 and shipped SDD-049 and SDD-054 with 616 passed / 2 skipped,
   clean schema/origin/staledoc lints, local doctor green, Article X 3/3 PASS, and
   PI-9 ledger rows 30-32 all success. The Sprint EM opened PI-9 in the same edit
-  that closed PI-8 (exactly one `(current)` marker at a time). No next sprint or
-  PI is created by this close. Follows PI-8 CLOSED 2026-07-09 / DONE (Sprint 21
-  close at `07a2296`; PI-8 closed at Sprint 22 open).
+  that closed PI-8 (exactly one `(current)` marker at a time). Follows PI-8 CLOSED
+  2026-07-09 / DONE (Sprint 21 close at `07a2296`; PI-8 closed at Sprint 22 open).
 
 - Theme: Turn two long-standing quality-of-life gaps into shipped features. PI-8
   made the window onto the engine tell the truth; PI-9 polishes the experience of
@@ -32,6 +33,17 @@ sprint: PI-9
   2026-06-26, structured by SDD-053): all human-facing output uses SHORT, PLAIN
   language and every owner decision uses the DECISION-REQUEST FORMAT; agent-to-agent
   detail is fine.
+
+---
+
+## Current sprint
+
+### Overall Sprint 23 -- ACTIVE
+
+- Current gate: F-63 design complete (`CLARIFY -> SPEC -> PLAN -> TASKS`).
+- Next gate: F-64 implementation + QA for the dashboard-truth pair.
+- PI status: PI-9 remains ACTIVE.
+- Close state: not closed; no implementation outcome is claimed by this update.
 
 ---
 

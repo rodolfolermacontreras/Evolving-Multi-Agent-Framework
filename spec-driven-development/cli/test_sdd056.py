@@ -19,21 +19,26 @@ REPLACEMENTS = (
         SPRINT_05,
         "Each F-## runs in its own fresh session.",
         "Each F-## runs in its own context-isolated unit: a fresh session or an EM-routed subagent dispatch.",
-        "028607f95aeb8161bf5a4dc56ef336c9bcbd4a7f75331071a6b0c4297e2f2723",
-        "9d6b782e08615f9301d485d11950e00eb85c7291e55d37452ba28c470a436c14",
+        "276c21e7d9bc61e9b815732a34b8c36f8708ed6fca39ed824c392de295e699c8",
+        "66376e4e033859709fc9d482476c82b617b8659c8cf17a7f2056956da0ea90ad",
     ),
     (
         SPRINT_06,
         "Do NOT start Sprint 7 in this session. It runs in its own fresh session",
         "Do NOT start Sprint 7 in this context-isolated unit. Start it in a fresh session or through an EM-routed subagent dispatch",
-        "e7f1654f5f6216a1ddd5f5daac975bf3eb159a2330df4aed5547bc6468a69a26",
-        "8525319e6f521cf17aa6bb7fac0bf45b05e94a6a7a49281067faf566ae13dd97",
+        "4be177aa730ce1a685119b93cd696fe6690560fc764894eca87975c92b5820c1",
+        "168e9e1b86940dabec0f496b888c54cc50675533e4633abdcb425cb41ea6e899",
     ),
 )
 
 
 def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def _normalize_checkout_newlines(data: bytes) -> bytes:
+    """Use repository-content newlines for platform-neutral scope hashes."""
+    return data.replace(b"\r\n", b"\n")
 
 
 class TestExactScopeWordingGuard(unittest.TestCase):
@@ -49,7 +54,7 @@ class TestExactScopeWordingGuard(unittest.TestCase):
     def test_all_other_bytes_unchanged(self) -> None:
         for path, old, new, before_hash, after_hash in REPLACEMENTS:
             with self.subTest(path=path.name):
-                current = path.read_bytes()
+                current = _normalize_checkout_newlines(path.read_bytes())
                 old_bytes = old.encode("utf-8")
                 new_bytes = new.encode("utf-8")
                 self.assertEqual(_sha256(current), after_hash)

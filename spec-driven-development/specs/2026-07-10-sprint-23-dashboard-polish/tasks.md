@@ -1,7 +1,7 @@
 ---
 id: SDD-20260710SPRINT23POLISH-tasks
 type: tasks
-status: active
+status: done
 owner: principal-software-developer
 updated: 2026-07-10
 feature: 2026-07-10-sprint-23-dashboard-polish
@@ -37,7 +37,7 @@ feature: 2026-07-10-sprint-23-dashboard-polish
 | T-038-01 | [S] | Write failing token/mapping/idempotence/contrast/accessibility tests, then implement/re-export lifecycle token injector with exact nine tokens and state classes. | `cli/state_builder_html.py`, `cli/state_builder.py`, `cli/test_state_builder.py` | V38-1..V38-4, VX-1 | T-056-02 | AFK | No | done (F-65) |
 | T-038-02 | [S] | Wire token injector immediately after lifecycle injector; verify labels/ARIA remain and opacity no longer communicates state. | `cli/state_builder.py`, `cli/test_state_builder.py` | V38-2, V38-4, VX-2 | T-038-01 | AFK | No | done (F-65) |
 | T-056-03 | [P] | Write exact-scope guard, then replace only the two locked historical phrases with the approved context-isolation wording. | `cli/test_sdd056.py`, `feature-prompts/SPRINT-05-KICKOFF.prompt.md`, `feature-prompts/SPRINT-06-KICKOFF.prompt.md` | V56-3, VX-1 | T-X-01 | AFK | Yes only parallel to T-057/038 state work | done (F-65) |
-| T-X-02 | [S] | Sprint EM/PM records explicit Sprint 23 ACTIVE source marker; run build to regenerate three exec files; assert real PI/Sprint/token/wording smoke; run full tests, lints, lock hashes, local doctor, clean CI doctor, ledger B-1, and public CI. Check validation with evidence and append close progress. | `sprints/PI-9/CURRENT_PI.md`, `exec/state.html`, `validation.md` | V56-4, V57-4, V38-3, VX-2..VX-5, M-1..M-3 | all | HITL close | No | in-progress -- local portion complete; public CI pending |
+| T-X-02 | [S] | Sprint EM/PM records explicit Sprint 23 ACTIVE source marker; run build to regenerate three exec files; assert real PI/Sprint/token/wording smoke; run full tests, lints, lock hashes, local doctor, clean CI doctor, ledger B-1, and public CI. Check validation with evidence and append close progress. | `sprints/PI-9/CURRENT_PI.md`, `exec/state.html`, `validation.md` | V56-4, V57-4, V38-3, VX-2..VX-5, M-1..M-3 | all | HITL close | No | done (F-66; public doctor success at `4e319fa`) |
 
 ## Sequencing
 

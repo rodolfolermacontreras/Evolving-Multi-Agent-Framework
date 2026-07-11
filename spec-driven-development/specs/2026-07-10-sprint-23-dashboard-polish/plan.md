@@ -1,7 +1,7 @@
 ---
 id: SDD-20260710SPRINT23POLISH-plan
 type: plan
-status: active
+status: done
 owner: principal-architect
 updated: 2026-07-10
 feature: 2026-07-10-sprint-23-dashboard-polish

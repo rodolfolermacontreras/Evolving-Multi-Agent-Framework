@@ -9,11 +9,10 @@ sprint: PI-9
 
 # PI-9: Experience Polish
 
-- Status: **ACTIVE; overall Sprint 23 ACTIVE (PI-9 Sprint 2).** F-63 design is
-  complete; F-64 dashboard truth and F-65 lifecycle/wording implementation + QA
-  are complete locally; F-66 local close readiness is prepared and awaiting the
-  owner pre-push decision. Public CI and final close remain pending. This marker
-  records the current sprint gate and does not claim Sprint 23 close. Sprint 22
+- Status: **ACTIVE; overall Sprint 23 CLOSED (PI-9 Sprint 2).** SDD-038,
+  SDD-056, and SDD-057 are DONE with 17/17 REQUIRED + 3/3 manual evidence,
+  668 passed / 2 skipped, Article X held, and public doctor SUCCESS for
+  `4e319fa`. PI-9 remains ACTIVE; no successor sprint or PI is opened. Sprint 22
   CLOSED
   locally 2026-07-09 and shipped SDD-049 and SDD-054 with 616 passed / 2 skipped,
   clean schema/origin/staledoc lints, local doctor green, Article X 3/3 PASS, and
@@ -41,13 +40,16 @@ sprint: PI-9
 
 ## Current sprint
 
-### Overall Sprint 23 -- ACTIVE
+### Overall Sprint 23 -- CLOSED
 
-- Current gate: F-66 local close-readiness prepared; independent QA/UX review,
-  manual UX checks, local/clean-checkout gates, and local provenance are complete.
-- Next gate: owner pre-push approval, push, public CI, then Sprint 23 close.
+- Close gate: owner approved Option 1; prepared push completed; the first public
+  run exposed a cross-platform wording-hash test defect, repaired at `4e319fa`;
+  repaired public doctor run `29139276251` completed SUCCESS in 18s.
+- Evidence: 17/17 REQUIRED + 3/3 manual; B-1/B-2/B-4 green; Article X held;
+  full local suite 668 passed / 2 skipped / 6 subtests.
 - PI status: PI-9 remains ACTIVE.
-- Close state: not closed; no implementation outcome is claimed by this update.
+- Next state: no Sprint 24 or new PI is authored here; that decision reports up
+  to the project Executive Manager.
 
 ---
 

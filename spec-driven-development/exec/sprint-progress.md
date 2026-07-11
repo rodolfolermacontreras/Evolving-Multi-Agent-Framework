@@ -1807,3 +1807,50 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
   with T-X-01 baseline and T-057-01 RED tests. Sprint EM/PM must add an explicit
   Sprint 23 ACTIVE marker to PI-9 `CURRENT_PI.md` before the real close smoke;
   implementation may not infer it.
+
+---
+
+### Sprint 23 -- CLOSED
+
+- Date: 2026-07-10
+- Owner: Sprint Executive Manager (lead); PM + Architect design; Principal
+  Software Developer + workers implementation, review, repair, and close.
+- Owner ratification: **APPROVED FOR COMMIT + PUSH** on 2026-07-10 (Option 1).
+- Features: SDD-038, SDD-056, and SDD-057 DONE. Validation is 17/17 REQUIRED +
+  3/3 manual with no deferral; tasks/spec/plan/validation are DONE.
+- Commit chain: `8b05c08` -> `092e4b4` -> `4817db9` -> `8a9402d` -> `2c606a4`
+  -> `0f271bf` -> `a64411a` -> `d3a2d0e` -> `5720567` -> `cdc5359` ->
+  `4e319fa` -> close-record commit.
+- Tests: 616 -> 668; final local result 668 passed / 2 skipped / 6 subtests.
+  Focused wording guard: 3 passed / 4 subtests under Python 3.12 and 3.14.
+- Lints/gates: schema, origin, and stale-doc clean; strict local doctor green;
+  CI-profile doctor green; DONE/schema checks green; no tracked database.
+- Article X: HELD. `TestS1FootprintLockGuard` 3/3 and independent SHA-256 for
+  `render_html`, `load_sprint_table`, `load_sprint_goal`,
+  `detect_current_sprint`, and `load_decisions` match their goldens.
+- Ledger/B-gates: PI-9 rows 30-42 are genuine; Sprint 23 rows 33-42 all record
+  success. B-1 real outcomes present, B-2 green, B-4 public CI green.
+- Public CI history: prepared SHA `cdc5359` run `29138619457` FAILED in 20s
+  because checkout line endings invalidated two whole-file scope hashes. Close
+  remained blocked. Test-only repair `4e319fa` normalized checkout newlines;
+  run `29139276251` completed SUCCESS in 18s:
+  https://github.com/rodolfolermacontreras/Evolving-Multi-Agent-Framework/actions/runs/29139276251
+- Generated truth: `state_builder.py` alone regenerated `state.md`, `state.html`,
+  and `work-index.md`; SDD-038/056/057 render DONE, PI-9 remains ACTIVE, and
+  Sprint 23 renders CLOSED.
+- Exclusions held: no constitution edit, new dependency/schema/API, locked
+  function edit, REQUIRED weakening, history scrub, SDD-034, brownfield
+  bootstrap, PI-4 housekeeping, SDD-035, new sprint, or new PI.
+- Report-up to project Executive Manager: **DELIVERED BY THIS CLOSE PAYLOAD**.
+  PI-9 remains ACTIVE. The next sprint/PI decision is intentionally surfaced
+  upward and is not authored here.
+
+#### Sprint 23 retrospective
+
+- Lesson: exact whole-file hashes must normalize checkout newlines when the
+  contract protects repository content across Windows and Linux. Action: retain
+  exact phrase counts and reverse-replacement proof alongside normalized hashes.
+- Lesson: public CI is a real close gate, not a confirmation formality. Action:
+  preserve the failed-run evidence and never transition to CLOSED before green.
+- Lesson: narrow-viewport manual review found a real defect after automated
+  checks. Action: keep 375px overflow and forced-colors evidence in UI closes.

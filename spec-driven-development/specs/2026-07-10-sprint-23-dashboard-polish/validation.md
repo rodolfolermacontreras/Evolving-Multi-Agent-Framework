@@ -1,7 +1,7 @@
 ---
 id: SDD-20260710SPRINT23POLISH-validation
 type: validation
-status: active
+status: done
 owner: principal-architect
 updated: 2026-07-10
 feature: 2026-07-10-sprint-23-dashboard-polish
@@ -79,7 +79,7 @@ truth are Strict and cannot be loosened.
 - [x] **VX-3:** Full `python -m pytest spec-driven-development/ --tb=no -q` is
   >=623 passed / 2 skipped plus new tests; schema lint, origin lint, and stale-doc
   lint all exit 0. Proves ACX-1.
-- [ ] **VX-4:** Strict local doctor is green; fresh CI-profile doctor is green in a
+- [x] **VX-4:** Strict local doctor is green; fresh CI-profile doctor is green in a
   clean checkout; public GitHub Actions CI is green at close. B-1 contains real
   Sprint 23 outcome rows, B-2 is green, and B-4 is green. Proves ACX-1.
 - [x] **VX-5:** `git diff` proves no `constitution/**` edit; generated executive
@@ -188,5 +188,22 @@ None at lock.
 - VX-5: `git diff 1356c33..HEAD` has no `constitution/**`, dependency, schema,
   migration, or API edit. Executive files were regenerated with the default
   `state_builder.py` build action after direct source updates; generated diffs
-  were never hand-edited. No REQUIRED item is deferred: VX-4 remains active
-  solely because its locked row requires post-push public CI.
+  were never hand-edited. No REQUIRED item is deferred; VX-4 closed after the
+  repaired public doctor run completed successfully.
+
+## F-66 Public CI Close Evidence -- 2026-07-10
+
+- Owner explicitly approved Option 1 for the release-and-close sequence before
+  push. The prepared chain was fast-forward pushed without force.
+- Public doctor run `29138619457` for prepared SHA `cdc5359` failed in 20s:
+  Linux checkout line endings made the exact-scope wording guard report two
+  failures. Sprint close remained blocked and no green claim was made.
+- Narrow test-only repair `4e319fa` normalizes checkout newlines before the two
+  whole-file hashes while retaining exact phrase counts and reverse replacement.
+  Focused tests passed 3 + 4 subtests under Python 3.12 and Python 3.14; full
+  local suite remained 668 passed / 2 skipped / 6 subtests.
+- Public doctor run `29139276251` for `4e319fa` completed SUCCESS in 18s:
+  https://github.com/rodolfolermacontreras/Evolving-Multi-Agent-Framework/actions/runs/29139276251
+- B-1 contains genuine Sprint 23 implementation/review/close rows; B-2 is green;
+  B-4 is green. All 17/17 REQUIRED and 3/3 manual rows are complete with no
+  deferral. T-X-02 and this bundle may therefore transition to DONE.

@@ -57,7 +57,7 @@ PI progress: 0/1 commitments complete (0%)
 | file-overlap-detector | DONE | done | validation required-complete |
 | reorder-backend-reoptimization | DONE | done | validation required-complete |
 | fresh-checkout-ci-doctor-repair | DONE | active | validation required-complete |
-| sprint-23-dashboard-polish | DONE | active | validation required-complete |
+| sprint-23-dashboard-polish | DONE | done | validation required-complete, RETRO present |
 
 ## Sprint Plan
 
@@ -101,6 +101,8 @@ PI progress: 0/1 commitments complete (0%)
 
 | When | Feature | Task | Agent |
 |------|---------|------|-------|
+| 2026-07-11T04:16:38Z | specs/2026-07-10-sprint-23-dashboard-polish | Final close and gate verification | qa-engineer-general |
+| 2026-07-11T04:16:38Z | specs/2026-07-10-sprint-23-dashboard-polish | Sprint 23 durable close | principal-software-developer |
 | 2026-07-10T22:54:48Z | spec-driven-development/specs/2026-07-10-sprint-23-dashboard-polish | F-66 independent local close-readiness QA | QA Engineer |
 | 2026-07-10T22:34:14Z | spec-driven-development/specs/2026-07-10-sprint-23-dashboard-polish | F-65 independent code-quality and accessibility review | gem-critic+ux-designer |
 | 2026-07-10T22:30:19Z | spec-driven-development/specs/2026-07-10-sprint-23-dashboard-polish | F-65 Stage 1 spec compliance review | qa-engineer-general |
@@ -109,8 +111,6 @@ PI progress: 0/1 commitments complete (0%)
 | 2026-07-10T21:26:59Z | spec-driven-development/specs/2026-07-10-sprint-23-dashboard-polish | F-64 SDD-057 and SDD-056 implementation with focused tests | developer-general |
 | 2026-07-10T21:26:59Z | spec-driven-development/specs/2026-07-10-sprint-23-dashboard-polish | F-64 Stage 1 spec compliance review and re-review | qa-engineer-general |
 | 2026-07-10T00:00:00Z | spec-driven-development/specs/2026-07-10-sprint-23-dashboard-polish | F-66 generated dashboard UX review | UX Designer |
-| 2026-07-09T15:09:43Z | specs/2026-07-09-reorder-backend-reoptimization | SDD-054 reorder backend re-optimization (design+TDD impl+QA) | principal-software-developer |
-| 2026-07-09T14:31:58Z | specs/2026-07-09-file-overlap-detector | SDD-049 file-overlap detector (design+TDD impl+QA) | principal-software-developer |
 
 ## Blockers
 

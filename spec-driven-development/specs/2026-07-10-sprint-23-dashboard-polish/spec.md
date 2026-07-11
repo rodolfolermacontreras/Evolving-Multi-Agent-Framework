@@ -1,7 +1,7 @@
 ---
 id: SDD-20260710SPRINT23POLISH-spec
 type: spec
-status: active
+status: done
 owner: principal-architect
 updated: 2026-07-10
 feature: 2026-07-10-sprint-23-dashboard-polish
@@ -13,7 +13,7 @@ depends_on: [SDD-036, SDD-037, SDD-040, SDD-042]
 
 - Feature IDs: **SDD-038**, **SDD-056**, **SDD-057**
 - Sprint: PI-9 Sprint 2 / overall Sprint 23
-- Status: **APPROVED**
+- Status: **DONE**
 - Clarification: [`clarify.md`](./clarify.md)
 - Validation: [`validation.md`](./validation.md) -- LOCKED at TASKS
 

@@ -1,11 +1,11 @@
 # Executive State
 
-Generated date: 2026-07-10
+Generated date: 2026-07-12
 Current PI: PI-9 (Experience Polish)
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
 Active focus: Finish implementation of 'azure-decommission'
 
-PI progress: 0/1 commitments complete (0%)
+PI progress: 2/3 commitments complete (67%)
 
 ## Spec Pipeline
 
@@ -135,7 +135,7 @@ _none -- no dispatches without outcome older than 24h_
 
 ## Next Milestones
 
-- Sprint 22: Close PI-8, open PI-9, and ship the experience pair -- SDD-049 (true pre-dispatch file-overlap conflict detector in `cli/fleet.py`) + SDD-041 Option B (backlog reorder -> backend re-optimization on the safeguarded `move()`/audit path).
+- Sprint 24 (PI-9 Sprint 3): Deliver the owner-authorized final PI-9 sprint -- SDD-058 (brownfield bootstrap correctness). Authorized 2026-07-12; PI-9 remains active.
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 version: '1.2.0'
-last_updated: 2026-07-08
+last_updated: 2026-07-12
 owner: principal-executive-manager
 co_owner: principal-product-manager
 discipline: abstraction-not-detail
@@ -32,11 +32,11 @@ Read [`RULES.md`](RULES.md) for the binding rules.
 | Field | Value |
 |-------|-------|
 | **Current PI** | PI-9 (Experience Polish) -- 8 PIs closed (PI-1..PI-8), PI-9 active |
-| **Current sprint** | See [`exec/sprint-progress.md`](../exec/sprint-progress.md) (read bottom-up) |
+| **Current sprint** | Overall Sprint 24 / PI-9 Sprint 3 (final) -- SDD-058 only; STARTED/prepared 2026-07-12 |
 | **Cadence** | Symbolic; ~1 day per sprint, ~5 sprints per PI (ADR-0003) |
 | **Tests passing** | See the live count in [`exec/state.md`](../exec/state.md) and the ledger (schema_lint clean) |
-| **Branch state** | See `git status` and the dashboard freshness line |
-| **PI history** | PI-1..PI-7 closed; PI-8 active -- see [`constitution/roadmap.md`](../constitution/roadmap.md) |
+| **Branch state** | Sprint established from clean `d77d4ab == origin/master`; no commit or push yet |
+| **PI history** | PI-1..PI-8 closed; PI-9 active -- see [`constitution/roadmap.md`](../constitution/roadmap.md) |
 
 ---
 

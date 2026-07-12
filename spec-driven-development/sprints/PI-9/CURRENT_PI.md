@@ -3,16 +3,23 @@ id: SDD-PI-9-CURRENT_PI-sprint
 type: sprint
 status: active
 owner: principal-product-manager
-updated: 2026-07-10
+updated: 2026-07-12
 sprint: PI-9
 ---
 
 # PI-9: Experience Polish
 
-- Status: **ACTIVE; overall Sprint 23 CLOSED (PI-9 Sprint 2).** SDD-038,
+- Status: **ACTIVE; overall Sprint 24 ACTIVE/prepared (PI-9 Sprint 3), the final
+  PI-9 sprint.** It is dedicated exclusively to SDD-058, the approved P1
+  brownfield bootstrap correctness defect. Owner authorization 2026-07-12:
+  "Owner approved Option 1 on 2026-07-12: authorize one final PI-9 sprint
+  dedicated exclusively to the approved P1 brownfield bootstrap correctness
+  defect, then close PI-9 after it ships." Overall Sprint 23 CLOSED (PI-9 Sprint
+  2): SDD-038,
   SDD-056, and SDD-057 are DONE with 17/17 REQUIRED + 3/3 manual evidence,
   668 passed / 2 skipped, Article X held, and public doctor SUCCESS for
-  `4e319fa`. PI-9 remains ACTIVE; no successor sprint or PI is opened. Sprint 22
+  `4e319fa`. PI-9 remains ACTIVE; no sprint beyond Sprint 24 and no successor PI
+  is opened. Sprint 22
   CLOSED
   locally 2026-07-09 and shipped SDD-049 and SDD-054 with 616 passed / 2 skipped,
   clean schema/origin/staledoc lints, local doctor green, Article X 3/3 PASS, and
@@ -20,12 +27,11 @@ sprint: PI-9
   that closed PI-8 (exactly one `(current)` marker at a time). Follows PI-8 CLOSED
   2026-07-09 / DONE (Sprint 21 close at `07a2296`; PI-8 closed at Sprint 22 open).
 
-- Theme: Turn two long-standing quality-of-life gaps into shipped features. PI-8
-  made the window onto the engine tell the truth; PI-9 polishes the experience of
-  using the framework. The fleet gets an automated pre-dispatch file-overlap check
-  (replacing the manual per-worker file-scope discipline), and dragging a backlog
-  item to a new position re-optimizes the priority order on the backend instead of
-  only persisting the visual arrangement.
+- Theme: Finish PI-9 by pairing the shipped experience polish with trustworthy
+  brownfield adoption. Sprints 22-23 delivered file-overlap protection, meaningful
+  backlog reorder, and dashboard truth. The owner-authorized final sprint addresses
+  the separately evidenced bootstrap correctness defect without reopening those
+  completed features.
 - Drafted: 2026-07-09 (activated same day at Sprint 22 open)
 - Owner: principal-executive-manager
 - Predecessor: PI-8 (Truth in the Window) CLOSED 2026-07-09 as DONE at the start
@@ -40,6 +46,29 @@ sprint: PI-9
 
 ## Current sprint
 
+### Overall Sprint 24 -- ACTIVE / PREPARED (PI-9 Sprint 3, final)
+
+- Sprint goal: make brownfield bootstrap safe and truthful so applying an edited
+  proposal preserves human decisions, installs only reusable framework assets,
+  creates host-specific identity/configuration and clean runtime state, and
+  presents an honest host-readiness contract.
+- Feature: SDD-058 only. Capacity: one full cross-cutting feature. Carry-over:
+  none. Primary risk: changing refresh/copy/readiness semantics without a precise
+  migration and safety contract.
+- Scope: B1 edited-proposal preservation; B2 reusable-asset allowlist with no
+  framework-state contamination; B3 host-specific `.github/copilot-instructions.md`
+  plus `project.config.json`; B4 host-mode doctor or honest docs/contract.
+- Sequence: CLARIFY -> SPEC/ADR -> PLAN/TASKS -> TDD IMPLEMENT/QA -> close.
+  Article XI serial gates apply. No feature spec artifacts are created by this
+  sprint-establishment update.
+- Baseline: clean `d77d4ab == origin/master`; 668 passed / 2 skipped; public CI
+  green. Owner pre-push approval remains mandatory.
+- Exclusions: SDD-035 Azure decommission out-of-band; retro reconciliation as a
+  separate cleanup; SDD-034; dashboards; all unrelated work.
+- Close intent: when SDD-058 ships with all acceptance evidence and owner-approved
+  push/public CI, Sprint 24 closes and the PI-9 close is then executed. PI-9 is
+  ACTIVE now; this update does not close it.
+
 ### Overall Sprint 23 -- CLOSED
 
 - Close gate: owner approved Option 1; prepared push completed; the first public
@@ -48,20 +77,20 @@ sprint: PI-9
 - Evidence: 17/17 REQUIRED + 3/3 manual; B-1/B-2/B-4 green; Article X held;
   full local suite 668 passed / 2 skipped / 6 subtests.
 - PI status: PI-9 remains ACTIVE.
-- Next state: no Sprint 24 or new PI is authored here; that decision reports up
-  to the project Executive Manager.
+- Historical handoff: the Sprint 23 close authored no successor and reported the
+  next-sprint decision upward. The owner subsequently authorized Sprint 24 on
+  2026-07-12; the current-sprint section above records that separate decision.
 
 ---
 
 ## Goal
 
-After PI-9 the fleet no longer relies on manual per-worker file scopes to avoid
-same-file dispatch conflicts — an automated detector reads each worker brief's
-declared IN-scope file set and blocks (or warns) when two briefs in the same batch
-intersect. And a backlog reorder is no longer cosmetic — dragging an item to a new
-position feeds the new order into the backend prioritization/optimization logic,
-not just the display-order overlay, on the same safeguarded `move()` + audit-trail
-machinery (ADR-017).
+After PI-9, the shipped fleet and backlog improvements remain intact, the dashboard
+reports current lifecycle truth, and brownfield bootstrap converts an approved
+proposal into a clean host-specific installation without silent edit loss,
+framework-state contamination, or a misleading readiness claim. The exact
+refresh, copy, identity, and readiness contracts remain undecided until SDD-058
+completes CLARIFY and its ADR-backed SPEC gate.
 
 ---
 
@@ -104,14 +133,18 @@ SDD-ID at CLARIFY. Stdlib-only; TDD.
 
 ## Close criteria
 
-PI-9 closes when SDD-049 and SDD-041 Option B are both shipped with tests and
-evidence, the dashboard shows PI-9 current and both features DONE, the suite does
-not regress (>= 596 passed, 2 skipped, growing with the new feature tests), the
-Article X render lock holds, `doctor` + CI are green, and the owner ratifies the
-close via the Executive Manager.
+PI-9 closes after SDD-049, SDD-054, SDD-038, SDD-056, SDD-057, and final-sprint
+SDD-058 are shipped with tests and evidence; the suite does not regress from
+668 passed / 2 skipped; Article X and B-1/B-2/B-4 hold; public CI is green; and
+the owner ratifies the close via the Executive Manager. SDD-058 must prove B1-B4
+on clean representative Windows/POSIX host fixtures, including realistic
+Node/Express and at least one cross-stack fixture, with migration/backward-
+compatibility and dry-run/diff/backup safety covered. No destructive real-host
+apply occurs without owner approval.
 
 Sprint 22 local close evidence is complete: both features are DONE, the
 dashboard/state surfaces show PI-9 current and both features DONE, 616 tests passed
 / 2 skipped, Article X held, local doctor is green, and ledger rows 30-32 are
 success. CI and owner pre-push ratification remain pending; no pre-push CI result
-is claimed. PI-9 remains current/active and no next sprint or PI is created here.
+is claimed. PI-9 remains current/active. Sprint 24 is the authorized final PI-9
+sprint; no successor PI is created here.

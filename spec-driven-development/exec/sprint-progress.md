@@ -1854,3 +1854,46 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
   preserve the failed-run evidence and never transition to CLOSED before green.
 - Lesson: narrow-viewport manual review found a real defect after automated
   checks. Action: keep 375px overflow and forced-colors evidence in UI closes.
+
+---
+
+## Sprint 24 -- PI-9 Sprint 3 / Final brownfield bootstrap correctness sprint
+
+### Sprint 24 -- STARTED / PREPARED
+
+- Date: 2026-07-12
+- Leader: Sprint Executive Manager (sprint-scoped; reports to project Executive
+  Manager). SDD-044 plain-language discipline and SDD-053 decision-request format
+  are binding.
+- Baseline verified: clean `master`; `HEAD == origin/master == d77d4ab`; Sprint
+  23 closed with 668 passed / 2 skipped and public CI green.
+- ID: repo-wide collision scan found no SDD-058; SDD-058 is the next free
+  production ID after SDD-057.
+- Goal: make brownfield bootstrap preserve approved human edits, install only
+  reusable allowlisted assets into clean host state, generate host-specific
+  identity/config, and communicate an honest host-readiness contract.
+- Scope: SDD-058 only -- B1 edited-proposal preservation; B2 reusable-asset
+  allowlist/no framework-state contamination; B3 host-specific Copilot
+  instructions + `project.config.json`; B4 host-mode doctor or honest docs/
+  contract.
+- Sequence: CLARIFY -> SPEC/ADR -> PLAN/TASKS -> TDD IMPLEMENT/QA -> close.
+  Article VII isolation, Article XI serial gates, Article X validation, B-1/B-2/
+  B-4, stdlib-only, clean representative Windows/POSIX fixtures, realistic Node/
+  Express plus one cross-stack fixture, and owner pre-push approval are mandatory.
+- Safety: no destructive real-host apply without owner approval; CLARIFY must
+  resolve preserve-vs-refresh, exact allowlist, host identity/config fields,
+  clean runtime state, host-mode doctor definition, migration/backward
+  compatibility, dry-run/diff/backup, and fixture realism.
+- Exclusions: SDD-035 Azure decommission out-of-band; retro reconciliation as a
+  separate cleanup; SDD-034; dashboards; all unrelated scope.
+- Article VIII: adding Sprint 24 records an owner-authorized operational roadmap
+  allocation. Article VIII explicitly exempts roadmap additions from a separate
+  ADR; this update removes nothing, changes no roadmap direction, and modifies no
+  framework principle. This determination applies only to the roadmap entry and
+  does not pre-judge whether a later SDD-058 technical design requires an ADR.
+- Owner authorization: "Owner approved Option 1 on 2026-07-12: authorize one
+  final PI-9 sprint dedicated exclusively to the approved P1 brownfield bootstrap
+  correctness defect, then close PI-9 after it ships."
+- State: Sprint 24 STARTED/prepared; no feature spec artifacts scaffolded; no
+  implementation, commit, push, Sprint close, or PI close performed. PI-9 remains
+  ACTIVE.

@@ -51,6 +51,25 @@ Raw ideas captured here. Triage moves them to BACKLOG.md with RICE scoring.
 - **Excluded from this triage:** SDD-034, the brownfield bootstrap defect, PI-4
 	housekeeping, SDD-035 Azure decommission, and all other work.
 
+### Sprint 24 brownfield-defect disposition (2026-07-12)
+
+- **2026-07-09 brownfield bootstrap defect: FILED -> BACKLOG P1 as SDD-058.**
+	Repo-wide collision scan on clean `d77d4ab == origin/master` found no SDD-058;
+	SDD-058 is the next free production ID after SDD-057. Existing evidence keeps
+	RICE 8.0: `(8 x 3 x 1.0) / 3 = 8.0`.
+- **Allocation:** the sole feature in overall Sprint 24 / PI-9 Sprint 3, the final
+	PI-9 sprint. PI-9 remains ACTIVE and closes only after SDD-058 ships through all
+	gates. Owner authorization: "Owner approved Option 1 on 2026-07-12: authorize
+	one final PI-9 sprint dedicated exclusively to the approved P1 brownfield
+	bootstrap correctness defect, then close PI-9 after it ships."
+- **Preserved product boundaries:** B1 edited-proposal preservation; B2 reusable-
+	asset allowlist and no framework-state contamination; B3 host-specific Copilot
+	instructions plus project config; B4 host-mode doctor or an honest documented
+	contract. Technical copy/refresh/readiness design remains for Architect CLARIFY,
+	SPEC, and ADR review.
+- **Excluded:** SDD-035 Azure decommission (out-of-band), retro reconciliation
+	(separate cleanup), SDD-034, dashboards, and all unrelated work.
+
 ---
 
 ## Scott Feedback Bundle (captured 2026-06-03)

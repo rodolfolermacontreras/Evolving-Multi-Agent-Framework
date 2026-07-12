@@ -14,6 +14,21 @@ Prioritized backlog with RICE scoring. Managed by Principal Product Manager.
 
 ## P1 - Must Have
 
+### Final PI-9 sprint: brownfield bootstrap correctness (approved 2026-07-12)
+
+| ID | Title | Priority | R | I | C | E | RICE | Sprint | Status | Notes |
+|----|-------|----------|---|---|---|---|------|--------|--------|-------|
+| SDD-058 | Brownfield bootstrap preserves proposals and creates a clean host | P1 | 8 | 3 | 1.0 | L = 3 | 8.0 | PI-9 Sprint 24 (PI-9 Sprint 3) | **APPROVED -- [HITL] -- Sprint 24 STARTED/prepared 2026-07-12.** Owner authorized one final PI-9 sprint exclusively for this defect; PI-9 remains ACTIVE until it ships. | First real Node/Express brownfield adoption proved four correctness gaps. **B1:** applying an edited `.sdd-proposal/` must preserve human answers; refresh semantics must be explicit and safe. **B2:** apply must use a reusable-asset allowlist and create clean runtime state, never copy framework backlog, specs, sprints, dispatches, exec state, ledger history, or other framework project state into the host. **B3:** scaffold host-specific `.github/copilot-instructions.md` and `project.config.json` from clarified host identity/config fields instead of copying framework identity. **B4:** either provide a truthful host-mode doctor contract or clearly document and enforce that framework doctor is not a host-readiness gate. Full spec + Architect ADR review required before implementation because this changes the cross-cutting bootstrap copy/refresh/readiness contract; PM makes no technical copy-contract decision here. Acceptance evidence must use clean representative host fixtures on Windows/POSIX, including realistic Node/Express and at least one cross-stack fixture; preserve migration/backward compatibility; define dry-run/diff/backup safety; and forbid destructive real-host apply without owner approval. Stdlib-only; Article VII isolation; Article XI serial CLARIFY/SPEC gates; Article X validation-before-implementation; B-1/B-2/B-4 live. Explicitly excluded: SDD-035 Azure decommission (out-of-band), retro reconciliation (separate cleanup), SDD-034, dashboards, and all unrelated scope. Owner authorization verbatim: "Owner approved Option 1 on 2026-07-12: authorize one final PI-9 sprint dedicated exclusively to the approved P1 brownfield bootstrap correctness defect, then close PI-9 after it ships." RICE = (8 x 3 x 1.0) / 3 = 8.0. |
+
+Scoring rationale: Reach 8 because every brownfield adoption and every host agent
+session depends on a trustworthy apply result; Impact 3 because the current flow
+silently destroys approved human input and contaminates the host with another
+project's identity and operating history; Confidence 1.0 because the first real
+Node/Express adoption reproduced each defect and required manual cleanup; Effort
+L = 3 because B1-B4 cross refresh, copy boundaries, host scaffolding, readiness
+contract, migration, safety, and cross-platform fixtures. Existing evidence
+therefore supports the approved P1 and RICE 8.0 without correction.
+
 ### Pre-Sprint-23 CI precondition repair (approved 2026-07-10)
 
 | ID | Title | Priority | R | I | C | E | RICE | Sprint | Status | Notes |

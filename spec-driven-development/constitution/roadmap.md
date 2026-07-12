@@ -1,7 +1,7 @@
 ---
 version: '1.2.0'
 ratified: 2026-05-12
-last_amended: 2026-07-09
+last_amended: 2026-07-12
 ---
 
 # Roadmap
@@ -166,12 +166,12 @@ are read.
 
 ## PI-9: Experience Polish (current)
 
-Opened 2026-07-09. ACTIVE. Turns two long-standing quality-of-life gaps into shipped features:
-the fleet gets an automated pre-dispatch file-overlap check (replacing the manual per-worker
-file-scope discipline), and a backlog reorder re-optimizes the priority order on the backend
-instead of only persisting the visual arrangement.
+Opened 2026-07-09. ACTIVE. The experience work shipped across Sprints 22-23; the
+owner authorized Sprint 24 as the final PI-9 sprint on 2026-07-12.
 
-- [ ] Sprint 22: Close PI-8, open PI-9, and ship the experience pair -- SDD-049 (true pre-dispatch file-overlap conflict detector in `cli/fleet.py`) + SDD-041 Option B (backlog reorder -> backend re-optimization on the safeguarded `move()`/audit path).
+- [x] Sprint 22 (PI-9 Sprint 1): Close PI-8, open PI-9, and ship the experience pair -- SDD-049 (true pre-dispatch file-overlap conflict detector) + SDD-054 (SDD-041 Option B, backlog reorder -> backend re-optimization). Closed 2026-07-09; 616 passed / 2 skipped.
+- [x] Sprint 23 (PI-9 Sprint 2): Ship dashboard truth and lifecycle polish -- SDD-038, SDD-056, and SDD-057. Closed 2026-07-10; 668 passed / 2 skipped; public CI green at `4e319fa`.
+- [ ] Sprint 24 (PI-9 Sprint 3): Deliver the owner-authorized final PI-9 sprint -- SDD-058 (brownfield bootstrap correctness). Authorized 2026-07-12; PI-9 remains active.
 
 ---
 

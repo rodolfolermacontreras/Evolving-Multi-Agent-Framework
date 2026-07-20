@@ -202,6 +202,13 @@ CLI_AND_LEDGER = {
         ".py",
     ),
 }
+REQUIRED_RUNTIME_MODULES = {
+    "spec-driven-development/cli/brownfield_identity.py",
+    "spec-driven-development/cli/brownfield_migration.py",
+    "spec-driven-development/cli/brownfield_transaction.py",
+    "spec-driven-development/cli/host_readiness.py",
+    "spec-driven-development/cli/brownfield_compat.py",
+}
 SEEDS = {
     "spec-driven-development/backlog/IDEAS.md",
     "spec-driven-development/backlog/BACKLOG.md",
@@ -300,6 +307,20 @@ def test_build_core_manifest_declares_sources_renderers_hashes_and_clean_seeds()
         if entry.operation == "render":
             assert entry.renderer_id and entry.renderer_version
             assert entry.source_sha256 is None
+
+
+def test_required_runtime_modules_are_installable_hash_bound_copy_entries() -> None:
+    _, bundle = _build(False)
+    entries = _entries_by_destination(bundle)
+
+    for path in REQUIRED_RUNTIME_MODULES:
+        entry = entries[path]
+        assert entry.operation == "copy", path
+        assert entry.ownership == "managed", path
+        assert entry.source == path, path
+        assert entry.source_sha256 == hashlib.sha256(
+            (FRAMEWORK_ROOT / path).read_bytes()
+        ).hexdigest(), path
 
 
 def test_validate_manifest_accepts_only_closed_stably_ordered_graph(tmp_path: Path) -> None:

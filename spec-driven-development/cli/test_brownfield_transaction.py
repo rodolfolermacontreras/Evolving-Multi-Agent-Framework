@@ -665,15 +665,29 @@ def test_bound_commit_artifact_is_staged_backed_up_and_rolled_back_on_atomic_rep
     transaction = _transaction()
     disposable = create_disposable_root(tmp_path)
     fixture = build_python_fixture(disposable)
-    preview = _preview()
+    receipt_relative = "spec-driven-development/.adoption/receipt.json"
+    receipt = b'{"transaction_state":"committed"}\n'
+    base_preview = _preview()
+    preview = replace(
+        base_preview,
+        items=base_preview.items + (
+            PreviewItem(
+                "create",
+                receipt_relative,
+                "approved adoption receipt",
+                "managed",
+                "render",
+                None,
+                _sha(receipt),
+                (),
+            ),
+        ),
+    )
     proposal, candidates = _write_transaction_inputs(fixture.root, preview)
+    candidates[receipt_relative] = receipt
     context = _context(
         transaction, fixture.root, disposable.root, preview, candidates=candidates
     )
-    receipt_relative = "spec-driven-development/.adoption/receipt.json"
-    receipt = b'{"transaction_state":"committed"}\n'
-    transaction.bind_commit_artifacts(context, {receipt_relative: receipt})
-    candidates[receipt_relative] = receipt
     _stage_and_backup(transaction, context, candidates)
     before = snapshot_paths((fixture.root, proposal))
     real_replace = transaction._ATOMIC_DESTINATION_REPLACE
@@ -691,6 +705,35 @@ def test_bound_commit_artifact_is_staged_backed_up_and_rolled_back_on_atomic_rep
     assert snapshot_paths((fixture.root, proposal)) == before
     assert not (fixture.root / receipt_relative).exists()
     assert _journal(context)["state"] == "rolled-back"
+
+
+def test_preflight_forbids_binding_candidate_bytes_absent_from_approved_preview(
+    tmp_path: Path,
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(
+        transaction, fixture.root, disposable.root, preview, candidates=candidates
+    )
+
+    with pytest.raises(
+        transaction.PreflightError,
+        match="approved preview",
+    ):
+        transaction.bind_commit_artifacts(
+            context,
+            {
+                "spec-driven-development/.adoption/receipt.json":
+                    b'{"transaction_state":"committed"}\n'
+            },
+        )
+
+    assert tuple(operation.destination for operation in context.operations) == tuple(
+        item.destination for item in preview.items
+    )
 
 
 def test_journal_and_directory_fsync_precede_every_mutation(

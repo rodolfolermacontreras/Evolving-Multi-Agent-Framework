@@ -481,36 +481,10 @@ def bind_commit_artifacts(
     context: TransactionContext,
     artifacts: Mapping[str, bytes],
 ) -> None:
-    """Bind deterministic post-promotion artifacts into the active transaction.
+    """Reject candidate bytes that were absent from the approved preview."""
 
-    Artifacts such as the adoption receipt depend on the allocated transaction
-    identifier. They are still staged, backed up, journaled, promoted, and
-    rolled back as ordinary final operations; this method only permits creates
-    or exact replacements that were not part of the approved semantic preview.
-    """
-
-    if _read_journal(context.journal_path)["state"] != JournalState.STAGING.value:
-        raise TransactionError("commit artifacts must be bound before staging")
-    existing = {operation.destination for operation in context.operations}
-    operations = list(context.operations)
-    for destination, data in sorted(artifacts.items()):
-        if destination in existing or not isinstance(data, bytes):
-            raise PreflightError("commit artifact is duplicated or invalid")
-        path = _safe_destination(context.target, destination)
-        if _has_link_component(path, context.target) or not is_supported_regular_path(path):
-            raise PreflightError(f"unsupported commit artifact: {destination}")
-        preimage = _path_record(path)
-        operations.append(TransactionOperation(
-            len(operations),
-            destination,
-            "commit-artifact",
-            preimage,
-            {"sha256": _sha(data), "size": len(data)},
-            None,
-            OperationState.PREPARED,
-        ))
-    object.__setattr__(context, "operations", tuple(operations))
-    _write_journal(context, JournalState.STAGING, context.operations)
+    del context, artifacts
+    raise PreflightError("commit artifact is absent from the approved preview")
 
 
 def _operation_json(operation: TransactionOperation) -> dict[str, object]:

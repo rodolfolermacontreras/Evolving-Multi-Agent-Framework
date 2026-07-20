@@ -146,17 +146,6 @@ _SEEDS = {
 }
 EXPECTED_DESTINATIONS = frozenset(_RENDERED_IDENTITY | _AGENTS | _PROMPTS | _SKILLS | _INSTRUCTIONS | _TEMPLATES_AND_DOCS | _EXISTING_CLI_AND_LEDGER | _SDD058_MODULES | _SEEDS)
 
-# Modules implemented by later approved SDD-058 tasks remain frozen members. They
-# are preservation entries until their individually named source exists; this
-# avoids inventing bytes or broad-reading the source tree during parallel B4.
-_PARALLEL_PENDING = {
-    "spec-driven-development/cli/brownfield_identity.py",
-    "spec-driven-development/cli/brownfield_migration.py",
-    "spec-driven-development/cli/brownfield_transaction.py",
-    "spec-driven-development/cli/host_readiness.py",
-    "spec-driven-development/cli/brownfield_compat.py",
-}
-
 
 def _read_source_bytes(root: Path, source: str) -> bytes:
     """Read exactly one allowlisted source file."""
@@ -214,7 +203,7 @@ def build_core_manifest(framework_root: Path, identity: object) -> BundleManifes
     entries: list[BundleEntry] = []
     rendered = _RENDERED_IDENTITY | _AGENTS | _PROMPTS | {FLEET_WORKER}
     copy_paths = (_SKILLS | (_INSTRUCTIONS - {FLEET_WORKER}) | _TEMPLATES_AND_DOCS |
-                  _EXISTING_CLI_AND_LEDGER | (_SDD058_MODULES - _PARALLEL_PENDING))
+                  _EXISTING_CLI_AND_LEDGER | _SDD058_MODULES)
     for destination in sorted(EXPECTED_DESTINATIONS):
         if destination in _SEEDS:
             dependencies = ("spec-driven-development/ledger/schema.sql",) if destination.endswith("fleet.db") else ()
@@ -239,8 +228,6 @@ def build_core_manifest(framework_root: Path, identity: object) -> BundleManifes
                 source_sha256=hashlib.sha256(content).hexdigest(),
                 text_policy="preserve" if destination.endswith(".sql") else "utf-8-lf",
             )
-        elif destination in _PARALLEL_PENDING:
-            entry = BundleEntry(destination, "preserve", ownership="unmanaged")
         else:  # pragma: no cover - the exhaustive frozen partition is tested
             raise AssertionError(f"unclassified Appendix A member: {destination}")
         entries.append(entry)

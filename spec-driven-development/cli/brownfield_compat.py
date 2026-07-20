@@ -306,7 +306,6 @@ def _execute_transaction(
     candidates: dict[str, bytes],
     reviewed_proposal: Path,
     structural_check: object | None = None,
-    commit_artifacts: object | None = None,
 ) -> tuple[object, object]:
     authorization = _authorization(
         request, fixture_authorization, preview, target_head
@@ -323,11 +322,6 @@ def _execute_transaction(
         candidate_bytes=candidates,
         reviewed_proposal=reviewed_proposal,
     )
-    artifacts = commit_artifacts(context) if callable(commit_artifacts) else {}
-    if artifacts:
-        brownfield_transaction.bind_commit_artifacts(context, artifacts)
-        candidates.update(artifacts)
-
     def materialize(stage_root: Path, operation: object) -> None:
         destination = stage_root / PurePosixPath(operation.destination)
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -564,8 +558,6 @@ def _receipt_payload(
     bundle: object,
     identity: object,
     managed_hashes: dict[str, str],
-    preview_hash: str,
-    transaction_id: str,
 ) -> dict[str, object]:
     schema = (_framework_root() / "spec-driven-development/ledger/schema.sql").read_bytes()
     return {
@@ -573,8 +565,6 @@ def _receipt_payload(
         "bundle_id": bundle.bundle_id,
         "framework_revision": bundle.framework_revision,
         "identity_schema_version": identity.schema_version,
-        "preview_hash": preview_hash,
-        "transaction_id": transaction_id,
         "transaction_state": "committed",
         "managed_hashes": managed_hashes,
         "ledger_schema_sha256": hashlib.sha256(schema).hexdigest(),
@@ -596,6 +586,20 @@ def _build_install(request: BrownfieldRequest) -> tuple[Path, object, object, ob
     )
     rendered, seeds = _render_bundle(bundle, identity, proposal, baseline)
     candidates = _candidate_bytes(bundle, rendered, seeds)
+    managed_hashes = {
+        path: hashlib.sha256(content).hexdigest()
+        for path, content in candidates.items()
+        if path not in {
+            "spec-driven-development/cli/bootstrap.py",
+            "spec-driven-development/cli/brownfield_compat.py",
+            "spec-driven-development/cli/brownfield_manifest.py",
+            "spec-driven-development/cli/host_readiness.py",
+        }
+    }
+    receipt_path = "spec-driven-development/.adoption/receipt.json"
+    receipt = _json_bytes(_receipt_payload(bundle, identity, managed_hashes))
+    rendered[receipt_path] = receipt
+    candidates[receipt_path] = receipt
     existing = _existing_bytes(target, bundle)
     categories = {
         path: "preserve" if existing.get(path) == content else (
@@ -603,7 +607,6 @@ def _build_install(request: BrownfieldRequest) -> tuple[Path, object, object, ob
         )
         for path, content in candidates.items()
     }
-    categories["spec-driven-development/.adoption/receipt.json"] = "preserve"
     preview = brownfield_manifest.build_preview(bundle, existing, rendered, seeds, categories)
     preview = dataclasses.replace(
         preview,
@@ -643,21 +646,6 @@ def _apply(request: BrownfieldRequest, fixture_authorization: object | None) -> 
         return _result(0, "no-op", "Installed bundle already matches reviewed inputs.", preview=preview)
     if request.preview_approval is None or not _SHA256.fullmatch(request.preview_approval):
         return _result(2, "invalid", "A valid approved preview hash is required.", preview=preview)
-    managed_hashes = {
-        path: hashlib.sha256(content).hexdigest()
-        for path, content in candidates.items()
-        if path not in {
-            "spec-driven-development/cli/bootstrap.py",
-            "spec-driven-development/cli/brownfield_manifest.py",
-        }
-    }
-
-    def receipt_artifacts(context: object) -> dict[str, bytes]:
-        payload = _receipt_payload(
-            bundle, identity, managed_hashes, context.preview_hash, context.transaction_id
-        )
-        return {"spec-driven-development/.adoption/receipt.json": _json_bytes(payload)}
-
     def staged_readiness(stage_root: Path, context: object) -> object:
         payload = json.loads(
             candidates["spec-driven-development/.adoption/receipt.json"]
@@ -676,7 +664,6 @@ def _apply(request: BrownfieldRequest, fixture_authorization: object | None) -> 
         candidates=candidates,
         reviewed_proposal=proposal,
         structural_check=staged_readiness,
-        commit_artifacts=receipt_artifacts,
     )
     if promoted.exit_code != 0:
         return _result(
@@ -687,8 +674,8 @@ def _apply(request: BrownfieldRequest, fixture_authorization: object | None) -> 
             recovery_command=promoted.recovery_command,
         )
 
-    receipt_payload = _receipt_payload(
-        bundle, identity, managed_hashes, context.preview_hash, context.transaction_id
+    receipt_payload = json.loads(
+        candidates["spec-driven-development/.adoption/receipt.json"]
     )
     receipt_path = request.target / "spec-driven-development/.adoption/receipt.json"
     readiness = host_readiness.run_structural_checks(
@@ -886,8 +873,11 @@ def _host_doctor(request: BrownfieldRequest) -> BrownfieldResult:
     if identity_path is None:
         raise ValueError("confirmed identity path is required for host-doctor")
     identity = brownfield_identity.load_identity(identity_path)
+    disclosures: list[str] = []
     if request.run_quality:
-        report = host_readiness.run_quality_checks(request.target, identity, lambda _text: None)
+        report = host_readiness.run_quality_checks(
+            request.target, identity, disclosures.append
+        )
     else:
         adoption = request.target / "spec-driven-development" / ".adoption"
         bundle = _load_json_namespace(adoption / "bundle-manifest.json", "bundle manifest")
@@ -895,10 +885,12 @@ def _host_doctor(request: BrownfieldRequest) -> BrownfieldResult:
         report = host_readiness.run_structural_checks(
             request.target, bundle, identity, receipt, staged=False
         )
+    summary = host_readiness.format_readiness_summary(report, installed=True)
+    message = "\n".join((*disclosures, summary))
     return _result(
         report.exit_code,
         "ok" if report.exit_code == 0 else "blocked",
-        host_readiness.format_readiness_summary(report, installed=True),
+        message,
         readiness=report,
     )
 

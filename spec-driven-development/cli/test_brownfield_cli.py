@@ -8,6 +8,7 @@ paths.  They never create or mutate a real host.  T-058-018 supplies the missing
 from __future__ import annotations
 
 import dataclasses
+import hashlib
 import importlib
 import inspect
 import io
@@ -566,6 +567,13 @@ def test_canonical_fixture_draft_apply_receipt_readiness_and_noop_rerun(tmp_path
     assert previewed.exit_code == 0
     assert previewed.status == "preview"
     assert isinstance(previewed.preview, brownfield_manifest.Preview)
+    receipt_item = next(
+        item
+        for item in previewed.preview.items
+        if item.destination == "spec-driven-development/.adoption/receipt.json"
+    )
+    assert receipt_item.category == "create"
+    assert receipt_item.after_sha256 is not None
     apply_hash = brownfield_manifest.preview_hash(previewed.preview)
 
     applied = compat.execute(
@@ -576,10 +584,18 @@ def test_canonical_fixture_draft_apply_receipt_readiness_and_noop_rerun(tmp_path
     assert applied.status == "installed"
     assert applied.receipt_path == fixture.root / "spec-driven-development/.adoption/receipt.json"
     assert applied.receipt_path.is_file()
+    assert hashlib.sha256(applied.receipt_path.read_bytes()).hexdigest() == receipt_item.after_sha256
     assert applied.readiness.exit_code == 0
     assert reviewed.read_bytes() == reviewed_before
 
     transaction_journal = preview_request.transaction_workspace / "transaction.json"
+    transaction_payload = json.loads(transaction_journal.read_text(encoding="utf-8"))
+    assert transaction_payload["preview_hash"] == apply_hash
+    assert tuple(item["destination"] for item in transaction_payload["operations"]) == tuple(
+        item.destination
+        for item in previewed.preview.items
+        if item.category in {"create", "replace", "runtime-initialize"}
+    )
     journal_before = transaction_journal.read_bytes()
     rerun = compat.execute(preview_request)
     assert rerun.exit_code == 0
@@ -634,6 +650,58 @@ def test_apply_receipt_replace_failure_rolls_back_and_never_reports_readiness_su
     assert result.readiness is None
     assert "pass" not in result.message.casefold()
     assert not receipt.exists()
+
+
+def test_host_doctor_quality_preserves_canonical_pre_execution_disclosure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    compat = _compat()
+    identity = tmp_path / "host-identity.json"
+    identity.write_text("{}\n", encoding="utf-8")
+    loaded_identity = SimpleNamespace(fields={})
+    disclosure = (
+        "quality test: cwd=C:/fixture; argv=['python', '-m', 'pytest']; "
+        "timeout=17s; environment=minimal; network=deny; filesystem and "
+        "external side effects are outside rollback"
+    )
+    events: list[str] = []
+
+    monkeypatch.setattr(
+        compat.brownfield_identity,
+        "load_identity",
+        lambda path: loaded_identity,
+    )
+
+    def run_quality_checks(root, received_identity, disclosure_sink):
+        assert root == tmp_path
+        assert received_identity is loaded_identity
+        disclosure_sink(disclosure)
+        events.append("execute")
+        return SimpleNamespace(exit_code=0)
+
+    monkeypatch.setattr(
+        compat.host_readiness,
+        "run_quality_checks",
+        run_quality_checks,
+    )
+    monkeypatch.setattr(
+        compat.host_readiness,
+        "format_readiness_summary",
+        lambda report, *, installed: "host readiness PASS",
+    )
+
+    result = compat.execute(
+        _request(
+            compat,
+            "host-doctor",
+            tmp_path,
+            identity_path=identity,
+            run_quality=True,
+        )
+    )
+
+    assert events == ["execute"]
+    assert result.message.splitlines() == [disclosure, "host readiness PASS"]
 
 
 def test_exactly_approved_refresh_and_migration_execute_through_transaction_engine(

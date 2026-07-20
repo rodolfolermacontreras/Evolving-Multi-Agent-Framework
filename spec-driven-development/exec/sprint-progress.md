@@ -1897,3 +1897,74 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - State: Sprint 24 STARTED/prepared; no feature spec artifacts scaffolded; no
   implementation, commit, push, Sprint close, or PI close performed. PI-9 remains
   ACTIVE.
+
+### F-66 -- sdd-058-clarify-spec-adr -- BLOCKED / OWNER-ATTENTION
+
+- Date: 2026-07-12
+- Owners: Principal Product Manager + Principal Architect, routed by Sprint
+  Executive Manager in one SDD-058 context-isolated unit.
+- Commits: none; no commit or push performed.
+- Files changed: 4 design artifacts.
+  - `spec-driven-development/specs/2026-07-12-brownfield-bootstrap-correctness/clarify.md`
+  - `spec-driven-development/specs/2026-07-12-brownfield-bootstrap-correctness/spec.md`
+  - `spec-driven-development/specs/2026-07-12-brownfield-bootstrap-correctness/validation.md`
+  - `spec-driven-development/docs/ADR/026-transactional-brownfield-adoption.md`
+- Tests: baseline remains 668 passed / 2 skipped / 6 subtests; F-66 is
+  design-only. Schema, origin, and stale-doc lints are clean; `git diff --check`
+  passes.
+- CLARIFY: PQ-01 through PQ-08 approved by owner as recommended (Option 1,
+  2026-07-12; local ledger decision 4). AQ-01 through AQ-08 closed by the
+  Architect. CLARIFY lock is free.
+- SPEC/ADR: proposed ADR-026 plus the draft full SPEC are internally consistent;
+  the SPEC defines 46 requirements and 15 acceptance criteria. The pre-
+  implementation validation contract contains 70 unchecked REQUIRED checks and
+  remains draft/unlocked until TASKS. SDD-058 is the sole SPEC lock holder.
+- Architecture: versioned proposal baseline + three-way refresh; immutable
+  dependency-closed `brownfield-core@1` allowlist; provenance-bearing host
+  identity manifest; preview-bound staged transaction with complete backup,
+  journal, atomic per-path promotion, and verified rollback/recovery; separate
+  bounded `host-doctor`; inventory-first non-destructive migration; realistic
+  Node/Express and Python fixtures on Windows/POSIX.
+- Ledger/B-1: genuine dispatch 43 records the PM+Architect design route and is
+  marked `success`. No fabricated row or outcome.
+- Scope: no PLAN, TASKS, validation lock, implementation, real-host mutation,
+  backlog/PI/constitution/generated-exec edit, dependency, schema migration,
+  commit, push, Sprint close, or PI close.
+- OWNER-ATTENTION: owner must approve ADR-026 and the SDD-058 SPEC together
+  before PLAN/TASKS. This is separate from later exact-package pre-push approval
+  and separate from any destructive real-host apply approval.
+- Next: owner chooses approve or revise. On approval, accept ADR-026, approve the
+  SPEC, release the SPEC lock, and route PLAN/TASKS to Architect + Software
+  Developer.
+
+### F-67 -- sdd-058-plan-tasks -- DONE
+
+- Date: 2026-07-12
+- Owners: Principal Architect + Principal Software Developer, routed by Sprint
+  Executive Manager after the owner-approved ADR/SPEC gate.
+- Owner gate: owner approved Option 1 on 2026-07-12, accepting ADR-026 and the
+  SDD-058 SPEC together. Local ledger decision 5 records the approval before
+  PLAN/TASKS. This approval does not authorize push or real-host mutation.
+- Commits: none; no commit or push performed.
+- Files changed: 2 planning artifacts.
+  - `spec-driven-development/specs/2026-07-12-brownfield-bootstrap-correctness/plan.md`
+  - `spec-driven-development/specs/2026-07-12-brownfield-bootstrap-correctness/tasks.md`
+- Design transition: ADR-026 is Accepted; SPEC is active/approved for PLAN/TASKS;
+  CLARIFY and SPEC locks are free.
+- Tasks: 28 atomic tasks across 14 batches; 10 parallel-eligible and 18 serial.
+  SDD-049 overlap preflight reports zero intersections for proposed parallel
+  batches B3, B4, B5, and B6. Every task has an exact one-to-three-file scope.
+- Validation: Article X contract is LOCKED / ACTIVE at TASKS. V-01 through V-04
+  are checked from completed design and sequencing evidence; 66 implementation,
+  review, release, and close checks remain unchecked.
+- Traceability: 46/46 requirements, 15/15 acceptance criteria, and 70/70
+  validation IDs map to tasks with zero orphans, including letter-suffixed IDs.
+- Checks: schema lint clean; `git diff --check` clean; task parser found 28 tasks;
+  immutable ADR-026 Appendix A membership preserved.
+- Ledger/B-1: genuine dispatch 52 records the PLAN/TASKS route and is marked
+  `success`.
+- Scope: no implementation, real-host mutation, commit, push, generated-exec
+  edit, Sprint close, or PI close.
+- Next: Principal Software Developer owns TDD implementation T-058-001 through
+  T-058-020 on positively identified disposable fixtures, then two-stage QA in
+  strict order. Owner exact-package approval remains required before push.

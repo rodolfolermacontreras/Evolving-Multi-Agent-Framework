@@ -14,7 +14,12 @@ permissions:
 
 jobs:
   doctor:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.12']
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,10 +27,23 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python-version }}
 
       - name: Install test runner
         run: python -m pip install pytest
+
+      - name: Run focused SDD-058 suite
+        run: >-
+          python -m pytest
+          spec-driven-development/cli/test_brownfield_cli.py
+          spec-driven-development/cli/test_brownfield_cross_platform.py
+          spec-driven-development/cli/test_brownfield_identity.py
+          spec-driven-development/cli/test_brownfield_inventory.py
+          spec-driven-development/cli/test_brownfield_manifest.py
+          spec-driven-development/cli/test_brownfield_migration.py
+          spec-driven-development/cli/test_brownfield_proposal.py
+          spec-driven-development/cli/test_brownfield_transaction.py
+          spec-driven-development/cli/test_host_readiness.py
 
       - name: Run doctor
         run: python spec-driven-development/cli/bootstrap.py doctor --mode ci

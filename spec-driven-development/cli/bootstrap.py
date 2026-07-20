@@ -14,6 +14,7 @@ placeholders, and creates the first backlog and ledger placeholders.
 from pathlib import Path
 import argparse
 import datetime
+import importlib
 import json
 import os
 import re
@@ -112,12 +113,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
 
     brownfield = subparsers.add_parser(
         "brownfield",
-        help="Inspect an existing git project and stage an SDD constitution proposal.",
+        help="Run a preview-first brownfield adoption action.",
         description=(
-            "Run a brownfield archaeology pass against an existing git repository, "
-            "write .sdd-archaeology.json, and stage a host-specific constitution "
-            "proposal under .sdd-proposal/constitution/. Use --apply only after "
-            "human review."
+            "Draft, preview, apply, refresh, migrate, recover, or inspect an "
+            "existing host through the canonical brownfield service."
         ),
     )
     brownfield.add_argument(
@@ -139,8 +138,19 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     brownfield_mode.add_argument(
         "--apply",
         action="store_true",
-        help="After prompting for approval, copy framework assets and the proposed constitution into the target.",
+        help="Legacy compatibility: preview the existing reviewed proposal; never refresh or apply it.",
     )
+    brownfield.add_argument("--action", choices=(
+        "draft", "preview", "apply", "refresh", "adopt-baseline", "migrate",
+        "recover", "cleanup", "host-doctor",
+    ))
+    brownfield.add_argument("--proposal-root", dest="proposal_root")
+    brownfield.add_argument("--identity")
+    brownfield.add_argument("--migration")
+    brownfield.add_argument("--preview-hash", dest="preview_hash")
+    brownfield.add_argument("--owner-approval", dest="owner_approval")
+    brownfield.add_argument("--transaction-workspace", dest="transaction_workspace")
+    brownfield.add_argument("--run-quality", action="store_true", dest="run_quality")
 
     host_link = subparsers.add_parser(
         "host-link",
@@ -236,7 +246,15 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="Validation profile: strict clone-local health (default) or fresh-checkout CI health.",
     )
 
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if args.command == "brownfield":
+        if args.action is not None and (args.draft_only or args.apply):
+            parser.error("--action cannot be combined with legacy --draft-only or --apply")
+        if args.preview_hash is not None and not re.fullmatch(r"[0-9a-f]{64}", args.preview_hash):
+            parser.error("--preview-hash must be a lowercase SHA-256 digest")
+        if args.run_quality and args.action != "host-doctor":
+            parser.error("--run-quality is valid only with --action host-doctor")
+    return args
 
 
 def fail(message: str, remediation: str) -> None:
@@ -625,19 +643,11 @@ def draft_constitution_proposal(target: Path, report: dict[str, object], owner: 
 
 
 def apply_brownfield_framework(target: Path, proposal_root: Path) -> None:
-    root = framework_root()
-    for source in (root / ".github", root / "spec-driven-development"):
-        if not source.exists():
-            fail(f"Framework source directory is missing: {source}", "Run this script from an intact checkout of the framework repository.")
-    copy_directory(root / ".github", target / ".github", force=True)
-    copy_directory(root / "spec-driven-development", target / "spec-driven-development", force=True)
-    destination = target / "spec-driven-development" / "constitution"
-    for name in CONSTITUTION_FILES:
-        source = proposal_root / "constitution" / name
-        if not source.is_file():
-            fail(f"Staged proposal is missing {name}: {source}", "Rerun brownfield bootstrap without --apply to refresh the proposal, review it, then apply again.")
-        write_text(destination / name, source.read_text(encoding="utf-8"), force=True)
-    initialize_ledger(target)
+    del target, proposal_root
+    fail(
+        "Legacy broad-copy brownfield apply is disabled.",
+        "Use an explicit canonical preview and owner-approved apply transaction.",
+    )
 
 
 def print_brownfield_next_steps() -> None:
@@ -648,25 +658,19 @@ def print_brownfield_next_steps() -> None:
     print("(3) Run /triage. The Executive Manager will route to the PM for grilling.")
 
 
-def run_brownfield(args: argparse.Namespace) -> None:
-    """Run brownfield archaeology, stage a host-derived constitution proposal, and optionally adopt SDD."""
-    date = today_iso()
-    target = validate_brownfield_target(Path(args.target_path))
-    report = create_archaeology_report(target)
-    proposal_root = draft_constitution_proposal(target, report, args.owner, date)
-    if not args.apply:
-        print(f"Archaeology report saved at {target / '.sdd-archaeology.json'}")
-        print(f"Proposal staged at {proposal_root}. Review, edit, then run `python bootstrap.py brownfield {target} --apply` to adopt.")
-        print_brownfield_next_steps()
-        return
-    answer = input(f"Apply SDD framework files and staged constitution into {target}? Type 'yes' to continue: ").strip().lower()
-    if answer != "yes":
-        fail("Brownfield apply was not approved.", f"Review the staged proposal at {proposal_root}, then rerun with --apply when ready.")
-    apply_brownfield_framework(target, proposal_root)
-    print(f"SDD brownfield bootstrap applied to {target}.")
-    print(f"Archaeology report: {target / '.sdd-archaeology.json'}")
-    print(f"Constitution source proposal: {proposal_root / 'constitution'}")
-    print_brownfield_next_steps()
+def run_brownfield(args: argparse.Namespace) -> int:
+    """Dispatch once through the canonical service and format its result."""
+    brownfield_compat = importlib.import_module("brownfield_compat")
+
+    request = brownfield_compat.request_from_args(args)
+    result = brownfield_compat.execute(request)
+    if result.exit_code == 0:
+        print(result.message)
+    else:
+        print(f"ERROR: {result.message}", file=sys.stderr)
+        if result.recovery_command:
+            print(f"Recovery: {result.recovery_command}", file=sys.stderr)
+    return result.exit_code
 
 
 def run_greenfield(args: argparse.Namespace) -> None:
@@ -1280,8 +1284,15 @@ def main(argv: list[str] | None = None) -> int:
             run_greenfield(args)
             return 0
         if args.command == "brownfield":
-            run_brownfield(args)
-            return 0
+            try:
+                return run_brownfield(args)
+            except Exception:
+                print("ERROR: Brownfield operation failed unexpectedly.", file=sys.stderr)
+                print(
+                    "Remediation: No mutation was claimed; inspect retained recovery evidence and retry.",
+                    file=sys.stderr,
+                )
+                return 1
         if args.command == "host-link":
             run_host_link(args)
             return 0

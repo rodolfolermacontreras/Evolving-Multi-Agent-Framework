@@ -315,7 +315,8 @@ its real evidence exists.
 
 ## J. Implementation boundaries and quality gates (REQUIRED)
 
-- [ ] **V-55 -- minimal responsibility boundaries.** Review proves one canonical
+- [x] **V-55 -- minimal responsibility boundaries.** Independent Stage-1 review
+  at commit `9e743e4bd6d7baa16debcc25ee5cad487dcf9782` proves one canonical
   path with thin CLI dispatch and distinct inventory, proposal/baseline, manifest,
   identity, migration, transaction/recovery, and host-readiness responsibilities;
   legacy adapters contain no duplicate unsafe implementation. Proves ADR-026,
@@ -348,7 +349,8 @@ its real evidence exists.
 
 ## K. Scope integrity review (REQUIRED)
 
-- [ ] **V-63 -- sequencing and scope history.** Repository history proves no
+- [x] **V-63 -- sequencing and scope history.** Repository history through
+  `9e743e4bd6d7baa16debcc25ee5cad487dcf9782` proves no
   PLAN/TASKS commit predates joint ADR/SPEC approval and no implementation commit
   predates TASKS validation lock. Implementation excludes real-host mutation,
   unproved greenfield redesign, dashboard/cloud/SDD-034/retro work, agent hiring,
@@ -426,7 +428,10 @@ its real evidence exists.
   positively identified sentinel temp root; local bare remotes avoided network;
   no serializable/public fixture bypass exists; no real-host authorization was
   issued or used.
-- Stage-1 review: pending T-058-021; V-55 and V-61 remain open.
+- Stage-1 review: T-058-021 PASS / complete at 2026-07-20 08:24:24 -07:00
+  for exact commit `9e743e4bd6d7baa16debcc25ee5cad487dcf9782`; all three
+  returned WRONG findings are closed; V-55 and V-63 are evidenced. V-61 remains
+  open until a different Stage-2 reviewer completes the ordered second review.
 - Stage-2 review: pending T-058-022; V-61 remains open.
 - Owner exact-package approval: not requested; V-62 remains open.
 - Public CI run: not run; V-54 and V-62 remain open.

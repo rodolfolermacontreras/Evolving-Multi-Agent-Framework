@@ -22,7 +22,7 @@ feature: 2026-07-12-brownfield-bootstrap-correctness
   traceability totals of 46 requirements, 15 acceptance criteria, and 70
   validation items; no implementation, worker dispatch, commit, push, or
   non-fixture mutation occurred during the lock transition
-- Status: **LOCKED / ACTIVE AT IMPLEMENTATION -- local evidence recorded; independent review and public CI pending**
+- Status: **LOCKED / ACTIVE AT IMPLEMENTATION -- local evidence and independent review recorded; owner approval and public CI pending**
 
 This contract was authored before implementation and locked at TASKS under
 Article X. Every REQUIRED item below must be proven; no item may be weakened,
@@ -338,7 +338,7 @@ its real evidence exists.
 - [x] **V-60 -- operational gates.** Strict local doctor is green; B-1 genuine PI-9
   dispatch/review/close outcomes exist in the local ledger without fabrication;
   B-2 TDD and DONE-completeness checks are green. Proves R-042, AC-12.
-- [ ] **V-61 -- two-stage QA ordering.** A Stage-1 reviewer independently proves
+- [x] **V-61 -- two-stage QA ordering.** A Stage-1 reviewer independently proves
   every requirement/AC with no missing/extra/wrong behavior before a different
   Stage-2 reviewer evaluates quality/security/maintainability; timestamps and
   outcomes prove the order. Proves R-043, AC-13.
@@ -430,13 +430,123 @@ its real evidence exists.
   issued or used.
 - Stage-1 review: T-058-021 PASS / complete at 2026-07-20 08:24:24 -07:00
   for exact commit `9e743e4bd6d7baa16debcc25ee5cad487dcf9782`; all three
-  returned WRONG findings are closed; V-55 and V-63 are evidenced. V-61 remains
-  open until a different Stage-2 reviewer completes the ordered second review.
-- Stage-2 review: pending T-058-022; V-61 remains open.
+  returned WRONG findings are closed; V-55 and V-63 are evidenced. This PASS
+  preceded every Stage-2 review recorded in `review-stage-2.md`.
+- Stage-2 review: T-058-022 APPROVED / complete on 2026-07-27 by a different
+  independent Principal Cloud Security Architect reviewer after all critical and
+  important findings were closed. The superseding verdict satisfies V-61.
 - Owner exact-package approval: not requested; V-62 remains open.
 - Public CI run: not run; V-54 and V-62 remain open.
 - Commit-history sequencing: no commit was permitted in this implementation unit;
   V-63 remains open until package/commit history exists.
+
+### Stage-2 repair evidence (2026-07-27)
+
+- Repair branch: `feature/f7.5-sdd-058-stage-2-security`, created from
+  `7c6ebd2e9362832f9afbedc28d489fe14601e6e5`. The binary diff hash before and
+  after branch creation was
+  `63bc0b1bb94529be2d73861837c19b90fc0a3f24`; porcelain status was identical,
+  so every pre-existing dirty change was preserved.
+- CRITICAL-02 RED: the focused multi-file proposal corruption test failed with
+  `Failed: DID NOT RAISE TransactionError`. GREEN after per-file durability and
+  content/mode verification: `1 passed, 86 deselected in 11.43s`.
+- CRITICAL-03 RED: the recovery inspection boundary test failed with
+  `Failed: DID NOT RAISE TransactionError`. GREEN after routing the destination
+  read through the canonical mutation-boundary resolver: `2 passed, 86
+  deselected in 8.07s`, including the neighboring link-substitution regression.
+- Host-readiness execution-policy repair: explicit `allow-confirmed` tests use
+  the contained `Popen` boundary, while `deny` still fails closed before launch;
+  focused result `4 passed, 14 deselected in 9.64s`.
+- Complete transaction/readiness security slice:
+  `106 passed in 196.35s`.
+- Focused cross-platform matrix: `26 passed in 68.25s`.
+- Complete SDD-058 focused workflow suite:
+  `424 passed, 1 skipped in 474.94s`.
+- Workflow contracts: `11 passed, 2 subtests passed in 0.65s`.
+- Full repository regression: `1092 passed, 3 skipped, 6 subtests passed in
+  626.11s`; the pre-repair full-suite result was `1051 passed, 2 skipped, 6
+  subtests passed`, so no passing-test baseline was lost.
+- Schema lint, origin lint with tracked-database detection, stale-doc lint, and
+  governance check all returned exit code 0. Article X FootprintLockGuard was
+  `3 passed, 286 deselected in 0.27s`; `git diff --check` returned exit code 0.
+- TDD gate and PI-9 DONE completeness both returned PASS. Strict local doctor
+  was launched without `--skip-tests` and returned `All checks passed.` Its test
+  result was `1092 passed, 3 skipped, 6 subtests passed in 625.77s`; the PI-9
+  dispatch-row count was `21`.
+- CRITICAL-01 public-boundary evidence: real canonical `recover` and `cleanup`
+  calls with valid fixture authorization and a journal-selected foreign target
+  both returned exit code 3 / `recovery-required`, retained the journal, and
+  preserved host and foreign bytes. Focused result: `2 passed, 47 deselected in
+  143.30s`.
+- CRITICAL-03 additional RED evidence: deterministic stage-root, backup-root,
+  promotion, rollback-replace, and rollback-unlink substitution tests failed
+  before their immediate-boundary repairs. GREEN transaction regression:
+  `93 passed in 229.63s`.
+- IMPORTANT-07 RED: a failed Windows `taskkill /T /F` was silently accepted
+  (`Failed: DID NOT RAISE RuntimeError`). GREEN after fail-closed handling, with
+  a real parent-spawns-child timeout proving the descendant PID inactive before
+  return: `3 passed, 17 deselected in 2.45s`.
+- No commit or push occurred at this repair checkpoint. Stage 2 was still blocked
+  then; the later superseding independent re-review in `review-stage-2.md`
+  APPROVED the repaired package and closes T-058-022 and V-61.
+
+### Stage-2 closure evidence (2026-07-27)
+
+- Superseding independent reviewer: Principal Cloud Security Architect, distinct
+  from the Stage-1 QA reviewer and not an implementer of the reviewed repairs.
+- Reviewed branch and base/current HEAD:
+  `feature/f7.5-sdd-058-stage-2-security` at
+  `7c6ebd2e9362832f9afbedc28d489fe14601e6e5`; the branch was created from that
+  commit and no commit or push has occurred since.
+- Superseding verdict: **APPROVED**. CRITICAL-03, IMPORTANT-07, and IMPORTANT-08
+  are closed, no new critical or important regression was found, and the prior
+  CHANGES REQUIRED findings remain preserved as review history.
+- Live local validation on the exact dirty package: full repository
+  `1109 passed, 4 skipped, 6 subtests passed`; transaction regression
+  `98 passed`; strict local doctor `All checks passed.` with the same
+  `1109 passed, 4 skipped, 6 subtests passed`; `git diff --check` clean.
+- A later exact complete SDD-058 focused-workflow rerun did not reproduce the
+  earlier `441 passed, 2 skipped` result: it returned `1 failed, 440 passed,
+  2 skipped`. The failing forged-equal fixture-authorization test passed both
+  alone (`1 passed`) and in the complete transaction module (`98 passed`),
+  proving an order-dependent shared-state defect. The module-level fixture
+  authorization registry retains raw object IDs, so allocator ID reuse can
+  make an unregistered replacement authorization appear registered. The exact
+  focused gate is therefore not currently green and pre-push approval must not
+  proceed until the defect is repaired and the complete focused command passes.
+- T-058-022 is complete and V-61 is satisfied. V-62 remains open: owner approval
+  has not yet been recorded, no push or public CI is claimed, and SDD-058, Sprint
+  24, and PI-9 remain open.
+
+### Final authorization-registry closure evidence (2026-07-28)
+
+- Preflight found and terminated only the stale workspace pytest parent/child
+  pair before validation. A separate Second Brain pytest pair was observed and
+  left untouched. No validation suites overlapped afterward.
+- The fixture registry repair replaced persistent raw object IDs with weak live
+  capabilities behind opaque UUID keys and exact object-identity checks. The
+  exact nine-module workflow initially exposed the stale-ID order dependence.
+- Independent targeted security review then found the equivalent owner-receipt
+  `id -> values` ABA path. The owner lifetime regression was RED with `Failed:
+  DID NOT RAISE AuthorizationError` (`1 failed in 45.82s`) before production
+  repair and GREEN (`1 passed in 1.79s`) after owner receipts moved to their own
+  weak exact-identity registry.
+- Complete transaction regression: `100 passed in 272.13s (0:04:32)`.
+- Exact nine-module SDD-058 workflow: `443 passed, 2 skipped in 771.20s
+  (0:12:51)`.
+- Full repository regression after both registry repairs: `1111 passed, 4
+  skipped, 6 subtests passed in 1085.72s (0:18:05)`.
+- Strict local doctor after both registry repairs: `All checks passed.` Internal
+  tests were `1111 passed, 4 skipped, 6 subtests passed in 1113.30s (0:18:33)`;
+  schema, governance, origin, stale-document, tracked-database, ledger, TDD, and
+  DONE-completeness checks passed; PI-9 had `21` genuine dispatch rows.
+- Article X FootprintLockGuard: `3 passed, 286 deselected in 0.21s`.
+- Independent Principal Cloud Security Architect final verdict: **APPROVED**;
+  no CRITICAL or IMPORTANT issue remains. T-058-022 and V-61 remain satisfied.
+- Owner exact-package approval, push, public Windows/POSIX CI, V-62, SDD-058
+  DONE, Sprint 24 close, PI-9 close, and executive regeneration remain open and
+  unclaimed. Final evidence-byte gates and binary-diff fingerprint follow this
+  append and must identify the exact package presented for approval.
 
 ## Definition of Done
 

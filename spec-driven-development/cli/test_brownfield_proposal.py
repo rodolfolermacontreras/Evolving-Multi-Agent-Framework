@@ -19,6 +19,7 @@ from brownfield_test_fixtures import (  # noqa: E402
     build_node_express_fixture,
     build_python_fixture,
     create_disposable_root,
+    make_link,
     snapshot_paths,
 )
 
@@ -133,6 +134,55 @@ def test_load_and_validate_baseline_accepts_complete_lossless_schema(tmp_path: P
         assert item.renderer_version == "1"
         assert item.text_policy == "preserve-bytes"
         assert (proposal_root / Path(*item.baseline_path.split("/"))).read_bytes() == expected
+
+
+def test_load_and_validate_baseline_rejects_linked_snapshot_outside_proposal(
+    tmp_path: Path,
+) -> None:
+    proposal_root = tmp_path / ".sdd-proposal"
+    data = b"external canary bytes\n"
+    _write_baseline(proposal_root, {"constitution/mission.md": data})
+    snapshot = proposal_root / ".baseline/constitution/mission.md"
+    snapshot.unlink()
+    external = tmp_path / "external.md"
+    external.write_bytes(data)
+    if not make_link(snapshot, external):
+        pytest.skip("links unavailable on this platform")
+
+    with pytest.raises(_proposal().BaselineValidationError, match="baseline|snapshot"):
+        _proposal().load_and_validate_baseline(proposal_root)
+
+
+def test_load_and_validate_baseline_rejects_unsafe_existing_manifest_without_fallback(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    proposal = _proposal()
+    proposal_root = tmp_path / ".sdd-proposal"
+    proposal_root.mkdir()
+    (proposal_root / "baseline-manifest.json").write_text("{}\n", encoding="utf-8")
+    monkeypatch.setattr(
+        proposal.brownfield_inventory,
+        "safe_relative_path",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            proposal.brownfield_inventory.PathSafetyError("fixture unsafe manifest")
+        ),
+    )
+
+    with pytest.raises(
+        proposal.BaselineValidationError,
+        match="baseline manifest is unsafe or outside the proposal",
+    ):
+        proposal.load_and_validate_baseline(proposal_root)
+
+
+def test_load_and_validate_baseline_reports_legacy_adoption_for_absent_manifest(
+    tmp_path: Path,
+) -> None:
+    proposal_root = tmp_path / ".sdd-proposal"
+    proposal_root.mkdir()
+
+    with pytest.raises(_proposal().LegacyBaselineRequiredError, match="adopt|legacy|baseline"):
+        _proposal().load_and_validate_baseline(proposal_root)
 
 
 def test_load_and_validate_baseline_preserves_reviewed_and_snapshot_bytes_and_skips_generation(

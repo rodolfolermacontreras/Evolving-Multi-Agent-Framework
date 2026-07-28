@@ -470,6 +470,29 @@ def test_quality_commands_require_exact_ordered_command_set(
 
 
 @pytest.mark.parametrize(
+    "argv",
+    (
+        ["tool", "--token", "IDENTITY_TOKEN_CANARY"],
+        ["tool", "--password=IDENTITY_PASSWORD_CANARY"],
+        ["tool", "--api-key", "IDENTITY_API_KEY_CANARY"],
+    ),
+)
+def test_quality_commands_reject_credential_flag_value_pairs_without_disclosure(
+    tmp_path: Path, argv: list[str]
+) -> None:
+    payload = _payload()
+    payload["fields"]["quality_commands"]["value"]["test"] = _quality(configured=True)
+    payload["fields"]["quality_commands"]["value"]["test"]["argv"] = argv
+    path = tmp_path / "credential-quality.json"
+    path.write_text(json.dumps(payload) + "\n", encoding="utf-8")
+
+    with pytest.raises(_identity().IdentityValidationError) as caught:
+        _identity().load_identity(path)
+
+    assert not any(canary in str(caught.value) for canary in SECRET_CANARIES)
+
+
+@pytest.mark.parametrize(
     ("raw", "expected"),
     (
         ("https://user:IDENTITY_PASSWORD_CANARY@example.invalid/org/repo.git?token=IDENTITY_TOKEN_CANARY#frag", "https://example.invalid/org/repo.git"),

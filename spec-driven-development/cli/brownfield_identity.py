@@ -91,6 +91,7 @@ _ALLOWED_CLASSIFICATIONS = {
 }
 _SECRET_EXPANSION = re.compile(r"(?:\$\{[^}]+\}|%[^%]+%)")
 _SECRET_ASSIGNMENT = re.compile(r"(?i)(?:password|passwd|token|secret|api[_-]?key)\s*[=:]")
+_SECRET_FLAG = re.compile(r"(?i)^--?(?:password|passwd|token|secret|api[_-]?key)$")
 _TOKEN = re.compile(r"\{\{([A-Z][A-Z0-9_]*)\}\}")
 _FULL_SHA = re.compile(r"[0-9a-f]{40}")
 _DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
@@ -224,6 +225,8 @@ def _validate_quality_commands(value: Any) -> None:
             _fail(f"quality_commands.{name}.argv")
         for arg in argv:
             _safe_string(arg, f"quality_commands.{name}.argv")
+        if any(_SECRET_FLAG.fullmatch(arg) for arg in argv):
+            _fail(f"quality_commands.{name}.argv", "contains a disallowed credential flag")
         if cwd is not None and not _posix_relative(cwd, f"quality_commands.{name}.cwd", dot_allowed=True):
             _fail(f"quality_commands.{name}.cwd")
         if timeout is not None and (

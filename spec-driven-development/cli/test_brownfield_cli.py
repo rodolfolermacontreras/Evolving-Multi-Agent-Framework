@@ -604,6 +604,90 @@ def test_canonical_fixture_draft_apply_receipt_readiness_and_noop_rerun(tmp_path
     assert not (fixture.root.parent / "transaction-preview-rerun").exists()
 
 
+def test_adoption_receipt_manages_every_installed_executable_module(tmp_path: Path) -> None:
+    compat = _compat()
+    del tmp_path
+    candidates = {
+        "spec-driven-development/cli/bootstrap.py": b"bootstrap",
+        "spec-driven-development/cli/brownfield_compat.py": b"compat",
+        "spec-driven-development/cli/brownfield_manifest.py": b"manifest",
+        "spec-driven-development/cli/host_readiness.py": b"readiness",
+        "spec-driven-development/.adoption/receipt.json": b"self-referential",
+    }
+    managed = compat._managed_candidate_hashes(candidates)
+
+    assert {
+        "spec-driven-development/cli/bootstrap.py",
+        "spec-driven-development/cli/brownfield_compat.py",
+        "spec-driven-development/cli/brownfield_manifest.py",
+        "spec-driven-development/cli/host_readiness.py",
+    }.issubset(managed)
+    assert "spec-driven-development/.adoption/receipt.json" not in managed
+
+
+def test_apply_rejects_head_drift_before_preflight(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    compat = _compat()
+    request = _request(compat, "apply", tmp_path / "host")
+    request.target.mkdir()
+    request.transaction_workspace.mkdir()
+    monkeypatch.setattr(compat, "_authorization", lambda *_args: object())
+    monkeypatch.setattr(
+        compat.brownfield_inventory, "read_repository_head", lambda _target: "b" * 40,
+        raising=False,
+    )
+    monkeypatch.setattr(
+        compat.brownfield_transaction,
+        "preflight",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("preflight entered")),
+    )
+
+    with pytest.raises(brownfield_transaction.PreflightError, match="HEAD|head"):
+        compat._execute_transaction(
+            request,
+            None,
+            preview=object(),
+            target_head="a" * 40,
+            candidates={},
+            reviewed_proposal=request.target,
+        )
+
+
+def test_apply_rejects_head_drift_immediately_before_first_promotion(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    compat = _compat()
+    request = _request(compat, "apply", tmp_path / "host")
+    request.target.mkdir()
+    request.transaction_workspace.mkdir()
+    heads = iter(("a" * 40, "b" * 40))
+    context = SimpleNamespace(stage_root=request.transaction_workspace / "stage")
+    monkeypatch.setattr(compat, "_authorization", lambda *_args: object())
+    monkeypatch.setattr(
+        compat.brownfield_inventory, "read_repository_head", lambda _target: next(heads),
+        raising=False,
+    )
+    monkeypatch.setattr(compat.brownfield_transaction, "preflight", lambda *_a, **_k: context)
+    monkeypatch.setattr(compat.brownfield_transaction, "stage_candidate", lambda *_a, **_k: None)
+    monkeypatch.setattr(compat.brownfield_transaction, "backup", lambda *_a, **_k: None)
+    monkeypatch.setattr(
+        compat.brownfield_transaction,
+        "promote",
+        lambda *_args: (_ for _ in ()).throw(AssertionError("promotion entered")),
+    )
+
+    with pytest.raises(brownfield_transaction.PreflightError, match="HEAD|head"):
+        compat._execute_transaction(
+            request,
+            None,
+            preview=object(),
+            target_head="a" * 40,
+            candidates={},
+            reviewed_proposal=request.target,
+        )
+
+
 def test_apply_receipt_replace_failure_rolls_back_and_never_reports_readiness_success(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -809,16 +893,23 @@ def test_canonical_refresh_adoption_and_migration_return_exact_executable_previe
 def test_canonical_recover_and_cleanup_route_to_transaction_engine(monkeypatch, tmp_path: Path) -> None:
     compat = _compat()
     journal = tmp_path / "transaction.json"
+    receipt = tmp_path / "owner-approval.json"
+    authorization = object()
     calls = []
 
-    def recover(path, *, action):
-        calls.append(("recover", path, action))
+    def recover(path, *, action, workspace, target, authorization):
+        calls.append(("recover", path, action, workspace, target, authorization))
         return SimpleNamespace(exit_code=0, status="rolled-back", message="recovered", recovery_command="recover")
 
-    def cleanup(path):
-        calls.append(("cleanup", path))
+    def cleanup(path, *, workspace, target, authorization):
+        calls.append(("cleanup", path, workspace, target, authorization))
         return SimpleNamespace(exit_code=0, status="cleaned", message="cleaned", recovery_command="recover")
 
+    monkeypatch.setattr(
+        brownfield_transaction,
+        "load_owner_authorization",
+        lambda path: authorization if path == receipt else None,
+    )
     monkeypatch.setattr(brownfield_transaction, "recover", recover)
     monkeypatch.setattr(brownfield_transaction, "cleanup", cleanup)
     base = _request(
@@ -826,8 +917,77 @@ def test_canonical_recover_and_cleanup_route_to_transaction_engine(monkeypatch, 
         "recover",
         tmp_path / "host",
         transaction_workspace=journal,
+        owner_approval_path=receipt,
     )
 
     assert compat.execute(base).status == "rolled-back"
     assert compat.execute(dataclasses.replace(base, action="cleanup")).status == "cleaned"
-    assert calls == [("recover", journal, "rollback"), ("cleanup", journal)]
+    assert calls == [
+        ("recover", journal, "rollback", tmp_path, tmp_path / "host", authorization),
+        ("cleanup", journal, tmp_path, tmp_path / "host", authorization),
+    ]
+
+
+@pytest.mark.parametrize("action", ("recover", "cleanup"))
+def test_canonical_recovery_actions_reject_journal_selected_foreign_target_without_mutation(
+    tmp_path: Path, action: str
+) -> None:
+    compat = _compat()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    authorization = compat.authorize_disposable_fixture(
+        target=fixture.root,
+        temporary_root=tmp_path,
+    )
+    draft = _request(compat, "draft", fixture.root)
+    draft_preview = compat.execute(draft, fixture_authorization=authorization)
+    compat.execute(
+        dataclasses.replace(
+            draft,
+            preview_approval=brownfield_manifest.preview_hash(draft_preview.preview),
+        ),
+        fixture_authorization=authorization,
+    )
+    _confirm_drafted_identity(fixture.root / ".sdd-proposal/host-identity.json")
+    preview_request = _request(compat, "preview", fixture.root)
+    previewed = compat.execute(preview_request)
+    applied = compat.execute(
+        dataclasses.replace(
+            preview_request,
+            action="apply",
+            preview_approval=brownfield_manifest.preview_hash(previewed.preview),
+        ),
+        fixture_authorization=authorization,
+    )
+    assert applied.status == "installed"
+
+    journal = preview_request.transaction_workspace / "transaction.json"
+    payload = json.loads(journal.read_text(encoding="utf-8"))
+    foreign = disposable.root / "foreign"
+    foreign.mkdir()
+    protected = foreign / "protected.txt"
+    protected.write_bytes(b"foreign bytes\n")
+    protected_before = protected.read_bytes()
+    receipt_before = applied.receipt_path.read_bytes()
+    payload["target"] = str(foreign.resolve())
+    journal.write_text(
+        json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+
+    result = compat.execute(
+        _request(
+            compat,
+            action,
+            fixture.root,
+            transaction_workspace=journal,
+        ),
+        fixture_authorization=authorization,
+    )
+
+    assert result.exit_code == 3
+    assert result.status == "recovery-required"
+    assert protected.read_bytes() == protected_before
+    assert applied.receipt_path.read_bytes() == receipt_before
+    assert journal.is_file()

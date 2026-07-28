@@ -7,9 +7,12 @@ mutate a real host and never run a host-provided quality command.
 
 from __future__ import annotations
 
+import base64
 import importlib
+import json
 import os
 import sys
+import time
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
@@ -279,18 +282,18 @@ def test_run_quality_checks_discloses_policy_before_token_array_execution(
     work = tmp_path / "service"
     work.mkdir()
     commands = {name: _not_configured() for name in QUALITY_NAMES}
-    commands["test"] = _quality(cwd="service")
+    commands["test"] = _quality(cwd="service", network_policy="allow-confirmed")
     identity = _identity(commands)
     events: list[tuple[str, object]] = []
 
     def disclosure_sink(text: str) -> None:
         events.append(("disclosure", text))
 
-    def fake_run(argv, **kwargs):
-        events.append(("run", (argv, kwargs)))
+    def fake_execute(argv, cwd, timeout, environment):
+        events.append(("run", (argv, cwd, timeout, environment)))
         return SimpleNamespace(returncode=0, stdout="fixture ok\n", stderr="")
 
-    monkeypatch.setattr(readiness.subprocess, "run", fake_run)
+    monkeypatch.setattr(readiness, "_execute_quality_command", fake_execute)
     report = readiness.run_quality_checks(tmp_path, identity, disclosure_sink)
 
     assert events[0][0] == "disclosure"
@@ -300,19 +303,18 @@ def test_run_quality_checks_discloses_policy_before_token_array_execution(
         "argv",
         "17",
         "minimal",
-        "deny",
+        "allow-confirmed",
         "outside rollback",
         "filesystem",
         "external",
     ):
         assert required in disclosure
-    argv, kwargs = events[1][1]
+    argv, cwd, timeout, environment = events[1][1]
     assert argv == ["python", "-c", "print('fixture quality')"]
-    assert kwargs["cwd"] == work
-    assert kwargs["timeout"] == 17
-    assert kwargs["shell"] is False
-    assert isinstance(kwargs["env"], dict)
-    assert kwargs["env"] is not os.environ
+    assert cwd == work
+    assert timeout == 17
+    assert isinstance(environment, dict)
+    assert environment is not os.environ
     assert report.exit_code == 0
 
 
@@ -321,11 +323,14 @@ def test_run_quality_checks_maps_command_failure_to_exit_one(
 ) -> None:
     readiness = _readiness()
     commands = {name: _not_configured() for name in QUALITY_NAMES}
-    commands["lint"] = _quality(argv=("python", "-c", "raise SystemExit(7)"))
+    commands["lint"] = _quality(
+        argv=("python", "-c", "raise SystemExit(7)"),
+        network_policy="allow-confirmed",
+    )
     identity = _identity(commands)
     monkeypatch.setattr(
-        readiness.subprocess,
-        "run",
+        readiness,
+        "_execute_quality_command",
         lambda *_args, **_kwargs: SimpleNamespace(returncode=7, stdout="", stderr="fixture failure"),
     )
 
@@ -386,16 +391,296 @@ def test_run_quality_checks_never_uses_shell_even_when_argument_contains_metacha
     readiness = _readiness()
     commands = {name: _not_configured() for name in QUALITY_NAMES}
     commands["build"] = _quality(
-        argv=("python", "-c", "print('literal')", "&&", "not-a-command")
+        argv=("python", "-c", "print('literal')", "&&", "not-a-command"),
+        network_policy="allow-confirmed",
     )
     identity = _identity(commands)
-    subprocess_run = mock.Mock(
-        return_value=SimpleNamespace(returncode=0, stdout="", stderr="")
+    stdin = mock.Mock()
+    process = SimpleNamespace(
+        communicate=lambda timeout=None: ("", ""),
+        stdin=stdin,
+        pid=12345,
+        returncode=0,
     )
-    monkeypatch.setattr(readiness.subprocess, "run", subprocess_run)
+    boundary = SimpleNamespace(
+        assign=lambda _process: None,
+        terminate_and_verify=lambda _process: None,
+    )
+    subprocess_popen = mock.Mock(return_value=process)
+    monkeypatch.setattr(readiness.subprocess, "Popen", subprocess_popen)
+    monkeypatch.setattr(readiness, "_WindowsJobObject", lambda: boundary)
 
     readiness.run_quality_checks(tmp_path, identity, lambda _text: None)
 
-    args, kwargs = subprocess_run.call_args
-    assert args[0] == ["python", "-c", "print('literal')", "&&", "not-a-command"]
+    args, kwargs = subprocess_popen.call_args
+    broker_argv = args[0]
+    decoded = json.loads(base64.b64decode(broker_argv[3]).decode("utf-8"))
+    assert decoded == ["python", "-c", "print('literal')", "&&", "not-a-command"]
     assert kwargs["shell"] is False
+    stdin.write.assert_called_once_with("start\n")
+
+
+def test_deny_policy_refuses_before_launch_when_enforcing_executor_is_unavailable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    readiness = _readiness()
+    commands = {name: _not_configured() for name in QUALITY_NAMES}
+    commands["test"] = _quality()
+    launched = mock.Mock(side_effect=AssertionError("deny command launched"))
+    monkeypatch.setattr(readiness.subprocess, "run", launched)
+
+    with pytest.raises(readiness.ReadinessConfigurationError, match="network|deny|enforce"):
+        readiness.run_quality_checks(tmp_path, _identity(commands), lambda _text: None)
+
+    launched.assert_not_called()
+
+
+def test_gitignore_unexpected_return_code_fails_closed_and_redacts_diagnostics(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    readiness = _readiness()
+    (tmp_path / ".git").mkdir()
+    secret = "GIT_TOKEN_CANARY"
+    monkeypatch.setattr(
+        readiness.subprocess,
+        "run",
+        lambda *_args, **_kwargs: SimpleNamespace(
+            returncode=128, stdout="", stderr=f"fatal: --token {secret}"
+        ),
+    )
+    receipt = SimpleNamespace(managed_hashes={"managed.txt": "0" * 64})
+
+    result = readiness._check_gitignore(tmp_path, object(), object(), receipt)
+
+    assert result.status == "FAIL"
+    assert "128" in result.detail
+    assert secret not in result.detail
+
+
+def test_managed_python_control_literals_do_not_fail_host_content_portability_scans(
+    tmp_path: Path,
+) -> None:
+    readiness = _readiness()
+    control = tmp_path / "spec-driven-development/cli/control.py"
+    control.parent.mkdir(parents=True)
+    control.write_text(
+        'TEMPLATE_HELP = "Host project name used for {{PROJECT_NAME}} placeholders."\n'
+        'FORBIDDEN_FINGERPRINTS = ("evolving-multi-agent-framework",)\n',
+        encoding="utf-8",
+    )
+    (tmp_path / "spec-driven-development/backlog").mkdir(parents=True)
+    (tmp_path / "spec-driven-development/backlog/IDEAS.md").write_text("# Ideas\n", encoding="utf-8")
+    (tmp_path / "spec-driven-development/backlog/BACKLOG.md").write_text("# Backlog\n", encoding="utf-8")
+    receipt = SimpleNamespace(
+        managed_hashes={"spec-driven-development/cli/control.py": "0" * 64}
+    )
+
+    placeholders = readiness._check_placeholders(tmp_path, object(), object(), receipt)
+    runtime_seed = readiness._check_runtime_seed(tmp_path, object(), object(), receipt)
+
+    assert placeholders.status == "PASS"
+    assert runtime_seed.status == "PASS"
+
+
+def test_quality_evidence_redacts_argv_output_and_exception_canaries(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    readiness = _readiness()
+    commands = {name: _not_configured() for name in QUALITY_NAMES}
+    commands["test"] = _quality(network_policy="allow-confirmed")
+    identity = _identity(commands)
+    disclosures: list[str] = []
+    secret = "QUALITY_SECRET_CANARY"
+    monkeypatch.setattr(
+        readiness,
+        "_execute_quality_command",
+        lambda *_args, **_kwargs: SimpleNamespace(
+            returncode=7, stdout=secret, stderr=f"--password {secret}"
+        ),
+        raising=False,
+    )
+
+    report = readiness.run_quality_checks(tmp_path, identity, disclosures.append)
+    evidence = repr((disclosures, report))
+
+    assert secret not in evidence
+
+
+def test_quality_timeout_executor_terminates_descendant_boundary_before_return(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    readiness = _readiness()
+    events: list[str] = []
+    process = SimpleNamespace(
+        communicate=lambda timeout=None: (_ for _ in ()).throw(
+            readiness.subprocess.TimeoutExpired(["fixture"], timeout)
+        ),
+        returncode=None,
+    )
+    contained = SimpleNamespace(process=process)
+    monkeypatch.setattr(readiness, "_spawn_contained_process", lambda *_a, **_k: contained, raising=False)
+    monkeypatch.setattr(readiness, "_terminate_process_tree", lambda _p: events.append("tree-terminated"), raising=False)
+
+    result = readiness._execute_quality_command(
+        ["fixture"], tmp_path, 1, readiness._minimal_environment()
+    )
+
+    assert events == ["tree-terminated"]
+    assert result.returncode != 0
+
+
+def test_quality_command_fails_before_launch_when_containment_is_unavailable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    readiness = _readiness()
+    if os.name != "nt":
+        pytest.skip("Windows Job Object construction failure contract")
+    launch = mock.Mock(side_effect=AssertionError("quality command launched"))
+    monkeypatch.setattr(readiness.subprocess, "Popen", launch)
+    monkeypatch.setattr(
+        readiness,
+        "_WindowsJobObject",
+        mock.Mock(side_effect=readiness.ContainmentUnavailableError("unavailable")),
+    )
+
+    with pytest.raises(readiness.ContainmentUnavailableError, match="unavailable"):
+        readiness._execute_quality_command(
+            ["fixture"], tmp_path, 1, readiness._minimal_environment()
+        )
+
+    launch.assert_not_called()
+
+
+def test_non_windows_quality_command_fails_before_process_launch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    readiness = _readiness()
+    launch = mock.Mock(side_effect=AssertionError("quality command launched"))
+    monkeypatch.setattr(readiness.os, "name", "posix")
+    monkeypatch.setattr(readiness.subprocess, "Popen", launch)
+
+    with pytest.raises(readiness.ContainmentUnavailableError, match="only available on Windows"):
+        readiness._execute_quality_command(
+            ["fixture"], tmp_path, 1, readiness._minimal_environment()
+        )
+
+    launch.assert_not_called()
+
+
+def test_quality_command_propagates_unverifiable_boundary_termination(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    readiness = _readiness()
+    process = SimpleNamespace(
+        communicate=lambda timeout=None: ("", ""),
+        returncode=0,
+    )
+    contained = SimpleNamespace(process=process)
+    monkeypatch.setattr(readiness, "_spawn_contained_process", lambda *_a, **_k: contained)
+    monkeypatch.setattr(
+        readiness,
+        "_terminate_process_tree",
+        mock.Mock(side_effect=RuntimeError("descendants remain active")),
+    )
+
+    with pytest.raises(RuntimeError, match="descendants remain active"):
+        readiness._execute_quality_command(
+            ["fixture"], tmp_path, 1, readiness._minimal_environment()
+        )
+
+
+def test_quality_timeout_terminates_real_descendant_process_before_return(
+    tmp_path: Path,
+) -> None:
+    readiness = _readiness()
+    child_pid_path = tmp_path / "child.pid"
+    child = tmp_path / "child.py"
+    child.write_text("import time\nwhile True:\n    time.sleep(1)\n", encoding="utf-8")
+    parent = tmp_path / "parent.py"
+    parent.write_text(
+        "import pathlib, subprocess, sys, time\n"
+        "process = subprocess.Popen([sys.executable, sys.argv[1]])\n"
+        "pathlib.Path(sys.argv[2]).write_text(str(process.pid), encoding='utf-8')\n"
+        "while True:\n"
+        "    time.sleep(1)\n",
+        encoding="utf-8",
+    )
+
+    result = readiness._execute_quality_command(
+        [sys.executable, str(parent), str(child), str(child_pid_path)],
+        tmp_path,
+        1,
+        readiness._minimal_environment(),
+    )
+
+    assert result.returncode == 124
+    assert child_pid_path.is_file()
+    child_pid = int(child_pid_path.read_text(encoding="utf-8"))
+    deadline = time.monotonic() + 2
+    while time.monotonic() < deadline and _pid_is_active(child_pid):
+        time.sleep(0.05)
+    assert _pid_is_active(child_pid) is False
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows Job Object contract")
+def test_windows_quality_process_uses_genuine_job_object_containment(
+    tmp_path: Path,
+) -> None:
+    readiness = _readiness()
+    contained = readiness._spawn_contained_process(
+        [sys.executable, "-c", "print('contained')"],
+        tmp_path,
+        readiness._minimal_environment(),
+    )
+
+    try:
+        assert contained.kind == "windows-job-object"
+        stdout, _stderr = contained.process.communicate(timeout=5)
+        assert stdout.strip() == "contained"
+    finally:
+        contained.terminate_and_verify()
+
+
+@pytest.mark.skipif(not sys.platform.startswith("linux"), reason="Linux refusal contract")
+def test_linux_quality_process_refuses_before_user_command(
+    tmp_path: Path,
+) -> None:
+    readiness = _readiness()
+    marker = tmp_path / "user-command-started"
+    argv = [sys.executable, "-c", f"from pathlib import Path; Path({str(marker)!r}).touch()"]
+
+    with pytest.raises(readiness.ContainmentUnavailableError, match="Windows"):
+        readiness._spawn_contained_process(
+            argv,
+            tmp_path,
+            readiness._minimal_environment(),
+        )
+
+    assert marker.exists() is False
+
+
+def _pid_is_active(pid: int) -> bool:
+    if os.name != "nt":
+        try:
+            os.kill(pid, 0)
+        except OSError:
+            return False
+        return True
+
+    import ctypes
+    from ctypes import wintypes
+
+    process = ctypes.WinDLL("kernel32", use_last_error=True).OpenProcess(
+        0x1000, False, pid
+    )
+    if not process:
+        return False
+    try:
+        exit_code = wintypes.DWORD()
+        if not ctypes.WinDLL("kernel32", use_last_error=True).GetExitCodeProcess(
+            process, ctypes.byref(exit_code)
+        ):
+            return False
+        return exit_code.value == 259
+    finally:
+        ctypes.WinDLL("kernel32", use_last_error=True).CloseHandle(process)

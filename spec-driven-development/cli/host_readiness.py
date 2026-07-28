@@ -9,6 +9,7 @@ execution policy and outside-rollback side effects have been disclosed.
 from __future__ import annotations
 
 import argparse
+import base64
 from dataclasses import dataclass
 import hashlib
 import json
@@ -64,6 +65,10 @@ _FORBIDDEN_FINGERPRINTS = (
 
 class ReadinessConfigurationError(ValueError):
     """Host-readiness configuration is invalid and cannot be executed safely."""
+
+
+class ContainmentUnavailableError(OSError):
+    """The operating system cannot provide the required process containment."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -281,10 +286,18 @@ def _managed_text(root: Path, receipt: object) -> Iterable[tuple[str, str]]:
             yield relative, path.read_text(encoding="utf-8")
 
 
+def _managed_host_content(root: Path, receipt: object) -> Iterable[tuple[str, str]]:
+    return (
+        (relative, text)
+        for relative, text in _managed_text(root, receipt)
+        if not relative.casefold().endswith(".py")
+    )
+
+
 def _check_placeholders(root: Path, bundle: object, identity: object, receipt: object) -> CheckResult:
     del bundle, identity
     try:
-        unresolved = [relative for relative, text in _managed_text(root, receipt) if _PLACEHOLDER.search(text)]
+        unresolved = [relative for relative, text in _managed_host_content(root, receipt) if _PLACEHOLDER.search(text)]
     except (OSError, UnicodeError, ReadinessConfigurationError) as exc:
         return _result(STRUCTURAL_CHECK_IDS[5], "FAIL", f"placeholder scan could not be established: {exc}")
     if unresolved:
@@ -295,7 +308,7 @@ def _check_placeholders(root: Path, bundle: object, identity: object, receipt: o
 def _check_runtime_seed(root: Path, bundle: object, identity: object, receipt: object) -> CheckResult:
     del bundle, identity
     try:
-        text_files = tuple(_managed_text(root, receipt))
+        text_files = tuple(_managed_host_content(root, receipt))
         hits = [relative for relative, text in text_files if any(mark in text.casefold() for mark in _FORBIDDEN_FINGERPRINTS)]
         ideas = root_view_path(root, "spec-driven-development/backlog/IDEAS.md")
         backlog = root_view_path(root, "spec-driven-development/backlog/BACKLOG.md")
@@ -349,6 +362,10 @@ def _check_gitignore(root: Path, bundle: object, identity: object, receipt: obje
             timeout=30,
         )
         ignored = tuple(line for line in result.stdout.splitlines() if line)
+        if result.returncode not in {0, 1}:
+            raise ReadinessConfigurationError(
+                f"git check-ignore failed with return code {result.returncode}"
+            )
         if ignored:
             raise ReadinessConfigurationError("managed paths are ignored: " + ", ".join(ignored))
     except (OSError, subprocess.SubprocessError, ReadinessConfigurationError) as exc:
@@ -378,7 +395,7 @@ def _validated_quality_command(root: Path, name: str, command: object) -> tuple[
     network_policy = command.get("network_policy")
     if state not in {"configured", "not-configured"}:
         raise ReadinessConfigurationError(f"quality command {name} has invalid state")
-    if environment_policy != "minimal" or network_policy != "deny":
+    if environment_policy != "minimal" or network_policy not in {"deny", "allow-confirmed"}:
         raise ReadinessConfigurationError(f"quality command {name} requires unsupported policy")
     if state == "not-configured":
         if argv != [] or cwd is not None or timeout is not None:
@@ -452,6 +469,212 @@ def _minimal_environment() -> dict[str, str]:
     return {name: os.environ[name] for name in allowed if name in os.environ}
 
 
+def _redact(value: object) -> str:
+    text = str(value)
+    text = re.sub(
+        r"(?i)(--?(?:password|passwd|token|secret|api[_-]?key))(?:\s+|=)\S+",
+        r"\1 [REDACTED]",
+        text,
+    )
+    text = re.sub(r"(?i)(?:password|passwd|token|secret|api[_-]?key)\s*[=:]\s*\S+", "[REDACTED]", text)
+    return text
+
+
+_BROKER_SCRIPT = (
+    "import base64,json,subprocess,sys;"
+    "sys.stdin.buffer.readline();"
+    "argv=json.loads(base64.b64decode(sys.argv[1]));"
+    "raise SystemExit(subprocess.run(argv, shell=False).returncode)"
+)
+
+
+@dataclass
+class _ContainedProcess:
+    process: subprocess.Popen[str]
+    kind: str
+    boundary: object
+    _closed: bool = False
+
+    def terminate_and_verify(self) -> None:
+        if self._closed:
+            return
+        try:
+            self.boundary.terminate_and_verify(self.process)
+        finally:
+            self._closed = True
+
+
+class _WindowsJobObject:
+    def __init__(self) -> None:
+        import ctypes
+        from ctypes import wintypes
+
+        class BasicLimitInformation(ctypes.Structure):
+            _fields_ = (
+                ("PerProcessUserTimeLimit", ctypes.c_longlong),
+                ("PerJobUserTimeLimit", ctypes.c_longlong),
+                ("LimitFlags", wintypes.DWORD),
+                ("MinimumWorkingSetSize", ctypes.c_size_t),
+                ("MaximumWorkingSetSize", ctypes.c_size_t),
+                ("ActiveProcessLimit", wintypes.DWORD),
+                ("Affinity", ctypes.c_size_t),
+                ("PriorityClass", wintypes.DWORD),
+                ("SchedulingClass", wintypes.DWORD),
+            )
+
+        class IoCounters(ctypes.Structure):
+            _fields_ = tuple((name, ctypes.c_ulonglong) for name in (
+                "ReadOperationCount", "WriteOperationCount", "OtherOperationCount",
+                "ReadTransferCount", "WriteTransferCount", "OtherTransferCount",
+            ))
+
+        class ExtendedLimitInformation(ctypes.Structure):
+            _fields_ = (
+                ("BasicLimitInformation", BasicLimitInformation),
+                ("IoInfo", IoCounters),
+                ("ProcessMemoryLimit", ctypes.c_size_t),
+                ("JobMemoryLimit", ctypes.c_size_t),
+                ("PeakProcessMemoryUsed", ctypes.c_size_t),
+                ("PeakJobMemoryUsed", ctypes.c_size_t),
+            )
+
+        class BasicAccountingInformation(ctypes.Structure):
+            _fields_ = (
+                ("TotalUserTime", ctypes.c_longlong),
+                ("TotalKernelTime", ctypes.c_longlong),
+                ("ThisPeriodTotalUserTime", ctypes.c_longlong),
+                ("ThisPeriodTotalKernelTime", ctypes.c_longlong),
+                ("TotalPageFaultCount", wintypes.DWORD),
+                ("TotalProcesses", wintypes.DWORD),
+                ("ActiveProcesses", wintypes.DWORD),
+                ("TotalTerminatedProcesses", wintypes.DWORD),
+            )
+
+        self._ctypes = ctypes
+        self._kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        self._kernel32.CreateJobObjectW.argtypes = (ctypes.c_void_p, wintypes.LPCWSTR)
+        self._kernel32.CreateJobObjectW.restype = wintypes.HANDLE
+        self._kernel32.SetInformationJobObject.argtypes = (
+            wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p, wintypes.DWORD
+        )
+        self._kernel32.SetInformationJobObject.restype = wintypes.BOOL
+        self._kernel32.AssignProcessToJobObject.argtypes = (wintypes.HANDLE, wintypes.HANDLE)
+        self._kernel32.AssignProcessToJobObject.restype = wintypes.BOOL
+        self._kernel32.QueryInformationJobObject.argtypes = (
+            wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p, wintypes.DWORD,
+            ctypes.POINTER(wintypes.DWORD),
+        )
+        self._kernel32.QueryInformationJobObject.restype = wintypes.BOOL
+        self._kernel32.TerminateJobObject.argtypes = (wintypes.HANDLE, wintypes.UINT)
+        self._kernel32.TerminateJobObject.restype = wintypes.BOOL
+        self._kernel32.CloseHandle.argtypes = (wintypes.HANDLE,)
+        self._kernel32.CloseHandle.restype = wintypes.BOOL
+        self._accounting_type = BasicAccountingInformation
+        self._handle = self._kernel32.CreateJobObjectW(None, None)
+        if not self._handle:
+            raise ContainmentUnavailableError(ctypes.get_last_error(), "Windows Job Object creation failed")
+        limits = ExtendedLimitInformation()
+        limits.BasicLimitInformation.LimitFlags = 0x00002000
+        if not self._kernel32.SetInformationJobObject(
+            self._handle, 9, ctypes.byref(limits), ctypes.sizeof(limits)
+        ):
+            error = ctypes.get_last_error()
+            self._kernel32.CloseHandle(self._handle)
+            self._handle = None
+            raise ContainmentUnavailableError(error, "Windows Job Object configuration failed")
+
+    def assign(self, process: subprocess.Popen[str]) -> None:
+        if not self._kernel32.AssignProcessToJobObject(self._handle, int(process._handle)):
+            raise ContainmentUnavailableError(
+                self._ctypes.get_last_error(), "quality process could not enter a Windows Job Object"
+            )
+
+    def _active_processes(self) -> int:
+        accounting = self._accounting_type()
+        if not self._kernel32.QueryInformationJobObject(
+            self._handle, 1, self._ctypes.byref(accounting), self._ctypes.sizeof(accounting), None
+        ):
+            raise RuntimeError("Windows Job Object termination could not be verified")
+        return int(accounting.ActiveProcesses)
+
+    def terminate_and_verify(self, process: subprocess.Popen[str]) -> None:
+        try:
+            if not self._kernel32.TerminateJobObject(self._handle, 1):
+                raise RuntimeError("Windows Job Object could not be terminated")
+            try:
+                process.communicate(timeout=5)
+            except (OSError, subprocess.SubprocessError, ValueError):
+                pass
+            if self._active_processes() != 0:
+                raise RuntimeError("Windows Job Object descendants remain active")
+        finally:
+            if self._handle:
+                self._kernel32.CloseHandle(self._handle)
+                self._handle = None
+
+
+def _spawn_contained_process(
+    argv: Sequence[str], cwd: Path, environment: Mapping[str, str]
+) -> _ContainedProcess:
+    if os.name != "nt":
+        raise ContainmentUnavailableError(
+            "quality process containment is only available on Windows"
+        )
+    encoded_argv = base64.b64encode(json.dumps(list(argv)).encode("utf-8")).decode("ascii")
+    boundary = _WindowsJobObject()
+    options: dict[str, object] = {
+        "cwd": cwd,
+        "env": dict(environment),
+        "shell": False,
+        "stdin": subprocess.PIPE,
+        "stdout": subprocess.PIPE,
+        "stderr": subprocess.PIPE,
+        "text": True,
+    }
+    process = subprocess.Popen(
+        [sys.executable, "-c", _BROKER_SCRIPT, encoded_argv], **options
+    )
+    try:
+        boundary.assign(process)
+        if process.stdin is None:
+            raise ContainmentUnavailableError("quality containment broker has no control pipe")
+        process.stdin.write("start\n")
+        process.stdin.flush()
+        process.stdin.close()
+        process.stdin = None
+        return _ContainedProcess(
+            process,
+            "windows-job-object",
+            boundary,
+        )
+    except Exception:
+        try:
+            boundary.terminate_and_verify(process)
+        finally:
+            if process.poll() is None:
+                process.kill()
+        raise
+
+
+def _terminate_process_tree(contained: _ContainedProcess) -> None:
+    contained.terminate_and_verify()
+
+
+def _execute_quality_command(
+    argv: Sequence[str], cwd: Path, timeout: int, environment: Mapping[str, str]
+) -> SimpleNamespace:
+    contained = _spawn_contained_process(argv, cwd, environment)
+    process = contained.process
+    try:
+        stdout, stderr = process.communicate(timeout=timeout)
+        return_code = process.returncode
+    except subprocess.TimeoutExpired:
+        _terminate_process_tree(contained)
+        return SimpleNamespace(returncode=124, stdout="", stderr="quality command timed out")
+    _terminate_process_tree(contained)
+    return SimpleNamespace(returncode=return_code, stdout=stdout, stderr=stderr)
+
+
 def run_quality_checks(
     root: Path,
     identity: object,
@@ -467,24 +690,20 @@ def run_quality_checks(
         if command["state"] == "not-configured":
             checks.append(CheckResult(check_id, f"quality {name}", "N/A", "confirmed not-configured"))
             continue
+        if command["network_policy"] == "deny":
+            raise ReadinessConfigurationError(
+                f"quality command {name} network deny cannot be enforced by this executor"
+            )
         disclosure_sink(
-            f"quality {name}: cwd={cwd}; argv={argv!r}; timeout={timeout}s; "
-            "environment=minimal; network=deny; filesystem and external side effects are outside rollback"
+            f"quality {name}: cwd={cwd}; argv=[redacted]; timeout={timeout}s; "
+            "environment=minimal; network=allow-confirmed; filesystem and external side effects are outside rollback"
         )
         try:
-            completed = subprocess.run(
-                argv,
-                cwd=cwd,
-                timeout=timeout,
-                shell=False,
-                env=_minimal_environment(),
-                capture_output=True,
-                text=True,
-            )
+            completed = _execute_quality_command(argv, cwd, timeout, _minimal_environment())
         except (OSError, subprocess.SubprocessError) as exc:
-            checks.append(CheckResult(check_id, f"quality {name}", "FAIL", str(exc)))
+            checks.append(CheckResult(check_id, f"quality {name}", "FAIL", _redact(exc)))
             continue
-        detail = (completed.stderr or completed.stdout or "command completed").strip()
+        detail = _redact((completed.stderr or completed.stdout or "command completed").strip())
         status = "PASS" if completed.returncode == 0 else "FAIL"
         checks.append(CheckResult(check_id, f"quality {name}", status, detail))
     frozen = tuple(checks)

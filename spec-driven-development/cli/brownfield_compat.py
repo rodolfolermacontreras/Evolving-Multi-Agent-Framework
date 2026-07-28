@@ -307,12 +307,14 @@ def _execute_transaction(
     reviewed_proposal: Path,
     structural_check: object | None = None,
 ) -> tuple[object, object]:
+    if request.transaction_workspace is None:
+        raise ValueError("transaction workspace is required")
+    if brownfield_inventory.read_repository_head(request.target) != target_head:
+        raise brownfield_transaction.PreflightError("approved Git HEAD is stale before preflight")
+    request.transaction_workspace.mkdir(parents=True, exist_ok=True)
     authorization = _authorization(
         request, fixture_authorization, preview, target_head
     )
-    if request.transaction_workspace is None:
-        raise ValueError("transaction workspace is required")
-    request.transaction_workspace.mkdir(parents=True, exist_ok=True)
     context = brownfield_transaction.preflight(
         preview,
         authorization,
@@ -334,6 +336,8 @@ def _execute_transaction(
 
     brownfield_transaction.stage_candidate(context, materialize, staged_readiness)
     brownfield_transaction.backup(context)
+    if brownfield_inventory.read_repository_head(request.target) != target_head:
+        raise brownfield_transaction.PreflightError("approved Git HEAD is stale before promotion")
     return context, brownfield_transaction.promote(context)
 
 
@@ -352,9 +356,11 @@ def _authorization(
         if fixture_authorization.target != request.target.resolve():
             raise ValueError("fixture authorization target does not match")
         backup = fixture_authorization.fixture_root / f"backup-{request.action}"
+        backup.mkdir()
         return brownfield_transaction.authorize_verified_fixture(
             target=request.target,
             fixture_root=fixture_authorization.fixture_root,
+            workspace=request.transaction_workspace,
             preview_hash=digest,
             target_head=target_head,
             backup_location=str(backup),
@@ -366,6 +372,10 @@ def _authorization(
     if authorization.preview_hash != digest:
         raise ValueError("owner receipt does not bind the current preview")
     return authorization
+
+
+def _missing_owner_approval() -> Path:
+    raise ValueError("owner approval receipt is required for recovery and cleanup")
 
 
 def _draft(request: BrownfieldRequest) -> BrownfieldResult:
@@ -426,7 +436,23 @@ def _persist_draft(
 def _reviewed_inputs(request: BrownfieldRequest) -> tuple[Path, object, object]:
     proposal = _proposal_for(request.target, request.proposal_root)
     baseline = brownfield_proposal.load_and_validate_baseline(proposal)
-    identity_path = request.identity_path or proposal / "host-identity.json"
+    if request.identity_path is None:
+        identity_path = brownfield_inventory.safe_relative_path(
+            "host-identity.json", proposal, "reviewed host identity", allow_missing=False
+        )
+    else:
+        try:
+            identity_relative = request.identity_path.relative_to(proposal)
+        except ValueError as exc:
+            raise brownfield_inventory.PathSafetyError(
+                "Reviewed host identity must be inside the proposal root."
+            ) from exc
+        identity_path = brownfield_inventory.safe_relative_path(
+            identity_relative,
+            proposal,
+            "reviewed host identity",
+            allow_missing=False,
+        )
     identity = brownfield_identity.load_identity(identity_path)
     return proposal, baseline, identity
 
@@ -441,7 +467,10 @@ def _reviewed_constitution(proposal: Path, baseline: object) -> dict[str, bytes]
         relative = PurePosixPath(item.path)
         if len(relative.parts) != 2 or relative.parts[0] != "constitution":
             raise ValueError("reviewed proposal contains an unsupported path")
-        result[relative.name] = (proposal / relative).read_bytes()
+        reviewed = brownfield_inventory.safe_relative_path(
+            item.path, proposal, "reviewed constitution", allow_missing=False
+        )
+        result[relative.name] = reviewed.read_bytes()
     return result
 
 
@@ -573,6 +602,15 @@ def _receipt_payload(
     }
 
 
+def _managed_candidate_hashes(candidates: dict[str, bytes]) -> dict[str, str]:
+    receipt_path = "spec-driven-development/.adoption/receipt.json"
+    return {
+        path: hashlib.sha256(content).hexdigest()
+        for path, content in candidates.items()
+        if path != receipt_path
+    }
+
+
 def _build_install(request: BrownfieldRequest) -> tuple[Path, object, object, object, dict[str, bytes], object]:
     target = brownfield_inventory.validate_repository_root(request.target)
     proposal, baseline, identity = _reviewed_inputs(request)
@@ -586,16 +624,7 @@ def _build_install(request: BrownfieldRequest) -> tuple[Path, object, object, ob
     )
     rendered, seeds = _render_bundle(bundle, identity, proposal, baseline)
     candidates = _candidate_bytes(bundle, rendered, seeds)
-    managed_hashes = {
-        path: hashlib.sha256(content).hexdigest()
-        for path, content in candidates.items()
-        if path not in {
-            "spec-driven-development/cli/bootstrap.py",
-            "spec-driven-development/cli/brownfield_compat.py",
-            "spec-driven-development/cli/brownfield_manifest.py",
-            "spec-driven-development/cli/host_readiness.py",
-        }
-    }
+    managed_hashes = _managed_candidate_hashes(candidates)
     receipt_path = "spec-driven-development/.adoption/receipt.json"
     receipt = _json_bytes(_receipt_payload(bundle, identity, managed_hashes))
     rendered[receipt_path] = receipt
@@ -948,7 +977,27 @@ def execute(
         if request.action == "migrate":
             return _migration(request, fixture_authorization)
         if request.action == "recover":
-            transaction = brownfield_transaction.recover(_journal(request), action="rollback")
+            journal = _journal(request)
+            authorization = (
+                brownfield_transaction.live_fixture_authorization(
+                    journal,
+                    workspace=Path(journal).parent,
+                    target=request.target,
+                )
+                if fixture_authorization is not None
+                else brownfield_transaction.load_owner_authorization(
+                    request.owner_approval_path
+                    if request.owner_approval_path is not None
+                    else _missing_owner_approval()
+                )
+            )
+            transaction = brownfield_transaction.recover(
+                journal,
+                action="rollback",
+                workspace=Path(journal).parent,
+                target=request.target,
+                authorization=authorization,
+            )
             return _result(
                 transaction.exit_code,
                 transaction.status,
@@ -956,7 +1005,26 @@ def execute(
                 recovery_command=transaction.recovery_command,
             )
         if request.action == "cleanup":
-            transaction = brownfield_transaction.cleanup(_journal(request))
+            journal = _journal(request)
+            authorization = (
+                brownfield_transaction.live_fixture_authorization(
+                    journal,
+                    workspace=Path(journal).parent,
+                    target=request.target,
+                )
+                if fixture_authorization is not None
+                else brownfield_transaction.load_owner_authorization(
+                    request.owner_approval_path
+                    if request.owner_approval_path is not None
+                    else _missing_owner_approval()
+                )
+            )
+            transaction = brownfield_transaction.cleanup(
+                journal,
+                workspace=Path(journal).parent,
+                target=request.target,
+                authorization=authorization,
+            )
             return _result(
                 transaction.exit_code,
                 transaction.status,

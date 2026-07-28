@@ -129,16 +129,19 @@ def _one_file_preview(manifest, before: bytes | None, after: bytes):
 def _transaction_context(disposable, fixture, preview, candidate: bytes):
     transaction = _module("brownfield_transaction")
     manifest = _module("brownfield_manifest")
+    workspace = disposable.root / "transaction-workspace"
+    workspace.mkdir()
+    backup = disposable.root / "backup"
+    backup.mkdir()
     authorization = transaction.authorize_verified_fixture(
         target=fixture.root,
         fixture_root=disposable.root,
+        workspace=workspace,
         preview_hash=manifest.preview_hash(preview),
         target_head=fixture.head,
-        backup_location=str(disposable.root / "backup"),
+        backup_location=str(backup),
         recovery_command="bootstrap brownfield recover --journal transaction.json --action rollback",
     )
-    workspace = disposable.root / "transaction-workspace"
-    workspace.mkdir()
     context = transaction.preflight(
         preview,
         authorization,
@@ -530,7 +533,13 @@ def test_scenario_matrix_apply_failure_recovery_rerun_and_migration(
             interrupted,
             injector=transaction.FailureInjector(fail_at="create:applied:after-flush"),
         )
-    recovered = transaction.recover(interrupted.journal_path, action="rollback")
+    recovered = transaction.recover(
+        interrupted.journal_path,
+        action="rollback",
+        workspace=interrupted.workspace,
+        target=interrupted.target,
+        authorization=interrupted.authorization,
+    )
     assert (recovered.exit_code, recovered.status, recovered.verified) == (0, "rolled-back", True)
     assert not (interrupted_fixture.root / "spec-driven-development/managed.txt").exists()
 

@@ -9,12 +9,14 @@ mutated.
 
 from __future__ import annotations
 
+import gc
 import hashlib
 import importlib
 import json
 import os
 import stat
 import sys
+import weakref
 from dataclasses import fields as dataclass_fields, replace
 from pathlib import Path
 from types import SimpleNamespace
@@ -152,36 +154,54 @@ def _workspace(disposable_root: Path, target: Path, name: str = "transaction-wor
     return workspace
 
 
-def _fixture_authorization(transaction, target: Path, disposable_root: Path, preview: Preview):
+def _fixture_authorization(
+    transaction, target: Path, disposable_root: Path, workspace: Path, preview: Preview
+):
+    backup = disposable_root / "fixture-backup"
+    backup.mkdir()
     return transaction.authorize_verified_fixture(
         target=target,
         fixture_root=disposable_root,
+        workspace=workspace,
         preview_hash=preview_hash(preview),
         target_head=HEAD,
-        backup_location=str(disposable_root / "fixture-backup"),
+        backup_location=str(backup),
         recovery_command=RECOVERY_COMMAND,
     )
 
 
-def _owner_receipt_payload(transaction, target: Path, preview: Preview, backup: Path) -> dict[str, str]:
+def _owner_receipt_payload(
+    transaction, target: Path, workspace: Path, preview: Preview, backup: Path
+) -> dict[str, object]:
     return {
-        "schema_version": "1",
+        "schema_version": "3",
         "kind": "owner-receipt",
         "target_fingerprint": transaction.target_fingerprint(target),
+        "target_identity": transaction._identity_json(transaction._filesystem_identity(target)),
+        "workspace_location": str(workspace.resolve()),
+        "workspace_identity": transaction._identity_json(
+            transaction._filesystem_identity(workspace)
+        ),
         "target_head": HEAD,
         "preview_hash": preview_hash(preview),
         "backup_location": str(backup.resolve()),
+        "backup_root_identity": transaction._identity_json(
+            transaction._filesystem_identity(backup)
+        ),
         "recovery_command": RECOVERY_COMMAND,
         "approved_by": "Fixture Owner",
         "approved_at": "2026-07-12T12:00:00Z",
     }
 
 
-def _owner_authorization(transaction, target: Path, preview: Preview, backup: Path):
+def _owner_authorization(
+    transaction, target: Path, workspace: Path, preview: Preview, backup: Path
+):
+    backup.mkdir()
     receipt = target.parent / "fixture-owner-approval.json"
     receipt.write_text(
         json.dumps(
-            _owner_receipt_payload(transaction, target, preview, backup),
+            _owner_receipt_payload(transaction, target, workspace, preview, backup),
             sort_keys=True,
             separators=(",", ":"),
         )
@@ -202,10 +222,10 @@ def _context(
     candidates: dict[str, bytes] | None = None,
     workspace: Path | None = None,
 ):
-    authorization = authorization or _fixture_authorization(
-        transaction, target, disposable_root, preview
-    )
     workspace = workspace or _workspace(disposable_root, target)
+    authorization = authorization or _fixture_authorization(
+        transaction, target, disposable_root, workspace, preview
+    )
     return transaction.preflight(
         preview,
         authorization,
@@ -237,6 +257,16 @@ def _journal(context) -> dict[str, object]:
     return json.loads(Path(context.journal_path).read_text(encoding="utf-8"))
 
 
+def _rewrite_journal(context, **changes: object) -> None:
+    payload = _journal(context)
+    payload.update(changes)
+    Path(context.journal_path).write_text(
+        json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+
+
 def _injector(transaction, fail_at: str):
     return transaction.FailureInjector(fail_at=fail_at)
 
@@ -266,9 +296,13 @@ def test_transaction_public_contract_has_exact_authorization_operation_and_journ
     assert tuple(item.name for item in dataclass_fields(transaction.ApplyAuthorization)) == (
         "kind",
         "target_fingerprint",
+        "target_identity",
+        "workspace_location",
+        "workspace_identity",
         "target_head",
         "preview_hash",
         "backup_location",
+        "backup_root_identity",
         "recovery_command",
         "approved_by",
         "approved_at",
@@ -287,6 +321,10 @@ def test_transaction_public_contract_has_exact_authorization_operation_and_journ
         "schema_version",
         "transaction_id",
         "target_fingerprint",
+        "target_identity",
+        "workspace_identity",
+        "backup_parent_identity",
+        "backup_root_identity",
         "target_head",
         "preview_hash",
         "state",
@@ -316,7 +354,9 @@ def test_preflight_owner_receipt_requires_exact_reviewed_authorization_fields(
     _, candidates = _write_transaction_inputs(fixture.root, preview)
     workspace = _workspace(disposable.root, fixture.root)
     backup = disposable.root / "owner-backup"
-    authorization = _owner_authorization(transaction, fixture.root, preview, backup)
+    authorization = _owner_authorization(
+        transaction, fixture.root, workspace, preview, backup
+    )
     invalid = replace(authorization, **{changed_field: bad_value})
     before = snapshot_paths((fixture.root,))
 
@@ -341,8 +381,11 @@ def test_owner_receipt_is_exact_positive_authorization_for_disposable_local_host
     fixture = build_node_express_fixture(disposable)
     preview = _preview()
     _, candidates = _write_transaction_inputs(fixture.root, preview)
+    workspace = _workspace(disposable.root, fixture.root)
     backup = disposable.root / "owner-backup"
-    authorization = _owner_authorization(transaction, fixture.root, preview, backup)
+    authorization = _owner_authorization(
+        transaction, fixture.root, workspace, preview, backup
+    )
 
     context = _context(
         transaction,
@@ -351,6 +394,7 @@ def test_owner_receipt_is_exact_positive_authorization_for_disposable_local_host
         preview,
         authorization=authorization,
         candidates=candidates,
+        workspace=workspace,
     )
 
     assert context.authorization.kind.value == "owner-receipt"
@@ -380,6 +424,10 @@ def test_verified_fixture_authorization_has_hard_positive_disposable_guard(
     external.mkdir()
     linked = tmp_path / "linked"
     link_created = make_link(linked, external)
+    workspace = disposable.root / "authorization-workspace"
+    workspace.mkdir()
+    backup = disposable.root / "backup"
+    backup.mkdir()
     targets = {
         "fixture-root": disposable.root,
         "sibling": sibling,
@@ -394,9 +442,10 @@ def test_verified_fixture_authorization_has_hard_positive_disposable_guard(
         transaction.authorize_verified_fixture(
             target=targets[target_case],
             fixture_root=disposable.root,
+            workspace=workspace,
             preview_hash=preview_hash(preview),
             target_head=HEAD,
-            backup_location=str(disposable.root / "backup"),
+            backup_location=str(backup),
             recovery_command=RECOVERY_COMMAND,
         )
 
@@ -408,7 +457,10 @@ def test_verified_fixture_authorization_is_in_memory_only_and_not_owner_deserial
     disposable = create_disposable_root(tmp_path)
     fixture = build_python_fixture(disposable)
     preview = _preview()
-    authorization = _fixture_authorization(transaction, fixture.root, disposable.root, preview)
+    workspace = _workspace(disposable.root, fixture.root)
+    authorization = _fixture_authorization(
+        transaction, fixture.root, disposable.root, workspace, preview
+    )
     forged = tmp_path / "forged-fixture-approval.json"
     forged.write_text(
         json.dumps(
@@ -475,7 +527,9 @@ def test_preflight_rejects_special_locked_stale_and_link_inputs_without_artifact
     preview = _preview()
     _, candidates = _write_transaction_inputs(fixture.root, preview)
     workspace = _workspace(disposable.root, fixture.root)
-    authorization = _fixture_authorization(transaction, fixture.root, disposable.root, preview)
+    authorization = _fixture_authorization(
+        transaction, fixture.root, disposable.root, workspace, preview
+    )
     kwargs = {"target_head": HEAD, "candidate_bytes": candidates}
     if condition == "special":
         monkeypatch.setattr(transaction, "is_supported_regular_path", lambda _path: False)
@@ -544,7 +598,7 @@ def test_stage_is_complete_same_volume_and_structurally_verified_before_backup(t
     ]
     assert snapshot_paths((fixture.root, proposal)) == host_before
     assert _journal(context)["state"] == "staged"
-    assert not Path(context.backup_root).exists()
+    assert list(Path(context.backup_root).iterdir()) == []
 
 
 def test_failed_or_incomplete_stage_never_creates_backup_or_mutates_host(tmp_path: Path) -> None:
@@ -570,7 +624,7 @@ def test_failed_or_incomplete_stage_never_creates_backup_or_mutates_host(tmp_pat
         )
 
     assert snapshot_paths((fixture.root, proposal)) == before
-    assert not Path(context.backup_root).exists()
+    assert list(Path(context.backup_root).iterdir()) == []
     assert _journal(context)["state"] == "staging"
 
 
@@ -605,6 +659,530 @@ def test_backup_is_complete_including_reviewed_proposal_and_portable_metadata(tm
     assert Path(context.journal_path).read_bytes().endswith(b"\n")
 
 
+def test_backup_fsync_failure_never_reaches_backed_up(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(transaction, fixture.root, disposable.root, preview, candidates=candidates)
+
+    def materialize(stage_root: Path, operation) -> None:
+        destination = stage_root / operation.destination
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(candidates[operation.destination])
+
+    transaction.stage_candidate(
+        context, materialize, lambda *_args: SimpleNamespace(exit_code=0)
+    )
+    monkeypatch.setattr(
+        transaction, "fsync_file", lambda _path: (_ for _ in ()).throw(OSError("fsync canary"))
+    )
+
+    with pytest.raises(transaction.TransactionError, match="backup|durab"):
+        transaction.backup(context)
+
+    assert _journal(context)["state"] == "staged"
+
+
+def test_multifile_proposal_backup_corruption_never_reaches_backed_up(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    extra = fixture.root / ".sdd-proposal/constitution/tech-stack.md"
+    extra.write_bytes(b"# Tech stack\n\nFixture bytes.\n")
+    context = _context(
+        transaction, fixture.root, disposable.root, preview, candidates=candidates
+    )
+
+    def materialize(stage_root: Path, operation) -> None:
+        destination = stage_root / operation.destination
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(candidates[operation.destination])
+
+    transaction.stage_candidate(
+        context, materialize, lambda *_args: SimpleNamespace(exit_code=0)
+    )
+    real_copy2 = transaction.shutil.copy2
+
+    def corrupt_copy2(source: Path, destination: Path, *args, **kwargs) -> Path:
+        result = real_copy2(source, destination, *args, **kwargs)
+        if Path(source) == extra:
+            Path(destination).write_bytes(b"corrupt\n")
+        return result
+
+    monkeypatch.setattr(transaction.shutil, "copy2", corrupt_copy2)
+
+    with pytest.raises(transaction.TransactionError, match="backup|durab|verif"):
+        transaction.backup(context)
+
+    assert _journal(context)["state"] == "staged"
+
+
+@pytest.mark.parametrize("failure", ["corrupt-bytes", "mode-mismatch", "directory-fsync"])
+def test_backup_verification_failure_never_reaches_backed_up(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(transaction, fixture.root, disposable.root, preview, candidates=candidates)
+
+    def materialize(stage_root: Path, operation) -> None:
+        destination = stage_root / operation.destination
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(candidates[operation.destination])
+
+    transaction.stage_candidate(
+        context, materialize, lambda *_args: SimpleNamespace(exit_code=0)
+    )
+    if failure == "corrupt-bytes":
+        real_copyfile = transaction.shutil.copyfile
+
+        def corrupt_copy(source: Path, destination: Path) -> None:
+            real_copyfile(source, destination)
+            Path(destination).write_bytes(b"short")
+
+        monkeypatch.setattr(transaction.shutil, "copyfile", corrupt_copy)
+    elif failure == "mode-mismatch":
+        real_path_record = transaction._path_record
+
+        def mismatched_mode(path: Path) -> dict[str, object]:
+            record = real_path_record(path)
+            if context.backup_root in Path(path).parents:
+                record["portable_mode"] = int(record["portable_mode"]) ^ stat.S_IXUSR
+            return record
+
+        monkeypatch.setattr(transaction, "_path_record", mismatched_mode)
+    else:
+        monkeypatch.setattr(
+            transaction, "fsync_directory",
+            lambda _path: (_ for _ in ()).throw(OSError("directory fsync canary")),
+        )
+
+    with pytest.raises(transaction.TransactionError, match="backup|durab"):
+        transaction.backup(context)
+
+    assert _journal(context)["state"] == "staged"
+
+
+def test_backup_revalidates_root_after_injector_before_creation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(transaction, fixture.root, disposable.root, preview, candidates=candidates)
+    transaction.stage_candidate(
+        context,
+        lambda stage_root, operation: (
+            (stage_root / operation.destination).parent.mkdir(parents=True, exist_ok=True),
+            (stage_root / operation.destination).write_bytes(candidates[operation.destination]),
+        ),
+        lambda *_args: SimpleNamespace(exit_code=0),
+    )
+    substituted = False
+    mkdir_calls = 0
+    real_check = transaction.is_link_or_reparse_point
+    real_mkdir = Path.mkdir
+
+    def check(path: Path) -> bool:
+        return (substituted and Path(path) == context.backup_root) or real_check(path)
+
+    def inject(event: str) -> None:
+        nonlocal substituted
+        if event == "before-backup-create":
+            substituted = True
+
+    def mkdir_canary(path: Path, *args, **kwargs) -> None:
+        nonlocal mkdir_calls
+        if substituted and path == context.backup_root:
+            mkdir_calls += 1
+            raise OSError("backup creation must not run after root substitution")
+        real_mkdir(path, *args, **kwargs)
+
+    monkeypatch.setattr(transaction, "is_link_or_reparse_point", check)
+    monkeypatch.setattr(Path, "mkdir", mkdir_canary)
+
+    with pytest.raises(transaction.TransactionError):
+        transaction.backup(context, injector=inject)
+
+    assert substituted is True
+    assert mkdir_calls == 0
+    assert _journal(context)["state"] == "staged"
+
+
+def test_mutation_boundary_rejects_link_substitution_before_promotion(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(transaction, fixture.root, disposable.root, preview, candidates=candidates)
+    _stage_and_backup(transaction, context, candidates)
+    guarded = fixture.root / "spec-driven-development"
+    real_check = transaction.is_link_or_reparse_point
+    monkeypatch.setattr(
+        transaction,
+        "is_link_or_reparse_point",
+        lambda path: Path(path) == guarded or real_check(path),
+    )
+
+    result = transaction.promote(context)
+
+    assert result.exit_code != 0
+    assert not (fixture.root / "spec-driven-development/created.txt").exists()
+
+
+def test_promotion_rejects_ordinary_directory_replacement_of_trusted_target_root(
+    tmp_path: Path,
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(transaction, fixture.root, disposable.root, preview, candidates=candidates)
+    _stage_and_backup(transaction, context, candidates)
+    original_root = fixture.root.with_name(f"{fixture.root.name}-original")
+    fixture.root.rename(original_root)
+    fixture.root.mkdir()
+    protected = fixture.root / "protected.txt"
+    protected.write_bytes(b"replacement root bytes\n")
+
+    with pytest.raises(transaction.TransactionError, match="filesystem identity"):
+        transaction.promote(context)
+
+    assert protected.read_bytes() == b"replacement root bytes\n"
+    assert not (fixture.root / "host-owned/replace.txt").exists()
+    assert not (fixture.root / "spec-driven-development").exists()
+
+
+def test_restart_recovery_rejects_ordinary_directory_replacement_of_trusted_target_root(
+    tmp_path: Path,
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(transaction, fixture.root, disposable.root, preview, candidates=candidates)
+    _stage_and_backup(transaction, context, candidates)
+    original_root = fixture.root.with_name(f"{fixture.root.name}-original")
+    fixture.root.rename(original_root)
+    fixture.root.mkdir()
+    protected = fixture.root / "protected.txt"
+    protected.write_bytes(b"replacement root bytes\n")
+
+    with pytest.raises(transaction.RecoveryRequiredError, match="journal"):
+        transaction.startup_recover(
+            context.journal_path,
+            action="rollback",
+            workspace=context.workspace,
+            target=context.target,
+            authorization=context.authorization,
+        )
+
+    assert protected.read_bytes() == b"replacement root bytes\n"
+    assert not (fixture.root / "host-owned").exists()
+    assert not (fixture.root / "spec-driven-development").exists()
+
+
+def test_stage_reset_revalidates_root_after_injector_before_rmtree(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(transaction, fixture.root, disposable.root, preview, candidates=candidates)
+    context.stage_root.mkdir(parents=True)
+    (context.stage_root / "retained.txt").write_bytes(b"retained evidence\n")
+    substituted = False
+    rmtree_calls = 0
+    real_check = transaction.is_link_or_reparse_point
+    real_rmtree = transaction.shutil.rmtree
+
+    def check(path: Path) -> bool:
+        return (substituted and Path(path) == context.stage_root) or real_check(path)
+
+    def inject(event: str) -> None:
+        nonlocal substituted
+        if event == "before-stage-reset":
+            substituted = True
+
+    def rmtree_canary(path: Path, *args, **kwargs) -> None:
+        nonlocal rmtree_calls
+        if substituted and Path(path) == context.stage_root:
+            rmtree_calls += 1
+            raise OSError("stage reset must not run after root substitution")
+        real_rmtree(path, *args, **kwargs)
+
+    monkeypatch.setattr(transaction, "is_link_or_reparse_point", check)
+    monkeypatch.setattr(transaction.shutil, "rmtree", rmtree_canary)
+
+    with pytest.raises(transaction.StagingError):
+        transaction.stage_candidate(
+            context,
+            lambda *_args: None,
+            lambda *_args: SimpleNamespace(exit_code=0),
+            injector=inject,
+        )
+
+    assert substituted is True
+    assert rmtree_calls == 0
+
+
+def test_promotion_revalidates_parent_after_transition_before_atomic_replace(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(transaction, fixture.root, disposable.root, preview, candidates=candidates)
+    _stage_and_backup(transaction, context, candidates)
+    guarded = fixture.root / "host-owned"
+    substituted = False
+    replace_calls = 0
+    real_check = transaction.is_link_or_reparse_point
+
+    def check(path: Path) -> bool:
+        return (substituted and Path(path) == guarded) or real_check(path)
+
+    def inject(event: str) -> None:
+        nonlocal substituted
+        if event == "replace:prepared:after-flush":
+            substituted = True
+
+    def replace_canary(_source: Path, _destination: Path) -> None:
+        nonlocal replace_calls
+        replace_calls += 1
+        raise OSError("atomic replace must not run after parent substitution")
+
+    monkeypatch.setattr(transaction, "is_link_or_reparse_point", check)
+    monkeypatch.setattr(transaction, "_ATOMIC_DESTINATION_REPLACE", replace_canary)
+
+    result = transaction.promote(context, injector=inject)
+
+    assert result.exit_code == 3
+    assert replace_calls == 0
+
+
+def test_rollback_revalidates_link_substitution_before_destination_mutation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(transaction, fixture.root, disposable.root, preview, candidates=candidates)
+    _stage_and_backup(transaction, context, candidates)
+    guarded = fixture.root / "host-owned"
+    foreign = tmp_path / "foreign"
+    foreign.mkdir()
+    protected = foreign / "replace.txt"
+    protected.write_bytes(b"foreign bytes\n")
+    before = snapshot_paths((foreign,))
+    real_check = transaction.is_link_or_reparse_point
+    monkeypatch.setattr(
+        transaction,
+        "is_link_or_reparse_point",
+        lambda path: Path(path) == guarded or real_check(path),
+    )
+
+    result = transaction.rollback(context)
+
+    assert result.exit_code == 3
+    assert snapshot_paths((foreign,)) == before
+
+
+def test_rollback_revalidates_parent_after_injector_before_replace(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(transaction, fixture.root, disposable.root, preview, candidates=candidates)
+    _stage_and_backup(transaction, context, candidates)
+    guarded = fixture.root / "host-owned"
+    substituted = False
+    replace_calls = 0
+    real_check = transaction.is_link_or_reparse_point
+    real_replace = transaction.os.replace
+
+    def check(path: Path) -> bool:
+        return (substituted and Path(path) == guarded) or real_check(path)
+
+    def inject(event: str) -> None:
+        nonlocal substituted
+        if event == "rollback-replace":
+            substituted = True
+
+    def replace_canary(source: Path, destination: Path) -> None:
+        nonlocal replace_calls
+        if Path(destination) == fixture.root / "host-owned/replace.txt":
+            replace_calls += 1
+            raise OSError("rollback replace must not run after parent substitution")
+        real_replace(source, destination)
+
+    monkeypatch.setattr(transaction, "is_link_or_reparse_point", check)
+    monkeypatch.setattr(transaction.os, "replace", replace_canary)
+
+    result = transaction.rollback(context, injector=inject)
+
+    assert result.exit_code == 3
+    assert replace_calls == 0
+
+
+def test_rollback_revalidates_parent_after_injector_before_unlink(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(transaction, fixture.root, disposable.root, preview, candidates=candidates)
+    _stage_and_backup(transaction, context, candidates)
+    assert transaction.promote(context).status == "committed"
+    guarded = fixture.root / "spec-driven-development"
+    substituted = False
+    unlink_calls = 0
+    real_check = transaction.is_link_or_reparse_point
+    real_unlink = Path.unlink
+
+    def check(path: Path) -> bool:
+        return (substituted and Path(path) == guarded) or real_check(path)
+
+    def inject(event: str) -> None:
+        nonlocal substituted
+        if event == "rollback-remove":
+            substituted = True
+
+    def unlink_canary(path: Path, *args, **kwargs) -> None:
+        nonlocal unlink_calls
+        if path == fixture.root / "spec-driven-development/ledger/fleet.db":
+            unlink_calls += 1
+            raise OSError("rollback unlink must not run after parent substitution")
+        real_unlink(path, *args, **kwargs)
+
+    monkeypatch.setattr(transaction, "is_link_or_reparse_point", check)
+    monkeypatch.setattr(Path, "unlink", unlink_canary)
+
+    result = transaction.rollback(context, injector=inject)
+
+    assert result.exit_code == 3
+    assert unlink_calls == 0
+
+
+def test_rollback_revalidates_parent_before_pruning(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(transaction, fixture.root, disposable.root, preview, candidates=candidates)
+    _stage_and_backup(transaction, context, candidates)
+    parent = fixture.root / "spec-driven-development"
+    real_mutation_destination = transaction._mutation_destination
+    rejected = False
+
+    def substitute_before_prune(target: Path, destination: str) -> Path:
+        nonlocal rejected
+        if Path(target) == fixture.root and destination == "spec-driven-development":
+            rejected = True
+            raise transaction.TransactionError("mutation destination is linked or reparsed")
+        return real_mutation_destination(target, destination)
+
+    monkeypatch.setattr(transaction, "_mutation_destination", substitute_before_prune)
+
+    result = transaction.rollback(context)
+
+    assert result.exit_code == 3
+    assert rejected is True
+    assert not parent.exists() or parent.is_dir()
+
+
+def test_recovery_inspection_revalidates_link_substitution_before_destination_read(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(transaction, fixture.root, disposable.root, preview, candidates=candidates)
+    _stage_and_backup(transaction, context, candidates)
+    guarded = fixture.root / "host-owned"
+    real_check = transaction.is_link_or_reparse_point
+    monkeypatch.setattr(
+        transaction,
+        "is_link_or_reparse_point",
+        lambda path: Path(path) == guarded or real_check(path),
+    )
+
+    with pytest.raises(transaction.RecoveryRequiredError, match="journal"):
+        transaction.inspect_recovery(
+            context.journal_path,
+            workspace=context.workspace,
+            target=context.target,
+            authorization=context.authorization,
+        )
+
+
+def test_recovery_inspection_resolves_mutation_boundary_immediately_before_read(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(transaction, fixture.root, disposable.root, preview, candidates=candidates)
+    _stage_and_backup(transaction, context, candidates)
+    inspected = "host-owned/replace.txt"
+    real_mutation_destination = transaction._mutation_destination
+    calls: list[str] = []
+
+    def reject_inspection_read(target: Path, destination: str) -> Path:
+        calls.append(destination)
+        if destination == inspected:
+            raise transaction.TransactionError("mutation destination is linked or reparsed")
+        return real_mutation_destination(target, destination)
+
+    monkeypatch.setattr(transaction, "_mutation_destination", reject_inspection_read)
+
+    with pytest.raises(transaction.TransactionError, match="linked|reparse"):
+        transaction.inspect_recovery(
+            context.journal_path,
+            workspace=context.workspace,
+            target=context.target,
+            authorization=context.authorization,
+        )
+
+    assert inspected in calls
+
+
 def test_proposal_only_transaction_allows_absent_reviewed_root_and_journals_exact_preview(
     tmp_path: Path,
 ) -> None:
@@ -630,7 +1208,7 @@ def test_proposal_only_transaction_allows_absent_reviewed_root_and_journals_exac
     )
     workspace = _workspace(disposable.root, fixture.root)
     authorization = _fixture_authorization(
-        transaction, fixture.root, disposable.root, preview
+        transaction, fixture.root, disposable.root, workspace, preview
     )
     context = transaction.preflight(
         preview,
@@ -791,10 +1369,257 @@ def test_each_prepared_applied_verified_interruption_is_startup_recoverable(
         transaction.promote(context, injector=_injector(transaction, boundary))
 
     assert Path(context.journal_path).exists()
-    recovered = transaction.startup_recover(context.journal_path, action="rollback")
+    recovered = transaction.startup_recover(
+        context.journal_path,
+        action="rollback",
+        workspace=context.workspace,
+        target=context.target,
+        authorization=context.authorization,
+    )
     assert recovered.exit_code == 0
     assert snapshot_paths((fixture.root / "host-owned/replace.txt", fixture.root / "spec-driven-development/created.txt", proposal)) == original
     assert _journal(context)["state"] == "rolled-back"
+
+
+def test_recovery_rejects_journal_selected_foreign_target_without_mutation(
+    tmp_path: Path,
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(
+        transaction, fixture.root, disposable.root, preview, candidates=candidates
+    )
+    _stage_and_backup(transaction, context, candidates)
+    foreign = tmp_path / "foreign"
+    foreign.mkdir()
+    protected = foreign / "protected.txt"
+    protected.write_bytes(b"do not read or mutate\n")
+    before = snapshot_paths((foreign,))
+    _rewrite_journal(
+        context,
+        target=str(foreign.resolve()),
+        target_fingerprint=transaction.target_fingerprint(foreign),
+    )
+
+    with pytest.raises(transaction.RecoveryRequiredError, match="journal"):
+        transaction.recover(
+            context.journal_path,
+            action="rollback",
+            workspace=context.workspace,
+            target=context.target,
+            authorization=context.authorization,
+        )
+
+    assert snapshot_paths((foreign,)) == before
+
+
+def test_recovery_rejects_forged_equal_authorization_without_mutation(
+    tmp_path: Path,
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(
+        transaction, fixture.root, disposable.root, preview, candidates=candidates
+    )
+    _stage_and_backup(transaction, context, candidates)
+    before = snapshot_paths((fixture.root, context.workspace, context.backup_root))
+    forged = replace(context.authorization)
+
+    with pytest.raises(transaction.AuthorizationError, match="registered"):
+        transaction.recover(
+            context.journal_path,
+            action="rollback",
+            workspace=context.workspace,
+            target=context.target,
+            authorization=forged,
+        )
+
+    assert snapshot_paths((fixture.root, context.workspace, context.backup_root)) == before
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    (
+        ("preview_hash", "b" * 64),
+        ("target_head", "c" * 40),
+        ("backup_root", "foreign-backup"),
+        ("recovery_command", "run forged recovery"),
+    ),
+)
+def test_recovery_rejects_journal_authorization_field_tampering_without_mutation(
+    tmp_path: Path, field: str, value: str
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(
+        transaction, fixture.root, disposable.root, preview, candidates=candidates
+    )
+    _stage_and_backup(transaction, context, candidates)
+    tampered = value
+    if field == "backup_root":
+        tampered = str((tmp_path / value).resolve())
+        Path(tampered).mkdir()
+    _rewrite_journal(context, **{field: tampered})
+    before = snapshot_paths((fixture.root, context.workspace, context.backup_root))
+
+    with pytest.raises(
+        (transaction.AuthorizationError, transaction.RecoveryRequiredError)
+    ):
+        transaction.recover(
+            context.journal_path,
+            action="rollback",
+            workspace=context.workspace,
+            target=context.target,
+            authorization=context.authorization,
+        )
+
+    assert snapshot_paths((fixture.root, context.workspace, context.backup_root)) == before
+
+
+def test_cleanup_rejects_forged_equal_authorization_without_deleting_evidence(
+    tmp_path: Path,
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(
+        transaction, fixture.root, disposable.root, preview, candidates=candidates
+    )
+    _stage_and_backup(transaction, context, candidates)
+    transaction.promote(context)
+    before = snapshot_paths((context.workspace, context.backup_root))
+
+    with pytest.raises(transaction.AuthorizationError, match="registered"):
+        transaction.cleanup(
+            context.journal_path,
+            workspace=context.workspace,
+            target=context.target,
+            authorization=replace(context.authorization),
+        )
+
+    assert snapshot_paths((context.workspace, context.backup_root)) == before
+
+
+def test_fixture_authorization_registry_rejects_reused_identity_after_capability_dies(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    transaction = _transaction()
+    first_parent = tmp_path / "first"
+    first_parent.mkdir()
+    first_disposable = create_disposable_root(first_parent)
+    first_fixture = build_python_fixture(first_disposable)
+    preview = _preview()
+    first_workspace = _workspace(first_disposable.root, first_fixture.root)
+    first_authorization = _fixture_authorization(
+        transaction,
+        first_fixture.root,
+        first_disposable.root,
+        first_workspace,
+        preview,
+    )
+    stale_identity = id(first_authorization)
+    first_reference = weakref.ref(first_authorization)
+    del first_authorization
+    gc.collect()
+    assert first_reference() is None
+
+    second_parent = tmp_path / "second"
+    second_parent.mkdir()
+    second_disposable = create_disposable_root(second_parent)
+    second_fixture = build_python_fixture(second_disposable)
+    second_workspace = _workspace(second_disposable.root, second_fixture.root)
+    second_authorization = _fixture_authorization(
+        transaction,
+        second_fixture.root,
+        second_disposable.root,
+        second_workspace,
+        preview,
+    )
+    forged = replace(second_authorization)
+    monkeypatch.setattr(transaction, "id", lambda _value: stale_identity, raising=False)
+
+    with pytest.raises(transaction.AuthorizationError, match="registered"):
+        transaction._validate_registered_authorization(forged)
+
+
+def test_owner_authorization_registry_rejects_reused_identity_after_capability_dies(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    preview = _preview()
+    workspace = _workspace(disposable.root, fixture.root)
+    backup = disposable.root / "owner-backup"
+    authorization = _owner_authorization(
+        transaction, fixture.root, workspace, preview, backup
+    )
+    stale_identity = id(authorization)
+    authorization_reference = weakref.ref(authorization)
+    forged = replace(authorization)
+    del authorization
+    gc.collect()
+    assert authorization_reference() is None
+    monkeypatch.setattr(transaction, "id", lambda _value: stale_identity, raising=False)
+
+    with pytest.raises(transaction.AuthorizationError, match="registered"):
+        transaction._validate_registered_authorization(forged)
+
+
+@pytest.mark.parametrize(
+    "tamper",
+    (
+        lambda item: item["preimage"].update({"sha256": "not-a-hash"}),
+        lambda item: item["preimage"].update({"size": -1}),
+        lambda item: item["preimage"].update({"portable_mode": 0o1000}),
+        lambda item: item["candidate"].update({"sha256": "A" * 64}),
+        lambda item: item["candidate"].update({"size": True}),
+        lambda item: item.update({"operation": "execute"}),
+        lambda item: item["backup"].update({"sha256": "d" * 64}),
+    ),
+)
+def test_recovery_rejects_malformed_nested_operation_records(
+    tmp_path: Path, tamper
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(
+        transaction, fixture.root, disposable.root, preview, candidates=candidates
+    )
+    _stage_and_backup(transaction, context, candidates)
+    payload = _journal(context)
+    tamper(payload["operations"][0])
+    Path(context.journal_path).write_text(
+        json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    before = snapshot_paths((fixture.root, context.workspace, context.backup_root))
+
+    with pytest.raises(transaction.RecoveryRequiredError, match="journal"):
+        transaction.recover(
+            context.journal_path,
+            action="rollback",
+            workspace=context.workspace,
+            target=context.target,
+            authorization=context.authorization,
+        )
+
+    assert snapshot_paths((fixture.root, context.workspace, context.backup_root)) == before
 
 
 def test_successful_promotion_uses_atomic_replace_per_path_and_preserves_unrelated_bytes(
@@ -955,10 +1780,21 @@ def test_startup_recovery_resolves_unknown_operation_from_preimage_or_candidate_
             injector=_injector(transaction, "replace:applied:after-flush"),
         )
 
-    inspection = transaction.inspect_recovery(context.journal_path)
+    inspection = transaction.inspect_recovery(
+        context.journal_path,
+        workspace=context.workspace,
+        target=context.target,
+        authorization=context.authorization,
+    )
     assert inspection.operation_states["host-owned/replace.txt"] in {"preimage", "candidate"}
     assert inspection.operation_states["spec-driven-development/created.txt"] in {"absent", "candidate"}
-    result = transaction.recover(context.journal_path, action="rollback")
+    result = transaction.recover(
+        context.journal_path,
+        action="rollback",
+        workspace=context.workspace,
+        target=context.target,
+        authorization=context.authorization,
+    )
 
     assert result.exit_code == 0
     assert result.verified is True
@@ -978,7 +1814,13 @@ def test_recovery_refuses_unknown_third_hash_and_retains_exit_three_evidence(tmp
         transaction.promote(context, injector=_injector(transaction, "replace:applied:after-flush"))
     (fixture.root / "host-owned/replace.txt").write_bytes(b"unknown third state\n")
 
-    result = transaction.recover(context.journal_path, action="rollback")
+    result = transaction.recover(
+        context.journal_path,
+        action="rollback",
+        workspace=context.workspace,
+        target=context.target,
+        authorization=context.authorization,
+    )
 
     assert result.exit_code == 3
     assert result.status == "recovery-required"
@@ -998,18 +1840,166 @@ def test_cleanup_only_removes_explicitly_eligible_committed_or_rolled_back_trans
     _stage_and_backup(transaction, context, candidates)
 
     with pytest.raises(transaction.CleanupNotEligibleError):
-        transaction.cleanup(context.journal_path)
+        transaction.cleanup(
+            context.journal_path,
+            workspace=context.workspace,
+            target=context.target,
+            authorization=context.authorization,
+        )
     assert Path(context.journal_path).exists()
     assert Path(context.backup_root).exists()
 
     transaction.promote(context)
-    result = transaction.cleanup(context.journal_path)
+    result = transaction.cleanup(
+        context.journal_path,
+        workspace=context.workspace,
+        target=context.target,
+        authorization=context.authorization,
+    )
 
     assert result.exit_code == 0
     assert not Path(context.journal_path).exists()
     assert not Path(context.stage_root).exists()
     assert not Path(context.backup_root).exists()
     assert (fixture.root / "host-owned/replace.txt").read_bytes() == candidates["host-owned/replace.txt"]
+
+
+def test_cleanup_revalidates_evidence_tree_immediately_before_deletion(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_node_express_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(transaction, fixture.root, disposable.root, preview, candidates=candidates)
+    _stage_and_backup(transaction, context, candidates)
+    transaction.promote(context)
+    real_evidence_deletion_path = transaction._evidence_deletion_path
+
+    def substitute_before_cleanup(workspace: Path, path: Path) -> Path:
+        if Path(path) == context.stage_root:
+            raise transaction.TransactionError("transaction evidence is linked or reparsed")
+        return real_evidence_deletion_path(workspace, path)
+
+    monkeypatch.setattr(transaction, "_evidence_deletion_path", substitute_before_cleanup)
+
+    with pytest.raises(transaction.TransactionError, match="linked|reparse"):
+        transaction.cleanup(
+            context.journal_path,
+            workspace=context.workspace,
+            target=context.target,
+            authorization=context.authorization,
+        )
+
+    assert Path(context.stage_root).exists()
+    assert Path(context.backup_root).exists()
+    assert Path(context.journal_path).exists()
+
+
+def test_cleanup_rejects_ordinary_directory_replacement_of_trusted_backup_root(
+    tmp_path: Path,
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_node_express_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(transaction, fixture.root, disposable.root, preview, candidates=candidates)
+    _stage_and_backup(transaction, context, candidates)
+    transaction.promote(context)
+    original_backup = context.backup_root.with_name(f"{context.backup_root.name}-original")
+    context.backup_root.rename(original_backup)
+    context.backup_root.mkdir()
+    protected = context.backup_root / "protected.txt"
+    protected.write_bytes(b"replacement backup bytes\n")
+
+    with pytest.raises(transaction.TransactionError, match="journal|filesystem identity"):
+        transaction.cleanup(
+            context.journal_path,
+            workspace=context.workspace,
+            target=context.target,
+            authorization=context.authorization,
+        )
+
+    assert protected.read_bytes() == b"replacement backup bytes\n"
+    assert original_backup.is_dir()
+    assert context.journal_path.is_file()
+
+
+def test_cleanup_rejects_backup_root_replacement_at_deletion_boundary(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_node_express_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(transaction, fixture.root, disposable.root, preview, candidates=candidates)
+    _stage_and_backup(transaction, context, candidates)
+    transaction.promote(context)
+    original_backup = context.backup_root.with_name(f"{context.backup_root.name}-original")
+    protected = context.backup_root / "protected.txt"
+    real_evidence_deletion_path = transaction._evidence_deletion_path
+
+    def substitute_at_deletion_boundary(workspace: Path, path: Path) -> Path:
+        if Path(path) == context.backup_root:
+            context.backup_root.rename(original_backup)
+            context.backup_root.mkdir()
+            protected.write_bytes(b"replacement backup bytes\n")
+        return real_evidence_deletion_path(workspace, path)
+
+    monkeypatch.setattr(transaction, "_evidence_deletion_path", substitute_at_deletion_boundary)
+
+    with pytest.raises(transaction.TransactionError, match="filesystem identity"):
+        transaction.cleanup(
+            context.journal_path,
+            workspace=context.workspace,
+            target=context.target,
+            authorization=context.authorization,
+        )
+
+    assert protected.read_bytes() == b"replacement backup bytes\n"
+    assert original_backup.is_dir()
+    assert context.journal_path.is_file()
+
+
+def test_restart_recovery_rejects_copied_journal_in_replaced_workspace(
+    tmp_path: Path,
+) -> None:
+    transaction = _transaction()
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_node_express_fixture(disposable)
+    preview = _preview()
+    _, candidates = _write_transaction_inputs(fixture.root, preview)
+    context = _context(transaction, fixture.root, disposable.root, preview, candidates=candidates)
+    _stage_and_backup(transaction, context, candidates)
+    journal_bytes = context.journal_path.read_bytes()
+    lock_bytes = context.lock_path.read_bytes()
+    original_workspace = context.workspace.with_name(f"{context.workspace.name}-original")
+    context.workspace.rename(original_workspace)
+    context.workspace.mkdir()
+    copied_journal = json.loads(journal_bytes)
+    copied_journal["workspace_identity"] = transaction._identity_json(
+        transaction._filesystem_identity(context.workspace)
+    )
+    copied_journal_bytes = (
+        json.dumps(copied_journal, sort_keys=True, separators=(",", ":")) + "\n"
+    ).encode("utf-8")
+    context.journal_path.write_bytes(copied_journal_bytes)
+    context.lock_path.write_bytes(lock_bytes)
+
+    with pytest.raises(transaction.TransactionError, match="journal|authorization"):
+        transaction.startup_recover(
+            context.journal_path,
+            action="rollback",
+            workspace=context.workspace,
+            target=context.target,
+            authorization=context.authorization,
+        )
+
+    assert original_workspace.is_dir()
+    assert context.journal_path.read_bytes() == copied_journal_bytes
 
 
 def test_cleanup_rejects_recovery_required_and_never_silently_deletes_evidence(tmp_path: Path) -> None:
@@ -1025,7 +2015,12 @@ def test_cleanup_rejects_recovery_required_and_never_silently_deletes_evidence(t
     evidence_before = snapshot_paths((context.journal_path, context.stage_root, context.backup_root))
 
     with pytest.raises(transaction.CleanupNotEligibleError):
-        transaction.cleanup(context.journal_path)
+        transaction.cleanup(
+            context.journal_path,
+            workspace=context.workspace,
+            target=context.target,
+            authorization=context.authorization,
+        )
 
     assert snapshot_paths((context.journal_path, context.stage_root, context.backup_root)) == evidence_before
 
@@ -1039,7 +2034,9 @@ def test_active_transaction_lock_blocks_concurrent_preflight_and_stale_lock_is_r
     preview = _preview()
     _, candidates = _write_transaction_inputs(fixture.root, preview)
     workspace = _workspace(disposable.root, fixture.root)
-    authorization = _fixture_authorization(transaction, fixture.root, disposable.root, preview)
+    authorization = _fixture_authorization(
+        transaction, fixture.root, disposable.root, workspace, preview
+    )
     first = _context(
         transaction,
         fixture.root,
@@ -1105,7 +2102,7 @@ def test_candidate_hash_drift_after_preflight_fails_before_promotion_and_preserv
         )
 
     assert snapshot_paths((fixture.root, proposal)) == before
-    assert not Path(context.backup_root).exists()
+    assert list(Path(context.backup_root).iterdir()) == []
 
 
 def test_transaction_module_is_stdlib_only_and_has_no_shell_or_real_host_escape() -> None:

@@ -2,6 +2,354 @@
 
 ---
 
+## Week of July 24-28, 2026
+
+Date: July 28, 2026 | Owner: Rodolfo Lerma | Branch: feature/f7.5-sdd-058-stage-2-security at 7c6ebd2 (no repair commit or push)
+
+### Progress since last week (July 23)
+
+**PI-9 Sprint 24 -- Brownfield Bootstrap Correctness (PRE-PUSH APPROVAL READY)**
+- Closed the order-dependent authorization defect that the exact SDD-058 workflow exposed. Both fixture and owner-receipt authorizations now require exact live weak-reference capability identity; stale object IDs and equal replacements cannot authorize recovery, cleanup, or apply.
+- TDD evidence: owner lifetime regression RED (`DID NOT RAISE AuthorizationError`) then GREEN; transaction module `100 passed`; exact nine-module workflow `443 passed, 2 skipped`.
+- Full repository `1111 passed, 4 skipped, 6 subtests passed`; strict local doctor passed with the same test total, 21 PI-9 ledger rows, TDD PASS, and DONE completeness PASS.
+- Fresh independent Principal Cloud Security Architect re-review: **APPROVED**, with no critical or important finding. T-058-022 and V-61 remain complete.
+
+**Release Gate (WAITING FOR OWNER)**
+- No commit or push has occurred. The exact dirty package must be fingerprinted after final evidence-byte gates and explicitly approved before any commit/push action.
+- V-62 and public Windows/POSIX CI remain open. SDD-058, Sprint 24, and PI-9 are not DONE/closed, and executive surfaces were not regenerated.
+
+### Blockers / Next Steps
+
+| Item | Status | Blocker |
+|------|--------|---------|
+| SDD-058 Stage-2 review | APPROVED | None; exact-package owner approval is next |
+| Local validation | GREEN | Final evidence-byte gate/fingerprint must match approval package |
+| Commit and push | NOT AUTHORIZED | Requires owner approval of the exact fingerprinted package |
+| Public CI / V-62 | Pending | Runs only after approved package is pushed |
+| Sprint 24 and PI-9 close | Pending | Requires green public Windows/POSIX CI and SDD-058 DONE |
+
+---
+
+## Week of July 17-23, 2026
+
+Date: July 23, 2026 | Owner: Rodolfo Lerma | Branch: master at 7c6ebd2 (330 commits)
+
+### Progress since last week (July 16)
+
+**PI-9 Sprint 24 -- Brownfield Bootstrap Correctness (IN FLIGHT, Jul 17-23 -- 5 commits)**
+- SDD-058 safe brownfield adoption implemented across compatibility, identity, inventory, manifest, migration, proposal, transaction, and host-readiness modules (`2a1d096`).
+- Stage-1 compliance review recorded findings, implementation defects were repaired, and Stage-1 subsequently passed (`669c07c` -> `9e743e4` -> `a086ce6`).
+- Stage-2 security review recorded durability, backup-verification, and quality findings (`7c6ebd2`). Sprint 24 remains open; no DONE status is claimed.
+- Current uncommitted repair work touches 6 runtime modules and 6 test modules. The working-tree suite currently reaches 1,087 passing, 3 skipped, and 3 failing host-readiness tests; the latest completed-sprint baseline remains 668 passing / 2 skipped / 6 subtests.
+
+**Review Discipline and Release Gate (ACTIVE)**
+- The two-stage review sequence is operating as designed: Stage 1 compliance passed before Stage 2 security/quality review began.
+- PI-9 cannot close until Stage-2 findings are repaired, focused and full tests pass, owner pre-push approval is recorded, and the exact package passes Windows/POSIX public CI.
+
+### Blockers / Next Steps
+
+| Item | Status | Blocker |
+|------|--------|---------|
+| SDD-058 Stage-2 review | BLOCKED / CHANGES REQUIRED | Durability and backup-verification findings remain open |
+| Full test suite | 1,087 pass / 3 fail / 3 skip (working tree) | 3 host-readiness tests hit `ReadinessConfigurationError` under deny-network policy |
+| Sprint 24 close | Pending | Requires Stage-2 approval and owner pre-push approval |
+| PI-9 close | Pending | Sprint 24 must close and public Windows/POSIX CI must pass |
+
+### Key Meetings This Week
+
+| Meeting | Date | Key Outcome |
+|---------|------|-------------|
+| _(No external meetings evidenced -- implementation and independent review work)_ | -- | -- |
+
+### Scorecard
+
+| Metric | Last Week (Jul 16) | This Week (Jul 23) | Delta |
+|--------|-------------------|-------------------|-------|
+| Total commits | 325 | 330 | +5 |
+| Tests passing | 668 + 2 skipped + 6 subtests | Completed baseline unchanged; WIP 1,087 pass / 3 fail / 3 skip | Sprint open |
+| PI status | PI-9 active, Sprint 24 prepared | PI-9 active, Sprint 24 in Stage-2 review | Advanced to review |
+| CLI code lines | ~12,462 | ~17,501 committed (~17,942 with WIP) | +~5,039 committed |
+| Agent definitions | 14 | 14 | Unchanged |
+| Skills | 35 | 35 | Unchanged |
+| Slash commands | 18 | 18 | Unchanged |
+| Feature kickoff prompts | 33 | 33 | Unchanged |
+| ADRs | 25 | 26 | +1 |
+| Constitution articles | 12 | 12 | Unchanged |
+| Spec dirs (DONE / active / legacy-unknown) | 40 / 4 / 3 | 40 / 5 / 3 | +1 active |
+| Schema lint | Clean | Clean | Unchanged |
+
+---
+
+## Week of July 10-16, 2026
+
+Date: July 16, 2026 | Owner: Rodolfo Lerma | Branch: master at 1631f4e (325 commits)
+
+### Progress since last week (July 9)
+
+**CI Doctor Profiles (COMPLETE, Jul 10)**
+- SDD-055 repaired local-versus-CI doctor profiles and installed pytest correctly on fresh CI runners.
+- ADR-025 documented the CI/local validation boundary and prevented local-only assumptions from masquerading as public CI readiness.
+
+**PI-9 Sprint 23 -- Dashboard Truth, Accessibility, and Polish (COMPLETE, Jul 10-12)**
+- SDD-057 shipped live sprint/PI truth so the dashboard reflects current governance state instead of stale generated labels.
+- SDD-038 added accessible lifecycle color tokens.
+- SDD-056 delivered wording cleanup, dashboard containment fixes, and pill-navigation polish.
+- A cross-platform wording-hash failure surfaced only after push; commit `4e319fa` repaired it and the public doctor run succeeded.
+- Sprint 23 closed at `d77d4ab` with 668 passing, 2 skipped, and 6 subtests.
+
+**PI-9 Sprint 24 -- Brownfield Bootstrap Correctness (PREPARED, Jul 12)**
+- Owner authorized a final PI-9 sprint dedicated exclusively to SDD-058 (`1631f4e`).
+- Sprint scope locked around transactional brownfield adoption, compatibility, identity, host-readiness, migration safety, independent two-stage review, and Windows/POSIX validation.
+
+### Blockers / Next Steps
+
+| Item | Status | Blocker |
+|------|--------|---------|
+| SDD-058 CLARIFY/SPEC | Prepared | Must finish design and lock validation before implementation |
+| Sprint 24 implementation | Not started | Depends on approved ADR/spec and transactional safety contract |
+| PI-9 close | Pending | Dedicated Sprint 24 must close first |
+
+### Key Meetings This Week
+
+| Meeting | Date | Key Outcome |
+|---------|------|-------------|
+| _(No external meetings evidenced -- framework implementation and CI validation)_ | -- | -- |
+
+### Scorecard
+
+| Metric | Last Week (Jul 9) | This Week (Jul 16) | Delta |
+|--------|-------------------|-------------------|-------|
+| Total commits | 299 | 325 | +26 |
+| Tests passing | 616 + 2 skipped | 668 + 2 skipped + 6 subtests | +52 |
+| PI status | PI-9 active, Sprint 22 closed | PI-9 active, Sprint 23 closed, Sprint 24 prepared | +1 sprint closed |
+| CLI code lines | ~12,109 | ~12,462 | +~353 |
+| Agent definitions | 14 | 14 | Unchanged |
+| Skills | 35 | 35 | Unchanged |
+| Slash commands | 18 | 18 | Unchanged |
+| Feature kickoff prompts | 31 | 33 | +2 |
+| ADRs | 24 | 25 | +1 |
+| Constitution articles | 12 | 12 | Unchanged |
+| Spec dirs (DONE / active / legacy-unknown) | 39 / 3 / 3 | 40 / 4 / 3 | +1 DONE, +1 active |
+
+---
+
+## Week of July 3-9, 2026
+
+Date: July 9, 2026 | Owner: Rodolfo Lerma | Branch: master at 183b6aa (299 commits)
+
+### Progress since last week (July 2)
+
+**PI-7 Sprint 17 + PI Close (COMPLETE, Jul 7)**
+- SDD-048 completed the `state_builder.py` modular split and validation closeout at 558 passing / 2 skipped.
+- PI-7 closed DONE-WITH-CARRYOVER at `7088f35` after the owner-approved Sprint 17 close.
+
+**PI-8 -- Truth in the Window (COMPLETE, Jul 8-9 -- 4 sprints)**
+- SDD-050 repaired dashboard stage and closed-PI truth (558 -> 576 tests).
+- SDD-051 added session-start document freshness and `staledoc_lint` (576 -> 590 tests).
+- SDD-052 repaired roadmap/status truth and documented the change in ADR-024.
+- SDD-053 made the decision-request format mandatory (590 -> 596 tests).
+- PI-8 closed at `6d981a5` with all four truth/communication sprints complete.
+
+**PI-9 Launch + Sprint 22 -- Conflict Detection and Priority Reoptimization (COMPLETE, Jul 9)**
+- SDD-049 added file-overlap detection to identify conflicting work before dispatch.
+- SDD-054 reoptimized backend priorities around portability, correctness, and execution risk.
+- Sprint 22 closed at `f5663fc` / `183b6aa` with 616 passing / 2 skipped.
+
+### Blockers / Next Steps
+
+| Item | Status | Blocker |
+|------|--------|---------|
+| Sprint 22 push/public CI | Locally closed | Owner-approved push and public CI evidence still pending at boundary |
+| PI-9 next sprint | Ready | Dashboard truth/polish carryover to be sequenced |
+| Long-term carryover | Backlogged | SDD-038, SDD-034, PI-4 housekeeping, SDD-041 Option B |
+
+### Key Meetings This Week
+
+| Meeting | Date | Key Outcome |
+|---------|------|-------------|
+| _(No external meetings evidenced -- PI closures and implementation work)_ | -- | -- |
+
+### Scorecard
+
+| Metric | Last Week (Jul 2) | This Week (Jul 9) | Delta |
+|--------|-------------------|-------------------|-------|
+| Total commits | 274 | 299 | +25 |
+| Tests passing | 540 + 2 skipped | 616 + 2 skipped | +76 |
+| PI status | PI-7 active, Sprint 17 implementation complete | PI-7 closed, PI-8 closed, PI-9 active | 2 PIs closed, 1 launched |
+| CLI code lines | ~11,501 | ~12,109 | +~608 |
+| Agent definitions | 14 | 14 | Unchanged |
+| Skills | 35 | 35 | Unchanged |
+| Slash commands | 18 | 18 | Unchanged |
+| Feature kickoff prompts | 25 | 31 | +6 |
+| ADRs | 23 | 24 | +1 |
+| Constitution articles | 12 | 12 | Unchanged |
+| Spec dirs (DONE / active / legacy-unknown) | 28 / 8 / 3 | 39 / 3 / 3 | +11 DONE |
+
+---
+
+## Week of June 26 - July 2, 2026
+
+Date: July 2, 2026 | Owner: Rodolfo Lerma | Branch: master at 37c49bb (274 commits)
+
+### Progress since last week (June 25)
+
+**PI-6 Sprint 13 Repair + PI Close (COMPLETE, Jun 26)**
+- SDD-041 browser drag-to-reorder was repaired with an OPEN-only persisted reorder path (`afbfe47`).
+- Sprint 13 closed and PI-6 closed DONE-WITH-CARRYOVER with owner approval (`4ad0521`).
+- Carryover retained explicit visibility: SDD-038, SDD-034, housekeeping, and SDD-041 Option B.
+
+**PI-7 Launch + Sprint 14 -- Framework Runtime and Operator Experience (COMPLETE, Jun 26)**
+- SDD-043/044/045 delivered a Sprint Executive Manager, plain-language communication, detached runtime ledger, one-command setup, doctor, origin lint, and governance consistency.
+- ADR-020 captured the runtime/governance architecture. Tests advanced 481 -> 501.
+
+**PI-7 Sprint 15 -- Ledger Truth and Blocking Gates (COMPLETE, Jun 26)**
+- SDD-046 added ledger truth, blocking TDD/DONE gates, and real CI enforcement.
+- ADR-021 documented the gate architecture. Tests advanced 501 -> 518.
+
+**PI-7 Sprint 16 -- Identity and Origin Hygiene (COMPLETE, Jun 26)**
+- SDD-047 shipped config-driven identity, origin scrub, dead-skill wiring/removal, and honest conflict-gate naming.
+- ADR-022 documented the identity/origin policy. Tests advanced 518 -> 540.
+
+**PI-7 Sprint 17 -- State Builder Modularization (IMPLEMENTED, CLOSE PENDING)**
+- `state_builder.py` split into focused modules while retaining stdlib-only rendering.
+- Cutover date became configurable; lightweight-spec support and advisory length lint were added under ADR-023.
+- Implementation gate completed, but independent close verification and owner approval remained pending at the weekly boundary.
+
+### Blockers / Next Steps
+
+| Item | Status | Blocker |
+|------|--------|---------|
+| Sprint 17 close | Implementation complete | Independent F-46 verification + owner pre-push approval pending |
+| PI-7 close | Pending | Sprint 17 must close first |
+| Carryover queue | Visible | SDD-038, SDD-034, PI-4 housekeeping, SDD-041 Option B, SDD-049, navigation polish |
+
+### Key Meetings This Week
+
+| Meeting | Date | Key Outcome |
+|---------|------|-------------|
+| _(No external meetings evidenced -- PI-6 close and PI-7 delivery)_ | -- | -- |
+
+### Scorecard
+
+| Metric | Last Week (Jun 25) | This Week (Jul 2) | Delta |
+|--------|-------------------|-------------------|-------|
+| Total commits | 248 | 274 | +26 |
+| Tests passing | 450 + 2 skipped | 540 + 2 skipped | +90 |
+| PI status | PI-6 active, Sprint 13 acceptance pending | PI-6 closed, PI-7 active (Sprints 14-16 closed; 17 implementing) | PI transition |
+| CLI code lines | ~9,412 | ~11,501 | +~2,089 |
+| Agent definitions | 13 | 14 | +1 |
+| Skills | 35 | 35 | Unchanged |
+| Slash commands | 18 | 18 | Unchanged |
+| Feature kickoff prompts | 21 | 25 | +4 |
+| ADRs | 19 | 23 | +4 |
+| Constitution articles | 12 | 12 | Unchanged |
+| Spec dirs (DONE / active / legacy-unknown) | 26 / 3 / 3 | 28 / 8 / 3 | +2 DONE, +5 active |
+
+---
+
+## Week of June 19-25, 2026
+
+Date: June 25, 2026 | Owner: Rodolfo Lerma | Branch: master at 721981d (248 commits)
+
+### Progress since last week (June 18)
+
+**PI-6 Sprint 10 -- Dashboard Parser Fix + Auto-Refresh (COMPLETE)**
+- SDD-040 replaced the stale active-focus heuristic and added serve-mode auto-refresh while preserving static non-serve generation.
+- Sprint 10 closed across commits `c740c4b` through `c040911`; tests advanced 337 -> 349.
+
+**PI-6 Sprint 11 -- Lifecycle Pipeline + Reorder Safeguards (COMPLETE)**
+- SDD-036 shipped the lifecycle pipeline, four-card document row, keyboard reorder, and dependency safeguards.
+- ADR-017 captured the lifecycle/reorder architecture. Sprint closed at `db25eec`; tests advanced 349 -> 412.
+
+**PI-6 Sprint 12 -- Dispatches and Health Signals (COMPLETE)**
+- SDD-037 added the Dispatches card and four dashboard health pills (`d417c66`, `84db2de`).
+- Tests advanced 412 -> 450.
+
+**PI-6 Sprint 13 -- Truth Fixes and Browser Drag (IN FLIGHT)**
+- SDD-042 fixed PI-label parsing (`ac1ccf0`).
+- SDD-039 clarified Article VII wording (`699d8bb`).
+- First SDD-041 browser drag implementation landed (`efefc92`) and reached 476 passing / 2 skipped in interim evidence, but real persisted reorder acceptance remained open.
+
+### Blockers / Next Steps
+
+| Item | Status | Blocker |
+|------|--------|---------|
+| SDD-041 browser drag acceptance | Implemented-pending-acceptance | Real browser persisted reorder path not yet proven |
+| Sprint 13 close | Pending | Depends on SDD-041 acceptance |
+| PI-6 close | Pending | Separate owner decision after Sprint 13 |
+| Deferred items | Backlogged | SDD-038, SDD-034, PI-4 housekeeping |
+
+### Key Meetings This Week
+
+| Meeting | Date | Key Outcome |
+|---------|------|-------------|
+| _(No external meetings evidenced -- PI-6 implementation work)_ | -- | -- |
+
+### Scorecard
+
+| Metric | Last Week (Jun 18) | This Week (Jun 25) | Delta |
+|--------|-------------------|-------------------|-------|
+| Total commits | 234 | 248 | +14 |
+| Tests passing | 349 + 2 skipped (local reported baseline) | 450 + 2 skipped (latest closed sprint) | +101 |
+| PI status | PI-6 active, Sprint 10 approval-gated | PI-6 active, Sprints 10-12 closed, Sprint 13 in flight | +3 sprints closed |
+| CLI code lines | ~7,761 | ~9,412 | +~1,651 |
+| Agent definitions | 13 | 13 | Unchanged |
+| Skills | 35 | 35 | Unchanged |
+| Slash commands | 18 | 18 | Unchanged |
+| Feature kickoff prompts | 18 | 21 | +3 |
+| ADRs | 16 | 19 | +3 |
+| Constitution articles | 12 | 12 | Unchanged |
+| Spec dirs (DONE / active / legacy-unknown) | 25 / 2 / 3 | 26 / 3 / 3 | +1 DONE, +1 active |
+
+---
+
+## Week of June 12-18, 2026
+
+Date: June 18, 2026 | Owner: Rodolfo Lerma | Branch: master at 8c7a22c (234 commits)
+
+### Progress since last week (June 11)
+
+**PI-6 Sprint 10 -- Approval-Gated Implementation (PAUSED, no new commits)**
+- No commits landed during this reporting window; HEAD remained `8c7a22c`.
+- SDD-040 parser fix and serve-mode auto-refresh remained implemented locally from the prior week, with 349 passing / 2 skipped reported locally against the 337 passing / 2 skipped pushed baseline.
+- The pause was procedural, not a technical reset: owner M3 ratification and pre-push approval were still required before Sprint 10 could close.
+
+**Carryover Preserved**
+- Sprint 11 remained anchored on SDD-036 lifecycle pipeline + drag-to-reorder safeguards.
+- SDD-034, SDD-039, and PI-4 housekeeping remained visible in BACKLOG and were not silently absorbed.
+
+### Blockers / Next Steps
+
+| Item | Status | Blocker |
+|------|--------|---------|
+| Sprint 10 / SDD-040 | Implemented locally, not committed | M3 owner ratification + pre-push approval |
+| Sprint 11 / SDD-036 | Ready after Sprint 10 | Sequential dependency |
+| Carryover cleanup | Backlogged | Explicitly deferred; no silent scope expansion |
+
+### Key Meetings This Week
+
+| Meeting | Date | Key Outcome |
+|---------|------|-------------|
+| _(No external meetings evidenced -- approval-gated pause)_ | -- | -- |
+
+### Scorecard
+
+| Metric | Last Week (Jun 11) | This Week (Jun 18) | Delta |
+|--------|-------------------|-------------------|-------|
+| Total commits | 234 | 234 | Unchanged |
+| Tests passing | 349 + 2 skipped (local) | 349 + 2 skipped (local reported baseline) | Unchanged |
+| PI status | PI-6 active, Sprint 10 in flight | PI-6 active, Sprint 10 approval-gated | Paused |
+| CLI code lines | ~6,841 committed | ~7,761 at boundary | +~920 from staged Sprint 10 work |
+| Agent definitions | 13 | 13 | Unchanged |
+| Skills | 35 | 35 | Unchanged |
+| Slash commands | 18 | 18 | Unchanged |
+| Feature kickoff prompts | 18 | 18 | Unchanged |
+| ADRs | 16 | 16 | Unchanged |
+| Constitution articles | 12 | 12 | Unchanged |
+| Spec dirs (DONE / active / legacy-unknown) | 25 / 2 / 3 | 25 / 2 / 3 | Unchanged |
+
+---
+
 ## Week of June 5 - June 11, 2026
 
 Date: June 11, 2026 | Owner: Rodolfo Lerma | Branch: master at 8c7a22c (234 commits)

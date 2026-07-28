@@ -14,6 +14,8 @@ from enum import Enum
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any, Mapping
 
+import brownfield_inventory
+
 BASELINE_SCHEMA_VERSION = "1"
 BASELINE_BUNDLE_VERSION = "brownfield-core@1"
 _SHA256_RE = re.compile(r"[0-9a-f]{64}\Z")
@@ -137,17 +139,16 @@ def _safe_relative_path(value: Any, field: str) -> str:
 
 
 def _read_snapshot(proposal_root: Path, relative: str) -> bytes:
-    root = proposal_root.resolve()
-    snapshot = proposal_root.joinpath(*PurePosixPath(relative).parts)
     try:
-        resolved = snapshot.resolve(strict=True)
-        resolved.relative_to(root)
-    except (FileNotFoundError, OSError, ValueError):
+        snapshot = brownfield_inventory.safe_relative_path(
+            relative, proposal_root, "baseline snapshot", allow_missing=False
+        )
+    except brownfield_inventory.PathSafetyError:
         raise _validation_error("baseline snapshot is missing or outside the proposal") from None
-    if not resolved.is_file():
+    if not snapshot.is_file():
         raise _validation_error("baseline snapshot is not a regular file")
     try:
-        return resolved.read_bytes()
+        return snapshot.read_bytes()
     except OSError:
         raise _validation_error("baseline snapshot cannot be read") from None
 
@@ -156,11 +157,23 @@ def load_and_validate_baseline(proposal_root: Path) -> BaselineManifest:
     """Load and fully validate the lossless baseline without mutating files."""
 
     root = Path(proposal_root)
-    manifest_path = root / "baseline-manifest.json"
-    if not manifest_path.is_file():
+    lexical_manifest = root / "baseline-manifest.json"
+    try:
+        lexical_manifest.lstat()
+    except FileNotFoundError:
         raise LegacyBaselineRequiredError(
             "Legacy proposal baseline is missing; use explicit baseline adoption."
+        ) from None
+    except OSError:
+        raise _validation_error("baseline manifest is unsafe or outside the proposal") from None
+    try:
+        manifest_path = brownfield_inventory.safe_relative_path(
+            "baseline-manifest.json", root, "baseline manifest", allow_missing=False
         )
+    except brownfield_inventory.PathSafetyError:
+        raise _validation_error("baseline manifest is unsafe or outside the proposal") from None
+    if not manifest_path.is_file():
+        raise _validation_error("baseline manifest is not a regular file")
     try:
         raw = json.loads(manifest_path.read_bytes())
     except (OSError, UnicodeDecodeError, json.JSONDecodeError):
@@ -308,7 +321,12 @@ def plan_refresh(
     for baseline_file in baseline.files:
         path = baseline_file.path
         baseline_bytes = _read_snapshot(root, baseline_file.baseline_path)
-        reviewed_path = root.joinpath(*PurePosixPath(path).parts)
+        try:
+            reviewed_path = brownfield_inventory.safe_relative_path(
+                path, root, "reviewed proposal", allow_missing=False
+            )
+        except brownfield_inventory.PathSafetyError:
+            raise _validation_error(f"reviewed proposal file is unsafe for {path!r}") from None
         try:
             reviewed_bytes = reviewed_path.read_bytes()
         except OSError:
@@ -361,7 +379,14 @@ def plan_baseline_adoption(
     items: list[ProposalRefreshItem] = []
     conflicts: list[str] = []
     for path in sorted(candidate_map):
-        reviewed_path = root.joinpath(*PurePosixPath(path).parts)
+        try:
+            reviewed_path = brownfield_inventory.safe_relative_path(
+                path, root, "reviewed proposal", allow_missing=False
+            )
+        except brownfield_inventory.PathSafetyError:
+            raise BaselineValidationError(
+                f"Legacy reviewed proposal file is unsafe for {path!r}; baseline adoption stopped."
+            ) from None
         try:
             reviewed = reviewed_path.read_bytes()
         except OSError:

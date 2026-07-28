@@ -13,6 +13,7 @@ import os
 import shutil
 import stat
 import uuid
+import weakref
 from dataclasses import asdict, dataclass, replace
 from enum import Enum
 from pathlib import Path, PurePosixPath
@@ -24,8 +25,19 @@ from brownfield_manifest import Preview, preview_hash as calculate_preview_hash
 _SENTINEL_NAME = ".sdd-disposable-fixture.json"
 _SENTINEL_SCHEMA = "sdd-058-disposable-root@1"
 _ATOMIC_JOURNAL_REPLACE = os.replace
-_OWNER_RECEIPTS: dict[int, tuple[object, ...]] = {}
-_FIXTURE_AUTHORIZATIONS: set[int] = set()
+_TRANSACTION_AUTHORIZATIONS: dict[str, ApplyAuthorization] = {}
+_JOURNAL_REQUIRED_KEYS = {
+    "schema_version", "transaction_id", "target_fingerprint", "target_head",
+    "preview_hash", "state", "stage_root", "backup_root", "operations",
+    "target", "workspace", "lock_path", "recovery_command",
+    "reviewed_proposal_path", "target_identity", "workspace_identity",
+    "backup_parent_identity", "backup_root_identity",
+}
+_JOURNAL_OPTIONAL_KEYS = {"reviewed_proposal"}
+_OPERATION_KEYS = {
+    "sequence", "destination", "operation", "preimage", "candidate",
+    "backup", "state",
+}
 
 
 class TransactionError(RuntimeError):
@@ -107,13 +119,34 @@ class JournalState(Enum):
 class ApplyAuthorization:
     kind: AuthorizationKind
     target_fingerprint: str
+    target_identity: tuple[int, int]
+    workspace_location: str
+    workspace_identity: tuple[int, int]
     target_head: str
     preview_hash: str
     backup_location: str
+    backup_root_identity: tuple[int, int]
     recovery_command: str
     approved_by: str
     approved_at: str
     fixture_root: Path | None
+
+
+class _LiveCapabilityRegistry:
+    def __init__(self) -> None:
+        self._capabilities: weakref.WeakValueDictionary[str, ApplyAuthorization] = (
+            weakref.WeakValueDictionary()
+        )
+
+    def register(self, capability: ApplyAuthorization) -> None:
+        self._capabilities[uuid.uuid4().hex] = capability
+
+    def contains(self, capability: ApplyAuthorization) -> bool:
+        return any(candidate is capability for candidate in tuple(self._capabilities.values()))
+
+
+_OWNER_RECEIPTS = _LiveCapabilityRegistry()
+_FIXTURE_AUTHORIZATIONS = _LiveCapabilityRegistry()
 
 
 @dataclass(frozen=True)
@@ -132,6 +165,10 @@ class TransactionJournal:
     schema_version: str
     transaction_id: str
     target_fingerprint: str
+    target_identity: dict[str, int]
+    workspace_identity: dict[str, int]
+    backup_parent_identity: dict[str, int]
+    backup_root_identity: dict[str, int]
     target_head: str
     preview_hash: str
     state: JournalState
@@ -154,6 +191,10 @@ class TransactionContext:
     target_head: str
     operations: tuple[TransactionOperation, ...]
     reviewed_proposal: Path
+    target_identity: tuple[int, int]
+    workspace_identity: tuple[int, int]
+    backup_parent_identity: tuple[int, int]
+    backup_root_identity: tuple[int, int]
 
 
 @dataclass(frozen=True)
@@ -189,12 +230,73 @@ def target_fingerprint(target: Path) -> str:
     return _sha(_canonical(Path(target)).encode("utf-8"))
 
 
-def _authorization_values(auth: ApplyAuthorization) -> tuple[object, ...]:
-    return (
-        auth.kind, auth.target_fingerprint, auth.target_head, auth.preview_hash,
-        auth.backup_location, auth.recovery_command, auth.approved_by,
-        auth.approved_at, auth.fixture_root,
+def _filesystem_identity(path: Path) -> tuple[int, int]:
+    path = Path(path)
+    if is_link_or_reparse_point(path) or not path.is_dir():
+        raise TransactionError("trusted root is absent, linked, or reparsed")
+    metadata = path.stat(follow_symlinks=False)
+    identity = (int(metadata.st_dev), int(metadata.st_ino))
+    if identity[1] == 0:
+        raise TransactionError("trusted root does not expose a stable filesystem identity")
+    return identity
+
+
+def _require_filesystem_identity(path: Path, expected: tuple[int, int]) -> None:
+    if _filesystem_identity(path) != expected:
+        raise TransactionError("trusted root filesystem identity changed")
+
+
+def _trusted_identity_path(
+    path: Path, root: Path, expected: tuple[int, int], *, allow_root: bool = False
+) -> Path:
+    _require_filesystem_identity(root, expected)
+    return _trusted_existing_path(path, root, allow_root=allow_root)
+
+
+def _target_destination(context: TransactionContext, destination: str) -> Path:
+    _require_filesystem_identity(context.target, context.target_identity)
+    return _mutation_destination(context.target, destination)
+
+
+def _workspace_path(
+    context: TransactionContext, path: Path, *, allow_root: bool = False
+) -> Path:
+    return _trusted_identity_path(
+        path, context.workspace, context.workspace_identity, allow_root=allow_root
     )
+
+
+def _backup_path(context: TransactionContext, path: Path) -> Path:
+    return _trusted_identity_path(
+        path, context.backup_root, context.backup_root_identity, allow_root=True
+    )
+
+
+def _identity_json(identity: tuple[int, int]) -> dict[str, int]:
+    return {"device": identity[0], "inode": identity[1]}
+
+
+def _identity_from_json(value: object) -> tuple[int, int]:
+    if not isinstance(value, dict) or set(value) != {"device", "inode"}:
+        raise _journal_error()
+    device = value.get("device")
+    inode = value.get("inode")
+    if type(device) is not int or type(inode) is not int or device < 0 or inode <= 0:
+        raise _journal_error()
+    return device, inode
+
+
+def _validate_registered_authorization(authorization: ApplyAuthorization) -> None:
+    if authorization.kind is AuthorizationKind.OWNER_RECEIPT:
+        if not _OWNER_RECEIPTS.contains(authorization):
+            raise AuthorizationError("owner authorization is not a registered live capability")
+    elif authorization.kind is AuthorizationKind.VERIFIED_FIXTURE:
+        if not _FIXTURE_AUTHORIZATIONS.contains(authorization):
+            raise AuthorizationError("verified-fixture authorization is not a registered live capability")
+        if authorization.fixture_root is None or not _bound_sentinel(authorization.fixture_root):
+            raise AuthorizationError("verified fixture proof is no longer valid")
+    else:
+        raise AuthorizationError("unsupported authorization kind")
 
 
 def load_owner_authorization(receipt_path: Path) -> ApplyAuthorization:
@@ -203,16 +305,20 @@ def load_owner_authorization(receipt_path: Path) -> ApplyAuthorization:
         required = {
             "schema_version", "kind", "target_fingerprint", "target_head",
             "preview_hash", "backup_location", "recovery_command",
-            "approved_by", "approved_at",
+            "approved_by", "approved_at", "target_identity",
+            "workspace_location", "workspace_identity", "backup_root_identity",
         }
-        if set(payload) != required or payload["schema_version"] != "1":
-            raise AuthorizationError("owner receipt has an invalid schema")
         if payload["kind"] != AuthorizationKind.OWNER_RECEIPT.value:
             raise AuthorizationError("only owner-receipt authorization is deserializable")
+        if set(payload) != required or payload["schema_version"] != "3":
+            raise AuthorizationError("owner receipt has an invalid schema")
         auth = ApplyAuthorization(
             AuthorizationKind.OWNER_RECEIPT,
-            str(payload["target_fingerprint"]), str(payload["target_head"]),
+            str(payload["target_fingerprint"]), _identity_from_json(payload["target_identity"]),
+            str(payload["workspace_location"]), _identity_from_json(payload["workspace_identity"]),
+            str(payload["target_head"]),
             str(payload["preview_hash"]), str(payload["backup_location"]),
+            _identity_from_json(payload["backup_root_identity"]),
             str(payload["recovery_command"]), str(payload["approved_by"]),
             str(payload["approved_at"]), None,
         )
@@ -220,7 +326,7 @@ def load_owner_authorization(receipt_path: Path) -> ApplyAuthorization:
         raise
     except (OSError, UnicodeError, json.JSONDecodeError, KeyError, TypeError) as exc:
         raise AuthorizationError("owner receipt is unreadable or invalid") from exc
-    _OWNER_RECEIPTS[id(auth)] = _authorization_values(auth)
+    _OWNER_RECEIPTS.register(auth)
     return auth
 
 
@@ -262,7 +368,7 @@ def _has_link_component(path: Path, stop: Path | None = None) -> bool:
 
 
 def authorize_verified_fixture(
-    *, target: Path, fixture_root: Path, preview_hash: str, target_head: str,
+    *, target: Path, fixture_root: Path, workspace: Path, preview_hash: str, target_head: str,
     backup_location: str, recovery_command: str,
 ) -> ApplyAuthorization:
     target = Path(target)
@@ -282,12 +388,16 @@ def authorize_verified_fixture(
     backup = Path(backup_location).resolve()
     if not _strict_descendant(backup, fixture_root) or _has_link_component(backup, fixture_root):
         raise FixtureAuthorizationError("fixture backup must remain below the bound fixture root")
+    workspace = Path(workspace).resolve()
+    if not _strict_descendant(workspace, fixture_root) or _has_link_component(workspace, fixture_root):
+        raise FixtureAuthorizationError("fixture workspace must remain below the bound fixture root")
     auth = ApplyAuthorization(
-        AuthorizationKind.VERIFIED_FIXTURE, target_fingerprint(target), target_head,
-        preview_hash, str(backup), recovery_command, "verified-fixture", "in-memory",
+        AuthorizationKind.VERIFIED_FIXTURE, target_fingerprint(target), _filesystem_identity(target),
+        str(workspace), _filesystem_identity(workspace), target_head, preview_hash, str(backup),
+        _filesystem_identity(backup), recovery_command, "verified-fixture", "in-memory",
         fixture_root.resolve(),
     )
-    _FIXTURE_AUTHORIZATIONS.add(id(auth))
+    _FIXTURE_AUTHORIZATIONS.register(auth)
     return auth
 
 
@@ -323,24 +433,42 @@ def probe_replace_access(path: Path) -> bool:
 
 
 def fsync_file(path: Path) -> None:
-    try:
-        with Path(path).open("rb") as stream:
-            os.fsync(stream.fileno())
-    except OSError:
-        pass
+    with Path(path).open("rb+") as stream:
+        os.fsync(stream.fileno())
 
 
 def fsync_directory(path: Path) -> None:
     if os.name == "nt":
-        return
-    try:
-        descriptor = os.open(Path(path), os.O_RDONLY)
+        import ctypes
+        from ctypes import wintypes
+
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        create_file = kernel32.CreateFileW
+        create_file.argtypes = [
+            wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD, ctypes.c_void_p,
+            wintypes.DWORD, wintypes.DWORD, wintypes.HANDLE,
+        ]
+        create_file.restype = wintypes.HANDLE
+        flush_file_buffers = kernel32.FlushFileBuffers
+        flush_file_buffers.argtypes = [wintypes.HANDLE]
+        flush_file_buffers.restype = wintypes.BOOL
+        close_handle = kernel32.CloseHandle
+        close_handle.argtypes = [wintypes.HANDLE]
+        close_handle.restype = wintypes.BOOL
+        handle = create_file(str(Path(path)), 0x40000000, 0x00000007, None, 3, 0x02000000, None)
+        if handle == ctypes.c_void_p(-1).value:
+            raise OSError(ctypes.get_last_error(), "directory durability handle could not be opened")
         try:
-            os.fsync(descriptor)
+            if not flush_file_buffers(handle):
+                raise OSError(ctypes.get_last_error(), "directory durability flush failed")
         finally:
-            os.close(descriptor)
-    except OSError:
-        pass
+            close_handle(handle)
+        return
+    descriptor = os.open(Path(path), os.O_RDONLY)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
 
 
 def _safe_destination(target: Path, destination: str) -> Path:
@@ -353,6 +481,38 @@ def _safe_destination(target: Path, destination: str) -> Path:
     except ValueError as exc:
         raise PreflightError(f"destination escapes target: {destination}") from exc
     return path
+
+
+def _mutation_destination(target: Path, destination: str) -> Path:
+    path = _safe_destination(target, destination)
+    if _has_link_component(path, target) or is_link_or_reparse_point(path):
+        raise TransactionError(f"mutation destination is linked or reparsed: {destination}")
+    return path
+
+
+def _evidence_deletion_path(workspace: Path, path: Path) -> Path:
+    workspace = Path(workspace)
+    path = Path(path)
+    evidence_root = workspace.parent
+    try:
+        relative = path.relative_to(evidence_root).as_posix()
+    except ValueError as exc:
+        raise TransactionError("transaction evidence escapes its workspace") from exc
+    resolved = _safe_destination(evidence_root, relative)
+    if _has_link_component(resolved, evidence_root) or is_link_or_reparse_point(resolved):
+        raise TransactionError("transaction evidence is linked or reparsed")
+    return resolved
+
+
+def _authorized_evidence_path(
+    workspace: Path,
+    path: Path,
+    authoritative_root: Path,
+    expected_identity: tuple[int, int],
+) -> Path:
+    resolved = _evidence_deletion_path(workspace, path)
+    _require_filesystem_identity(authoritative_root, expected_identity)
+    return resolved
 
 
 def _path_record(path: Path) -> dict[str, object]:
@@ -382,20 +542,16 @@ def preflight(
     proposal = Path(reviewed_proposal).resolve()
     actual_preview_hash = calculate_preview_hash(preview)
 
-    expected_auth = (_OWNER_RECEIPTS.get(id(authorization)) if authorization.kind is AuthorizationKind.OWNER_RECEIPT else None)
-    if authorization.kind is AuthorizationKind.OWNER_RECEIPT:
-        if expected_auth is None or expected_auth != _authorization_values(authorization):
-            raise AuthorizationError("owner authorization was altered or was not loaded from a receipt")
-    elif authorization.kind is AuthorizationKind.VERIFIED_FIXTURE:
-        if id(authorization) not in _FIXTURE_AUTHORIZATIONS:
-            raise AuthorizationError("verified-fixture authorization is not an internal live capability")
-        if authorization.fixture_root is None or not _bound_sentinel(authorization.fixture_root):
-            raise AuthorizationError("verified fixture proof is no longer valid")
-    else:
-        raise AuthorizationError("unsupported authorization kind")
+    _validate_registered_authorization(authorization)
 
     if authorization.target_fingerprint != target_fingerprint(target):
         raise AuthorizationError("authorization target fingerprint is stale")
+    if authorization.target_identity != _filesystem_identity(target):
+        raise AuthorizationError("authorization target filesystem identity is stale")
+    if Path(authorization.workspace_location).resolve() != workspace:
+        raise AuthorizationError("authorization workspace does not match")
+    if authorization.workspace_identity != _filesystem_identity(workspace):
+        raise AuthorizationError("authorization workspace filesystem identity is stale")
     if authorization.target_head != target_head:
         raise AuthorizationError("authorization target head is stale")
     if authorization.preview_hash != actual_preview_hash:
@@ -404,6 +560,10 @@ def preflight(
         raise AuthorizationError("authorization recovery command is required")
     if Path(authorization.backup_location).resolve() == target or target in Path(authorization.backup_location).resolve().parents:
         raise AuthorizationError("backup cannot be the target or inside it")
+    if authorization.backup_root_identity != _filesystem_identity(
+        Path(authorization.backup_location).resolve()
+    ):
+        raise AuthorizationError("authorization backup filesystem identity is stale")
     if not target.is_dir() or is_link_or_reparse_point(target):
         raise PreflightError("target must be a regular directory")
     if workspace.parent != target.parent or workspace == target:
@@ -470,10 +630,14 @@ def preflight(
     context = TransactionContext(
         transaction_id, authorization, target, workspace, stage_root, backup_root,
         journal_path, lock_path, actual_preview_hash, target_head, tuple(operations), proposal,
+        _filesystem_identity(target), _filesystem_identity(workspace),
+        _filesystem_identity(backup_root.parent),
+        _filesystem_identity(backup_root),
     )
     workspace.mkdir(parents=True, exist_ok=True)
     lock_path.write_text(json.dumps({"schema_version": "1", "transaction_id": transaction_id, "pid": os.getpid()}, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
     _write_journal(context, JournalState.STAGING, context.operations)
+    _TRANSACTION_AUTHORIZATIONS[transaction_id] = authorization
     return context
 
 
@@ -494,25 +658,29 @@ def _operation_json(operation: TransactionOperation) -> dict[str, object]:
 
 
 def _proposal_record(context: TransactionContext) -> dict[str, object] | None:
-    record_path = context.backup_root / "reviewed-proposal"
+    record_path = _backup_path(context, context.backup_root / "reviewed-proposal")
+    proposal_path = _trusted_identity_path(
+        context.reviewed_proposal, context.target, context.target_identity
+    )
     proposal_relative = context.reviewed_proposal.relative_to(context.target).as_posix()
     proposal_was_absent = any(
         operation.destination.startswith(proposal_relative + "/")
         and not operation.preimage["exists"]
         for operation in context.operations
     ) and not record_path.exists()
-    if not context.reviewed_proposal.exists() or proposal_was_absent:
+    if not proposal_path.exists() or proposal_was_absent:
         return {"exists": False, "preview_hash": context.preview_hash}
     if not record_path.exists():
         return None
-    files = sorted(path for path in context.reviewed_proposal.rglob("*") if path.is_file())
+    files = sorted(path for path in proposal_path.rglob("*") if path.is_file())
     if len(files) == 1:
-        source = files[0]
-        backup = record_path / source.relative_to(context.reviewed_proposal)
+        source = _trusted_identity_path(files[0], context.target, context.target_identity)
+        backup = _backup_path(context, record_path / source.relative_to(proposal_path))
         return {"path": str(source), "sha256": _sha(source.read_bytes()), "backup_path": str(backup), "bytes_preserved": backup.read_bytes() == source.read_bytes()}
     digest = hashlib.sha256()
     for source in files:
-        digest.update(source.relative_to(context.reviewed_proposal).as_posix().encode())
+        source = _trusted_identity_path(source, context.target, context.target_identity)
+        digest.update(source.relative_to(proposal_path).as_posix().encode())
         digest.update(source.read_bytes())
     return {"path": str(context.reviewed_proposal), "sha256": digest.hexdigest(), "backup_path": str(record_path), "bytes_preserved": True}
 
@@ -522,7 +690,10 @@ def _write_journal(
     operations: tuple[TransactionOperation, ...], *, include_proposal: bool = True,
 ) -> None:
     journal = TransactionJournal(
-        "1", context.transaction_id, target_fingerprint(context.target), context.target_head,
+        "1.1", context.transaction_id, target_fingerprint(context.target),
+        _identity_json(context.target_identity), _identity_json(context.workspace_identity),
+        _identity_json(context.backup_parent_identity), _identity_json(context.backup_root_identity),
+        context.target_head,
         context.preview_hash, state, str(context.stage_root), str(context.backup_root), operations,
     )
     payload = asdict(journal)
@@ -536,12 +707,16 @@ def _write_journal(
     proposal = _proposal_record(context) if include_proposal else None
     if proposal is not None:
         payload["reviewed_proposal"] = proposal
-    context.journal_path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = context.journal_path.with_suffix(".json.tmp")
+    journal_parent = _workspace_path(context, context.journal_path.parent, allow_root=True)
+    journal_parent.mkdir(parents=True, exist_ok=True)
+    temporary = _workspace_path(context, context.journal_path.with_suffix(".json.tmp"))
     temporary.write_text(json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n", encoding="utf-8", newline="\n")
-    _ATOMIC_JOURNAL_REPLACE(temporary, context.journal_path)
-    fsync_file(context.journal_path)
-    fsync_directory(context.journal_path.parent)
+    temporary = _workspace_path(context, temporary)
+    journal_path = _workspace_path(context, context.journal_path)
+    _ATOMIC_JOURNAL_REPLACE(temporary, journal_path)
+    journal_path = _workspace_path(context, journal_path)
+    fsync_file(journal_path)
+    fsync_directory(_workspace_path(context, journal_path.parent, allow_root=True))
 
 
 def stage_candidate(
@@ -549,25 +724,37 @@ def stage_candidate(
     materializer: Callable[[Path, TransactionOperation], None],
     structural_check: Callable[..., object], *, injector: FailureInjector | None = None,
 ) -> StagedCandidate:
-    if context.stage_root.exists():
-        shutil.rmtree(context.stage_root)
-    context.stage_root.mkdir(parents=True)
     try:
+        if injector:
+            injector("before-stage-reset")
+        stage_root = _workspace_path(context, context.stage_root)
+        if stage_root.exists():
+            stage_root = _workspace_path(context, context.stage_root)
+            shutil.rmtree(stage_root)
+        stage_root = _workspace_path(context, context.stage_root)
+        stage_root.mkdir(parents=True)
         for operation in context.operations:
-            materializer(context.stage_root, operation)
-        actual = {path.relative_to(context.stage_root).as_posix() for path in context.stage_root.rglob("*") if path.is_file()}
+            materializer(stage_root, operation)
+        stage_root = _workspace_path(context, context.stage_root)
+        staged_paths = tuple(stage_root.rglob("*"))
+        if any(is_link_or_reparse_point(path) for path in staged_paths):
+            raise StagingError("staged candidate contains a linked or reparsed path")
+        actual = {path.relative_to(stage_root).as_posix() for path in staged_paths if path.is_file()}
         expected = {operation.destination for operation in context.operations}
         if actual != expected:
             raise StagingError("staged candidate is incomplete or contains unapproved paths")
         for operation in context.operations:
-            path = context.stage_root / operation.destination
+            path = _trusted_identity_path(
+                stage_root / PurePosixPath(operation.destination), context.workspace,
+                context.workspace_identity,
+            )
             if is_link_or_reparse_point(path) or _sha(path.read_bytes()) != operation.candidate["sha256"]:
                 raise StagingError(f"staged candidate hash mismatch: {operation.destination}")
-        report = structural_check(context.stage_root, context.operations, context)
+        report = structural_check(stage_root, context.operations, context)
         if getattr(report, "exit_code", 1) != 0:
             raise StagingError("staged structural readiness failed")
         _write_journal(context, JournalState.STAGED, context.operations)
-        return StagedCandidate(context.stage_root, context.operations)
+        return StagedCandidate(stage_root, context.operations)
     except StagingError:
         raise
     except Exception as exc:
@@ -575,24 +762,71 @@ def stage_candidate(
 
 
 def backup(context: TransactionContext, *, injector: FailureInjector | None = None) -> None:
-    if not context.stage_root.is_dir():
+    if not _workspace_path(context, context.stage_root).is_dir():
         raise TransactionError("complete staging is required before backup")
-    context.backup_root.mkdir(parents=True, exist_ok=False)
     operations: list[TransactionOperation] = []
-    for operation in context.operations:
-        source = context.target / operation.destination
-        backup_record = None
-        if operation.preimage["exists"]:
-            destination = context.backup_root / "destinations" / operation.destination
-            destination.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(source, destination)
-            if operation.preimage["portable_mode"] is not None:
-                destination.chmod(int(operation.preimage["portable_mode"]))
-            backup_record = {"path": str(destination), "sha256": operation.preimage["sha256"]}
-        operations.append(replace(operation, backup=backup_record))
-    if context.reviewed_proposal.exists():
-        proposal_backup = context.backup_root / "reviewed-proposal"
-        shutil.copytree(context.reviewed_proposal, proposal_backup, copy_function=shutil.copy2)
+    try:
+        if injector:
+            injector("before-backup-create")
+        backup_root = _backup_path(context, context.backup_root)
+        if any(backup_root.iterdir()):
+            raise TransactionError("authorized backup root must be empty before backup")
+        for operation in context.operations:
+            source = _target_destination(context, operation.destination)
+            backup_record = None
+            if operation.preimage["exists"]:
+                destination = backup_root / "destinations" / PurePosixPath(operation.destination)
+                destination_parent = _backup_path(context, destination.parent)
+                destination_parent.mkdir(parents=True, exist_ok=True)
+                source = _target_destination(context, operation.destination)
+                destination = _backup_path(context, destination)
+                shutil.copyfile(source, destination)
+                if operation.preimage["portable_mode"] is not None:
+                    destination = _backup_path(context, destination)
+                    destination.chmod(int(operation.preimage["portable_mode"]))
+                destination = _backup_path(context, destination)
+                fsync_file(destination)
+                fsync_directory(_backup_path(context, destination.parent))
+                persisted = _path_record(destination)
+                if (
+                    persisted["sha256"] != operation.preimage["sha256"]
+                    or persisted["size"] != operation.preimage["size"]
+                    or persisted["portable_mode"] != operation.preimage["portable_mode"]
+                ):
+                    raise TransactionError(f"backup verification failed: {operation.destination}")
+                backup_record = {"path": str(destination), "sha256": operation.preimage["sha256"]}
+            operations.append(replace(operation, backup=backup_record))
+        if _trusted_identity_path(context.reviewed_proposal, context.target, context.target_identity).exists():
+            proposal_source = _trusted_identity_path(
+                context.reviewed_proposal, context.target, context.target_identity
+            )
+            proposal_paths = tuple(proposal_source.rglob("*"))
+            if any(is_link_or_reparse_point(source) for source in proposal_paths):
+                raise TransactionError("reviewed proposal backup contains a linked or reparsed path")
+            proposal_backup = _backup_path(context, backup_root / "reviewed-proposal")
+            shutil.copytree(proposal_source, proposal_backup, copy_function=shutil.copy2)
+            for source in proposal_paths:
+                if is_link_or_reparse_point(source):
+                    raise TransactionError("reviewed proposal backup contains a linked or reparsed path")
+                if source.is_dir():
+                    continue
+                if not source.is_file():
+                    raise TransactionError("reviewed proposal backup contains a special path")
+                source = _trusted_identity_path(source, context.target, context.target_identity)
+                copied = _backup_path(
+                    context, proposal_backup / source.relative_to(proposal_source)
+                )
+                if is_link_or_reparse_point(copied) or not copied.is_file():
+                    raise TransactionError("reviewed proposal backup is incomplete")
+                fsync_file(copied)
+                fsync_directory(_backup_path(context, copied.parent))
+                source_record = _path_record(source)
+                copied_record = _path_record(copied)
+                if copied_record != source_record:
+                    raise TransactionError("reviewed proposal backup verification failed")
+        fsync_directory(_backup_path(context, backup_root))
+    except (OSError, TransactionError) as exc:
+        raise TransactionError("backup could not be durably verified") from exc
     updated = tuple(operations)
     object.__setattr__(context, "operations", updated)
     _write_journal(context, JournalState.BACKED_UP, updated)
@@ -615,7 +849,7 @@ def _transition(
 
 
 def promote(context: TransactionContext, *, injector: FailureInjector | None = None) -> TransactionResult:
-    data = _read_journal(context.journal_path)
+    data = _read_journal(_workspace_path(context, context.journal_path))
     if data["state"] != JournalState.BACKED_UP.value:
         raise TransactionError("complete backup and preimage journal are required before promotion")
     operations = list(context.operations)
@@ -627,14 +861,27 @@ def promote(context: TransactionContext, *, injector: FailureInjector | None = N
             injector("after-preimage-journal-flush")
             injector("before-first-promotion")
         for index, operation in enumerate(operations):
-            destination = context.target / operation.destination
-            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination = _target_destination(context, operation.destination)
+            destination_parent = _trusted_identity_path(
+                destination.parent, context.target, context.target_identity, allow_root=True
+            )
+            destination_parent.mkdir(parents=True, exist_ok=True)
             temporary = destination.parent / f".{destination.name}.{context.transaction_id}.candidate"
-            shutil.copyfile(context.stage_root / operation.destination, temporary)
+            source = _trusted_identity_path(
+                context.stage_root / PurePosixPath(operation.destination), context.workspace,
+                context.workspace_identity,
+            )
+            temporary_relative = temporary.relative_to(context.target).as_posix()
+            temporary = _target_destination(context, temporary_relative)
+            shutil.copyfile(source, temporary)
+            temporary = _target_destination(context, temporary_relative)
             fsync_file(temporary)
             _transition(context, operations, index, OperationState.PREPARED, injector)
+            destination = _target_destination(context, operation.destination)
+            temporary = _target_destination(context, temporary_relative)
             _ATOMIC_DESTINATION_REPLACE(temporary, destination)
             _transition(context, operations, index, OperationState.APPLIED, injector)
+            destination = _target_destination(context, operation.destination)
             if _sha(destination.read_bytes()) != operation.candidate["sha256"]:
                 raise TransactionError(f"candidate verification failed: {operation.destination}")
             _transition(context, operations, index, OperationState.VERIFIED, injector)
@@ -648,10 +895,15 @@ def promote(context: TransactionContext, *, injector: FailureInjector | None = N
         raise
     except Exception:
         for operation in operations:
-            destination = context.target / operation.destination
+            try:
+                destination = _target_destination(context, operation.destination)
+            except TransactionError:
+                continue
             temporary = destination.parent / f".{destination.name}.{context.transaction_id}.candidate"
+            temporary_relative = temporary.relative_to(context.target).as_posix()
+            temporary = _target_destination(context, temporary_relative)
             if temporary.exists():
-                temporary.unlink()
+                _target_destination(context, temporary_relative).unlink()
         object.__setattr__(context, "operations", tuple(operations))
         return rollback(context)
 
@@ -672,32 +924,44 @@ def rollback(context: TransactionContext, *, injector: FailureInjector | None = 
         if injector:
             injector("open-handle")
         for operation in reversed(operations):
-            destination = context.target / operation.destination
+            destination = _target_destination(context, operation.destination)
             if operation.preimage["exists"]:
                 if injector:
                     injector("rollback-replace")
+                destination = _target_destination(context, operation.destination)
                 if not operation.backup:
                     raise TransactionError("replacement backup is absent")
                 temporary = destination.parent / f".{destination.name}.{context.transaction_id}.rollback"
-                shutil.copyfile(Path(str(operation.backup["path"])), temporary)
+                backup_source = _backup_path(context, Path(str(operation.backup["path"])))
+                temporary_relative = temporary.relative_to(context.target).as_posix()
+                temporary = _target_destination(context, temporary_relative)
+                shutil.copyfile(backup_source, temporary)
                 if operation.preimage["portable_mode"] is not None:
+                    temporary = _target_destination(context, temporary_relative)
                     temporary.chmod(int(operation.preimage["portable_mode"]))
+                temporary = _target_destination(context, temporary_relative)
                 fsync_file(temporary)
+                destination = _target_destination(context, operation.destination)
+                temporary = _target_destination(context, temporary_relative)
                 os.replace(temporary, destination)
                 if operation.preimage["portable_mode"] is not None:
+                    destination = _target_destination(context, operation.destination)
                     destination.chmod(int(operation.preimage["portable_mode"]))
             else:
                 if destination.exists():
                     if injector:
                         injector("rollback-remove")
+                    destination = _target_destination(context, operation.destination)
                     destination.unlink()
                 parent = destination.parent
                 while parent != context.target and parent != context.reviewed_proposal:
                     try:
-                        parent.rmdir()
+                        relative_parent = parent.relative_to(context.target).as_posix()
+                        _target_destination(context, relative_parent).rmdir()
                     except OSError:
                         break
                     parent = parent.parent
+            destination = _target_destination(context, operation.destination)
             record = _path_record(destination)
             if record["exists"] != operation.preimage["exists"] or record["sha256"] != operation.preimage["sha256"]:
                 raise TransactionError("rollback hash verification failed")
@@ -716,6 +980,170 @@ def _read_journal(path: Path) -> dict[str, object]:
         raise RecoveryRequiredError("transaction journal is unreadable") from exc
 
 
+def _journal_error() -> RecoveryRequiredError:
+    return RecoveryRequiredError("transaction journal is invalid or outside its authorized roots")
+
+
+def _is_sha256(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(character in "0123456789abcdef" for character in value)
+    )
+
+
+def _validate_content_record(
+    record: object, *, preimage: bool
+) -> dict[str, object]:
+    expected = {"exists", "sha256", "size", "portable_mode"} if preimage else {"sha256", "size"}
+    if not isinstance(record, dict) or set(record) != expected:
+        raise _journal_error()
+    exists = record.get("exists", True)
+    digest = record.get("sha256")
+    size = record.get("size")
+    mode = record.get("portable_mode") if preimage else None
+    if type(exists) is not bool or type(size) is not int or size < 0:
+        raise _journal_error()
+    if exists:
+        if not _is_sha256(digest) or (preimage and (type(mode) is not int or not 0 <= mode <= 0o777)):
+            raise _journal_error()
+    elif digest is not None or size != 0 or mode is not None:
+        raise _journal_error()
+    return record
+
+
+def _trusted_existing_path(path: Path, root: Path, *, allow_root: bool = False) -> Path:
+    path = Path(path).absolute()
+    root = Path(root).absolute()
+    try:
+        relative = path.relative_to(root)
+    except ValueError as exc:
+        raise _journal_error() from exc
+    if not allow_root and not relative.parts:
+        raise _journal_error()
+    current = root
+    if is_link_or_reparse_point(current):
+        raise _journal_error()
+    for part in relative.parts:
+        current = current / part
+        if current.exists() and is_link_or_reparse_point(current):
+            raise _journal_error()
+    if is_link_or_reparse_point(path):
+        raise _journal_error()
+    try:
+        resolved = path.resolve(strict=False)
+        resolved.relative_to(root.resolve(strict=True))
+    except (OSError, ValueError) as exc:
+        raise _journal_error() from exc
+    return path
+
+
+def _validated_journal(
+    journal_path: Path, *, workspace: Path, target: Path
+) -> dict[str, object]:
+    workspace = Path(workspace).absolute()
+    target = Path(target).absolute()
+    journal_path = Path(journal_path).absolute()
+    trusted_parent = workspace.parent
+    if journal_path != workspace / "transaction.json":
+        raise _journal_error()
+    _trusted_existing_path(workspace, trusted_parent)
+    _trusted_existing_path(journal_path, workspace)
+    _trusted_existing_path(target, trusted_parent)
+    payload = _read_journal(journal_path)
+    if not isinstance(payload, dict) or not _JOURNAL_REQUIRED_KEYS.issubset(payload):
+        raise _journal_error()
+    if set(payload) - (_JOURNAL_REQUIRED_KEYS | _JOURNAL_OPTIONAL_KEYS):
+        raise _journal_error()
+    if payload.get("schema_version") != "1.1":
+        raise _journal_error()
+    transaction_id = payload.get("transaction_id")
+    if not isinstance(transaction_id, str) or len(transaction_id) != 32:
+        raise _journal_error()
+    try:
+        int(transaction_id, 16)
+        JournalState(str(payload["state"]))
+    except (TypeError, ValueError) as exc:
+        raise _journal_error() from exc
+    if Path(str(payload["workspace"])).absolute() != workspace:
+        raise _journal_error()
+    if Path(str(payload["target"])).absolute() != target:
+        raise _journal_error()
+    if payload["target_fingerprint"] != target_fingerprint(target):
+        raise _journal_error()
+    target_identity = _identity_from_json(payload["target_identity"])
+    workspace_identity = _identity_from_json(payload["workspace_identity"])
+    backup_parent_identity = _identity_from_json(payload["backup_parent_identity"])
+    backup_root_identity = _identity_from_json(payload["backup_root_identity"])
+    try:
+        _require_filesystem_identity(target, target_identity)
+        _require_filesystem_identity(workspace, workspace_identity)
+    except TransactionError as exc:
+        raise _journal_error() from exc
+    expected_stage = workspace / f"stage-{transaction_id}"
+    expected_lock = workspace / "transaction.lock"
+    if Path(str(payload["stage_root"])).absolute() != expected_stage:
+        raise _journal_error()
+    if Path(str(payload["lock_path"])).absolute() != expected_lock:
+        raise _journal_error()
+    _trusted_existing_path(expected_stage, workspace)
+    _trusted_existing_path(expected_lock, workspace)
+    backup = Path(str(payload["backup_root"])).absolute()
+    _trusted_existing_path(backup, trusted_parent)
+    try:
+        _require_filesystem_identity(backup.parent, backup_parent_identity)
+        _require_filesystem_identity(backup, backup_root_identity)
+    except TransactionError as exc:
+        raise _journal_error() from exc
+    proposal = Path(str(payload["reviewed_proposal_path"])).absolute()
+    _trusted_existing_path(proposal, target)
+    try:
+        lock = json.loads(expected_lock.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise _journal_error() from exc
+    if set(lock) != {"schema_version", "transaction_id", "pid"}:
+        raise _journal_error()
+    if lock.get("schema_version") != "1" or lock.get("transaction_id") != transaction_id:
+        raise _journal_error()
+    operations = payload.get("operations")
+    if not isinstance(operations, list):
+        raise _journal_error()
+    for sequence, item in enumerate(operations):
+        if not isinstance(item, dict) or set(item) != _OPERATION_KEYS:
+            raise _journal_error()
+        if item.get("sequence") != sequence:
+            raise _journal_error()
+        destination = str(item.get("destination", ""))
+        _safe_destination(target, destination)
+        _trusted_existing_path(target / PurePosixPath(destination), target)
+        preimage = _validate_content_record(item.get("preimage"), preimage=True)
+        _validate_content_record(item.get("candidate"), preimage=False)
+        if item.get("operation") not in {"copy", "render", "seed"}:
+            raise _journal_error()
+        backup_record = item.get("backup")
+        if backup_record is not None:
+            if not isinstance(backup_record, dict) or set(backup_record) != {"path", "sha256"}:
+                raise _journal_error()
+            if not preimage["exists"] or not _is_sha256(backup_record.get("sha256")):
+                raise _journal_error()
+            if backup_record["sha256"] != preimage["sha256"]:
+                raise _journal_error()
+            expected = backup / "destinations" / PurePosixPath(destination)
+            if Path(str(backup_record["path"])).absolute() != expected:
+                raise _journal_error()
+            _trusted_existing_path(expected, backup)
+        elif preimage["exists"] and payload["state"] not in {
+            JournalState.STAGING.value,
+            JournalState.STAGED.value,
+        }:
+            raise _journal_error()
+        try:
+            OperationState(str(item["state"]))
+        except ValueError as exc:
+            raise _journal_error() from exc
+    return payload
+
+
 def _operation_from_json(item: dict[str, object]) -> TransactionOperation:
     return TransactionOperation(
         int(item["sequence"]), str(item["destination"]), str(item["operation"]),
@@ -725,14 +1153,46 @@ def _operation_from_json(item: dict[str, object]) -> TransactionOperation:
     )
 
 
-def _context_from_journal(journal_path: Path) -> TransactionContext:
-    payload = _read_journal(journal_path)
-    authorization = ApplyAuthorization(
-        AuthorizationKind.OWNER_RECEIPT, str(payload["target_fingerprint"]),
-        str(payload["target_head"]), str(payload["preview_hash"]),
-        str(payload["backup_root"]), str(payload["recovery_command"]),
-        "recovery", "journal", None,
-    )
+def _validate_journal_authorization(
+    payload: dict[str, object], authorization: ApplyAuthorization
+) -> None:
+    _validate_registered_authorization(authorization)
+    expected = {
+        "target_fingerprint": authorization.target_fingerprint,
+        "target_identity": _identity_json(authorization.target_identity),
+        "workspace": str(Path(authorization.workspace_location).resolve()),
+        "workspace_identity": _identity_json(authorization.workspace_identity),
+        "target_head": authorization.target_head,
+        "preview_hash": authorization.preview_hash,
+        "backup_root": str(Path(authorization.backup_location).resolve()),
+        "backup_root_identity": _identity_json(authorization.backup_root_identity),
+        "recovery_command": authorization.recovery_command,
+    }
+    for key, value in expected.items():
+        actual = payload.get(key)
+        if key == "backup_root":
+            actual = str(Path(str(actual)).resolve())
+        if actual != value:
+            raise AuthorizationError(f"transaction journal does not match authorization: {key}")
+
+
+def live_fixture_authorization(
+    journal_path: Path, *, workspace: Path, target: Path
+) -> ApplyAuthorization:
+    payload = _validated_journal(journal_path, workspace=workspace, target=target)
+    authorization = _TRANSACTION_AUTHORIZATIONS.get(str(payload["transaction_id"]))
+    if authorization is None or authorization.kind is not AuthorizationKind.VERIFIED_FIXTURE:
+        raise AuthorizationError("no live fixture authorization exists for this transaction")
+    _validate_journal_authorization(payload, authorization)
+    return authorization
+
+
+def _context_from_journal(
+    journal_path: Path, *, workspace: Path, target: Path,
+    authorization: ApplyAuthorization,
+) -> TransactionContext:
+    payload = _validated_journal(journal_path, workspace=workspace, target=target)
+    _validate_journal_authorization(payload, authorization)
     return TransactionContext(
         str(payload["transaction_id"]), authorization, Path(str(payload["target"])),
         Path(str(payload["workspace"])), Path(str(payload["stage_root"])),
@@ -740,15 +1200,24 @@ def _context_from_journal(journal_path: Path) -> TransactionContext:
         str(payload["preview_hash"]), str(payload["target_head"]),
         tuple(_operation_from_json(item) for item in payload["operations"]),
         Path(str(payload["reviewed_proposal_path"])),
+        _identity_from_json(payload["target_identity"]),
+        _identity_from_json(payload["workspace_identity"]),
+        _identity_from_json(payload["backup_parent_identity"]),
+        _identity_from_json(payload["backup_root_identity"]),
     )
 
 
-def inspect_recovery(journal_path: Path) -> RecoveryInspection:
-    payload = _read_journal(journal_path)
-    target = Path(str(payload["target"]))
+def inspect_recovery(
+    journal_path: Path, *, workspace: Path, target: Path,
+    authorization: ApplyAuthorization,
+) -> RecoveryInspection:
+    payload = _validated_journal(journal_path, workspace=workspace, target=target)
+    _validate_journal_authorization(payload, authorization)
+    target = Path(target)
     states: dict[str, str] = {}
     for item in payload["operations"]:
-        destination = target / str(item["destination"])
+        _require_filesystem_identity(target, _identity_from_json(payload["target_identity"]))
+        destination = _mutation_destination(target, str(item["destination"]))
         if not destination.exists():
             states[str(item["destination"])] = "absent"
             continue
@@ -764,11 +1233,20 @@ def inspect_recovery(journal_path: Path) -> RecoveryInspection:
     return RecoveryInspection(str(payload["state"]), states)
 
 
-def recover(journal_path: Path, *, action: str) -> TransactionResult:
+def recover(
+    journal_path: Path, *, action: str, workspace: Path, target: Path,
+    authorization: ApplyAuthorization,
+) -> TransactionResult:
     if action != "rollback":
         raise TransactionError("only explicit rollback recovery is supported")
-    context = _context_from_journal(Path(journal_path))
-    inspection = inspect_recovery(journal_path)
+    context = _context_from_journal(
+        Path(journal_path), workspace=workspace, target=target,
+        authorization=authorization,
+    )
+    inspection = inspect_recovery(
+        journal_path, workspace=workspace, target=target,
+        authorization=authorization,
+    )
     if "unknown" in inspection.operation_states.values():
         return _mark_recovery_required(context, context.operations)
     # Restore every path, including candidates whose flushed journal state is stale.
@@ -778,24 +1256,53 @@ def recover(journal_path: Path, *, action: str) -> TransactionResult:
     return return_value
 
 
-def startup_recover(journal_path: Path, *, action: str) -> TransactionResult:
-    return recover(journal_path, action=action)
+def startup_recover(
+    journal_path: Path, *, action: str, workspace: Path, target: Path,
+    authorization: ApplyAuthorization,
+) -> TransactionResult:
+    return recover(
+        journal_path, action=action, workspace=workspace, target=target,
+        authorization=authorization,
+    )
 
 
-def cleanup(journal_path: Path) -> TransactionResult:
+def cleanup(
+    journal_path: Path, *, workspace: Path, target: Path,
+    authorization: ApplyAuthorization,
+) -> TransactionResult:
     journal_path = Path(journal_path)
-    payload = _read_journal(journal_path)
+    payload = _validated_journal(journal_path, workspace=workspace, target=target)
+    _validate_journal_authorization(payload, authorization)
     if payload["state"] not in {JournalState.COMMITTED.value, JournalState.ROLLED_BACK.value}:
         raise CleanupNotEligibleError("only committed or rolled-back transactions are cleanup-eligible")
     stage = Path(str(payload["stage_root"]))
     backup = Path(str(payload["backup_root"]))
     workspace = Path(str(payload["workspace"]))
+    workspace_identity = authorization.workspace_identity
     for path in (stage, backup):
         if path.exists():
-            shutil.rmtree(path)
-    journal_path.unlink()
+            authoritative_root = backup if path == backup else workspace
+            expected_identity = (
+                authorization.backup_root_identity
+                if path == backup
+                else workspace_identity
+            )
+            shutil.rmtree(
+                _authorized_evidence_path(
+                    workspace, path, authoritative_root, expected_identity
+                )
+            )
+    _authorized_evidence_path(
+        workspace, journal_path, workspace, workspace_identity
+    ).unlink()
     lock = Path(str(payload["lock_path"]))
     if lock.exists():
-        lock.unlink()
-    fsync_directory(workspace)
+        _authorized_evidence_path(
+            workspace, lock, workspace, workspace_identity
+        ).unlink()
+    fsync_directory(
+        _authorized_evidence_path(
+            workspace, workspace, workspace, workspace_identity
+        )
+    )
     return TransactionResult(0, "cleaned", True, str(payload["recovery_command"]), "transaction evidence cleaned explicitly")

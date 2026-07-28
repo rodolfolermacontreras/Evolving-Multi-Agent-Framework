@@ -258,6 +258,13 @@ def validate_repository_root(target: Path) -> Path:
     return resolved
 
 
+def read_repository_head(target: Path) -> str:
+    """Read current HEAD from the exact validated repository root."""
+
+    root = validate_repository_root(target)
+    return _run_git(root, ("rev-parse", "HEAD"))
+
+
 def _sanitize_remote(raw: str) -> str:
     value = raw.strip()
     if not value:

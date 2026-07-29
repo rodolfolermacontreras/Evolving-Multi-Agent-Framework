@@ -1994,3 +1994,72 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
   repair evidence). Unrelated SDD-059 backlog/ideas edits were not staged.
 - Next: request new owner approval for exact repaired package `32d33ae`; no push
   is authorized until that approval is recorded.
+
+### F-69 -- sdd-058-feature-close -- DONE
+
+- Date: 2026-07-29
+- Owners: Principal Product Manager + Principal Software Developer; public CI
+  observed by QA Engineer and recorded by genuine ledger dispatch 59.
+- Scope: SDD-058 feature close only. Sprint 24 and PI-9 remain open; T-058-027
+  is handed to the Sprint Executive Manager. T-058-028 generated executive
+  surfaces remain pending after Sprint close.
+- Test delta: authoritative pre-feature baseline `668 passed, 2 skipped, 6
+  subtests` -> final local full suite `1111 passed, 5 skipped, 6 subtests`.
+- Validation: **70/70 REQUIRED IDs checked**, including V-17A, V-21A, V-31A,
+  V-38A, and V-54A. AC-01 through AC-15 accepted. Stage 1 COMPLIANT; Stage 2
+  APPROVED with no critical or important finding open.
+- Owner gates: decision 6 approved the earlier package whose public run
+  `30469954928` failed and remains preserved in F-68 and validation history.
+  Decision 7 records renewed Option 1 approval on 2026-07-29 for exact repaired
+  package `2236321`, authorizing push, public CI, and SDD-058/Sprint 24 close only
+  if green.
+- Push identity: `origin/master` equals exact approved SHA
+  `22363217fdaf869fe73e054a1dab031e18a36cca`.
+- Public B-4: workflow run `30475556326` concluded success. Ubuntu job
+  `90656261309` completed `2026-07-29T17:31:12Z` with `442 passed, 4 skipped`
+  and doctor all checks passed. Windows job `90656261415` completed
+  `2026-07-29T17:38:39Z` with `445 passed, 1 skipped` and doctor all checks
+  passed.
+- Gates: B-1 ledger truth satisfied through genuine dispatches, including
+  dispatch 59 for successful CI observation; B-2 TDD and DONE completeness
+  satisfied; B-4 public Windows/Ubuntu CI green. Schema, origin, stale-doc,
+  governance, diff, Article X, and strict doctor gates are green.
+- Safety and exclusions: no real host was mutated. No CURRENT_PI, roadmap,
+  constitution, IDEAS.md, generated executive surface, Sprint-close marker, or
+  PI-close marker was edited. Unrelated SDD-059 working changes were preserved.
+- Result: SDD-058 is DONE. Sprint 24 and PI-9 are not closed by F-69.
+- Exact handoff: Sprint Executive Manager owns T-058-027 to close Sprint 24 and
+  record the authorized PI-9 close handoff; after that, Principal Software
+  Developer owns T-058-028 to regenerate and verify the three executive surfaces.
+
+### Sprint 24 -- CLOSED
+
+- Date: 2026-07-29
+- Owner: Sprint Executive Manager (close record); project Executive Manager
+  retains PI-9 close authority.
+- Feature: SDD-058 DONE with 70/70 validation, Stage 1 COMPLIANT, and Stage 2
+  APPROVED. No real host was mutated.
+- Owner gate: decision 7 authorized exact package `2236321`, push, public CI,
+  and Sprint 24 close if green.
+- Push identity: `origin/master` equals
+  `22363217fdaf869fe73e054a1dab031e18a36cca`.
+- Public B-4: run `30475556326` SUCCESS. Ubuntu job `90656261309` reported
+  442 passed / 4 skipped plus doctor green; Windows job `90656261415` reported
+  445 passed / 1 skipped plus doctor green.
+- Local evidence: 1111 passed / 5 skipped / 6 subtests; schema, origin,
+  stale-doc, governance, `git diff --check`, Article X 3/3, and strict doctor
+  gates green.
+- Result: Sprint 24 is CLOSED. PI-9 remains ACTIVE / READY FOR PROJECT-EM CLOSE.
+  No successor PI or sprint was created.
+- Project-EM report-up handoff: execute the separately owner-authorized PI-9
+  close after inspecting this Sprint 24 checkpoint. Do not infer or create a
+  successor lifecycle unit from this handoff.
+
+#### Sprint 24 retrospective
+
+- What worked: exact-package approval, remote SHA equality, and public Windows /
+  Ubuntu jobs formed one auditable release chain.
+- What changed: the failed first public run remained recorded, and the repaired
+  package received renewed approval before push.
+- Carry-forward lesson: test the fail-closed security contract across platforms
+  without coupling assertions to incidental managed-path traversal order.

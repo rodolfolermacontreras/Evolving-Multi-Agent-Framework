@@ -228,34 +228,70 @@ def test_collect_repository_evidence_keeps_conventional_nonsecret_git_ssh_user(
     assert evidence.remotes == ("git@example.invalid:org/repo.git",)
 
 
-def test_inventory_target_does_not_follow_links_or_hash_unrelated_files(tmp_path: Path) -> None:
+def test_inventory_target_rejects_link_without_reading_external_or_unrelated_bytes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     disposable = create_disposable_root(tmp_path)
     fixture = build_python_fixture(disposable)
     outside = tmp_path / "outside"
     outside.mkdir()
-    (outside / "secret.txt").write_text("INVENTORY_SECRET_CANARY\n", encoding="utf-8")
+    secret = outside / "secret.txt"
+    secret.write_text("INVENTORY_SECRET_CANARY\n", encoding="utf-8")
     linked = fixture.root / "linked-outside"
     link_created = make_link(linked, outside)
-    (fixture.root / "unrelated-host-owned.txt").write_text(
+    unrelated = fixture.root / "unrelated-host-owned.txt"
+    unrelated.write_text(
         "UNRELATED_CONTENT_CANARY\n", encoding="utf-8"
     )
     inventory = _inventory()
+    original_read_bytes = Path.read_bytes
+    read_paths: list[Path] = []
 
-    managed = ("README.md", "linked-outside") if link_created else ("README.md",)
+    def record_read_bytes(path: Path) -> bytes:
+        read_paths.append(path)
+        return original_read_bytes(path)
+
+    monkeypatch.setattr(Path, "read_bytes", record_read_bytes)
+
+    if not link_created:
+        pytest.skip("directory links are unavailable")
+
+    with pytest.raises(inventory.PathSafetyError, match="link|junction|reparse"):
+        inventory.inventory_target(
+            fixture.root,
+            managed_paths=("README.md", "linked-outside"),
+            forbidden_fingerprints=("FRAMEWORK_FORBIDDEN_CANARY",),
+        )
+
+    assert read_paths == [fixture.root / "README.md"]
+
+
+def test_inventory_target_hashes_only_managed_files_without_fingerprint_scan(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    disposable = create_disposable_root(tmp_path)
+    fixture = build_python_fixture(disposable)
+    unrelated = fixture.root / "unrelated-host-owned.txt"
+    unrelated.write_text("UNRELATED_CONTENT_CANARY\n", encoding="utf-8")
+    inventory = _inventory()
+    original_read_bytes = Path.read_bytes
+    read_paths: list[Path] = []
+
+    def record_read_bytes(path: Path) -> bytes:
+        read_paths.append(path)
+        return original_read_bytes(path)
+
+    monkeypatch.setattr(Path, "read_bytes", record_read_bytes)
+
     snapshot = inventory.inventory_target(
         fixture.root,
-        managed_paths=managed,
-        forbidden_fingerprints=("FRAMEWORK_FORBIDDEN_CANARY",),
+        managed_paths=("README.md",),
+        forbidden_fingerprints=(),
     )
-    serialized = repr(snapshot)
 
-    assert "INVENTORY_SECRET_CANARY" not in serialized
-    assert "UNRELATED_CONTENT_CANARY" not in serialized
+    assert read_paths == [fixture.root / "README.md"]
+    assert snapshot.observations[0].sha256 is not None
     assert all("\\" not in observation.path for observation in snapshot.observations)
-    if link_created:
-        observation = next(item for item in snapshot.observations if item.path == "linked-outside")
-        assert observation.link_kind in {"symlink", "junction", "reparse"}
-        assert observation.sha256 is None
 
 
 def test_expected_inventory_failures_are_actionable_and_do_not_disclose_content(

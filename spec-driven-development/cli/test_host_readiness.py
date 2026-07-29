@@ -385,6 +385,7 @@ def test_run_quality_checks_rejects_unsafe_cwd_argv_timeout_and_policy(
     subprocess_run.assert_not_called()
 
 
+@pytest.mark.skipif(os.name != "nt", reason="Windows Job Object execution contract")
 def test_run_quality_checks_never_uses_shell_even_when_argument_contains_metacharacters(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -589,6 +590,7 @@ def test_quality_command_propagates_unverifiable_boundary_termination(
         )
 
 
+@pytest.mark.skipif(os.name != "nt", reason="Windows Job Object execution contract")
 def test_quality_timeout_terminates_real_descendant_process_before_return(
     tmp_path: Path,
 ) -> None:

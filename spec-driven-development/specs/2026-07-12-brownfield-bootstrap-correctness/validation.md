@@ -587,6 +587,10 @@ its real evidence exists.
 - Strict local doctor and the final explicit-path checkpoint commit follow this
   evidence update. A new owner approval must name that exact checkpoint SHA
   before any push; no push is authorized by the prior approval.
+- Strict local doctor subsequently passed all 9 checks. The explicit-path repair
+  checkpoint is commit `32d33ae`; it contains only the test portability change
+  and this SDD-058 evidence. V-54 and V-62 remain unchecked until a newly
+  approved push of this exact repaired package produces green public jobs.
 
 ## Definition of Done
 

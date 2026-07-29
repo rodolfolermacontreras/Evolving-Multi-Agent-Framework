@@ -1969,7 +1969,7 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
   T-058-020 on positively identified disposable fixtures, then two-stage QA in
   strict order. Owner exact-package approval remains required before push.
 
-### F-68 -- sdd-058-public-ci-portability-repair -- IN PROGRESS
+### F-68 -- sdd-058-public-ci-portability-repair -- DONE / PUSH PENDING
 
 - Date: 2026-07-29
 - Owner: Principal Software Developer.
@@ -1989,5 +1989,8 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
   governance, diff, and Article X 3/3 gates are green.
 - Scope: no real-host mutation, generated executive surface, roadmap, CURRENT_PI,
   close marker, DONE claim, backlog edit, dependency, or push.
-- Next: complete strict local doctor, commit only explicit SDD-058 paths, then
-  request new owner approval for the resulting exact package SHA before push.
+- Strict local doctor: all 9 checks PASS after the full regression.
+- Repair commit: `32d33ae` (test-only portability assertion plus failed-run and
+  repair evidence). Unrelated SDD-059 backlog/ideas edits were not staged.
+- Next: request new owner approval for exact repaired package `32d33ae`; no push
+  is authorized until that approval is recorded.

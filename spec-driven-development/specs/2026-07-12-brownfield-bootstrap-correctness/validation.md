@@ -548,6 +548,46 @@ its real evidence exists.
   unclaimed. Final evidence-byte gates and binary-diff fingerprint follow this
   append and must identify the exact package presented for approval.
 
+### Failed public matrix and portability repair evidence (2026-07-29)
+
+- Public run `30469954928` tested master SHA
+  `8c942c881f4f31cbc5133f8098658f8633ce1362`. Ubuntu job `90637291129`
+  failed `Run focused SDD-058 suite` with
+  `test_brownfield_inventory.py::test_inventory_target_rejects_link_without_reading_external_or_unrelated_bytes`:
+  `assert [] == [PosixPath(.../README.md)]`; summary
+  `1 failed, 441 passed, 4 skipped in 44.06s`.
+- Windows job `90637291287` later failed the same test and assertion with
+  `assert [] == [WindowsPath(.../README.md)]`; summary
+  `1 failed, 444 passed, 1 skipped in 339.95s`. Both jobs skipped `Run doctor`
+  after the focused-suite failure. The failed matrix invalidates the prior exact
+  package approval for any further push; V-54 and V-62 remain unchecked.
+- Root cause: `validate_path_set()` deterministically sorts `linked-outside`
+  before `README.md`. On runners capable of creating the directory link,
+  `safe_relative_path()` rejects that first managed path before `_observe()` can
+  read any file. The test incorrectly expected `README.md` to be read first;
+  local Windows had hidden the defect by skipping when link creation was
+  unavailable.
+- Repair: the test-only assertion now requires `read_paths == []`. This matches
+  both public traces and strengthens the locked security contract: link
+  rejection occurs before managed, external, or unrelated bytes are read. No
+  production code, requirement mapping, trust boundary, dependency, or real host
+  changed, so the existing independent Stage-2 APPROVED verdict remains valid
+  and no Stage-2 re-review is required.
+- Structural POSIX-equivalent reproduction, used because Docker was absent and
+  WSL was not installed, returned normalized order
+  `['linked-outside', 'README.md']`; direct code inspection proves the link error
+  precedes `_observe()` and `Path.read_bytes()`. The affected test skips on this
+  non-link-capable checkout, while the exact nine-module workflow is green at
+  `443 passed, 3 skipped in 1099.87s`.
+- Full `spec-driven-development/` regression:
+  `1111 passed, 5 skipped, 6 subtests passed in 852.37s`. Schema lint with orphan
+  checking, origin lint with tracked-database detection, stale-doc lint,
+  governance check, and `git diff --check` are green. Article X
+  FootprintLockGuard is `3 passed, 286 deselected in 0.31s`.
+- Strict local doctor and the final explicit-path checkpoint commit follow this
+  evidence update. A new owner approval must name that exact checkpoint SHA
+  before any push; no push is authorized by the prior approval.
+
 ## Definition of Done
 
 All V-01 through V-65, including letter-suffixed items, MUST be checked with real

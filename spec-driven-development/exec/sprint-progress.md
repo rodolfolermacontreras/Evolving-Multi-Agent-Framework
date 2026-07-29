@@ -1968,3 +1968,26 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
 - Next: Principal Software Developer owns TDD implementation T-058-001 through
   T-058-020 on positively identified disposable fixtures, then two-stage QA in
   strict order. Owner exact-package approval remains required before push.
+
+### F-68 -- sdd-058-public-ci-portability-repair -- IN PROGRESS
+
+- Date: 2026-07-29
+- Owner: Principal Software Developer.
+- Public evidence: run `30469954928` for master SHA
+  `8c942c881f4f31cbc5133f8098658f8633ce1362` failed the same inventory link
+  assertion on Ubuntu job `90637291129` and Windows job `90637291287`; V-54 and
+  V-62 remain open and unchecked.
+- Root cause: the test expected `README.md` bytes to be read before link
+  rejection, but deterministic managed-path sorting validates `linked-outside`
+  first. Both link-capable public runners correctly rejected it with no byte
+  reads.
+- Repair: one test-only assertion now requires an empty read set. Production
+  behavior and Stage-2 security mappings are unchanged; the existing Stage-2
+  APPROVED verdict remains applicable without re-review.
+- Local evidence: exact workflow `443 passed, 3 skipped`; full SDD regression
+  `1111 passed, 5 skipped, 6 subtests passed`; schema, origin, stale-doc,
+  governance, diff, and Article X 3/3 gates are green.
+- Scope: no real-host mutation, generated executive surface, roadmap, CURRENT_PI,
+  close marker, DONE claim, backlog edit, dependency, or push.
+- Next: complete strict local doctor, commit only explicit SDD-058 paths, then
+  request new owner approval for the resulting exact package SHA before push.

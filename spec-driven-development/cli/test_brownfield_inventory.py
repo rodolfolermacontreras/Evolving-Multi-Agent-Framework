@@ -263,7 +263,7 @@ def test_inventory_target_rejects_link_without_reading_external_or_unrelated_byt
             forbidden_fingerprints=("FRAMEWORK_FORBIDDEN_CANARY",),
         )
 
-    assert read_paths == [fixture.root / "README.md"]
+    assert read_paths == []
 
 
 def test_inventory_target_hashes_only_managed_files_without_fingerprint_scan(

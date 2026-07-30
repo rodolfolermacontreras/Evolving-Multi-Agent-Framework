@@ -1,9 +1,9 @@
 ---
 id: SDD-20260712BROWNFIELD-tasks
 type: tasks
-status: active
+status: done
 owner: principal-software-developer
-updated: 2026-07-12
+updated: 2026-07-29
 feature: 2026-07-12-brownfield-bootstrap-correctness
 ---
 
@@ -15,7 +15,7 @@ feature: 2026-07-12-brownfield-bootstrap-correctness
 - Architecture: [ADR-026](../../docs/ADR/026-transactional-brownfield-adoption.md) -- accepted
 - Approval basis: owner-approved ADR-026/SPEC package, 2026-07-12, local ledger decision 5
 - Baseline authority: Sprint 24 kickoff and Sprint EM evidence, **668 passed / 2 skipped / 6 subtests** using the repository venv
-- Status: TASKS complete; implementation, worker dispatch, commit, push, and non-fixture mutation remain unauthorized
+- Status: T-058-001 through T-058-028 complete; Sprint 24 CLOSED; generated executive surfaces verified; PI-9 remains ACTIVE / READY FOR PROJECT-EM CLOSE
 
 ---
 
@@ -57,12 +57,12 @@ feature: 2026-07-12-brownfield-bootstrap-correctness
 | T-058-020 | [S][AFK] | Run local regression, schema/origin/staledoc/governance, Article X, doctor, B-1/B-2, dependency, scope, and evidence-integrity gates. | `spec-driven-development/specs/2026-07-12-brownfield-bootstrap-correctness/validation.md`; `spec-driven-development/ledger/fleet.db` | T-058-019 | Principal Software Developer | V-55..V-60, V-63, V-64; >=668/2; genuine ledger outcomes | No | Production/test/workflow files; fabricated ledger rows | complete |
 | T-058-021 | [S][AFK] | Perform independent Stage-1 spec-compliance review and re-review owning fixes until PASS. | `spec-driven-development/specs/2026-07-12-brownfield-bootstrap-correctness/review-stage-1.md`; `spec-driven-development/specs/2026-07-12-brownfield-bootstrap-correctness/validation.md` | T-058-020 | QA Engineer (reviewer A; no implementation) | Every R/AC/V; MISSING/EXTRA/WRONG; V-61, V-63..V-65 | No | Production edits; Stage-2 artifact | complete |
 | T-058-022 | [S][AFK] | After Stage-1 PASS, perform independent Stage-2 quality/security review and re-review owning fixes until APPROVED. | `spec-driven-development/specs/2026-07-12-brownfield-bootstrap-correctness/review-stage-2.md`; `spec-driven-development/specs/2026-07-12-brownfield-bootstrap-correctness/validation.md` | T-058-021 | Principal Cloud Security Architect (reviewer B) | Quality/security verdict after Stage 1; V-61 | No | Production edits; Stage-1 artifact; owner evidence | complete |
-| T-058-023 | [S][HITL] | Present the exact pre-push package and record owner approval without pushing. | `spec-driven-development/specs/2026-07-12-brownfield-bootstrap-correctness/validation.md`; `spec-driven-development/exec/sprint-progress.md` | T-058-022 | Sprint Executive Manager | Exact diff/commit package, owner quote/time; first half of V-62 | No | Git push; implementation; generated exec surfaces | pending |
-| T-058-024 | [S][HITL] | Push only the owner-approved exact package to `origin/master`. | NONE (external git operation only) | T-058-023 | Principal Software Developer | Remote SHA equals approved package; no pre-approval push | No | All file edits; force push; alternate branch | pending |
-| T-058-025 | [S][HITL] | Observe public Windows/POSIX CI/B-4 and record real run IDs/URLs/results. | `spec-driven-development/specs/2026-07-12-brownfield-bootstrap-correctness/validation.md`; `spec-driven-development/exec/sprint-progress.md` | T-058-024 | QA Engineer | Green public run; V-54, V-62 | No | Workflow edits; retry-result fabrication; DONE markers | pending |
-| T-058-026 | [S][HITL] | Run DONE completeness and close SDD-058 only after all 70 validation items are evidenced. | `spec-driven-development/backlog/BACKLOG.md`; `spec-driven-development/specs/2026-07-12-brownfield-bootstrap-correctness/validation.md`; `spec-driven-development/exec/sprint-progress.md` | T-058-025 | Principal Product Manager + Principal Software Developer | 70/70 REQUIRED; AC-01..AC-15 accepted; SDD-058 DONE | No | PI/Sprint close; generated exec surfaces | pending |
-| T-058-027 | [S][HITL] | Close Sprint 24 and record the authorized PI-9 close handoff without pre-closing or opening a successor. | `spec-driven-development/sprints/PI-9/CURRENT_PI.md`; `spec-driven-development/constitution/roadmap.md`; `spec-driven-development/exec/sprint-progress.md` | T-058-026 | Sprint Executive Manager | Sprint 24 close evidence and project-EM handoff | No | Generated exec surfaces; successor PI/sprint; unrelated backlog | pending |
-| T-058-028 | [S][AFK] | Regenerate and verify the three executive surfaces from authoritative closed artifacts. | `spec-driven-development/exec/state.md`; `spec-driven-development/exec/state.html`; `spec-driven-development/exec/work-index.md` | T-058-027 | Principal Software Developer | Canonical builder diff; final schema/doctor checks | No | Hand edits; source artifacts; push without any newly required approval | pending |
+| T-058-023 | [S][HITL] | Present the exact pre-push package and record owner approval without pushing. | `spec-driven-development/specs/2026-07-12-brownfield-bootstrap-correctness/validation.md`; `spec-driven-development/exec/sprint-progress.md` | T-058-022 | Sprint Executive Manager | Exact diff/commit package, owner quote/time; first half of V-62 | No | Git push; implementation; generated exec surfaces | complete |
+| T-058-024 | [S][HITL] | Push only the owner-approved exact package to `origin/master`. | NONE (external git operation only) | T-058-023 | Principal Software Developer | Remote SHA equals approved package; no pre-approval push | No | All file edits; force push; alternate branch | complete |
+| T-058-025 | [S][HITL] | Observe public Windows/POSIX CI/B-4 and record real run IDs/URLs/results. | `spec-driven-development/specs/2026-07-12-brownfield-bootstrap-correctness/validation.md`; `spec-driven-development/exec/sprint-progress.md` | T-058-024 | QA Engineer | Green public run; V-54, V-62 | No | Workflow edits; retry-result fabrication; DONE markers | complete |
+| T-058-026 | [S][HITL] | Run DONE completeness and close SDD-058 only after all 70 validation items are evidenced. | `spec-driven-development/backlog/BACKLOG.md`; `spec-driven-development/specs/2026-07-12-brownfield-bootstrap-correctness/validation.md`; `spec-driven-development/exec/sprint-progress.md` | T-058-025 | Principal Product Manager + Principal Software Developer | 70/70 REQUIRED; AC-01..AC-15 accepted; SDD-058 DONE | No | PI/Sprint close; generated exec surfaces | complete |
+| T-058-027 | [S][HITL] | Close Sprint 24 and record the authorized PI-9 close handoff without pre-closing or opening a successor. | `spec-driven-development/sprints/PI-9/CURRENT_PI.md`; `spec-driven-development/constitution/roadmap.md`; `spec-driven-development/exec/sprint-progress.md` | T-058-026 | Sprint Executive Manager | Sprint 24 close evidence and project-EM handoff | No | Generated exec surfaces; successor PI/sprint; unrelated backlog | complete |
+| T-058-028 | [S][AFK] | Regenerate and verify the three executive surfaces from authoritative closed artifacts. | `spec-driven-development/exec/state.md`; `spec-driven-development/exec/state.html`; `spec-driven-development/exec/work-index.md` | T-058-027 | Principal Software Developer | Canonical builder diff; final schema/doctor checks | No | Hand edits; source artifacts; push without any newly required approval | complete |
 
 ## Batch and overlap schedule
 
@@ -666,6 +666,7 @@ Re-run affected focused tests and complete local gates after any fix; record fin
 **Depends on**: T-058-022
 **Role**: Sprint Executive Manager
 **Evidence**: exact diff/package identifier, owner quote, timestamp; V-62 pre-push half
+**Status**: complete -- Rodolfo Lerma renewed Option 1 approval on 2026-07-29 for exact repaired package `2236321`; local ledger decision 7 records approval before push
 
 ### Description
 
@@ -691,6 +692,7 @@ Compare the approved package identifier to the pending push SHA/diff and verify 
 **Depends on**: T-058-023
 **Role**: Principal Software Developer
 **Evidence**: local/remote SHA equality and push output
+**Status**: complete -- `origin/master` equals approved SHA `22363217fdaf869fe73e054a1dab031e18a36cca`; no force push or alternate package
 
 ### Description
 
@@ -716,6 +718,7 @@ Compare `HEAD`, approved SHA, and `origin/master` after the push.
 **Depends on**: T-058-024
 **Role**: QA Engineer
 **Evidence**: public run ID/URL, exact SHA, Windows/POSIX job results; V-54, V-62
+**Status**: complete -- public workflow `30475556326` succeeded at exact SHA `22363217fdaf869fe73e054a1dab031e18a36cca`; Ubuntu `90656261309` passed 442/4 skipped plus doctor, Windows `90656261415` passed 445/1 skipped plus doctor; ledger dispatch 59 records observation
 
 ### Description
 
@@ -741,6 +744,7 @@ Inspect the public workflow details and match its commit SHA to T-058-024.
 **Depends on**: T-058-025
 **Role**: Principal Product Manager and Principal Software Developer
 **Evidence**: 70/70 validation items; AC-01..AC-15 acceptance; DONE completeness
+**Status**: complete -- 70/70 validation IDs checked with real evidence; AC-01 through AC-15 accepted; SDD-058 alone marked DONE on 2026-07-29; no real-host mutation
 
 ### Description
 
@@ -766,6 +770,7 @@ Run the canonical DONE checker plus schema lint and `git diff --check` on the ex
 **Depends on**: T-058-026
 **Role**: Sprint Executive Manager
 **Evidence**: Sprint 24 close record, all gates, report-up to project EM
+**Status**: complete -- Sprint 24 CLOSED on 2026-07-29 with exact package, local/public gate evidence, concise retro, and project-EM PI-9 close handoff; PI-9 remains active and no successor was created
 
 ### Description
 
@@ -791,6 +796,7 @@ Run schema/staledoc/governance checks and inspect the lifecycle markers for a si
 **Depends on**: T-058-027
 **Role**: Principal Software Developer
 **Evidence**: canonical builder output and final checks
+**Status**: complete -- canonical builder generated `state.md`, `state.html`, and `work-index.md`; SDD-058 renders DONE, Sprint 24 has no active-sprint claim, and PI-9 remains current/active ready for project-EM close
 
 ### Description
 

@@ -3,14 +3,14 @@ id: SDD-PI-9-CURRENT_PI-sprint
 type: sprint
 status: active
 owner: principal-product-manager
-updated: 2026-07-12
+updated: 2026-07-29
 sprint: PI-9
 ---
 
 # PI-9: Experience Polish
 
-- Status: **ACTIVE; overall Sprint 24 ACTIVE/prepared (PI-9 Sprint 3), the final
-  PI-9 sprint.** It is dedicated exclusively to SDD-058, the approved P1
+- Status: **ACTIVE / READY FOR PROJECT-EM CLOSE; overall Sprint 24 CLOSED
+  (PI-9 Sprint 3), the final PI-9 sprint.** It delivered SDD-058, the approved P1
   brownfield bootstrap correctness defect. Owner authorization 2026-07-12:
   "Owner approved Option 1 on 2026-07-12: authorize one final PI-9 sprint
   dedicated exclusively to the approved P1 brownfield bootstrap correctness
@@ -19,7 +19,8 @@ sprint: PI-9
   SDD-056, and SDD-057 are DONE with 17/17 REQUIRED + 3/3 manual evidence,
   668 passed / 2 skipped, Article X held, and public doctor SUCCESS for
   `4e319fa`. PI-9 remains ACTIVE; no sprint beyond Sprint 24 and no successor PI
-  is opened. Sprint 22
+  is opened. Project-EM close execution remains separate and is not performed by
+  the Sprint 24 close. Sprint 22
   CLOSED
   locally 2026-07-09 and shipped SDD-049 and SDD-054 with 616 passed / 2 skipped,
   clean schema/origin/staledoc lints, local doctor green, Article X 3/3 PASS, and
@@ -46,7 +47,7 @@ sprint: PI-9
 
 ## Current sprint
 
-### Overall Sprint 24 -- ACTIVE / PREPARED (PI-9 Sprint 3, final)
+### Overall Sprint 24 -- CLOSED (PI-9 Sprint 3, final)
 
 - Sprint goal: make brownfield bootstrap safe and truthful so applying an edited
   proposal preserves human decisions, installs only reusable framework assets,
@@ -65,9 +66,35 @@ sprint: PI-9
   green. Owner pre-push approval remains mandatory.
 - Exclusions: SDD-035 Azure decommission out-of-band; retro reconciliation as a
   separate cleanup; SDD-034; dashboards; all unrelated work.
-- Close intent: when SDD-058 ships with all acceptance evidence and owner-approved
-  push/public CI, Sprint 24 closes and the PI-9 close is then executed. PI-9 is
-  ACTIVE now; this update does not close it.
+- Close result: SDD-058 shipped at exact approved package `2236321`; public run
+  `30475556326` succeeded on Ubuntu and Windows; Sprint 24 is CLOSED. PI-9 remains
+  ACTIVE / READY FOR PROJECT-EM CLOSE; this update neither closes PI-9 nor opens
+  a successor PI or sprint.
+
+#### Sprint 24 close evidence
+
+- Owner approval: decision 7 authorized exact package `2236321`, push, public
+  CI, and Sprint 24 close if green.
+- Push identity: `origin/master` is
+  `22363217fdaf869fe73e054a1dab031e18a36cca`.
+- Public CI: run `30475556326` SUCCESS. Ubuntu job `90656261309` reported
+  442 passed / 4 skipped plus doctor green; Windows job `90656261415` reported
+  445 passed / 1 skipped plus doctor green.
+- Local evidence: 1111 passed / 5 skipped / 6 subtests; validation 70/70;
+  Stage 1 COMPLIANT; Stage 2 APPROVED; schema, origin, stale-doc, governance,
+  diff, Article X 3/3, and strict doctor gates green.
+- Safety: no real host mutation. SDD-058 is DONE. PI-9 remains ACTIVE and is
+  handed to the project Executive Manager as READY FOR PROJECT-EM CLOSE.
+
+#### Sprint 24 retrospective
+
+- Preserve failed public-run evidence and require renewed approval for the exact
+  repaired package; this kept the release identity auditable.
+- Cross-platform link tests should assert the security boundary rather than an
+  incidental traversal order; the repair retained fail-closed behavior.
+- Keep feature, sprint, and PI closes separate. Sprint 24 closes here, while the
+  project Executive Manager retains authority for the already authorized PI-9
+  close and any later successor decision.
 
 ### Overall Sprint 23 -- CLOSED
 
@@ -146,5 +173,6 @@ Sprint 22 local close evidence is complete: both features are DONE, the
 dashboard/state surfaces show PI-9 current and both features DONE, 616 tests passed
 / 2 skipped, Article X held, local doctor is green, and ledger rows 30-32 are
 success. CI and owner pre-push ratification remain pending; no pre-push CI result
-is claimed. PI-9 remains current/active. Sprint 24 is the authorized final PI-9
-sprint; no successor PI is created here.
+is claimed. PI-9 remains current/active and is READY FOR PROJECT-EM CLOSE.
+Sprint 24 is CLOSED as the authorized final PI-9 sprint; no successor PI or
+sprint is created here.

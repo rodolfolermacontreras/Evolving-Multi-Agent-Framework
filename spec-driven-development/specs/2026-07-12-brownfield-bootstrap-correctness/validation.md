@@ -1,9 +1,9 @@
 ---
 id: SDD-20260712BROWNFIELD-validation
 type: validation
-status: active
+status: done
 owner: principal-architect
-updated: 2026-07-12
+updated: 2026-07-29
 feature: 2026-07-12-brownfield-bootstrap-correctness
 ---
 
@@ -22,7 +22,7 @@ feature: 2026-07-12-brownfield-bootstrap-correctness
   traceability totals of 46 requirements, 15 acceptance criteria, and 70
   validation items; no implementation, worker dispatch, commit, push, or
   non-fixture mutation occurred during the lock transition
-- Status: **LOCKED / ACTIVE AT IMPLEMENTATION -- local evidence and independent review recorded; owner approval and public CI pending**
+- Status: **DONE -- 70/70 REQUIRED validation IDs evidenced; exact repaired package approved, pushed, and green on public Windows/POSIX CI**
 
 This contract was authored before implementation and locked at TASKS under
 Article X. Every REQUIRED item below must be proven; no item may be weakened,
@@ -304,10 +304,14 @@ its real evidence exists.
   case-only renames are avoided/rejected; success and injected rename/open-handle
   failures produce identical exit-state contracts across platforms. Proves R-036,
   R-040, AC-07, AC-11.
-- [ ] **V-54 -- Windows and POSIX CI/equivalent runners.** The same focused fixture
-  suite runs green on a Windows runner and a POSIX runner with recorded run IDs/
-  output. Platform skips require explicit non-applicability and may not remove
-  equivalent behavioral proof. Proves R-040, AC-11.
+- [x] **V-54 -- Windows and POSIX CI/equivalent runners.** Public workflow run
+  `30475556326` at exact repaired SHA
+  `22363217fdaf869fe73e054a1dab031e18a36cca` ran the same focused suite green on
+  Ubuntu job `90656261309` (`442 passed, 4 skipped`; doctor all checks passed;
+  completed `2026-07-29T17:31:12Z`) and Windows job `90656261415` (`445 passed,
+  1 skipped`; doctor all checks passed; completed `2026-07-29T17:38:39Z`).
+  Platform skips are explicit non-applicability only and do not remove equivalent
+  behavioral proof. Proves R-040, AC-11.
 - [x] **V-54A -- minimum scenario matrix complete.** Every row in SPEC Section 9.1
   has evidence for the named stack/platform cells; all installation/path classes
   have platform-neutral unit coverage and OS-specific substitutions are named.
@@ -342,10 +346,14 @@ its real evidence exists.
   every requirement/AC with no missing/extra/wrong behavior before a different
   Stage-2 reviewer evaluates quality/security/maintainability; timestamps and
   outcomes prove the order. Proves R-043, AC-13.
-- [ ] **V-62 -- exact-package owner approval and public CI.** Owner approval names
-  the exact pre-push diff/package; no push precedes it; public B-4 CI for that
-  package is green with run ID/URL; only then are SDD-058 and Sprint 24 eligible
-  for DONE/close. Proves R-043, AC-14.
+- [x] **V-62 -- exact-package owner approval and public CI.** Rodolfo Lerma
+  renewed Option 1 approval on 2026-07-29 for exact repaired package `2236321`,
+  recorded as local ledger decision 7, authorizing push, public CI, and SDD-058/
+  Sprint 24 close only if green. No push preceded that renewed approval.
+  `origin/master` is exact SHA
+  `22363217fdaf869fe73e054a1dab031e18a36cca`; public B-4 workflow run
+  `30475556326` concluded success with Ubuntu job `90656261309` and Windows job
+  `90656261415` both green. Proves R-043, AC-14.
 
 ## K. Scope integrity review (REQUIRED)
 
@@ -404,11 +412,12 @@ its real evidence exists.
 
 ### Cross-platform fixture runs
 
-- Windows run: local Windows 383-test focused suite PASS; scenario-matrix and
-  platform-neutral/POSIX-substitution tests are included.
-- POSIX run: not yet executed on a real POSIX runner; V-54 remains open. The
-  workflow now defines both `ubuntu-latest` and `windows-latest`, but no public run
-  is claimed.
+- Final public run: workflow `30475556326` at exact repaired SHA
+  `22363217fdaf869fe73e054a1dab031e18a36cca` concluded success.
+- Ubuntu job `90656261309`: success; focused suite `442 passed, 4 skipped`;
+  doctor all checks passed; completed `2026-07-29T17:31:12Z`.
+- Windows job `90656261415`: success; focused suite `445 passed, 1 skipped`;
+  doctor all checks passed; completed `2026-07-29T17:38:39Z`.
 
 ### Full gates
 
@@ -435,8 +444,9 @@ its real evidence exists.
 - Stage-2 review: T-058-022 APPROVED / complete on 2026-07-27 by a different
   independent Principal Cloud Security Architect reviewer after all critical and
   important findings were closed. The superseding verdict satisfies V-61.
-- Owner exact-package approval: not requested; V-62 remains open.
-- Public CI run: not run; V-54 and V-62 remain open.
+- At this initial local checkpoint, owner exact-package approval had not yet been
+  requested and public CI had not yet run. Later failed-run, repair, renewed-
+  approval, and green-run evidence is preserved below.
 - Commit-history sequencing: no commit was permitted in this implementation unit;
   V-63 remains open until package/commit history exists.
 
@@ -592,6 +602,33 @@ its real evidence exists.
   and this SDD-058 evidence. V-54 and V-62 remain unchecked until a newly
   approved push of this exact repaired package produces green public jobs.
 
+### Final owner approval, push, public CI, and feature close (2026-07-29)
+
+- Owner decision 6 authorized the earlier exact package and its public run. Run
+  `30469954928` failed on both platforms; that evidence remains preserved above
+  and the approval was invalidated for any repair push.
+- Owner decision 7 records Rodolfo Lerma's renewed Option 1 approval on
+  2026-07-29 for exact repaired package `2236321`, authorizing push, public CI,
+  and SDD-058/Sprint 24 close only if green.
+- Push evidence: `origin/master` is
+  `22363217fdaf869fe73e054a1dab031e18a36cca`, exactly the approved repaired
+  package. No post-approval implementation byte is included in this feature-close
+  documentation unit.
+- Public B-4 evidence: workflow run `30475556326` concluded success. Ubuntu job
+  `90656261309` completed `2026-07-29T17:31:12Z` with `442 passed, 4 skipped`
+  and doctor all checks passed. Windows job `90656261415` completed
+  `2026-07-29T17:38:39Z` with `445 passed, 1 skipped` and doctor all checks
+  passed.
+- Local final evidence remains `1111 passed, 5 skipped, 6 subtests passed` with
+  schema, origin, stale-document, governance, `git diff --check`, Article X, and
+  strict doctor green. Stage 1 is COMPLIANT; Stage 2 is APPROVED. B-1, B-2, and
+  B-4 are satisfied through genuine evidence; ledger dispatch 59 records the
+  successful CI observation.
+- No real host was mutated. All 70 validation IDs, including suffixes, are
+  checked. SDD-058 is DONE and Sprint 24 is CLOSED after T-058-027 and
+  T-058-028 completed. PI-9 remains ACTIVE pending separate project-EM close
+  approval; no successor PI or sprint was created.
+
 ## Definition of Done
 
 All V-01 through V-65, including letter-suffixed items, MUST be checked with real
@@ -600,3 +637,5 @@ silently deferred, converted to optional, or checked by assertion alone. ADR-026
 and SPEC approval must precede PLAN/TASKS; validation must lock at TASKS before
 implementation; two-stage QA must run in order; owner exact-package approval must
 precede push; public CI/B-4 must be green before SDD-058 or Sprint 24 is DONE.
+
+Feature validation status: **DONE -- 70/70 REQUIRED IDs checked on 2026-07-29.**

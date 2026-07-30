@@ -171,7 +171,7 @@ owner authorized Sprint 24 as the final PI-9 sprint on 2026-07-12.
 
 - [x] Sprint 22 (PI-9 Sprint 1): Close PI-8, open PI-9, and ship the experience pair -- SDD-049 (true pre-dispatch file-overlap conflict detector) + SDD-054 (SDD-041 Option B, backlog reorder -> backend re-optimization). Closed 2026-07-09; 616 passed / 2 skipped.
 - [x] Sprint 23 (PI-9 Sprint 2): Ship dashboard truth and lifecycle polish -- SDD-038, SDD-056, and SDD-057. Closed 2026-07-10; 668 passed / 2 skipped; public CI green at `4e319fa`.
-- [ ] Sprint 24 (PI-9 Sprint 3): Deliver the owner-authorized final PI-9 sprint -- SDD-058 (brownfield bootstrap correctness). Authorized 2026-07-12; PI-9 remains active.
+- [x] Sprint 24 (PI-9 Sprint 3): Deliver the owner-authorized final PI-9 sprint -- SDD-058 (brownfield bootstrap correctness). Closed 2026-07-29; PI-9 remains active / ready for project-EM close.
 
 ---
 

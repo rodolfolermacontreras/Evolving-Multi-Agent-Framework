@@ -1,11 +1,11 @@
 # Executive State
 
-Generated date: 2026-07-12
+Generated date: 2026-07-29
 Current PI: PI-9 (Experience Polish)
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
 Active focus: Finish implementation of 'azure-decommission'
 
-PI progress: 2/3 commitments complete (67%)
+PI progress: 3/3 commitments complete (100%)
 
 ## Spec Pipeline
 
@@ -58,6 +58,7 @@ PI progress: 2/3 commitments complete (67%)
 | reorder-backend-reoptimization | DONE | done | validation required-complete |
 | fresh-checkout-ci-doctor-repair | DONE | active | validation required-complete |
 | sprint-23-dashboard-polish | DONE | done | validation required-complete, RETRO present |
+| brownfield-bootstrap-correctness | DONE | done | validation required-complete |
 
 ## Sprint Plan
 
@@ -101,16 +102,16 @@ PI progress: 2/3 commitments complete (67%)
 
 | When | Feature | Task | Agent |
 |------|---------|------|-------|
-| 2026-07-11T04:16:38Z | specs/2026-07-10-sprint-23-dashboard-polish | Final close and gate verification | qa-engineer-general |
-| 2026-07-11T04:16:38Z | specs/2026-07-10-sprint-23-dashboard-polish | Sprint 23 durable close | principal-software-developer |
-| 2026-07-10T22:54:48Z | spec-driven-development/specs/2026-07-10-sprint-23-dashboard-polish | F-66 independent local close-readiness QA | QA Engineer |
-| 2026-07-10T22:34:14Z | spec-driven-development/specs/2026-07-10-sprint-23-dashboard-polish | F-65 independent code-quality and accessibility review | gem-critic+ux-designer |
-| 2026-07-10T22:30:19Z | spec-driven-development/specs/2026-07-10-sprint-23-dashboard-polish | F-65 Stage 1 spec compliance review | qa-engineer-general |
-| 2026-07-10T22:28:26Z | spec-driven-development/specs/2026-07-10-sprint-23-dashboard-polish | F-65 lifecycle token injector TDD implementation | developer-general |
-| 2026-07-10T22:28:26Z | spec-driven-development/specs/2026-07-10-sprint-23-dashboard-polish | F-65 exact historical wording repair | developer-cli-specialist-1 |
-| 2026-07-10T21:26:59Z | spec-driven-development/specs/2026-07-10-sprint-23-dashboard-polish | F-64 SDD-057 and SDD-056 implementation with focused tests | developer-general |
-| 2026-07-10T21:26:59Z | spec-driven-development/specs/2026-07-10-sprint-23-dashboard-polish | F-64 Stage 1 spec compliance review and re-review | qa-engineer-general |
-| 2026-07-10T00:00:00Z | spec-driven-development/specs/2026-07-10-sprint-23-dashboard-polish | F-66 generated dashboard UX review | UX Designer |
+| 2026-07-29T17:58:14Z | 2026-07-12-brownfield-bootstrap-correctness | Observe repaired public Windows and Ubuntu CI | qa-engineer-general |
+| 2026-07-29T17:16:52Z | 2026-07-12-brownfield-bootstrap-correctness | Repair Stage-2 critical and important security findings | principal-software-developer |
+| 2026-07-20T15:27:32Z | 2026-07-12-brownfield-bootstrap-correctness | SDD-058 Stage-1 compliance re-review | qa-engineer-general |
+| 2026-07-20T15:03:16Z | 2026-07-12-brownfield-bootstrap-correctness | Repair three Stage-1 compliance defects | principal-software-developer |
+| 2026-07-13T09:13:28Z | 2026-07-12-brownfield-bootstrap-correctness | SDD-058 TDD implementation and local gate evidence | principal-software-developer |
+| 2026-07-12T20:15:38Z | 2026-07-12-brownfield-bootstrap-correctness | SDD-058 PLAN and TASKS with validation lock | principal-architect+principal-software-developer |
+| 2026-07-12T19:56:31Z | 2026-07-12-brownfield-bootstrap-correctness | SDD-058 CLARIFY product and architecture contract | principal-product-manager+principal-architect |
+| 2026-07-12T18:44:18+00:00 | None | Dedup scan (all) | dedup-scanner |
+| 2026-07-12T18:44:18+00:00 | None | [SOFT] Cross-feature deduplication pass at triage and clarify | dedup-scanner |
+| 2026-07-12T18:44:18+00:00 | None | [SOFT] Map Microsoft self-improving skills paper against our skill mechanism | dedup-scanner |
 
 ## Blockers
 
@@ -135,7 +136,7 @@ _none -- no dispatches without outcome older than 24h_
 
 ## Next Milestones
 
-- Sprint 24 (PI-9 Sprint 3): Deliver the owner-authorized final PI-9 sprint -- SDD-058 (brownfield bootstrap correctness). Authorized 2026-07-12; PI-9 remains active.
+_all PI commitments complete -- plan next PI_
 
 ---
 

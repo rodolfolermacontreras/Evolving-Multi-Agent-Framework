@@ -1,7 +1,7 @@
 ---
-version: '1.2.0'
+version: '1.3.0'
 ratified: 2026-05-12
-last_amended: 2026-07-12
+last_amended: 2026-07-30
 ---
 
 # Roadmap
@@ -164,14 +164,22 @@ are read.
 
 ---
 
-## PI-9: Experience Polish (current)
+## PI-9: Experience Polish (closed 2026-07-30)
 
-Opened 2026-07-09. ACTIVE. The experience work shipped across Sprints 22-23; the
-owner authorized Sprint 24 as the final PI-9 sprint on 2026-07-12.
+Opened 2026-07-09. Closed 2026-07-30 as DONE. All three planned PI-9 sprints
+shipped; no successor PI or sprint was opened by this close.
 
 - [x] Sprint 22 (PI-9 Sprint 1): Close PI-8, open PI-9, and ship the experience pair -- SDD-049 (true pre-dispatch file-overlap conflict detector) + SDD-054 (SDD-041 Option B, backlog reorder -> backend re-optimization). Closed 2026-07-09; 616 passed / 2 skipped.
 - [x] Sprint 23 (PI-9 Sprint 2): Ship dashboard truth and lifecycle polish -- SDD-038, SDD-056, and SDD-057. Closed 2026-07-10; 668 passed / 2 skipped; public CI green at `4e319fa`.
-- [x] Sprint 24 (PI-9 Sprint 3): Deliver the owner-authorized final PI-9 sprint -- SDD-058 (brownfield bootstrap correctness). Closed 2026-07-29; PI-9 remains active / ready for project-EM close.
+- [x] Sprint 24 (PI-9 Sprint 3): Deliver the owner-authorized final PI-9 sprint -- SDD-058 (brownfield bootstrap correctness). Closed 2026-07-29; 70/70 validation, Stage 1 COMPLIANT, Stage 2 APPROVED, and public Windows/Ubuntu CI green.
+
+**PI-9 close decision: DONE.** Ratified by owner 2026-07-30 after Sprint 24
+closure and green master CI (exact owner direction: "Lets formally close it
+then"). Release evidence: feature-branch doctor run `30546501039` succeeded at
+`b6deb60a2da18672e4a217236143b540b982972a`; merge commit
+`fed33dbaaf5a65de4193a28efe671a12b6bcaba4` reached `origin/master`; master
+doctor run `30550585479` succeeded for that exact SHA. No successor PI or sprint
+was created, and SDD-059 remains an unscheduled candidate.
 
 ---
 
@@ -180,7 +188,15 @@ owner authorized Sprint 24 as the final PI-9 sprint on 2026-07-12.
 These conventions govern how the PI sections above are written and read. They are mechanical:
 the dashboard reader (`cli/state_builder_data.py::load_pis`) parses the markers literally.
 
-- Exactly one PI carries the `(current)` marker at any time -- the single ACTIVE increment.
+- At most one PI carries the `(current)` marker. When an ACTIVE PI exists,
+  exactly one PI carries `(current)` and its `sprints/PI-N/CURRENT_PI.md` is also
+  active.
+- Zero `(current)` markers is valid only after an owner-ratified PI close when no
+  successor PI has been opened. In that explicit between-PI state, no agent may
+  invent or schedule a successor merely to satisfy a display convention.
+- Generated operational surfaces reserve `Current PI` for that active PI. In a
+  valid zero-active state they show `No active PI`; they may separately show the
+  newest closed PI as `Latest PI: PI-N (closed)`, but never as current or active.
 - Every completed PI carries a `(closed YYYY-MM-DD)` marker with its real owner-ratified close date.
 - The two markers are never combined. A PI header is either `(current)` or `(closed YYYY-MM-DD)` -- never both in a single marker. (This is exactly the defect SDD-052 repaired: a PI-7 header that read "current, closed".)
 - A closed PI renders at 100% completion in the dashboard regardless of any unchecked boxes in its section.

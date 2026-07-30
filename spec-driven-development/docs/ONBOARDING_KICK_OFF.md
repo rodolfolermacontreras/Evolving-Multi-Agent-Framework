@@ -460,15 +460,13 @@ Each lives in its own directory under `specs/YYYY-MM-DD-feature-name/` with co-l
 | Archetypes | 5 starter constitutions |
 | Lessons captured | 10 (4 from PI-1, 6 from PI-2) |
 
-### Current PI: PI-9 (Experience Polish)
+### Program increment state: No active PI
 
 **For current state, read the live source.** The current PI, sprint, in-flight
 feature, and test count live in the dashboard [`exec/state.html`](../exec/state.html),
 the ledger [`exec/sprint-progress.md`](../exec/sprint-progress.md), and the roadmap
-[`../constitution/roadmap.md`](../constitution/roadmap.md). PI-1..PI-8 are closed;
-PI-9 ("Experience Polish") is active -- shipping two quality-of-life features: an
-automated pre-dispatch file-overlap check and a backlog reorder that re-optimizes
-on the backend.
+[`../constitution/roadmap.md`](../constitution/roadmap.md). PI-1..PI-9 are closed;
+no successor PI is active in the owner-ratified between-PI state.
 
 ---
 

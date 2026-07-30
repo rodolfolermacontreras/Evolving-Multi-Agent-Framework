@@ -876,6 +876,39 @@ class TestEdgeCases:
         assert len(ledger.blockers) == 1
         assert ledger.blockers[0]["task_title"] == "Stuck task example"
 
+    def test_fixed_date_freezes_time_sensitive_loaders(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Fixed-date builds use a stable ledger clock and absolute Git dates."""
+        from cli import state_builder as sb
+
+        sdd = _seed_sdd_root(tmp_path)
+        observed: dict[str, object] = {}
+
+        def fake_load_ledger(root: Path, *, now: datetime) -> LedgerView:
+            observed["ledger_root"] = root
+            observed["ledger_now"] = now
+            return LedgerView([], [], [], False, [])
+
+        def fake_load_recent_commits(
+            root: Path, *, absolute_dates: bool,
+        ) -> list[tuple[str, str, str]]:
+            observed["commit_root"] = root
+            observed["absolute_dates"] = absolute_dates
+            return []
+
+        monkeypatch.setattr(sb, "load_ledger", fake_load_ledger)
+        monkeypatch.setattr(sb, "load_recent_commits", fake_load_recent_commits)
+
+        sb.build(sdd_root=sdd, write=False, fixed_date="2026-07-30")
+
+        assert observed == {
+            "ledger_root": sdd.resolve(),
+            "ledger_now": datetime(2026, 7, 30, tzinfo=timezone.utc),
+            "commit_root": sdd.resolve(),
+            "absolute_dates": True,
+        }
+
     def test_load_features_detects_status(self, tmp_path: Path) -> None:
         """load_features picks up Status line from spec.md files."""
         sdd = _seed_sdd_root(tmp_path)
@@ -2504,6 +2537,19 @@ class TestWorkIndexGeneration:
         assert "wip-one" in md, "IN-FLIGHT feature must appear in work-index"
         assert "Queued idea" in md, "QUEUED backlog item must appear"
         assert "PI-4" in md
+        assert "the work supports the active PI" in md
+
+    def test_render_work_index_routes_between_pi_work_to_owner_triage(self) -> None:
+        md = render_work_index(
+            generated_date="2026-07-30",
+            features=[],
+            backlog=[],
+            pi=None,
+        )
+
+        assert "No active PI." in md
+        assert "the work supports the active PI" not in md
+        assert "owner-approved triage before scheduling" in md
 
     def test_build_writes_work_index_file(self, tmp_path: Path) -> None:
         # Reuse the integration fixture to get a full sdd-root
@@ -4259,8 +4305,7 @@ class TestSdd050DetectStage:
 
 
 class TestSdd050PiClosed:
-    """Defect 2: closed PIs render at 100% and never masquerade as current;
-    the header falls back to the newest PI, not the oldest."""
+    """Defect 2: closed PIs render at 100% and never masquerade as current."""
 
     def _write_roadmap(self, tmp_path: Path, body: str) -> Path:
         sdd = _seed_sdd_root(tmp_path)
@@ -4292,10 +4337,11 @@ class TestSdd050PiClosed:
         )
         assert pi.pct == 100
 
-    def test_current_pi_fallback_returns_newest_when_all_closed(
+    def test_current_pi_returns_none_when_all_closed(
         self, tmp_path: Path
     ) -> None:
-        # PI-1..PI-5 closed, PI-6 absent, PI-7 closed -> header = PI-7 (newest).
+        # A ratified between-PI state has no active PI, even though closed
+        # history remains available to the roadmap and dashboard.
         sdd = self._write_roadmap(
             tmp_path,
             "# Roadmap\n\n"
@@ -4304,9 +4350,39 @@ class TestSdd050PiClosed:
             "## PI-7: Hardening (current, closed 2026-07-07)\n\n- [ ] a\n",
         )
         pis = load_pis(sdd)
-        picked = current_pi(pis)
-        assert picked is not None
-        assert picked.name == "PI-7"
+        assert current_pi(pis) is None
+
+    def test_current_pi_ignores_direct_closed_current_block(self) -> None:
+        """Selector enforces closed precedence even without parser normalization."""
+        pis = [
+            PIBlock(
+                name="PI-9", title="Experience", is_current=True,
+                checkboxes=[(False, "a")], is_closed=True,
+            ),
+        ]
+
+        assert current_pi(pis) is None
+
+    def test_all_closed_build_surfaces_no_active_pi_without_current_styling(
+        self, tmp_path: Path
+    ) -> None:
+        sdd = self._write_roadmap(
+            tmp_path,
+            "# Roadmap\n\n"
+            "## PI-8: Truth (closed 2026-07-09)\n\n- [x] a\n\n"
+            "## PI-9: Experience (closed 2026-07-30)\n\n- [x] a\n",
+        )
+
+        result = build(sdd_root=sdd, write=False, fixed_date="2026-07-30")
+
+        assert "Current PI: No active PI" in result["markdown"]
+        assert "_no active PI -- plan next PI_" in result["markdown"]
+        assert "No active PI." in result["work_index"]
+        assert "No active PI." in result["html"]
+        for surface in (result["markdown"], result["work_index"], result["html"]):
+            assert "Current PI: PI-9" not in surface
+        assert 'class="pill current"' not in result["html"]
+        assert 'aria-current="page"' not in result["html"]
 
     def test_current_pi_unchecked_fallback_skips_closed(self, tmp_path: Path) -> None:
         # A closed PI with unchecked boxes must NOT be picked by the
@@ -4320,4 +4396,19 @@ class TestSdd050PiClosed:
         picked = current_pi(pis)
         assert picked is not None
         assert picked.name == "PI-2"
+
+    def test_current_pi_fully_checked_open_fallback_picks_newest(self) -> None:
+        # A malformed roadmap can omit the current marker after every open PI's
+        # commitments are checked. Preserve the defensive newest-open fallback.
+        pis = [
+            PIBlock(name="PI-2", title="Older", is_current=False,
+                    checkboxes=[(True, "a")], is_closed=False),
+            PIBlock(name="PI-10", title="Newest", is_current=False,
+                    checkboxes=[(True, "b")], is_closed=False),
+        ]
+
+        picked = current_pi(pis)
+
+        assert picked is not None
+        assert picked.name == "PI-10"
 

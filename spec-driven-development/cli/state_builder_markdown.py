@@ -79,7 +79,7 @@ _FOOTER_LINES = [
 def _md_header(*, generated_date: str, pi: PIBlock | None,
                next_action: tuple[str, str, str | None]) -> list[str]:
     """Section 1: header block plus the optional PI-progress line."""
-    pi_label = f"{pi.name} ({pi.title})" if pi else "no PI active"
+    pi_label = f"{pi.name} ({pi.title})" if pi else "No active PI"
     focus_line = next_action[0] if next_action else ""
     out = _HEADER_TMPL.substitute(
         generated_date=generated_date,
@@ -208,7 +208,7 @@ def _md_next_milestones(pi: PIBlock | None) -> list[str]:
         else:
             out.append("_all PI commitments complete -- plan next PI_")
     else:
-        out.append("_no PI commitments registered_")
+        out.append("_no active PI -- plan next PI_")
     return out
 
 

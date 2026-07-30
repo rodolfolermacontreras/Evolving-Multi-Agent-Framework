@@ -263,17 +263,17 @@ def current_pi(pis: list[PIBlock], override: str | None = None) -> PIBlock | Non
         # Override didn't match any existing PI -- create a synthetic one
         return PIBlock(name=override, title="", is_current=True)
     for p in pis:
-        if p.is_current:
+        if p.is_current and not p.is_closed:
             return p
     for p in pis:
         if not p.is_closed and any(not c for c, _ in p.checkboxes):
             return p
     if not pis:
         return None
-    # Every PI is closed (or fully checked): fall back to the NEWEST PI by
-    # number, not the oldest (pis[0]), so the header never shows a stale PI-1.
+    # A fully checked but non-closed PI may be a malformed open marker; preserve
+    # the newest-open fallback. All-closed roadmaps represent no active PI.
     open_pis = [p for p in pis if not p.is_closed]
-    return max(open_pis or pis, key=_pi_number)
+    return max(open_pis, key=_pi_number) if open_pis else None
 
 
 # ---------------------------------------------------------------------------- #
@@ -439,10 +439,17 @@ def load_ledger(sdd_root: Path, now: dt.datetime | None = None,
 # Git log (HTML extra; not part of SDD-002)
 # ---------------------------------------------------------------------------- #
 
-def load_recent_commits(sdd_root: Path, limit: int = 10) -> list[tuple[str, str, str]]:
+def load_recent_commits(
+    sdd_root: Path, limit: int = 10, *, absolute_dates: bool = False,
+) -> list[tuple[str, str, str]]:
+    date_format = "%ad" if absolute_dates else "%cr"
+    date_args = ["--date=short"] if absolute_dates else []
     try:
         out = subprocess.run(
-            ["git", "log", f"-{limit}", "--pretty=format:%h\x1f%s\x1f%cr"],
+            [
+                "git", "log", f"-{limit}", *date_args,
+                f"--pretty=format:%h\x1f%s\x1f{date_format}",
+            ],
             capture_output=True, text=True, check=True, cwd=str(repo_root_for(sdd_root)),
         ).stdout
     except (subprocess.CalledProcessError, FileNotFoundError):

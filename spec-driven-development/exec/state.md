@@ -1,11 +1,9 @@
 # Executive State
 
-Generated date: 2026-07-29
-Current PI: PI-9 (Experience Polish)
+Generated date: 2026-07-30
+Current PI: No active PI
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
 Active focus: Finish implementation of 'azure-decommission'
-
-PI progress: 3/3 commitments complete (100%)
 
 ## Spec Pipeline
 
@@ -136,7 +134,7 @@ _none -- no dispatches without outcome older than 24h_
 
 ## Next Milestones
 
-_all PI commitments complete -- plan next PI_
+_no active PI -- plan next PI_
 
 ---
 

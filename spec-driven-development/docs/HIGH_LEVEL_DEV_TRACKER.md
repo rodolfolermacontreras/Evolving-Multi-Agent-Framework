@@ -1,6 +1,6 @@
 ---
 version: '1.2.0'
-last_updated: 2026-07-12
+last_updated: 2026-07-29
 owner: principal-executive-manager
 co_owner: principal-product-manager
 discipline: abstraction-not-detail
@@ -32,10 +32,10 @@ Read [`RULES.md`](RULES.md) for the binding rules.
 | Field | Value |
 |-------|-------|
 | **Current PI** | PI-9 (Experience Polish) -- 8 PIs closed (PI-1..PI-8), PI-9 active |
-| **Current sprint** | Overall Sprint 24 / PI-9 Sprint 3 (final) -- SDD-058 only; STARTED/prepared 2026-07-12 |
+| **Current sprint** | Overall Sprint 24 / PI-9 Sprint 3 (final) -- CLOSED 2026-07-29; SDD-058 DONE (28/28 tasks, 70/70 validation); PI-9 remains active pending separate project-EM close approval |
 | **Cadence** | Symbolic; ~1 day per sprint, ~5 sprints per PI (ADR-0003) |
 | **Tests passing** | See the live count in [`exec/state.md`](../exec/state.md) and the ledger (schema_lint clean) |
-| **Branch state** | Sprint established from clean `d77d4ab == origin/master`; no commit or push yet |
+| **Branch state** | Local HEAD `4e0d23d`; approved SDD-058 package `2236321 == origin/master`; public CI run `30475556326` green on Ubuntu and Windows; closure-reconciliation docs remain local and unpushed |
 | **PI history** | PI-1..PI-8 closed; PI-9 active -- see [`constitution/roadmap.md`](../constitution/roadmap.md) |
 
 ---

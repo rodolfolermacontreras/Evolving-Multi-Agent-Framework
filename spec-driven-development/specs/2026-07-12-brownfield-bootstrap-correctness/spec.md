@@ -1,9 +1,9 @@
 ---
 id: SDD-20260712BROWNFIELD-spec
 type: spec
-status: active
+status: done
 owner: principal-architect
-updated: 2026-07-12
+updated: 2026-07-29
 feature: 2026-07-12-brownfield-bootstrap-correctness
 ---
 
@@ -15,7 +15,7 @@ feature: 2026-07-12-brownfield-bootstrap-correctness
 - CLARIFY: [clarify.md](clarify.md)
 - Validation: [validation.md](validation.md)
 - Architecture decision: [ADR-026](../../docs/ADR/026-transactional-brownfield-adoption.md)
-- Status: **APPROVED FOR PLAN/TASKS ONLY -- SPEC LOCK RELEASED**
+- Status: **DONE -- 70/70 validation IDs checked; exact repaired package green on public Windows/POSIX CI**
 - Approval: Rodolfo Lerma (owner) selected Option 1 on 2026-07-12, jointly
   approving ADR-026 and this SPEC; recorded as local ledger decision 5.
 

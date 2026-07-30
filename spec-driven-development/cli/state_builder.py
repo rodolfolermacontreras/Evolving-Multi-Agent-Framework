@@ -144,6 +144,7 @@ from state_builder_html import (  # noqa: E402  -- in-tree sibling re-export (AD
     _next_for,
     inject_user_gates_html,
     inject_pi_pills_html,
+    inject_no_active_pi_html,
     _SPRINT_STAGE_MAP,
     _sprint_stage,
     render_lifecycle_pipeline,
@@ -1675,6 +1676,12 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
           port: int | None = None, fixed_date: str | None = None) -> dict:
     sdd_root = sdd_root or DEFAULT_SDD_ROOT
     sdd_root = Path(sdd_root).resolve()
+    fixed_now = (
+        dt.datetime.combine(
+            dt.date.fromisoformat(fixed_date), dt.time(), tzinfo=dt.timezone.utc,
+        )
+        if fixed_date else None
+    )
 
     pis = load_pis(sdd_root)
     pi = resolve_display_pi(sdd_root, pis, override=pi_override)
@@ -1682,8 +1689,8 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
     user_gates = load_user_gates(sdd_root)
     backlog = load_backlog(sdd_root)
     roster = load_roster(sdd_root)
-    ledger = load_ledger(sdd_root)
-    commits = load_recent_commits(sdd_root)
+    ledger = load_ledger(sdd_root, now=fixed_now)
+    commits = load_recent_commits(sdd_root, absolute_dates=fixed_date is not None)
     next_action = derive_next_action(sdd_root, pi, features)
 
     # v3 data-layer additions (Phase 1 functions)
@@ -1722,6 +1729,7 @@ def build(*, sdd_root: Path | None = None, write: bool = True,
         sprint_goal=sprint_goal, decisions=decisions,
     )
     htm = inject_pi_pills_html(htm, pis=pis, active_pi=pi)
+    htm = inject_no_active_pi_html(htm, active_pi=pi)
     htm = inject_user_gates_html(htm, user_gates)
     # SDD-036: lifecycle pipeline + four-card docs row (static; reorder moved
     # to the dedicated Backlog section below).

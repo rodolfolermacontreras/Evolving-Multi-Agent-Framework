@@ -1,6 +1,6 @@
 ---
 version: '1.2.0'
-last_updated: 2026-07-29
+last_updated: 2026-07-30
 owner: principal-executive-manager
 co_owner: principal-product-manager
 discipline: abstraction-not-detail
@@ -31,12 +31,13 @@ Read [`RULES.md`](RULES.md) for the binding rules.
 
 | Field | Value |
 |-------|-------|
-| **Current PI** | PI-9 (Experience Polish) -- 8 PIs closed (PI-1..PI-8), PI-9 active |
-| **Current sprint** | Overall Sprint 24 / PI-9 Sprint 3 (final) -- CLOSED 2026-07-29; SDD-058 DONE (28/28 tasks, 70/70 validation); PI-9 remains active pending separate project-EM close approval |
+| **Current PI** | None -- no active PI or successor PI opened |
+| **Latest PI** | PI-9 (Experience Polish) CLOSED / DONE 2026-07-30 |
+| **Current sprint** | None -- Overall Sprint 24 / PI-9 Sprint 3 closed 2026-07-29; no successor sprint opened |
 | **Cadence** | Symbolic; ~1 day per sprint, ~5 sprints per PI (ADR-0003) |
 | **Tests passing** | See the live count in [`exec/state.md`](../exec/state.md) and the ledger (schema_lint clean) |
-| **Branch state** | Local HEAD `4e0d23d`; approved SDD-058 package `2236321 == origin/master`; public CI run `30475556326` green on Ubuntu and Windows; closure-reconciliation docs remain local and unpushed |
-| **PI history** | PI-1..PI-8 closed; PI-9 active -- see [`constitution/roadmap.md`](../constitution/roadmap.md) |
+| **Branch state** | PI-9 close package prepared from `origin/master` merge SHA `fed33db`; feature doctor run `30546501039` and exact-master doctor run `30550585479` succeeded; close edits remain local and uncommitted |
+| **PI history** | PI-1..PI-9 closed; no current PI -- see [`constitution/roadmap.md`](../constitution/roadmap.md) |
 
 ---
 
@@ -180,4 +181,5 @@ The roadmap is strategic, the backlog is prioritized; the tracker is operational
 | **PI-5** | 2026-06 | Closed -- see roadmap | curated | [`constitution/roadmap.md`](../constitution/roadmap.md) |
 | **PI-6** | 2026-06 -> 2026-06-25 | Closed -- see roadmap | curated | [`constitution/roadmap.md`](../constitution/roadmap.md) |
 | **PI-7** | -> 2026-07-07 | Hardening + orchestration maturity -- CLOSED (DONE-WITH-CARRYOVER at `7088f35`) | curated | [`constitution/roadmap.md`](../constitution/roadmap.md) |
-| **PI-8** | 2026-07-08 -> active | Truth in the Window (dashboard + docs + roadmap truth) | _in flight_ | [`../sprints/PI-8/CURRENT_PI.md`](../sprints/PI-8/CURRENT_PI.md) |
+| **PI-8** | 2026-07-08 -> 2026-07-09 | Truth in the Window -- CLOSED / DONE | curated | [`../sprints/PI-8/CURRENT_PI.md`](../sprints/PI-8/CURRENT_PI.md) |
+| **PI-9** | 2026-07-09 -> 2026-07-30 | Experience Polish -- CLOSED / DONE; Sprints 22-24 shipped | close recorded | [`../sprints/PI-9/CURRENT_PI.md`](../sprints/PI-9/CURRENT_PI.md) |

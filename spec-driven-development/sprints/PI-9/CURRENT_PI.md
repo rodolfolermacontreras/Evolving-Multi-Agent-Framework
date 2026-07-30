@@ -1,32 +1,34 @@
 ---
 id: SDD-PI-9-CURRENT_PI-sprint
 type: sprint
-status: active
+status: done
 owner: principal-product-manager
-updated: 2026-07-29
+updated: 2026-07-30
 sprint: PI-9
 ---
 
 # PI-9: Experience Polish
 
-- Status: **ACTIVE / READY FOR PROJECT-EM CLOSE; overall Sprint 24 CLOSED
-  (PI-9 Sprint 3), the final PI-9 sprint.** It delivered SDD-058, the approved P1
-  brownfield bootstrap correctness defect. Owner authorization 2026-07-12:
-  "Owner approved Option 1 on 2026-07-12: authorize one final PI-9 sprint
-  dedicated exclusively to the approved P1 brownfield bootstrap correctness
-  defect, then close PI-9 after it ships." Overall Sprint 23 CLOSED (PI-9 Sprint
-  2): SDD-038,
-  SDD-056, and SDD-057 are DONE with 17/17 REQUIRED + 3/3 manual evidence,
-  668 passed / 2 skipped, Article X held, and public doctor SUCCESS for
-  `4e319fa`. PI-9 remains ACTIVE; no sprint beyond Sprint 24 and no successor PI
-  is opened. Project-EM close execution remains separate and is not performed by
-  the Sprint 24 close. Sprint 22
-  CLOSED
-  locally 2026-07-09 and shipped SDD-049 and SDD-054 with 616 passed / 2 skipped,
-  clean schema/origin/staledoc lints, local doctor green, Article X 3/3 PASS, and
-  PI-9 ledger rows 30-32 all success. The Sprint EM opened PI-9 in the same edit
-  that closed PI-8 (exactly one `(current)` marker at a time). Follows PI-8 CLOSED
-  2026-07-09 / DONE (Sprint 21 close at `07a2296`; PI-8 closed at Sprint 22 open).
+- Status: **CLOSED 2026-07-30 (DONE).** Sprint 22 shipped SDD-049 and SDD-054;
+  Sprint 23 shipped SDD-038, SDD-056, and SDD-057; Sprint 24 shipped SDD-058 as
+  the owner-authorized final PI-9 sprint. No successor PI or sprint was opened,
+  and SDD-059 remains an unscheduled candidate.
+- Close authority: owner direction on 2026-07-30, exact quote: "Lets formally
+  close it then". This follows the separate Sprint 24 close on 2026-07-29 and
+  satisfies the PI-close owner gate.
+- Release evidence: feature-branch doctor run `30546501039` succeeded at
+  `b6deb60a2da18672e4a217236143b540b982972a`; merge commit
+  `fed33dbaaf5a65de4193a28efe671a12b6bcaba4` reached `origin/master`; master
+  doctor run `30550585479` succeeded for that exact SHA.
+- Final close-package validation: explicit full suite `1116 passed, 5 skipped,
+  6 subtests passed`; completed strict-doctor capture reported the same test
+  total and all nine checks PASS. Two doctor evidence-recovery process trees
+  overlapped, so the captured doctor result is retained as functional evidence
+  without claiming serialized execution. The subsequent non-full-suite gates,
+  fixed-date regeneration proof, and zero-active-PI assertions were serialized
+  and green.
+- Predecessor state: PI-8 CLOSED 2026-07-09 / DONE (Sprint 21 close at
+  `07a2296`; PI-8 closed at Sprint 22 open).
 
 - Theme: Finish PI-9 by pairing the shipped experience polish with trustworthy
   brownfield adoption. Sprints 22-23 delivered file-overlap protection, meaningful
@@ -45,7 +47,7 @@ sprint: PI-9
 
 ---
 
-## Current sprint
+## Sprint history
 
 ### Overall Sprint 24 -- CLOSED (PI-9 Sprint 3, final)
 
@@ -68,8 +70,7 @@ sprint: PI-9
   separate cleanup; SDD-034; dashboards; all unrelated work.
 - Close result: SDD-058 shipped at exact approved package `2236321`; public run
   `30475556326` succeeded on Ubuntu and Windows; Sprint 24 is CLOSED. PI-9 remains
-  ACTIVE / READY FOR PROJECT-EM CLOSE; this update neither closes PI-9 nor opens
-  a successor PI or sprint.
+  closed separately on 2026-07-30; neither close opened a successor PI or sprint.
 
 #### Sprint 24 close evidence
 
@@ -83,8 +84,8 @@ sprint: PI-9
 - Local evidence: 1111 passed / 5 skipped / 6 subtests; validation 70/70;
   Stage 1 COMPLIANT; Stage 2 APPROVED; schema, origin, stale-doc, governance,
   diff, Article X 3/3, and strict doctor gates green.
-- Safety: no real host mutation. SDD-058 is DONE. PI-9 remains ACTIVE and is
-  handed to the project Executive Manager as READY FOR PROJECT-EM CLOSE.
+- Safety: no real host mutation. SDD-058 is DONE. The Sprint 24 handoff was
+  accepted by the project Executive Manager before the separate PI-9 close.
 
 #### Sprint 24 retrospective
 
@@ -103,7 +104,7 @@ sprint: PI-9
   repaired public doctor run `29139276251` completed SUCCESS in 18s.
 - Evidence: 17/17 REQUIRED + 3/3 manual; B-1/B-2/B-4 green; Article X held;
   full local suite 668 passed / 2 skipped / 6 subtests.
-- PI status: PI-9 remains ACTIVE.
+- PI status at Sprint 23 close: PI-9 remained ACTIVE.
 - Historical handoff: the Sprint 23 close authored no successor and reported the
   next-sprint decision upward. The owner subsequently authorized Sprint 24 on
   2026-07-12; the current-sprint section above records that separate decision.
@@ -170,9 +171,9 @@ compatibility and dry-run/diff/backup safety covered. No destructive real-host
 apply occurs without owner approval.
 
 Sprint 22 local close evidence is complete: both features are DONE, the
-dashboard/state surfaces show PI-9 current and both features DONE, 616 tests passed
-/ 2 skipped, Article X held, local doctor is green, and ledger rows 30-32 are
-success. CI and owner pre-push ratification remain pending; no pre-push CI result
-is claimed. PI-9 remains current/active and is READY FOR PROJECT-EM CLOSE.
-Sprint 24 is CLOSED as the authorized final PI-9 sprint; no successor PI or
-sprint is created here.
+dashboard/state surfaces showed PI-9 current and both features DONE, 616 tests
+passed / 2 skipped, Article X held, local doctor was green, and ledger rows 30-32
+were successful. CI and owner pre-push ratification were pending at that Sprint
+22 checkpoint; no pre-push CI result was claimed there.
+Sprint 24 is CLOSED as the authorized final PI-9 sprint. The owner separately
+ratified PI-9 CLOSED / DONE on 2026-07-30; no successor PI or sprint is open.

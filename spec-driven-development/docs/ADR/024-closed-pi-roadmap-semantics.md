@@ -1,7 +1,9 @@
 # ADR-024: Closed-PI roadmap semantics and marker convention
 
 - Date: 2026-07-08
-- Status: accepted (drafted by principal-architect at Sprint 20 F-53 design; ratified by owner at F-54 on 2026-07-08)
+- Status: superseded by ADR-027 on 2026-07-30
+- Superseded scope: Decision 1 marker cardinality. Closed-PI semantics,
+  roadmap completeness, and historical owner evidence remain authoritative.
 
 ## Owner ratification
 

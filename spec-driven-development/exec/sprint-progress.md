@@ -2063,3 +2063,36 @@ Scope: SDD-043 (two-tier executive manager), SDD-044 (plain-language comms disci
   package received renewed approval before push.
 - Carry-forward lesson: test the fail-closed security contract across platforms
   without coupling assertions to incidental managed-path traversal order.
+
+---
+
+## PI-9 -- CLOSED / DONE
+
+- Date: 2026-07-30
+- Owner: Rodolfo Lerma, routed through the project Executive Manager.
+- Exact owner evidence: "Lets formally close it then" (2026-07-30), issued after
+  Sprint 24 closure and green master CI.
+- Sprint summary: Sprint 22 shipped SDD-049 + SDD-054; Sprint 23 shipped
+  SDD-038 + SDD-056 + SDD-057; Sprint 24 shipped SDD-058. All three sprints are
+  closed and all six PI-9 features are DONE.
+- Release chain: feature-branch doctor run `30546501039` concluded SUCCESS at
+  `b6deb60a2da18672e4a217236143b540b982972a`; merge commit
+  `fed33dbaaf5a65de4193a28efe671a12b6bcaba4` is on `origin/master`; master
+  doctor run `30550585479` concluded SUCCESS for that exact merge SHA.
+- Close result: PI-9 is CLOSED / DONE. No successor PI or sprint was opened.
+  The roadmap intentionally has zero `(current)` PI markers in this between-PI
+  state. SDD-059 remains an unscheduled candidate; it was not assigned to a PI
+  or sprint by this close.
+- Narrow implementation: state-builder selection and unlocked display wording,
+  paired regression tests, the live-state bootstrap assertion, `BACKLOG.md`, and
+  close/governance surfaces were updated to represent the zero-active state.
+  `IDEAS.md`, unrelated history, push, merge, and branch cleanup were untouched.
+- Exact close-package validation on 2026-07-30: the explicit full suite reported
+  `1116 passed, 5 skipped, 6 subtests passed`; the completed strict-doctor
+  capture independently reported the same `1116 passed, 5 skipped, 6 subtests`
+  and all nine checks PASS. Earlier doctor evidence-recovery wrappers caused two
+  process trees to overlap, so that completed doctor result is functional gate
+  evidence but is not claimed as a clean serialization proof. All remaining
+  schema, origin, stale-doc, governance, Article X, TDD, DONE, diff, fixed-date
+  regeneration, and zero-active-PI checks passed after the final generated
+  state update.

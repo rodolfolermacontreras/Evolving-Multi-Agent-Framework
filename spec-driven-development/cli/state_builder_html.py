@@ -221,6 +221,16 @@ def inject_pi_pills_html(
     return _PI_PILLS_NAV_RE.sub(replace_nav, html_doc, count=1)
 
 
+def inject_no_active_pi_html(
+    html_doc: str, *, active_pi: PIBlock | None
+) -> str:
+    """Surface the between-PI state without changing the locked renderer."""
+    label = '<span class="pi-status">No active PI.</span>'
+    if active_pi is not None or label in html_doc:
+        return html_doc
+    return _PI_PILLS_NAV_RE.sub(lambda match: match.group(0) + label, html_doc, count=1)
+
+
 # ---------------------------------------------------------------------------- #
 # SDD-036: Lifecycle pipeline + four-card docs row + reorder control.
 #
@@ -1293,6 +1303,11 @@ def render_work_index(
     else:
         lines.append("_Backlog is empty._")
 
+    pi_alignment_check = (
+        "4. **Aligns with current PI objective**: the work supports the active PI."
+        if pi
+        else "4. **Between-PI authorization**: require owner-approved triage before scheduling; do not imply or create a successor PI."
+    )
     lines += [
         "",
         "---",
@@ -1305,7 +1320,7 @@ def render_work_index(
         "2. **No conflict with IN-FLIGHT**: the proposed work does not touch the",
         "   same files or contradict the design of any in-flight feature.",
         "3. **Not a duplicate of QUEUED**: the idea is not already in backlog.",
-        "4. **Aligns with current PI objective**: the work supports the active PI.",
+        pi_alignment_check,
         "",
         "If ANY check fails, surface as an escalation to the Executive Manager",
         "instead of proceeding. See `.github/skills/core/pre-work-check/SKILL.md`",

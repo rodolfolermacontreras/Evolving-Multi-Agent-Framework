@@ -119,6 +119,26 @@ class TestCurrentPi(unittest.TestCase):
             findings = staledoc_lint.scan(root)
             self.assertEqual(findings, [])
 
+    def test_current_pi_claim_is_flagged_when_no_pi_is_active(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = _seed_root(tmp, current_pi=8)
+            marker = (
+                root / "spec-driven-development" / "sprints" /
+                "PI-8" / "CURRENT_PI.md"
+            )
+            marker.write_text(
+                "---\nstatus: done\nsprint: PI-8\n---\n\n# PI-8\n",
+                encoding="utf-8",
+            )
+            _write(_doc(root, 2), "### Current PI: PI-8 (closed)\n")
+
+            findings = staledoc_lint.scan(root)
+
+            self.assertTrue(any(
+                f.kind == "pi" and "no active PI" in f.detail
+                for f in findings
+            ))
+
 
 class TestScope(unittest.TestCase):
     def test_non_session_start_doc_is_ignored(self) -> None:

@@ -166,14 +166,19 @@ def scan_file(
                         line.strip(),
                     ))
 
-        if current_pi is not None:
-            for match in _CURRENT_PI_RE.finditer(line):
-                if int(match.group(1)) != current_pi:
-                    findings.append(Finding(
-                        rel, lineno, "pi",
-                        f"says Current PI PI-{match.group(1)}; live is PI-{current_pi}",
-                        line.strip(),
-                    ))
+        for match in _CURRENT_PI_RE.finditer(line):
+            if current_pi is None:
+                findings.append(Finding(
+                    rel, lineno, "pi",
+                    f"says Current PI PI-{match.group(1)}; live has no active PI",
+                    line.strip(),
+                ))
+            elif int(match.group(1)) != current_pi:
+                findings.append(Finding(
+                    rel, lineno, "pi",
+                    f"says Current PI PI-{match.group(1)}; live is PI-{current_pi}",
+                    line.strip(),
+                ))
     return findings
 
 

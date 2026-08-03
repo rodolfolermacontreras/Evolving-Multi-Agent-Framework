@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Leadership brief for a governed AI delivery system that turns business intent into evidence-backed releases.">
+  <title>AI Delivery, With an Operating System | Leadership Brief</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f3f2ed;
+      --surface: #ffffff;
+      --ink: #17242d;
+      --navy: #17354f;
+      --muted: #52616b;
+      --line: #d7dddf;
+      --line-strong: #aebbc0;
+      --teal: #096c69;
+      --teal-soft: #e7f2f0;
+      --green: #34714a;
+      --green-soft: #e9f2eb;
+      --amber: #9a6618;
+      --amber-soft: #f8eed9;
+      --red: #9b3f38;
+      --red-soft: #f8e9e7;
+      --shadow: 0 16px 44px rgba(23, 36, 45, 0.09);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 16px;
+      letter-spacing: 0;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-width: 0;
+      background: var(--paper);
+    }
+
+    main {
+      width: min(1180px, calc(100% - 48px));
+      margin: 24px auto;
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    h1, h2, h3, p {
+      margin-top: 0;
+    }
+
+    h1, h2, h3 {
+      color: var(--navy);
+      line-height: 1.08;
+    }
+
+    h1 {
+      max-width: 800px;
+      margin-bottom: 24px;
+      font-size: clamp(3rem, 7vw, 5.6rem);
+      font-weight: 760;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin-bottom: 0;
+      font-size: clamp(1.75rem, 3.4vw, 2.75rem);
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin-bottom: 10px;
+      font-size: 1.08rem;
+      letter-spacing: 0;
+    }
+
+    p, li {
+      line-height: 1.58;
+    }
+
+    ul, ol {
+      margin-top: 0;
+    }
+
+    .masthead {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 16px 42px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--line);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .brand {
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    .hero {
+      position: relative;
+      padding: 74px 42px 44px;
+    }
+
+    .hero::before {
+      position: absolute;
+      top: 38px;
+      left: 42px;
+      width: 76px;
+      height: 4px;
+      background: var(--teal);
+      content: "";
+    }
+
+    .eyebrow, .section-kicker, .mini-label, .status-label, .horizon-label {
+      margin-bottom: 10px;
+      color: var(--teal);
+      font-size: 0.74rem;
+      font-weight: 760;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .hero-copy {
+      display: grid;
+      grid-template-columns: minmax(0, 1.9fr) minmax(260px, 0.75fr);
+      gap: 48px;
+      align-items: end;
+    }
+
+    .purpose {
+      max-width: 760px;
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 1.12rem;
+    }
+
+    .status-card {
+      padding: 24px;
+      background: var(--navy);
+      color: #ffffff;
+      border-radius: 6px;
+    }
+
+    .status-card h2 {
+      margin-bottom: 14px;
+      color: #ffffff;
+      font-size: 1.45rem;
+    }
+
+    .status-card p:last-child {
+      margin-bottom: 0;
+      color: #dce8ed;
+      font-size: 0.9rem;
+    }
+
+    .status-label {
+      color: #85d1ca;
+    }
+
+    .proof-strip {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      margin-top: 46px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .proof {
+      min-width: 0;
+      padding: 18px 14px;
+      border-right: 1px solid var(--line);
+    }
+
+    .proof:first-child {
+      padding-left: 0;
+    }
+
+    .proof:last-child {
+      border-right: 0;
+    }
+
+    .proof strong, .proof span {
+      display: block;
+    }
+
+    .proof strong {
+      color: var(--navy);
+      font-size: 1.14rem;
+    }
+
+    .proof span {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.72rem;
+    }
+
+    .section {
+      padding: 52px 42px;
+      border-top: 1px solid var(--line);
+    }
+
+    .band {
+      background: #f7f8f6;
+    }
+
+    .section-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(260px, 0.7fr);
+      gap: 56px;
+      align-items: end;
+      margin-bottom: 30px;
+    }
+
+    .section-header > p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .contrast-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr);
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .contrast-panel {
+      min-width: 0;
+      padding: 26px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+
+    .contrast-panel.before {
+      background: var(--red-soft);
+      border-color: #e4c5c1;
+    }
+
+    .contrast-panel.after {
+      background: var(--green-soft);
+      border-color: #c8dacd;
+    }
+
+    .contrast-panel ul {
+      margin-bottom: 0;
+      padding-left: 20px;
+      color: var(--muted);
+    }
+
+    .contrast-arrow, .pipeline-arrow {
+      display: grid;
+      place-items: center;
+      color: var(--teal);
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+
+    .diagram {
+      min-width: 0;
+      margin: 0;
+      padding: 24px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+
+    .diagram figcaption {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.5;
+    }
+
+    .governance-line {
+      margin: 22px 0 0;
+      padding: 14px 18px;
+      background: var(--teal-soft);
+      color: var(--navy);
+      border-left: 4px solid var(--teal);
+    }
+
+    .team-section {
+      background: #e9f0f1;
+      border-top-color: #c9d7da;
+    }
+
+    .team-section .section-header > p {
+      color: #455b65;
+    }
+
+    .team-portrait {
+      padding: 30px;
+      background: #f8fbfb;
+      border-color: #b9cbcf;
+    }
+
+    .team-org {
+      display: grid;
+      justify-items: center;
+      width: 100%;
+    }
+
+    .portrait-card {
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr);
+      gap: 16px;
+      align-items: center;
+      width: min(100%, 370px);
+      min-width: 0;
+      padding: 16px;
+      background: #ffffff;
+      border: 1px solid #c4d2d5;
+      border-radius: 6px;
+      box-shadow: 0 8px 22px rgba(23, 53, 79, 0.07);
+    }
+
+    .portrait-card.owner-card {
+      border-top: 4px solid var(--amber);
+    }
+
+    .portrait-card.executive-card {
+      width: min(100%, 450px);
+      padding: 20px;
+      background: var(--navy);
+      color: #ffffff;
+      border: 0;
+      box-shadow: 0 12px 28px rgba(23, 53, 79, 0.2);
+    }
+
+    .portrait-card h3 {
+      margin-bottom: 5px;
+      font-size: 1rem;
+    }
+
+    .executive-card h3 {
+      color: #ffffff;
+      font-size: 1.22rem;
+    }
+
+    .portrait-card p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.42;
+    }
+
+    .executive-card p {
+      color: #dce8ed;
+    }
+
+    .role-tag {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--teal);
+      font-size: 0.63rem;
+      font-weight: 750;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .executive-card .role-tag {
+      color: #8ad8d0;
+    }
+
+    .avatar {
+      position: relative;
+      display: grid;
+      place-items: end center;
+      width: 72px;
+      height: 82px;
+      overflow: hidden;
+      flex: 0 0 auto;
+      background: var(--avatar-bg, #dbe8ea);
+      border-radius: 6px;
+    }
+
+    .avatar::before {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      width: 30px;
+      height: 30px;
+      background: var(--avatar-ink, #30536b);
+      border-radius: 50%;
+      content: "";
+      transform: translateX(-50%);
+    }
+
+    .avatar::after {
+      position: absolute;
+      bottom: -18px;
+      left: 50%;
+      width: 62px;
+      height: 50px;
+      background: var(--avatar-ink, #30536b);
+      border-radius: 50% 50% 10px 10px;
+      content: "";
+      transform: translateX(-50%);
+    }
+
+    .avatar span {
+      position: relative;
+      z-index: 1;
+      margin-bottom: 6px;
+      color: #ffffff;
+      font-size: 0.64rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
+    .avatar.owner-avatar { --avatar-bg: #f4e6c8; --avatar-ink: #91601a; }
+    .avatar.executive-avatar { --avatar-bg: #c9e8e4; --avatar-ink: #08726e; }
+    .avatar.product-avatar { --avatar-bg: #dfe9d8; --avatar-ink: #4d7442; }
+    .avatar.architect-avatar { --avatar-bg: #dce7ef; --avatar-ink: #345c7c; }
+    .avatar.developer-avatar { --avatar-bg: #eee2d7; --avatar-ink: #815c3f; }
+    .avatar.designer-avatar { --avatar-bg: #eadfea; --avatar-ink: #73516f; }
+    .avatar.security-avatar { --avatar-bg: #eadedd; --avatar-ink: #803f3a; }
+
+    .team-connector {
+      position: relative;
+      width: 2px;
+      height: 34px;
+      background: var(--teal);
+    }
+
+    .team-connector::after {
+      position: absolute;
+      bottom: -1px;
+      left: 50%;
+      width: 9px;
+      height: 9px;
+      border-right: 2px solid var(--teal);
+      border-bottom: 2px solid var(--teal);
+      content: "";
+      transform: translateX(-50%) rotate(45deg);
+    }
+
+    .principal-connector {
+      position: relative;
+      width: 80%;
+      height: 36px;
+      border-top: 2px solid var(--teal);
+    }
+
+    .principal-connector::before {
+      position: absolute;
+      top: -36px;
+      left: 50%;
+      width: 2px;
+      height: 36px;
+      background: var(--teal);
+      content: "";
+      transform: translateX(-50%);
+    }
+
+    .principal-connector span {
+      position: absolute;
+      top: 0;
+      width: 2px;
+      height: 36px;
+      background: var(--teal);
+    }
+
+    .principal-connector span:nth-child(1) { left: 0; }
+    .principal-connector span:nth-child(2) { left: 25%; }
+    .principal-connector span:nth-child(3) { left: 50%; }
+    .principal-connector span:nth-child(4) { left: 75%; }
+    .principal-connector span:nth-child(5) { right: 0; }
+
+    .principal-team {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      width: 100%;
+    }
+
+    .principal-team .portrait-card {
+      grid-template-columns: 1fr;
+      grid-template-rows: 82px auto;
+      align-content: start;
+      justify-items: center;
+      width: 100%;
+      min-height: 225px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .principal-team .portrait-copy {
+      min-width: 0;
+    }
+
+    .worker-connector {
+      height: 32px;
+    }
+
+    .worker-layer {
+      width: 100%;
+      padding: 18px;
+      background: #e6efee;
+      border: 1px dashed #8eaaa9;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    .worker-layer h3 {
+      margin-bottom: 12px;
+    }
+
+    .worker-roles {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .worker-chip {
+      padding: 7px 11px;
+      background: #ffffff;
+      color: var(--navy);
+      border: 1px solid #b7c8ca;
+      border-radius: 4px;
+      font-size: 0.74rem;
+      font-weight: 680;
+    }
+
+    .worker-layer p {
+      max-width: 760px;
+      margin: 12px auto 0;
+      color: var(--muted);
+      font-size: 0.76rem;
+    }
+
+    .authority-caption {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1px;
+      margin-top: 18px;
+      overflow: hidden;
+      background: #c3d1d3;
+      border: 1px solid #c3d1d3;
+      border-radius: 4px;
+    }
+
+    .authority-caption span {
+      padding: 10px;
+      background: #ffffff;
+      color: var(--muted);
+      font-size: 0.69rem;
+      line-height: 1.4;
+    }
+
+    .authority-caption strong {
+      display: block;
+      color: var(--navy);
+    }
+
+    .pipeline {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr) 28px) minmax(0, 1fr);
+      align-items: stretch;
+    }
+
+    .stage {
+      display: flex;
+      gap: 12px;
+      min-width: 0;
+      min-height: 180px;
+      padding: 18px;
+      background: #f7f9f8;
+      border-top: 4px solid var(--teal);
+      border-radius: 4px;
+    }
+
+    .stage-number {
+      color: var(--teal);
+      font-size: 0.7rem;
+      font-weight: 800;
+    }
+
+    .stage p {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .gate {
+      display: inline-block;
+      padding: 5px 8px;
+      background: var(--teal-soft);
+      color: var(--teal);
+      border-radius: 3px;
+      font-size: 0.66rem;
+      font-weight: 760;
+      text-transform: uppercase;
+    }
+
+    .pillars, .benefit-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .pillar, .benefit {
+      min-width: 0;
+      min-height: 180px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--teal);
+      border-radius: 6px;
+    }
+
+    .pillar p:last-child, .benefit p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .example-grid {
+      display: grid;
+      grid-template-columns: minmax(280px, 0.72fr) minmax(0, 1.28fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .case-story {
+      display: grid;
+      gap: 10px;
+    }
+
+    .case-step {
+      padding: 16px;
+      background: #ffffff;
+      border-left: 4px solid var(--teal);
+    }
+
+    .case-step.risk {
+      border-left-color: var(--red);
+    }
+
+    .case-step.evidence {
+      border-left-color: var(--green);
+    }
+
+    .case-step h3 {
+      font-size: 0.98rem;
+    }
+
+    .case-step p:last-child {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .repo-shell {
+      padding: 18px;
+      background: #f3f6f5;
+      border: 2px solid var(--navy);
+      border-radius: 6px;
+    }
+
+    .repo-title, .boundary-legend {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      color: var(--navy);
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+
+    .repo-projects {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin: 16px 0 10px;
+    }
+
+    .repo-project {
+      display: grid;
+      place-items: center;
+      min-width: 0;
+      min-height: 156px;
+      padding: 14px;
+      background: #ffffff;
+      color: var(--muted);
+      border: 1px solid var(--line-strong);
+      border-radius: 4px;
+      text-align: center;
+    }
+
+    .repo-project.selected {
+      background: var(--teal-soft);
+      color: var(--navy);
+      border: 3px solid var(--teal);
+    }
+
+    .repo-project span {
+      display: block;
+      margin-top: 8px;
+      font-size: 0.72rem;
+      line-height: 1.45;
+    }
+
+    .root-files {
+      padding: 11px;
+      background: #ffffff;
+      color: var(--muted);
+      border: 1px solid var(--line-strong);
+      text-align: center;
+      font-size: 0.72rem;
+    }
+
+    .boundary-legend {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 14px;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .untouched-note {
+      margin: 18px 0 0;
+      padding: 12px;
+      background: var(--amber-soft);
+      color: #604716;
+      border-left: 4px solid var(--amber);
+      font-size: 0.76rem;
+    }
+
+    .secondary-ref {
+      white-space: nowrap;
+      color: var(--teal);
+      font-size: 0.82em;
+      font-weight: 700;
+    }
+
+    .timeline {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .timeline::before {
+      position: absolute;
+      top: 5px;
+      right: 0;
+      left: 0;
+      height: 2px;
+      background: var(--line-strong);
+      content: "";
+    }
+
+    .timeline li {
+      position: relative;
+      min-width: 0;
+      padding: 28px 14px 0 0;
+      color: var(--muted);
+      font-size: 0.72rem;
+    }
+
+    .timeline li::before {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 12px;
+      height: 12px;
+      background: #ffffff;
+      border: 3px solid var(--teal);
+      border-radius: 50%;
+      content: "";
+    }
+
+    .timeline li.current::before {
+      background: var(--teal);
+    }
+
+    .timeline time {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--navy);
+      font-weight: 760;
+    }
+
+    .roadmap-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .horizon {
+      min-width: 0;
+      min-height: 150px;
+      padding: 22px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+
+    .horizon.active {
+      background: var(--teal-soft);
+      border-color: #bad7d3;
+    }
+
+    .horizon.next {
+      grid-column: 2;
+    }
+
+    .horizon.skillsops, .horizon.explore {
+      grid-column: span 1;
+    }
+
+    .horizon p, .horizon li {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .horizon ul {
+      margin-bottom: 0;
+      padding-left: 18px;
+    }
+
+    .idea-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .idea-list div {
+      padding: 10px;
+      background: #f4f6f5;
+      color: var(--navy);
+      border-radius: 3px;
+      font-size: 0.75rem;
+    }
+
+    .skill-flow {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr) 16px) minmax(0, 1fr);
+      align-items: center;
+      margin-top: 16px;
+      color: var(--teal);
+      font-size: 0.7rem;
+      text-align: center;
+    }
+
+    .skill-flow span {
+      padding: 8px;
+      background: #f4f8f7;
+      border: 1px solid #c8d8d6;
+      border-radius: 3px;
+    }
+
+    .market-note {
+      margin-top: 16px;
+      padding: 18px 22px;
+      background: var(--navy);
+      color: #dce8ed;
+      border-radius: 6px;
+    }
+
+    .market-note p:last-child {
+      margin-bottom: 0;
+      font-size: 0.82rem;
+    }
+
+    .market-note .mini-label {
+      color: #85d1ca;
+    }
+
+    .ask {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.6fr);
+      gap: 36px;
+      padding: 44px 42px;
+      background: var(--teal-soft);
+      border-top: 1px solid #bcd5d2;
+    }
+
+    .ask h2 {
+      max-width: 700px;
+    }
+
+    .ask p {
+      color: var(--muted);
+    }
+
+    .ask-measures {
+      margin-bottom: 0;
+      padding-left: 20px;
+      color: var(--navy);
+      font-size: 0.84rem;
+    }
+
+    .ask-gate {
+      grid-column: 1 / -1;
+      margin: 0;
+      padding-top: 14px;
+      border-top: 1px solid #b6cecb;
+      font-size: 0.78rem;
+    }
+
+    .caveat {
+      display: grid;
+      grid-template-columns: 180px minmax(0, 1fr);
+      gap: 24px;
+      padding: 16px 42px;
+      background: var(--amber-soft);
+      color: #614916;
+      border-top: 1px solid #e6d4af;
+      font-size: 0.78rem;
+    }
+
+    .caveat p {
+      margin-bottom: 0;
+    }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 16px 42px;
+      color: var(--muted);
+      font-size: 0.74rem;
+    }
+
+    @media (max-width: 980px) {
+      .hero-copy, .section-header, .example-grid, .ask {
+        grid-template-columns: 1fr;
+      }
+
+      .principal-connector {
+        width: 50%;
+        height: 28px;
+        border-top: 0;
+      }
+
+      .principal-connector::before {
+        top: 0;
+        height: 28px;
+      }
+
+      .principal-connector span {
+        display: none;
+      }
+
+      .principal-team {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .principal-team .portrait-card {
+        grid-template-columns: 72px minmax(0, 1fr);
+        grid-template-rows: auto;
+        justify-items: start;
+        min-height: 142px;
+        text-align: left;
+      }
+
+      .authority-caption {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .proof-strip {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+      }
+
+      .principal-row, .pillars, .benefit-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .pipeline {
+        grid-template-columns: 1fr;
+      }
+
+      .pipeline-arrow {
+        width: auto;
+        height: 20px;
+        transform: rotate(90deg);
+      }
+
+      .stage {
+        min-height: 0;
+      }
+
+      .timeline {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 24px 0;
+      }
+
+      .timeline::before {
+        display: none;
+      }
+
+      .timeline li {
+        border-top: 2px solid var(--line);
+      }
+
+      .timeline li::before {
+        top: -7px;
+      }
+
+      .ask-gate {
+        grid-column: auto;
+      }
+    }
+
+    @media (max-width: 680px) {
+      main {
+        width: 100%;
+        margin: 0;
+        border-right: 0;
+        border-left: 0;
+        box-shadow: none;
+      }
+
+      .masthead, footer {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .masthead, .hero, .section, .ask, .caveat, footer {
+        padding-right: 20px;
+        padding-left: 20px;
+      }
+
+      .hero {
+        padding-top: 45px;
+      }
+
+      .hero::before {
+        left: 20px;
+      }
+
+      h1 {
+        font-size: 3rem;
+      }
+
+      .proof-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .proof, .proof:first-child {
+        padding-left: 12px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .proof:nth-child(even) {
+        border-right: 0;
+      }
+
+      .proof:last-child {
+        grid-column: 1 / -1;
+        border-bottom: 0;
+      }
+
+      .contrast-grid, .principal-row, .pillars, .repo-projects, .boundary-legend, .timeline, .benefit-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .contrast-arrow {
+        min-height: 44px;
+        transform: rotate(90deg);
+      }
+
+      .diagram {
+        padding: 18px 14px;
+      }
+
+      .team-portrait {
+        padding: 18px 14px;
+      }
+
+      .portrait-card, .portrait-card.executive-card {
+        grid-template-columns: 62px minmax(0, 1fr);
+        gap: 12px;
+        padding: 14px;
+      }
+
+      .avatar {
+        width: 62px;
+        height: 72px;
+      }
+
+      .avatar::after {
+        width: 54px;
+      }
+
+      .principal-team {
+        grid-template-columns: 1fr;
+      }
+
+      .principal-team .portrait-card {
+        grid-template-columns: 62px minmax(0, 1fr);
+        min-height: 0;
+        justify-items: start;
+        text-align: left;
+      }
+
+      .principal-team .portrait-card + .portrait-card {
+        position: relative;
+        margin-top: 10px;
+      }
+
+      .principal-team .portrait-card + .portrait-card::before {
+        position: absolute;
+        top: -11px;
+        left: 44px;
+        width: 2px;
+        height: 11px;
+        background: var(--teal);
+        content: "";
+      }
+
+      .authority-caption {
+        grid-template-columns: 1fr;
+      }
+
+      .worker-layer {
+        padding: 14px;
+      }
+
+      .principal {
+        min-height: 0;
+      }
+
+      .repo-project {
+        min-height: 94px;
+      }
+
+      .timeline {
+        gap: 18px;
+      }
+
+      .timeline li {
+        padding: 22px 0 0;
+      }
+
+      .horizon, .horizon.next, .horizon.skillsops, .horizon.explore {
+        grid-column: 1 / -1;
+      }
+
+      .idea-list, .skill-flow {
+        grid-template-columns: 1fr;
+      }
+
+      .skill-flow b {
+        transform: rotate(90deg);
+      }
+
+      .caveat {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+    }
+
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 9mm;
+      }
+
+      html, body {
+        background: #ffffff;
+        font-size: 8.3pt;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+
+      main {
+        width: 100%;
+        margin: 0;
+        overflow: visible;
+        border: 0;
+        box-shadow: none;
+      }
+
+      .masthead, footer {
+        padding: 6px 18px;
+      }
+
+      .hero {
+        padding: 24px 18px 14px;
+      }
+
+      .hero::before {
+        left: 18px;
+      }
+
+      h1 {
+        font-size: 37pt;
+      }
+
+      h2 {
+        font-size: 20pt;
+      }
+
+      .purpose {
+        font-size: 10.5pt;
+      }
+
+      .proof-strip {
+        margin-top: 18px;
+      }
+
+      .proof {
+        padding: 9px 10px;
+      }
+
+      .section {
+        padding: 18px;
+      }
+
+      .section-header {
+        margin-bottom: 12px;
+      }
+
+      .diagram, .contrast-panel, .pillar, .horizon, .benefit, .case-step {
+        break-inside: avoid;
+      }
+
+      .team-section {
+        break-before: page;
+        page-break-before: always;
+      }
+
+      .portrait-card, .worker-layer {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .team-section .section-header {
+        margin-bottom: 8px;
+      }
+
+      .team-portrait {
+        padding: 12px;
+      }
+
+      .portrait-card {
+        grid-template-columns: 44px minmax(0, 1fr);
+        gap: 8px;
+        padding: 7px;
+        box-shadow: none;
+      }
+
+      .portrait-card.executive-card {
+        width: min(100%, 390px);
+        padding: 8px;
+      }
+
+      .avatar {
+        width: 44px;
+        height: 50px;
+      }
+
+      .avatar::before {
+        top: 7px;
+        width: 19px;
+        height: 19px;
+      }
+
+      .avatar::after {
+        bottom: -13px;
+        width: 38px;
+        height: 34px;
+      }
+
+      .avatar span {
+        margin-bottom: 3px;
+        font-size: 5.5pt;
+      }
+
+      .portrait-card h3, .executive-card h3 {
+        margin-bottom: 2px;
+        font-size: 7.6pt;
+      }
+
+      .portrait-card p {
+        font-size: 6.2pt;
+        line-height: 1.25;
+      }
+
+      .role-tag {
+        margin-bottom: 1px;
+        font-size: 5pt;
+      }
+
+      .team-connector {
+        height: 17px;
+      }
+
+      .principal-connector {
+        height: 18px;
+      }
+
+      .principal-connector::before {
+        top: -18px;
+        height: 18px;
+      }
+
+      .principal-connector span {
+        height: 18px;
+      }
+
+      .principal-team {
+        gap: 6px;
+      }
+
+      .principal-team .portrait-card {
+        grid-template-rows: 50px auto;
+        min-height: 116px;
+        padding: 7px;
+      }
+
+      .worker-connector {
+        height: 16px;
+      }
+
+      .worker-layer {
+        padding: 8px;
+      }
+
+      .worker-layer h3 {
+        margin-bottom: 5px;
+        font-size: 7.5pt;
+      }
+
+      .worker-chip {
+        padding: 3px 6px;
+        font-size: 5.8pt;
+      }
+
+      .worker-layer p, .authority-caption span, .team-portrait figcaption {
+        font-size: 5.8pt;
+      }
+
+      .authority-caption {
+        margin-top: 7px;
+      }
+
+      .authority-caption span {
+        padding: 5px;
+      }
+
+      .print-page {
+        break-before: page;
+        page-break-before: always;
+      }
+
+      .org-node {
+        min-height: 42px;
+        padding: 7px 12px;
+      }
+
+      .principal {
+        min-height: 62px;
+        padding: 8px;
+      }
+
+      .stage {
+        min-height: 112px;
+        padding: 10px;
+      }
+
+      .pillar {
+        min-height: 108px;
+        padding: 12px;
+      }
+
+      .repo-project {
+        min-height: 112px;
+      }
+
+      .timeline {
+        margin-top: 20px;
+      }
+
+      .timeline li, .horizon p, .horizon li, .pillar p, .benefit p, .case-step p {
+        font-size: 7.2pt;
+      }
+
+      .ask {
+        padding: 22px 18px;
+      }
+
+      .caveat {
+        padding: 9px 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="masthead">
+      <span class="brand">Evolving Multi-Agent Framework</span>
+      <span>A Governed AI Delivery System | Leadership brief | July 31, 2026</span>
+    </header>
+
+    <section class="hero" aria-labelledby="brief-title">
+      <p class="eyebrow">AI Delivery, With an Operating System</p>
+      <div class="hero-copy">
+        <div>
+          <h1 id="brief-title">One accountable leader. An AI team that ships with proof.</h1>
+          <p class="purpose">Turn a business request into an approved contract, coordinated implementation, independent review, and release evidence. Specialized AI roles do the work; the human owner retains scope, risk, and release authority.</p>
+        </div>
+        <aside class="status-card" aria-labelledby="now-building-title">
+          <p class="status-label">Now building</p>
+          <h2 id="now-building-title">Project-Safe Monorepo Adoption</h2>
+          <p>Architecture, specification, plan, and tasks are complete. Implementation is underway only in disposable fixtures. <span class="secondary-ref">SDD-068</span></p>
+        </aside>
+      </div>
+
+      <div class="proof-strip" aria-label="Delivery proof at PI-9 close and current operating model">
+        <div class="proof"><strong>9</strong><span>product increments closed</span></div>
+        <div class="proof"><strong>40</strong><span>delivered feature packages</span></div>
+        <div class="proof"><strong>1,100+</strong><span>automated tests</span></div>
+        <div class="proof"><strong>Windows + Linux</strong><span>public validation evidence</span></div>
+        <div class="proof"><strong>One human</strong><span>entry point and release authority</span></div>
+      </div>
+    </section>
+
+    <section class="section band" aria-labelledby="problem-title">
+      <div class="section-header">
+        <div><p class="section-kicker">The leadership problem</p><h2 id="problem-title">AI output is easy. Accountable delivery is not.</h2></div>
+        <p>Fast individual sessions do not solve organizational risk: unclear scope, conflicting changes, lost decisions, inconsistent execution, and no defensible evidence that a result is ready.</p>
+      </div>
+      <div class="contrast-grid" aria-label="Before and after adopting governed AI delivery">
+        <article class="contrast-panel before"><p class="mini-label">Before | Disconnected AI assistance</p><h3>Speed without a control plane</h3><ul><li>Intent changes between chats and contributors.</li><li>Parallel work collides or silently expands scope.</li><li>Reviews arrive late, after rework is expensive.</li><li>Evidence disappears with session history.</li></ul></article>
+        <div class="contrast-arrow" aria-hidden="true">→</div>
+        <article class="contrast-panel after"><p class="mini-label">After | Governed AI delivery</p><h3>Clarity before code, proof before release</h3><ul><li>Business outcomes become approved acceptance contracts.</li><li>Specialists work inside explicit authority and file boundaries.</li><li>Independent review challenges requirements, quality, and security.</li><li>Versioned evidence supports a human release decision.</li></ul></article>
+      </div>
+    </section>
+
+    <section class="section team-section" aria-labelledby="operating-model-title">
+      <div class="section-header">
+        <div><p class="section-kicker">The operating model</p><h2 id="operating-model-title">Meet the AI Delivery Leadership Team</h2></div>
+        <p>One accountable human works through a single executive front door. Each principal owns decisions in a defined domain; bounded workers execute narrow assignments without inheriting release authority.</p>
+      </div>
+      <figure class="diagram team-portrait" aria-labelledby="operating-model-caption">
+        <div class="team-org" role="group" aria-label="AI delivery organization led by one accountable human, one Principal Executive Manager, five domain principals, and a bounded worker team.">
+          <article class="portrait-card owner-card">
+            <div class="avatar owner-avatar" aria-hidden="true"><span>HA</span></div>
+            <div class="portrait-copy"><span class="role-tag">Final authority</span><h3>Human Sponsor / Accountable Owner</h3><p>Sets the outcome, approves major scope, accepts consequential risk, and authorizes release.</p></div>
+          </article>
+          <div class="team-connector" aria-hidden="true"></div>
+          <article class="portrait-card executive-card">
+            <div class="avatar executive-avatar" aria-hidden="true"><span>EM</span></div>
+            <div class="portrait-copy"><span class="role-tag">Single front door</span><h3>Principal Executive Manager</h3><p>Receives the human request, routes work and decisions, coordinates principals, synthesizes status, and escalates what needs human judgment.</p></div>
+          </article>
+          <div class="principal-connector" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="principal-team" aria-label="Five domain principals coordinated by the Principal Executive Manager">
+            <article class="portrait-card">
+              <div class="avatar product-avatar" aria-hidden="true"><span>PM</span></div>
+              <div class="portrait-copy"><span class="role-tag">Principal</span><h3>Product Manager</h3><p>Chooses value, priorities, and acceptance outcomes.</p></div>
+            </article>
+            <article class="portrait-card">
+              <div class="avatar architect-avatar" aria-hidden="true"><span>AR</span></div>
+              <div class="portrait-copy"><span class="role-tag">Principal</span><h3>Architect</h3><p>Designs boundaries, risk controls, and technical decisions.</p></div>
+            </article>
+            <article class="portrait-card">
+              <div class="avatar developer-avatar" aria-hidden="true"><span>TL</span></div>
+              <div class="portrait-copy"><span class="role-tag">Principal</span><h3>Software Developer / Tech Lead</h3><p>Decomposes work, dispatches specialists, and integrates delivery.</p></div>
+            </article>
+            <article class="portrait-card">
+              <div class="avatar designer-avatar" aria-hidden="true"><span>UI</span></div>
+              <div class="portrait-copy"><span class="role-tag">Principal</span><h3>UI Designer</h3><p>Owns usability, accessibility, and visual coherence.</p></div>
+            </article>
+            <article class="portrait-card">
+              <div class="avatar security-avatar" aria-hidden="true"><span>CS</span></div>
+              <div class="portrait-copy"><span class="role-tag">Principal</span><h3>Cloud Security Architect</h3><p>Challenges identity, isolation, secrets, and deployment risk.</p></div>
+            </article>
+          </div>
+          <div class="team-connector worker-connector" aria-hidden="true"></div>
+          <div class="worker-layer">
+            <h3>Bounded Worker Team</h3>
+            <div class="worker-roles" aria-label="Worker roles"><span class="worker-chip">Developer</span><span class="worker-chip">QA Engineer</span><span class="worker-chip">UX Designer</span><span class="worker-chip">Data Scientist</span><span class="worker-chip">Earned Specialists</span></div>
+            <p>Workers take narrow assignments with explicit boundaries, produce candidate changes and evidence, and do not own major scope or final release authority.</p>
+          </div>
+        </div>
+        <div class="authority-caption" aria-label="Authority model summary"><span><strong>Executive Manager</strong>Single human-facing entry point</span><span><strong>Principals</strong>Own decisions by domain</span><span><strong>Workers</strong>Execute bounded tasks</span><span><strong>Human owner</strong>Approves major scope and release</span></div>
+        <figcaption id="operating-model-caption">The Executive Manager is the single human-facing entry point; principals own decisions by domain; workers execute bounded tasks; the human approves major scope and release decisions.</figcaption>
+      </figure>
+      <p class="governance-line"><strong>Governance in one sentence:</strong> no implementation begins without a defined outcome and proof contract, and no host mutation or release occurs without human authority.</p>
+    </section>
+
+    <section class="section band" aria-labelledby="value-flow-title">
+      <div class="section-header">
+        <div><p class="section-kicker">How value moves</p><h2 id="value-flow-title">Four stages. Three visible gates. One accountable decision.</h2></div>
+        <p>Speed comes from freezing the success criteria early, then letting specialists execute against a stable bar instead of renegotiating quality after the work is done.</p>
+      </div>
+      <figure class="diagram" aria-labelledby="pipeline-caption">
+        <div class="pipeline" role="img" aria-label="Business outcome moves through a human scope gate to an approved contract, through an evidence gate to specialized execution, and through an independent review and human release gate to an evidence-backed release.">
+          <div class="stage"><span class="stage-number">01</span><div><h3>Business outcome</h3><p>Clarify the value, owner, urgency, and real constraints.</p><span class="gate">Human scope gate</span></div></div><div class="pipeline-arrow" aria-hidden="true">→</div>
+          <div class="stage"><span class="stage-number">02</span><div><h3>Approved contract</h3><p>Freeze requirements, boundaries, risks, and how success will be proved.</p><span class="gate">Evidence gate</span></div></div><div class="pipeline-arrow" aria-hidden="true">→</div>
+          <div class="stage"><span class="stage-number">03</span><div><h3>Specialized execution</h3><p>Dispatch bounded tasks, test first, integrate deliberately.</p><span class="gate">Independent review</span></div></div><div class="pipeline-arrow" aria-hidden="true">→</div>
+          <div class="stage"><span class="stage-number">04</span><div><h3>Evidence-backed release</h3><p>Bind tests, review, CI, and package identity to a human disposition.</p><span class="gate">Human release gate</span></div></div>
+        </div>
+        <figcaption id="pipeline-caption">The delivery bar is agreed before implementation; every later transition adds evidence rather than weakening the contract.</figcaption>
+      </figure>
+    </section>
+
+    <section class="section" aria-labelledby="portfolio-title">
+      <div class="section-header">
+        <div><p class="section-kicker">Delivered portfolio</p><h2 id="portfolio-title">Months of work, assembled into a reusable control plane</h2></div>
+        <p>Forty delivered feature packages now work together as an operating system for repeatable AI-assisted delivery, not a collection of disconnected automation scripts.</p>
+      </div>
+      <div class="pillars">
+        <article class="pillar"><p class="mini-label">01 | Decide</p><h3>Clarity Before Code</h3><p>Ideas become ranked outcomes, acceptance criteria, explicit decisions, and owner-visible gates before implementation begins.</p></article>
+        <article class="pillar"><p class="mini-label">02 | Organize</p><h3>A Team Without the Org Chart</h3><p>Product, architecture, engineering, quality, security, and worker roles collaborate through clear authority boundaries.</p></article>
+        <article class="pillar"><p class="mini-label">03 | Execute</p><h3>Parallel, Not Chaotic</h3><p>Atomic tasks, conflict detection, worktrees, and bounded dispatch increase throughput while protecting shared code.</p></article>
+        <article class="pillar"><p class="mini-label">04 | Prove</p><h3>Evidence Is the Product</h3><p>Frozen validation, TDD chronology, two-stage review, security findings, and public CI create reproducible confidence.</p></article>
+        <article class="pillar"><p class="mini-label">05 | See</p><h3>Truth in the Window</h3><p>Dashboards, work indexes, ledgers, readiness checks, and stale-document detection keep leadership views aligned with reality.</p></article>
+        <article class="pillar"><p class="mini-label">06 | Adopt</p><h3>Meet Projects Where They Are</h3><p>Greenfield and brownfield workflows preserve host identity, conventions, state, and rollback paths rather than imposing a clean-room rewrite.</p></article>
+      </div>
+    </section>
+
+    <section class="section band print-page" aria-labelledby="example-title">
+      <div class="section-header">
+        <div><p class="section-kicker">Concrete example</p><h2 id="example-title">Make Second Brain safe inside a shared Microsoft repository.</h2></div>
+        <p>A simple request exposed a leadership-level boundary: adopting useful process into one project must not grant authority over the repository root or neighboring teams' work.</p>
+      </div>
+      <div class="example-grid">
+        <div class="case-story" aria-label="Request, risk, framework response, evidence, and current boundary">
+          <article class="case-step"><p class="mini-label">The request</p><h3>Adopt the framework into my Second Brain project.</h3><p>One selected project sits inside a larger Microsoft monorepo.</p></article>
+          <article class="case-step risk"><p class="mini-label">The risk</p><h3>A root-level installer could cross team boundaries.</h3><p>Shared configuration, sibling projects, links, or path replacement could be changed unintentionally.</p></article>
+          <article class="case-step"><p class="mini-label">The framework response</p><h3>Turn intent into an enforceable management contract.</h3><p>Identify repository and project separately, allow project-relative writes only, fail closed on identity drift, and require an exact authorization receipt.</p></article>
+          <article class="case-step evidence"><p class="mini-label">The evidence</p><h3>Prove the surroundings never changed.</h3><p>Before-and-after hashes, topology checks, transaction journals, rollback evidence, Windows/POSIX fixtures, security review, and public CI.</p></article>
+          <article class="case-step"><p class="mini-label">Current boundary</p><h3>Design complete; implementation gated.</h3><p><strong>4 of 58</strong> formal checks and <strong>1 of 29</strong> tasks evidenced. Work remains confined to disposable fixtures.</p></article>
+        </div>
+        <figure class="diagram" aria-labelledby="boundary-caption">
+          <div class="repo-shell" role="img" aria-label="A shared repository root contains sibling project A, the selected Second Brain project, and sibling project B. Only Second Brain is within the managed mutation boundary. Root files and sibling projects remain byte-identical.">
+            <div class="repo-title"><span>Shared Microsoft repository root</span><span>Read-only identity and Git evidence</span></div>
+            <div class="repo-projects"><div class="repo-project"><div><strong>Sibling Project A</strong><span>Outside managed boundary<br>Byte-identical</span></div></div><div class="repo-project selected"><div><strong>Selected Project<br>Second Brain</strong><span>Only authorized mutation boundary<br>Project-relative changes</span></div></div><div class="repo-project"><div><strong>Sibling Project B</strong><span>Outside managed boundary<br>Byte-identical</span></div></div></div>
+            <div class="root-files"><strong>Repository-shared files</strong> | outside managed boundary | byte-identical</div>
+            <div class="boundary-legend"><span><strong>Inside boundary:</strong> exact selected project only</span><span><strong>Outside boundary:</strong> root and siblings are immutable</span></div>
+          </div>
+          <figcaption id="boundary-caption">Project-level adoption without repository-level authority. Any identity, path, topology, or surroundings change stops or rolls back the operation.</figcaption>
+          <p class="untouched-note"><strong>Current fact:</strong> the real Microsoft host has not been changed and remains inaccessible to this implementation phase. Real-host access requires separate owner approval after all isolation gates pass.</p>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="timeline-title">
+      <div class="section-header">
+        <div><p class="section-kicker">The build story</p><h2 id="timeline-title">From a design exercise to an operating system in twelve weeks</h2></div>
+        <p>The framework was built through its own governed lifecycle: every new capability had to improve delivery while preserving human control, evidence, and portability.</p>
+      </div>
+      <ol class="timeline">
+        <li><time datetime="2026-05-07">May 7</time>Dual-model planning established the product vision and control principles.</li><li><time datetime="2026-05-12">May 12</time>Extracted into a standalone framework; first lifecycle pilot shipped.</li><li><time datetime="2026-05-16">May 16</time>First operational tools, live dashboard, and earned specialist role shipped.</li><li><time datetime="2026-06">June</time>Adoption, governance, user gates, dashboard, and fleet operations matured.</li><li><time datetime="2026-07-07">July 7</time>Maintainability work reduced coupling and made the toolset easier to evolve.</li><li><time datetime="2026-07-09">July 9</time>Truth and decision clarity hardened leadership status and evidence discipline.</li><li><time datetime="2026-07-30">July 30</time>Ninth increment closed with 1,116 tests passing and safe brownfield adoption delivered.</li><li class="current"><time datetime="2026-07-31">July 31</time>Project-safe monorepo adoption entered controlled fixture implementation.</li>
+      </ol>
+    </section>
+
+    <section class="section band print-page" aria-labelledby="roadmap-title">
+      <div class="section-header">
+        <div><p class="section-kicker">Innovation horizon</p><h2 id="roadmap-title">A disciplined portfolio, not an autonomy race</h2></div>
+        <p>Only one feature is scheduled. The remaining ideas are options with explicit maturity labels, waiting for demonstrated need, capacity, and human approval.</p>
+      </div>
+      <div class="roadmap-grid">
+        <article class="horizon active"><p class="horizon-label">Active / Now</p><h3>Project-Safe Monorepo Adoption</h3><p>Change only an explicitly selected nested project while proving the root and sibling projects remain byte-identical. <span class="secondary-ref">SDD-068</span></p></article>
+        <article class="horizon next"><p class="horizon-label">Next candidates | Unscheduled</p><div class="idea-list"><div>Operational Memory Hygiene <span class="secondary-ref">SDD-060</span></div><div>Skill Trust Labels <span class="secondary-ref">SDD-061</span></div><div>Safe Framework Upgrades <span class="secondary-ref">SDD-062</span></div></div></article>
+        <article class="horizon skillsops"><p class="horizon-label">Strategic experiment | Registered, unscheduled</p><h3>SkillsOps: Evidence-Gated Skill Evolution</h3><p>When a skill demonstrably regresses, benchmark a bounded change against frozen, leakage-resistant tests. An independent validator scores both versions; a human chooses <strong>PROMOTE</strong>, <strong>RETAIN</strong>, or <strong>REJECT</strong>. There is no automatic self-modification or activation. <span class="secondary-ref">SDD-059</span></p><div class="skill-flow" aria-label="SkillsOps evaluation flow"><span>Frozen baseline</span><b aria-hidden="true">→</b><span>Bounded skill change</span><b aria-hidden="true">→</b><span>Independent score</span><b aria-hidden="true">→</b><span>Human promotion</span></div></article>
+        <article class="horizon explore"><p class="horizon-label">Explore when needed | Unscheduled</p><ul><li>Portable Process State <span class="secondary-ref">SDD-063</span></li><li>Privacy Scrubbing <span class="secondary-ref">SDD-064</span></li><li>Parallel Decision Inbox <span class="secondary-ref">SDD-065</span></li><li>Earned Specialist Memory <span class="secondary-ref">SDD-066</span></li><li>Supervised Watch Mode <span class="secondary-ref">SDD-067</span></li></ul></article>
+      </div>
+      <aside class="market-note" aria-labelledby="market-title"><p class="mini-label" id="market-title">Learning from the market</p><p><strong>Squad is the closest peer.</strong> We selectively captured high-return, net-new patterns such as serial requirements drafting, cross-feature deduplication, environment specialization, model-upgrade discipline, and explicit cost-versus-benefit analysis. We rejected full autonomy and TypeScript-first choices that conflict with human control and the framework's portable Markdown/stdlib approach. Squad-derived ideas <span class="secondary-ref">SDD-060 through SDD-067</span> are backlog concepts, not shipped claims.</p></aside>
+    </section>
+
+    <section class="section" aria-labelledby="benefits-title">
+      <div class="section-header">
+        <div><p class="section-kicker">Why leadership should care</p><h2 id="benefits-title">More speed you can defend</h2></div>
+        <p>The advantage is not simply more code. It is faster organizational learning with boundaries, retained evidence, and an explicit human decision at every consequential transition.</p>
+      </div>
+      <div class="benefit-grid">
+        <article class="benefit"><h3>Faster ramp-up</h3><p>New contributors inherit context, roles, operating methods, and current truth instead of reconstructing them from chat history.</p></article><article class="benefit"><h3>Auditable decisions</h3><p>Scope, tradeoffs, approvals, findings, and package identity remain reviewable after the session ends.</p></article><article class="benefit"><h3>Lower rework</h3><p>Ambiguity and proof gaps are resolved before implementation makes them expensive.</p></article><article class="benefit"><h3>Safer parallelism</h3><p>Bounded tasks, file ownership, and conflict checks increase throughput without surrendering integration control.</p></article><article class="benefit"><h3>Portable repeatability</h3><p>Markdown contracts, stdlib tools, and host-aware adoption let the system travel across stacks and repositories.</p></article><article class="benefit"><h3>Bounded risk</h3><p>Fail-closed controls and human gates keep experimentation separate from production authority.</p></article>
+      </div>
+    </section>
+
+    <section class="ask" aria-labelledby="ask-title">
+      <div><p class="section-kicker">The leadership ask</p><h2 id="ask-title">Sponsor one governed pilot after monorepo isolation gates pass.</h2><p>Select a suitable non-production project, one accountable owner, and one meaningful feature. Run the full lifecycle, then make an explicit adopt, adapt, or stop decision.</p></div>
+      <ul class="ask-measures" aria-label="Pilot success measures"><li>Cycle time from request to reviewed result</li><li>Defects and avoidable rework</li><li>Evidence completeness and reproducibility</li><li>Onboarding effort for a second reviewer</li></ul>
+      <p class="ask-gate"><strong>Approval boundary:</strong> this brief does not authorize real-host access, mutation, deployment, or a broad platform commitment. Any real Microsoft host pilot requires separate owner approval after the current isolation contract is fully validated.</p>
+    </section>
+
+    <aside class="caveat" aria-label="Important product caveat"><strong>Deliberate discipline</strong><p>This is a governance and delivery system, not a chatbot or AI runtime. Its up-front discipline is intentional: clarify value early, constrain execution, preserve evidence, and keep consequential decisions human.</p></aside>
+    <footer><span>Evolving Multi-Agent Framework | A Governed AI Delivery System</span><span>Evidence snapshot: July 31, 2026 | PI-9 closed July 30; PI-10 active</span></footer>
+  </main>
+</body>
+</html>

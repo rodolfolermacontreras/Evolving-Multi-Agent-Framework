@@ -1,92 +1,75 @@
 # Executive State
 
-Generated date: 2026-07-30
+Generated date: 2026-08-06
 Current PI: No active PI
 Active sprint: Symbolic -- AI fleet compresses wall-clock time
-Active focus: Finish implementation of 'azure-decommission'
+Active focus: No feature scheduled
 
 ## Spec Pipeline
 
 | Feature | Stage | Status | Notes |
 |---------|-------|--------|-------|
-| fleet-ledger | DONE | done | validation required-complete, RETRO present |
-| fleet-bridge-dashboard | CLARIFY | - | DESIGN.md only (pre-spec design exploration) |
-| cloud-dashboard | CLARIFY | - | DESIGN.md only (pre-spec design exploration) |
-| dashboard-about-and-freshness | DONE | done | validation required-complete, RETRO present |
-| fleet | DONE | done | validation required-complete, RETRO present |
-| fleet-cli | DONE | done | validation required-complete, RETRO present |
-| qa-cli | DONE | done | validation required-complete, RETRO present |
-| retro-cli | DONE | done | validation required-complete, RETRO present |
-| retro-closure | TASKS | - | tasks.md present |
-| schema-lint | DONE | done | validation required-complete, RETRO present |
-| state-builder | DONE | done | validation required-complete, RETRO present |
-| state-dashboard | DONE | done | validation required-complete, RETRO present |
-| day-to-day-brownfield-bootstrap | DONE | done | validation required-complete, RETRO present |
-| live-ui-v2 | DONE | done | validation required-complete, RETRO present |
-| principal-agent-hygiene | DONE | done | Status: done (no validation file) |
-| friction-analysis-template | DONE | done | validation required-complete |
-| filesystem-data-contracts | DONE | done | validation required-complete |
-| symlink-portability | DONE | done | validation required-complete |
-| cross-feature-dedup | REVIEW | done | Status: done but validation required items unchecked |
-| host-gitignore-protection | DONE | done | validation required-complete |
-| serial-clarify-spec-gate | REVIEW | done | Status: done but validation required items unchecked |
-| ado-github-bridge | DONE | done | validation required-complete |
-| azure-decommission | IMPLEMENT | active | validation required 33% (4/12) |
-| end-of-session-self-review | DONE | done | validation required-complete |
-| first-class-user-gates | DONE | done | validation required-complete |
-| model-upgrade-discipline | DONE | done | validation required-complete |
-| stakeholder-pressure-defense | DONE | done | validation required-complete |
-| sprint-6-completion | DONE | done | validation required-complete, RETRO present |
-| ui-lifecycle-variant | DONE | done | validation required-complete, RETRO present |
-| state-builder-fixes | DONE | done | validation required-complete |
+| fleet-ledger | DONE | done | explicit completed terminal disposition |
+| cloud-dashboard | DONE | done | explicit completed terminal disposition |
+| dashboard-about-and-freshness | DONE | done | explicit completed terminal disposition |
+| fleet | DONE | done | explicit completed terminal disposition |
+| fleet-cli | DONE | done | explicit completed terminal disposition |
+| qa-cli | DONE | done | explicit completed terminal disposition |
+| retro-cli | DONE | done | explicit completed terminal disposition |
+| retro-closure | DONE | done | explicit completed terminal disposition |
+| schema-lint | DONE | done | explicit completed terminal disposition |
+| state-builder | DONE | done | explicit completed terminal disposition |
+| state-dashboard | DONE | done | explicit completed terminal disposition |
+| day-to-day-brownfield-bootstrap | DONE | done | explicit completed terminal disposition |
+| live-ui-v2 | DONE | done | explicit completed terminal disposition |
+| principal-agent-hygiene | DONE | done | explicit completed terminal disposition |
+| friction-analysis-template | DONE | done | explicit completed terminal disposition |
+| filesystem-data-contracts | DONE | done | explicit completed terminal disposition |
+| symlink-portability | DONE | done | explicit completed terminal disposition |
+| cross-feature-dedup | DONE | done | explicit completed terminal disposition |
+| host-gitignore-protection | DONE | done | explicit completed terminal disposition |
+| serial-clarify-spec-gate | DONE | done | explicit completed terminal disposition |
+| ado-github-bridge | DONE | done | explicit completed terminal disposition |
+| end-of-session-self-review | DONE | done | explicit completed terminal disposition |
+| first-class-user-gates | DONE | done | explicit completed terminal disposition |
+| model-upgrade-discipline | DONE | done | explicit completed terminal disposition |
+| stakeholder-pressure-defense | DONE | done | explicit completed terminal disposition |
+| sprint-6-completion | DONE | done | explicit completed terminal disposition |
+| ui-lifecycle-variant | DONE | done | explicit completed terminal disposition |
+| state-builder-fixes | DONE | done | explicit completed terminal disposition |
 | dashboard-dispatches-health-pills | DONE | active | validation required-complete |
 | dashboard-lifecycle-reorder | DONE | active | validation required-complete |
-| d2-proof-config-cutover | BACKLOG | - | directory exists, no artifacts yet |
-| detach-clone-and-run-hardening | DONE | done | validation required-complete |
-| make-promises-true | DONE | done | validation required-complete |
-| plain-language-comms-discipline | DONE | done | validation required-complete |
-| sdd-047-de-author | DONE | done | validation required-complete |
-| sdd-048-maintainability | DONE | done | validation required-complete |
-| two-tier-executive-manager | DONE | done | validation required-complete |
-| dashboard-truth | DONE | done | validation required-complete, RETRO present |
-| decision-request-format | DONE | done | validation required-complete |
-| doc-freshness-staledoc-guard | DONE | done | validation required-complete |
-| roadmap-repair-status-backfill | DONE | done | validation required-complete |
-| file-overlap-detector | DONE | done | validation required-complete |
-| reorder-backend-reoptimization | DONE | done | validation required-complete |
+| d2-proof-config-cutover | DONE | done | explicit completed terminal disposition |
+| detach-clone-and-run-hardening | DONE | done | explicit completed terminal disposition |
+| make-promises-true | DONE | done | explicit completed terminal disposition |
+| plain-language-comms-discipline | DONE | done | explicit completed terminal disposition |
+| sdd-047-de-author | DONE | done | explicit completed terminal disposition |
+| sdd-048-maintainability | DONE | done | explicit completed terminal disposition |
+| two-tier-executive-manager | DONE | done | explicit completed terminal disposition |
+| dashboard-truth | DONE | done | explicit completed terminal disposition |
+| decision-request-format | DONE | done | explicit completed terminal disposition |
+| doc-freshness-staledoc-guard | DONE | done | explicit completed terminal disposition |
+| roadmap-repair-status-backfill | DONE | done | explicit completed terminal disposition |
+| file-overlap-detector | DONE | done | explicit completed terminal disposition |
+| reorder-backend-reoptimization | DONE | done | explicit completed terminal disposition |
 | fresh-checkout-ci-doctor-repair | DONE | active | validation required-complete |
-| sprint-23-dashboard-polish | DONE | done | validation required-complete, RETRO present |
-| brownfield-bootstrap-correctness | DONE | done | validation required-complete |
+| sprint-23-dashboard-polish | DONE | done | explicit completed terminal disposition |
+| brownfield-bootstrap-correctness | DONE | done | explicit completed terminal disposition |
+| truth-reconciliation-maintenance | REVIEW | review | owning artifact review veto |
 
 ## Sprint Plan
 
-### PI-2 Sprint A
+### Carried forward after PI-5 close
 
 | ID | Title | Priority | RICE | Status |
 |----|-------|----------|------|--------|
-| SDD-002 | state_builder.py -- auto-generate exec/state.md from ledger and artifacts | P2 | 10.8 | Approved |
-| SDD-003 | fleet.py -- dispatch packets and ledger writes | P2 | 6.4 | Approved |
+| SDD-034 | Dedup heuristic upgrade -- content-shingle for spec.md problem statements (replaces title-shingle only) | P3 | -- | Filed 2026-06-08 via Executive Manager. Surfaced by F-10 pass 1 Article XI live contention test: SDD-020 dedup scan returned 100% false-positive overlaps (6 SOFT/ADVISORY all title-shingle artifacts); real prior art (`2026-05-26-live-ui-v2/`, `2026-05-16-state-dashboard/`, `2026-05-16-dashboard-about-and-freshness/`) was found manually by PM+Architect, not the scanner. Upgrade dedup heuristic to also consider Problem Statement / Goal section content-shingles, not just titles. Not pulled into Sprint 8, Sprint 9, or the PI-5 close stamp; carried forward because Sprint 8 primary SDD-022 + SDD-015 and Sprint 9 primary SDD-021 + SDD-023 + SDD-025 consumed their close criteria. |
 
-### PI-2 Sprint B
-
-| ID | Title | Priority | RICE | Status |
-|----|-------|----------|------|--------|
-| SDD-004 | qa.py -- two-stage review automation | P2 | 4.8 | Approved |
-| SDD-005 | retro.py -- sprint retro generator | P2 | 9.6 | Approved |
-| SDD-006 | Schema validation lint for agent/skill/prompt YAML frontmatter | P2 | 6.3 | Approved |
-
-### PI-3 Sprint A (proposed)
+### DEFERRED
 
 | ID | Title | Priority | RICE | Status |
 |----|-------|----------|------|--------|
-| SDD-009 | Dashboard data-freshness -- live values reflect new commits/ledger writes without manual redeploy | P2 | 4.0 | Triaged 2026-05-16; bundled spec dir `2026-05-16-dashboard-about-and-freshness`; needs /clarify to choose option (a) document-as-expected, (b) GH Actions OIDC auto-redeploy (REC-3 from cloud-dashboard SECURITY-REVIEW), or (c) runtime repo sync (volume mount or git pull on startup) |
-| SDD-010 | Dashboard "About / Where we are" section -- newcomer-facing purpose + high-level project state (meta-aware) | P2 | 3.0 | Triaged 2026-05-16; bundled with SDD-009 in spec dir `2026-05-16-dashboard-about-and-freshness`; pure content addition to `state_builder.py` HTTP handler |
-
-### Shipped 2026-05-16
-
-| ID | Title | Priority | RICE | Status |
-|----|-------|----------|------|--------|
-| SDD-007 | Cloud-deployed live Bridge dashboard on Azure Container Apps with Entra ID auth, scale-to-zero, OIDC CI/CD | P3 | 0.9 | DEPLOYED (v1 live, see PROVISIONED.md) |
+| SDD-026 | Trim agent traceability scope -- stop per-feature instruction snapshots; keep dispatch + outcome + promotions | P4 | -- | PM override (EM P3 -> P4); re-evaluation trigger: PI-5 retrospective after ledger has accumulated 2 PIs of usage data; removing data without measured pain is premature optimization |
 
 ## Fleet
 
@@ -98,18 +81,7 @@ Active focus: Finish implementation of 'azure-decommission'
 
 ## Recently Completed
 
-| When | Feature | Task | Agent |
-|------|---------|------|-------|
-| 2026-07-29T17:58:14Z | 2026-07-12-brownfield-bootstrap-correctness | Observe repaired public Windows and Ubuntu CI | qa-engineer-general |
-| 2026-07-29T17:16:52Z | 2026-07-12-brownfield-bootstrap-correctness | Repair Stage-2 critical and important security findings | principal-software-developer |
-| 2026-07-20T15:27:32Z | 2026-07-12-brownfield-bootstrap-correctness | SDD-058 Stage-1 compliance re-review | qa-engineer-general |
-| 2026-07-20T15:03:16Z | 2026-07-12-brownfield-bootstrap-correctness | Repair three Stage-1 compliance defects | principal-software-developer |
-| 2026-07-13T09:13:28Z | 2026-07-12-brownfield-bootstrap-correctness | SDD-058 TDD implementation and local gate evidence | principal-software-developer |
-| 2026-07-12T20:15:38Z | 2026-07-12-brownfield-bootstrap-correctness | SDD-058 PLAN and TASKS with validation lock | principal-architect+principal-software-developer |
-| 2026-07-12T19:56:31Z | 2026-07-12-brownfield-bootstrap-correctness | SDD-058 CLARIFY product and architecture contract | principal-product-manager+principal-architect |
-| 2026-07-12T18:44:18+00:00 | None | Dedup scan (all) | dedup-scanner |
-| 2026-07-12T18:44:18+00:00 | None | [SOFT] Cross-feature deduplication pass at triage and clarify | dedup-scanner |
-| 2026-07-12T18:44:18+00:00 | None | [SOFT] Map Microsoft self-improving skills paper against our skill mechanism | dedup-scanner |
+_no successful dispatches yet_
 
 ## Blockers
 

@@ -1,6 +1,6 @@
 ---
-version: '1.2.0'
-last_updated: 2026-07-30
+version: '1.2.1'
+last_updated: 2026-08-06
 owner: principal-executive-manager
 co_owner: principal-product-manager
 discipline: abstraction-not-detail
@@ -34,22 +34,25 @@ Read [`RULES.md`](RULES.md) for the binding rules.
 | **Current PI** | None -- no active PI or successor PI opened |
 | **Latest PI** | PI-9 (Experience Polish) CLOSED / DONE 2026-07-30 |
 | **Current sprint** | None -- Overall Sprint 24 / PI-9 Sprint 3 closed 2026-07-29; no successor sprint opened |
+| **Current feature** | None -- no product feature is active or scheduled |
+| **Scheduled work** | None -- owner-approved triage is required before any new allocation |
 | **Cadence** | Symbolic; ~1 day per sprint, ~5 sprints per PI (ADR-0003) |
 | **Tests passing** | See the live count in [`exec/state.md`](../exec/state.md) and the ledger (schema_lint clean) |
-| **Branch state** | PI-9 close package prepared from `origin/master` merge SHA `fed33db`; feature doctor run `30546501039` and exact-master doctor run `30550585479` succeeded; close edits remain local and uncommitted |
+| **Branch state** | Owner-authorized truth-reconciliation maintenance is local and uncommitted for independent review; it creates no product allocation |
 | **PI history** | PI-1..PI-9 closed; no current PI -- see [`constitution/roadmap.md`](../constitution/roadmap.md) |
 
 ---
 
-## Top 3 Next Moves (PI-3 historical snapshot -- see the live ledger for current moves)
+## Top 3 Next Moves
 
-1. **S2 (Day-to-Day Brownfield Bootstrap) -- human picks dogfood feature.** T-001
-   needs the human to pick which Day-to-Day feature to walk through the lifecycle.
-   Then `bootstrap.py brownfield --draft-only` can run.
-2. **Human runs the 9 HITL Azure provisioning steps for Sprint 1.** Listed in
-   [Sprint-1 SPEC](Management/PI-3/Sprint-1-dashboard-freshness-unblock/SPEC.md)
-   Section 8. ~5 min once `az login` is done.
-3. **Push to origin.** 60+ commits ahead. `git push origin master` when ready.
+1. **Independently review the local truth-reconciliation maintenance package.**
+  Review does not authorize a commit, push, PI, sprint, or product feature.
+2. **Keep the repository between PIs.** The owner must triage and explicitly
+  authorize a candidate before any product work is scheduled.
+3. **Use authoritative live sources for status.** Read
+  [`constitution/roadmap.md`](../constitution/roadmap.md), the applicable
+  `sprints/PI-*/CURRENT_PI.md`, and generated [`exec/state.md`](../exec/state.md)
+  before treating narrative or historical examples as current work.
 
 ---
 

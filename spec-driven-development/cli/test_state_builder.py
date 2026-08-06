@@ -7,6 +7,8 @@ Proves AC1-AC8 and AC10 from the validation contract.
 from __future__ import annotations
 
 import json
+import os
+import re
 import sqlite3
 import sys
 from datetime import datetime, timedelta, timezone
@@ -166,6 +168,29 @@ def _seed_sdd_root(tmp_path: Path) -> Path:
     conn.commit()
     conn.close()
     return sdd
+
+
+def _normalize_html_parity(html_text: str, generated_at: str) -> str:
+    """Normalize documented volatile fields for no-write HTML parity."""
+    normalized = html_text.replace(
+        f" -- {generated_at}</title>",
+        " -- <generated-at></title>",
+    )
+    normalized = normalized.replace(
+        f'<div class="freshness" aria-live="polite">{generated_at}</div>',
+        '<div class="freshness" aria-live="polite"><generated-at></div>',
+    )
+    normalized = normalized.replace(
+        f'<footer role="contentinfo"><span>{generated_at}</span>',
+        '<footer role="contentinfo"><span><generated-at></span>',
+    )
+    return re.sub(
+        r'(<div class="feed-event"><span class="when">)'
+        r'\d+ (?:seconds?|minutes?|hours?|days?|weeks?|months?|years?) ago'
+        r'(</span><span class="badge b-commit">COMMIT</span>)',
+        r'\1<commit-relative-time>\2',
+        normalized,
+    )
 
 
 def _seed_dispatches(sdd: Path) -> None:
@@ -930,6 +955,44 @@ class TestEdgeCases:
         assert "PI-2 Sprint A" in sprints
         assert "PI-2 Sprint B" in sprints
         assert "Unscheduled" in sprints
+
+    def test_load_backlog_parses_canonical_notes_and_dash_rice(
+        self, tmp_path: Path
+    ) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        (sdd / "backlog" / "BACKLOG.md").write_text(
+            "# Product Backlog\n\n"
+            "| ID | Title | Priority | R | I | C | E | RICE | Sprint | Status | Notes |\n"
+            "|----|-------|----------|---|---|---|---|------|--------|--------|-------|\n"
+            "| SDD-035 | Azure history | P1 | H | H | H | M | -- | Historical | "
+            "**ABANDONED / HISTORICAL.** | Owner disposition |\n"
+            "| SDD-008 | Dashboard candidate | P3 | 1 | 3 | 0.7 | 8 | 0.26 | "
+            "Unscheduled | Backlog | Requires approval |\n",
+            encoding="utf-8",
+        )
+
+        items = {item.pid: item for item in load_backlog(sdd)}
+
+        assert set(items) == {"SDD-035", "SDD-008"}
+        assert items["SDD-035"].rice == "--"
+        assert items["SDD-035"].status == "**ABANDONED / HISTORICAL.**"
+        assert items["SDD-008"].rice == "0.26"
+        assert items["SDD-008"].status == "Backlog"
+        assert all("Owner disposition" not in item.status for item in items.values())
+
+    def test_real_backlog_loads_canonical_truth_rows(self) -> None:
+        sdd = Path(__file__).resolve().parent.parent
+
+        items = {item.pid: item for item in load_backlog(sdd)}
+
+        assert {"SDD-035", "SDD-008", "SDD-059"} <= set(items)
+        assert items["SDD-035"].rice == "--"
+        assert is_terminal_status(items["SDD-035"].status)
+        assert items["SDD-008"].rice == "0.26"
+        assert items["SDD-008"].sprint == "Unscheduled"
+        assert not is_terminal_status(items["SDD-008"].status)
+        assert items["SDD-059"].sprint == "Unscheduled"
+        assert not is_terminal_status(items["SDD-059"].status)
 
 
 # ---------------------------------------------------------------------------
@@ -4250,10 +4313,10 @@ class TestSdd050DetectStage:
         stage, _status, _notes = detect_stage(feat)
         assert stage == "DONE"
 
-    def test_done_status_with_incomplete_required_is_review(
+    def test_owning_done_status_precedes_incomplete_validation(
         self, tmp_path: Path
     ) -> None:
-        # Status: done but REQUIRED items still unchecked -> not truthfully DONE.
+        # Architect precedence: owning completion precedes validation inference.
         feat = _write_feature(
             tmp_path, "2026-06-26-carryover",
             spec_status="done",
@@ -4261,7 +4324,7 @@ class TestSdd050DetectStage:
             retro=False,
         )
         stage, _status, _notes = detect_stage(feat)
-        assert stage == "REVIEW"
+        assert stage == "DONE"
 
     def test_split_validation_required_complete_is_done(self, tmp_path: Path) -> None:
         # Split validation files, all REQUIRED complete, stale status, no RETRO.
@@ -4411,4 +4474,665 @@ class TestSdd050PiClosed:
 
         assert picked is not None
         assert picked.name == "PI-10"
+
+
+# ---------------------------------------------------------------------------
+# MAINT-2026-08-06-TRUTH-RECONCILIATION
+# ---------------------------------------------------------------------------
+
+from cli.state_builder_data import (  # noqa: E402
+    feature_terminal_disposition,
+    is_terminal_status,
+)
+from cli.state_builder_markdown import _md_sprint_plan  # noqa: E402
+
+
+class TestTruthReconciliationTerminalStatus:
+    def test_html_parity_normalizes_relative_commit_times(self) -> None:
+        first = _render_html_with_features(
+            generated_at="2026-08-06 11:00",
+            commits=[("abc1234", "fix: reconcile truth", "11 hours ago")],
+            pi=None,
+        )
+        second = _render_html_with_features(
+            generated_at="2026-08-06 12:00",
+            commits=[("abc1234", "fix: reconcile truth", "12 hours ago")],
+            pi=None,
+        )
+
+        assert _normalize_html_parity(
+            first, "2026-08-06 11:00"
+        ) == _normalize_html_parity(second, "2026-08-06 12:00")
+
+    def test_html_parity_normalization_is_narrowly_scoped(self) -> None:
+        html_text = (
+            '<div class="feed-event"><span class="when">11 hours ago</span>'
+            '<span class="badge b-commit">COMMIT</span>'
+            '<span class="desc"><strong>abc1234</strong> 11 hours ago</span></div>'
+            '<div class="feed-event"><span class="when">11 hours ago</span>'
+            '<span class="badge b-dispatch">DISPATCH</span></div>'
+        )
+
+        normalized = _normalize_html_parity(html_text, "2026-08-06 11:00")
+
+        assert '<span class="when"><commit-relative-time></span>' in normalized
+        assert '<strong>abc1234</strong> 11 hours ago' in normalized
+        assert (
+            '<span class="when">11 hours ago</span>'
+            '<span class="badge b-dispatch">DISPATCH</span>'
+        ) in normalized
+
+    @pytest.mark.parametrize(
+        "status",
+        [
+            "DONE",
+            "shipped 2026-07-30",
+            "Archived",
+            "SUPERSEDED / HISTORICAL",
+            "historical / retired cloud direction",
+            "ABANDONED-HISTORICAL 2026-08-06",
+        ],
+    )
+    def test_shared_predicate_recognizes_terminal_statuses(self, status: str) -> None:
+        assert is_terminal_status(status)
+
+    @pytest.mark.parametrize("status", ["approved", "active", "draft", "unscheduled"])
+    def test_shared_predicate_preserves_non_terminal_statuses(self, status: str) -> None:
+        assert not is_terminal_status(status)
+
+    def test_terminal_evidence_outside_stale_spec_wins(self, tmp_path: Path) -> None:
+        feature = _write_feature(
+            tmp_path,
+            "2026-06-08-old-work",
+            spec_status="Implementing",
+            validation_files={
+                "validation.md": (
+                    "---\nstatus: archived\n---\n\n"
+                    "# Validation\n\n## Required Items\n\n- [ ] R-1 open\n"
+                )
+            },
+            retro=False,
+        )
+
+        disposition = feature_terminal_disposition(feature)
+
+        assert disposition == "non-operational"
+
+    def test_missing_spec_with_explicit_disposition_is_terminal(self, tmp_path: Path) -> None:
+        feature = tmp_path / "2026-06-08-abandoned"
+        feature.mkdir()
+        (feature / "validation.md").write_text(
+            "# Validation\n\nDisposition: ABANDONED / HISTORICAL\n",
+            encoding="utf-8",
+        )
+
+        assert feature_terminal_disposition(feature) == "non-operational"
+
+    def test_contradictory_terminal_evidence_is_conservatively_non_operational(
+        self, tmp_path: Path
+    ) -> None:
+        feature = _write_feature(
+            tmp_path,
+            "2026-06-08-conflict",
+            spec_status="done",
+            validation_files={
+                "validation.md": "---\nstatus: abandoned/historical\n---\n"
+            },
+            retro=False,
+        )
+
+        assert feature_terminal_disposition(feature) == "non-operational"
+
+    def test_non_operational_feature_is_not_loaded_as_done_or_inflight(
+        self, tmp_path: Path
+    ) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        feature = sdd / "specs" / "2026-06-08-abandoned"
+        feature.mkdir()
+        (feature / "spec.md").write_text("# Spec\n\n- Status: Draft\n", encoding="utf-8")
+        (feature / "validation.md").write_text(
+            "---\nstatus: archived\n---\n\n## Required Items\n\n- [ ] R-1\n",
+            encoding="utf-8",
+        )
+
+        loaded = load_features(sdd)
+
+        assert all(item.name != "abandoned" for item in loaded)
+
+    def test_normal_feature_uses_spec_as_owning_artifact(self, tmp_path: Path) -> None:
+        feature = _write_feature(
+            tmp_path,
+            "2026-08-06-normal",
+            spec_status="active",
+            extra={"RETRO.md": "---\nstatus: done\n---\n"},
+        )
+
+        stage, _status, _notes = detect_stage(feature)
+
+        assert stage == "SPEC"
+        assert feature_terminal_disposition(feature) is None
+
+    def test_single_lightweight_feature_artifact_is_owning(self, tmp_path: Path) -> None:
+        feature = tmp_path / "2026-08-06-lightweight"
+        feature.mkdir()
+        (feature / "feature.md").write_text(
+            "---\ntype: feature\nstatus: done\n---\n\n# Lightweight feature\n",
+            encoding="utf-8",
+        )
+
+        stage, _status, _notes = detect_stage(feature)
+
+        assert stage == "DONE"
+
+    @pytest.mark.parametrize(
+        ("filename", "body"),
+        [
+            ("DESIGN.md", "# Historical design\n\n- Status: done\n"),
+            ("tasks.md", "# Historical tasks\n\n- Status: shipped 2026-05-16\n"),
+        ],
+    )
+    def test_named_historical_owning_artifact_compatibility(
+        self, tmp_path: Path, filename: str, body: str
+    ) -> None:
+        feature = tmp_path / f"2026-05-16-{filename.lower().split('.')[0]}-legacy"
+        feature.mkdir()
+        (feature / filename).write_text(body, encoding="utf-8")
+
+        stage, _status, _notes = detect_stage(feature)
+
+        assert stage == "DONE"
+
+    @pytest.mark.parametrize(
+        "filename",
+        [
+            "clarification.md",
+            "plan.md",
+            "RETRO.md",
+            "security-review.md",
+            "provisioning-notes.md",
+            "reference.md",
+            "arbitrary.md",
+        ],
+    )
+    def test_non_owning_markdown_done_status_is_ignored(
+        self, tmp_path: Path, filename: str
+    ) -> None:
+        feature = _write_feature(
+            tmp_path,
+            f"2026-08-06-ignore-{filename.lower().replace('.', '-')}",
+            spec_status="active",
+            extra={filename: "---\nstatus: done\n---\n"},
+        )
+
+        stage, _status, _notes = detect_stage(feature)
+
+        assert stage != "DONE"
+        assert feature_terminal_disposition(feature) is None
+
+    def test_validation_non_operational_override_wins(self, tmp_path: Path) -> None:
+        feature = _write_feature(
+            tmp_path,
+            "2026-08-06-validation-override",
+            spec_status="active",
+            validation_files={
+                "validation-history.md": "---\nstatus: abandoned / historical\n---\n"
+            },
+        )
+
+        assert feature_terminal_disposition(feature) == "non-operational"
+
+    def test_validation_generic_done_cannot_complete_feature(self, tmp_path: Path) -> None:
+        feature = _write_feature(
+            tmp_path,
+            "2026-08-06-validation-done",
+            spec_status="active",
+            validation_files={
+                "validation.md": "---\nstatus: done\n---\n\n# Validation\n"
+            },
+        )
+
+        stage, _status, _notes = detect_stage(feature)
+
+        assert stage != "DONE"
+        assert feature_terminal_disposition(feature) is None
+
+    def test_review_veto_beats_owning_done(self, tmp_path: Path) -> None:
+        feature = tmp_path / "2026-08-06-review-veto"
+        feature.mkdir()
+        (feature / "spec.md").write_text(
+            "---\nstatus: done\nlifecycle_status: changes required\n---\n\n# Spec\n",
+            encoding="utf-8",
+        )
+
+        stage, _status, _notes = detect_stage(feature)
+
+        assert stage == "REVIEW"
+        assert feature_terminal_disposition(feature) is None
+
+    def test_ordered_metadata_winner_supplies_display_status(self, tmp_path: Path) -> None:
+        feature = tmp_path / "2026-08-06-ordered-metadata"
+        feature.mkdir()
+        (feature / "spec.md").write_text(
+            "---\nstatus: active\nlifecycle_status: review\n---\n",
+            encoding="utf-8",
+        )
+
+        stage, status, _notes = detect_stage(feature)
+
+        assert stage == "REVIEW"
+        assert status == "review"
+
+    def test_ordered_metadata_is_hash_seed_deterministic(self, tmp_path: Path) -> None:
+        feature = tmp_path / "2026-08-06-hash-seed"
+        feature.mkdir()
+        (feature / "spec.md").write_text(
+            "---\nstatus: active\nlifecycle_status: review\n---\n",
+            encoding="utf-8",
+        )
+        script = (
+            "import json,sys; from state_builder_data import detect_stage; "
+            "print(json.dumps(detect_stage(__import__('pathlib').Path(sys.argv[1]))))"
+        )
+        cli_dir = Path(__file__).resolve().parent
+
+        outputs = []
+        for seed in ("1", "7", "29"):
+            env = os.environ.copy()
+            env["PYTHONHASHSEED"] = seed
+            result = subprocess.run(
+                [sys.executable, "-c", script, str(feature)],
+                cwd=cli_dir,
+                env=env,
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            outputs.append(json.loads(result.stdout))
+
+        assert outputs == [["REVIEW", "review", "owning artifact review veto"]] * 3
+
+    @pytest.mark.parametrize(
+        ("status", "expected_stage"),
+        [
+            ("**DONE.**", "DONE"),
+            ("**DONE.** Authoritative feature evidence follows.", "DONE"),
+            ("**SUPERSEDED / HISTORICAL.**", "REVIEW"),
+            ("`__*DONE.*__` Supporting text", "DONE"),
+        ],
+    )
+    def test_leading_markdown_presentation_is_normalized(
+        self, tmp_path: Path, status: str, expected_stage: str
+    ) -> None:
+        feature = _write_feature(
+            tmp_path,
+            "2026-08-06-markdown-status",
+            spec_status=status,
+        )
+
+        stage, _status, _notes = detect_stage(feature)
+
+        assert stage == expected_stage
+
+    def test_formatted_lifecycle_term_in_arbitrary_prose_is_not_terminal(
+        self, tmp_path: Path
+    ) -> None:
+        feature = _write_feature(
+            tmp_path,
+            "2026-08-06-formatted-prose",
+            spec_status="Work is **DONE.**",
+        )
+
+        stage, _status, _notes = detect_stage(feature)
+
+        assert stage == "SPEC"
+        assert feature_terminal_disposition(feature) is None
+
+    @pytest.mark.parametrize(
+        "status",
+        [
+            "not done",
+            "never shipped",
+            "no longer done",
+            "reopened",
+            "reactivated",
+            "pending review",
+            "changes required",
+            "blocked",
+            "work done",
+            "doneish",
+        ],
+    )
+    def test_negated_reopened_or_unanchored_status_never_completes(
+        self, tmp_path: Path, status: str
+    ) -> None:
+        feature = _write_feature(
+            tmp_path,
+            "2026-08-06-not-complete-" + re.sub(r"[^a-z]+", "-", status),
+            spec_status=status,
+        )
+
+        stage, _status, _notes = detect_stage(feature)
+
+        assert stage != "DONE"
+        assert feature_terminal_disposition(feature) is None
+
+    def test_frontmatter_precedes_conflicting_body_lifecycle(self, tmp_path: Path) -> None:
+        feature = tmp_path / "2026-08-06-frontmatter-first"
+        feature.mkdir()
+        (feature / "spec.md").write_text(
+            "---\nstatus: review\n---\n\n# Spec\n\n- Status: done\n",
+            encoding="utf-8",
+        )
+
+        stage, _status, _notes = detect_stage(feature)
+
+        assert stage == "REVIEW"
+
+    def test_late_body_lifecycle_line_is_not_metadata(self, tmp_path: Path) -> None:
+        feature = tmp_path / "2026-08-06-late-body"
+        feature.mkdir()
+        (feature / "spec.md").write_text(
+            "# Spec\n\n- Status: active\n\n## Discussion\n\nStatus: done\n",
+            encoding="utf-8",
+        )
+
+        stage, _status, _notes = detect_stage(feature)
+
+        assert stage == "SPEC"
+
+    def test_non_operational_beats_review_and_done_conflict(self, tmp_path: Path) -> None:
+        feature = tmp_path / "2026-08-06-precedence"
+        feature.mkdir()
+        (feature / "spec.md").write_text(
+            "---\nstatus: done\nlifecycle_status: review\n---\n",
+            encoding="utf-8",
+        )
+        (feature / "validation.md").write_text(
+            "---\nstatus: superseded\n---\n",
+            encoding="utf-8",
+        )
+
+        assert feature_terminal_disposition(feature) == "non-operational"
+
+    def test_maintenance_active_repair_renders_review_not_shipped(
+        self, tmp_path: Path
+    ) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        feature = sdd / "specs" / "2026-08-06-truth-reconciliation-maintenance"
+        feature.mkdir()
+        (feature / "spec.md").write_text(
+            "---\ntype: spec\nstatus: active\nlifecycle_status: review\n---\n",
+            encoding="utf-8",
+        )
+        (feature / "validation.md").write_text(
+            "---\ntype: validation\nstatus: active\n---\n\n"
+            "## Required Items\n\n- [x] V-01 old\n- [ ] V-19 repair\n",
+            encoding="utf-8",
+        )
+
+        result = build(sdd_root=sdd, write=False, fixed_date="2026-08-06")
+
+        feature_row = next(item for item in load_features(sdd) if item.name == "truth-reconciliation-maintenance")
+        assert feature_row.stage == "REVIEW"
+        assert "Already shipped" in result["work_index"]
+        done_section = result["work_index"].split("## 2.", 1)[0]
+        assert "truth-reconciliation-maintenance" not in done_section
+
+
+class TestTruthReconciliationBacklogFiltering:
+    @pytest.mark.parametrize(
+        "status",
+        [
+            "**DONE** 2026-06-24 (Sprint 11 close; evidence follows)",
+            "__DONE.__ Supporting evidence follows.",
+            "*DONE!* / 2026-06-24",
+            "_DONE?_ closed",
+            "`DONE` 2026-06-24",
+            "__*DONE.*__ Supporting evidence follows.",
+        ],
+    )
+    def test_char_zero_markdown_terminal_presentation_is_terminal(
+        self, status: str
+    ) -> None:
+        assert is_terminal_status(status)
+
+    @pytest.mark.parametrize(
+        "status",
+        [
+            "Work is **DONE** 2026-06-24",
+            "[DONE](https://example.invalid/status)",
+            "<strong>DONE</strong>",
+            "**DONEish**",
+            "**DONE",
+            "**DONE*",
+            "*DONE**",
+            "`DONE**",
+            " **DONE** 2026-06-24",
+        ],
+    )
+    def test_non_terminal_markdown_controls_remain_non_terminal(
+        self, status: str
+    ) -> None:
+        assert not is_terminal_status(status)
+
+    def test_real_sdd_036_done_status_is_not_scheduled_or_queued(self) -> None:
+        sdd_root = Path(__file__).resolve().parent.parent
+        backlog = load_backlog(sdd_root)
+        by_id = {item.pid: item for item in backlog}
+
+        assert by_id["SDD-036"].status.startswith(
+            "**DONE** 2026-06-24 (Sprint 11 close;"
+        )
+        assert is_terminal_status(by_id["SDD-036"].status)
+
+        sprint_plan = "\n".join(_md_sprint_plan(backlog))
+        work_index = render_work_index(
+            generated_date="2026-08-06", features=[], backlog=backlog, pi=None
+        )
+
+        assert "SDD-036" not in sprint_plan
+        assert "SDD-036" not in work_index
+
+    def test_real_source_formatted_terminal_oracle_is_filtered(self) -> None:
+        sdd_root = Path(__file__).resolve().parent.parent
+        backlog = load_backlog(sdd_root)
+        terminal_terms = (
+            "DONE", "SHIPPED", "ARCHIVED", "SUPERSEDED", "HISTORICAL",
+            "RETIRED", "ABANDONED",
+        )
+        opening_delimiters = ("**", "__", "*", "_", "`")
+
+        def oracle_terminal(status: str) -> bool:
+            remaining = status
+            closings: list[str] = []
+            while True:
+                delimiter = next(
+                    (item for item in opening_delimiters if remaining.startswith(item)),
+                    None,
+                )
+                if delimiter is None:
+                    break
+                closings.insert(0, delimiter)
+                remaining = remaining[len(delimiter):]
+            if not closings:
+                return False
+            term = next((item for item in terminal_terms if remaining.startswith(item)), None)
+            if term is None:
+                return False
+            remaining = remaining[len(term):]
+            if remaining[:1] in ".!?":
+                remaining = remaining[1:]
+            closing_text = "".join(closings)
+            if not remaining.startswith(closing_text):
+                return False
+            remaining = remaining[len(closing_text):]
+            return not remaining or remaining[0].isspace() or remaining[0] in "/,:;.!?()-"
+
+        oracle_ids = {
+            item.pid for item in backlog if oracle_terminal(item.status)
+        }
+        sprint_plan = "\n".join(_md_sprint_plan(backlog))
+        work_index = render_work_index(
+            generated_date="2026-08-06", features=[], backlog=backlog, pi=None
+        )
+
+        assert "SDD-036" in oracle_ids
+        for item in backlog:
+            if item.pid in oracle_ids:
+                assert is_terminal_status(item.status)
+        selected_row_pattern = r"^\| (SDD-\d+) \|"
+        sprint_plan_ids = set(re.findall(selected_row_pattern, sprint_plan, re.MULTILINE))
+        queued_ids = set(re.findall(selected_row_pattern, work_index, re.MULTILINE))
+        assert oracle_ids.isdisjoint(sprint_plan_ids)
+        assert oracle_ids.isdisjoint(queued_ids)
+
+    def test_real_markdown_terminal_backlog_rows_are_not_scheduled_or_queued(self) -> None:
+        sdd_root = Path(__file__).resolve().parent.parent
+        backlog = load_backlog(sdd_root)
+        by_id = {item.pid: item for item in backlog}
+
+        assert by_id["SDD-002"].status.startswith("**DONE.**")
+        assert by_id["SDD-001"].status.startswith("**SUPERSEDED / HISTORICAL.**")
+
+        sprint_plan = "\n".join(_md_sprint_plan(backlog))
+        work_index = render_work_index(
+            generated_date="2026-08-06", features=[], backlog=backlog, pi=None
+        )
+
+        for pid in ("SDD-001", "SDD-002"):
+            assert pid not in sprint_plan
+            assert pid not in work_index
+
+    @pytest.mark.parametrize(
+        "status",
+        ["DONE", "SHIPPED", "ARCHIVED", "SUPERSEDED", "HISTORICAL / RETIRED", "ABANDONED"],
+    )
+    def test_terminal_backlog_never_enters_sprint_plan(self, status: str) -> None:
+        terminal = BacklogItem(
+            pid="SDD-900", title="Old work", priority="P1", rice="9.0",
+            sprint="PI-10 Sprint 1", status=status,
+        )
+        control = BacklogItem(
+            pid="SDD-901", title="Scheduled control", priority="P2", rice="1.0",
+            sprint="PI-10 Sprint 1", status="Approved",
+        )
+
+        output = "\n".join(_md_sprint_plan([terminal, control]))
+
+        assert "SDD-900" not in output
+        assert "SDD-901" in output
+
+    @pytest.mark.parametrize(
+        "status",
+        ["DONE", "SHIPPED", "ARCHIVED", "SUPERSEDED", "HISTORICAL / RETIRED", "ABANDONED"],
+    )
+    def test_terminal_backlog_never_enters_queued(self, status: str) -> None:
+        terminal = BacklogItem(
+            pid="SDD-900", title="Old work", priority="P1", rice="9.0",
+            sprint="PI-10 Sprint 1", status=status,
+        )
+        control = BacklogItem(
+            pid="SDD-901", title="Candidate control", priority="P2", rice="1.0",
+            sprint="Unscheduled", status="Triaged",
+        )
+
+        output = render_work_index(
+            generated_date="2026-08-06", features=[], backlog=[terminal, control], pi=None
+        )
+
+        assert "SDD-900" not in output
+        assert "SDD-901" in output
+
+    def test_renderers_use_data_layer_terminal_predicate(self) -> None:
+        cli_dir = Path(__file__).parent
+        data_source = (cli_dir / "state_builder_data.py").read_text(encoding="utf-8")
+        markdown_source = (cli_dir / "state_builder_markdown.py").read_text(encoding="utf-8")
+        html_source = (cli_dir / "state_builder_html.py").read_text(encoding="utf-8")
+
+        assert "def terminal_status_class(" in data_source
+        assert "def is_terminal_status(" in data_source
+        for renderer_source in (markdown_source, html_source):
+            assert "is_terminal_status" in renderer_source
+            assert "_NON_OPERATIONAL_TERMINAL_WORDS" not in renderer_source
+            assert "_COMPLETED_TERMINAL_WORDS" not in renderer_source
+
+
+class TestTruthReconciliationZeroActive:
+    def test_no_active_pi_suppresses_stale_feature_focus(self, tmp_path: Path) -> None:
+        stale = Feature(
+            feature_dir=Path("specs/2026-06-08-stale"),
+            name="stale",
+            stage="IMPLEMENT",
+            created="2026-06-08",
+            notes="old artifact",
+        )
+
+        action = derive_next_action(tmp_path, None, [stale])
+
+        assert action[0] == "No feature scheduled"
+        assert "No active PI" in action[1]
+        assert action[2] == "spec-driven-development/backlog/BACKLOG.md"
+
+    def test_active_pi_still_uses_active_feature_focus(self, tmp_path: Path) -> None:
+        sdd = tmp_path / "spec-driven-development"
+        feature_dir = sdd / "specs" / "2026-08-06-active"
+        feature_dir.mkdir(parents=True)
+        active = Feature(
+            feature_dir=feature_dir,
+            name="active",
+            stage="IMPLEMENT",
+            created="2026-08-06",
+            notes="current",
+        )
+        pi = PIBlock(name="PI-10", title="Authorized", is_current=True)
+
+        action = derive_next_action(sdd, pi, [active])
+
+        assert action[0] == "Finish implementation of 'active'"
+
+    def test_all_closed_build_excludes_terminal_old_feature(self, tmp_path: Path) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        (sdd / "constitution" / "roadmap.md").write_text(
+            "# Roadmap\n\n## PI-9: Experience (closed 2026-07-30)\n\n- [x] done\n",
+            encoding="utf-8",
+        )
+        feature = sdd / "specs" / "2026-06-08-old-active"
+        feature.mkdir()
+        (feature / "spec.md").write_text("# Spec\n\n- Status: Implementing\n", encoding="utf-8")
+        (feature / "validation.md").write_text(
+            "# Validation\n\nDisposition: ABANDONED / HISTORICAL\n\n"
+            "## Required Items\n\n- [ ] R-1\n",
+            encoding="utf-8",
+        )
+
+        result = build(sdd_root=sdd, write=False, fixed_date="2026-08-06")
+
+        assert "Current PI: No active PI" in result["markdown"]
+        assert "Active focus: No feature scheduled" in result["markdown"]
+        assert "old-active" not in result["work_index"]
+        assert "old-active" not in result["html"]
+
+    def test_sdd_035_is_neither_done_nor_inflight(self, tmp_path: Path) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        (sdd / "constitution" / "roadmap.md").write_text(
+            "# Roadmap\n\n## PI-9: Experience (closed 2026-07-30)\n\n- [x] done\n",
+            encoding="utf-8",
+        )
+        feature = sdd / "specs" / "2026-06-08-azure-decommission"
+        feature.mkdir()
+        (feature / "spec.md").write_text(
+            "---\nstatus: archived\n---\n\n# SDD-035\n\n"
+            "Status: ABANDONED / HISTORICAL\n",
+            encoding="utf-8",
+        )
+        (feature / "validation.md").write_text(
+            "---\nstatus: archived\n---\n\n# Validation\n\n"
+            "- [x] Partial inventory evidence\n- [ ] Azure teardown\n",
+            encoding="utf-8",
+        )
+
+        result = build(sdd_root=sdd, write=False, fixed_date="2026-08-06")
+
+        for output in (result["markdown"], result["work_index"], result["html"]):
+            assert "azure-decommission" not in output
 

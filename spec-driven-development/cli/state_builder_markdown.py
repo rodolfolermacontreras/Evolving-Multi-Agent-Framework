@@ -28,6 +28,7 @@ from state_builder_data import (  # noqa: E402  -- in-tree sibling re-export (AD
     Feature,
     LedgerView,
     PIBlock,
+    is_terminal_status,
 )
 from schema_lint import UserGate  # noqa: E402  -- shared contract (ADR-012)
 from state_builder_html import active_user_gates  # noqa: E402  -- in-tree sibling (ADR-012)
@@ -113,6 +114,8 @@ def _md_sprint_plan(backlog: list[BacklogItem]) -> list[str]:
     if backlog:
         by_sprint: dict[str, list[BacklogItem]] = {}
         for item in backlog:
+            if is_terminal_status(item.status):
+                continue
             key = item.sprint or "Unassigned"
             by_sprint.setdefault(key, []).append(item)
         for sprint_key in sorted(by_sprint.keys()):

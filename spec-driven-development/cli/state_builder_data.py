@@ -74,7 +74,222 @@ class Feature:
     notes: str = ""
 
 
-_STATUS_RE = re.compile(r"^\s*(?:-\s+)?[Ss]tatus\s*:\s*(.+?)\s*$", re.MULTILINE)
+_STATUS_RE = re.compile(
+    r"^\s*(?:-\s+)?[Ss]tatus\s*:\s*(.+?)\s*$", re.MULTILINE
+)
+_LIFECYCLE_FIELD_RE = re.compile(
+    r"^\s*(?:-\s+)?(?:status|disposition|lifecycle(?:[_ -](?:status|disposition))?)"
+    r"\s*:\s*(.+?)\s*$", re.IGNORECASE,
+)
+_COMPLETED_TERMINAL_WORDS = frozenset({"done", "shipped"})
+_NON_OPERATIONAL_TERMINAL_WORDS = frozenset(
+    {"archived", "superseded", "historical", "retired", "abandoned"}
+)
+_REVIEW_STATUS_TERMS = (
+    "pending review", "changes required", "reopened", "reactivated",
+    "blocked", "review",
+)
+_COMPLETION_VETO_RE = re.compile(
+    r"\b(?:not|never)\s+(?:done|shipped)\b|"
+    r"\bno\s+longer\s+(?:done|shipped)\b|"
+    r"\b(?:reopened|reactivated|pending\s+review|changes\s+required|blocked)\b",
+    re.IGNORECASE,
+)
+_FRONTMATTER_FIELD_RE = re.compile(r"^([A-Za-z][A-Za-z0-9 _-]*):\s*(.*?)\s*$")
+_BODY_METADATA_LINE_LIMIT = 40
+_LIFECYCLE_FIELD_PRECEDENCE = (
+    "lifecycle_disposition", "lifecycle_status", "disposition", "status",
+)
+_MARKDOWN_PRESENTATION_DELIMITERS = ("**", "__", "*", "_", "`")
+_TERMINAL_PRESENTATION_TERM_RE = re.compile(
+    r"(?:done|shipped|archived|superseded|historical|retired|abandoned)"
+    r"(?:\s*/\s*(?:done|shipped|archived|superseded|historical|retired|abandoned))*",
+    re.IGNORECASE,
+)
+
+
+def _normalized_field_name(name: str) -> str:
+    return re.sub(r"[ -]+", "_", name.strip().lower())
+
+
+def _starts_with_term(value: str, term: str) -> bool:
+    """Return whether value starts with a complete lifecycle term."""
+    return re.match(rf"^{re.escape(term)}(?:$|[\s/,:;.!?()\-])", value) is not None
+
+
+def _normalize_lifecycle_presentation(status: str) -> str:
+    """Unwrap an anchored, balanced Markdown terminal presentation."""
+    raw_value = status or ""
+    value = raw_value.strip()
+    if not raw_value or raw_value[0].isspace():
+        return value
+
+    remaining = value
+    openings: list[str] = []
+    while remaining:
+        delimiter = next(
+            (item for item in _MARKDOWN_PRESENTATION_DELIMITERS
+             if remaining.startswith(item)),
+            None,
+        )
+        if delimiter is None:
+            break
+        openings.append(delimiter)
+        remaining = remaining[len(delimiter):]
+    if not openings:
+        return value
+
+    term_match = _TERMINAL_PRESENTATION_TERM_RE.match(remaining)
+    if term_match is None:
+        return value
+    term_end = term_match.end()
+    if remaining[term_end:term_end + 1] in ".!?":
+        term_end += 1
+
+    closing_text = "".join(reversed(openings))
+    closing_index = remaining.find(closing_text, term_end)
+    if closing_index < 0:
+        return value
+    if closing_index > term_end and not (
+        remaining[term_end].isspace() or remaining[term_end] in "/,:;.!?()-"
+    ):
+        return value
+    suffix = remaining[closing_index + len(closing_text):]
+    if suffix.startswith(_MARKDOWN_PRESENTATION_DELIMITERS):
+        return value
+    if suffix and not (suffix[0].isspace() or suffix[0] in "/,:;.!?()-"):
+        return value
+    return (remaining[:closing_index] + suffix).strip()
+
+
+def _lifecycle_class(status: str) -> str | None:
+    """Classify a lifecycle value using anchored, conservative semantics."""
+    value = re.sub(
+        r"\s+", " ", _normalize_lifecycle_presentation(status).lower()
+    )
+    if not value:
+        return None
+    for term in _NON_OPERATIONAL_TERMINAL_WORDS:
+        if _starts_with_term(value, term):
+            return "non-operational"
+    for term in _REVIEW_STATUS_TERMS:
+        if _starts_with_term(value, term):
+            return "review"
+    for term in _COMPLETED_TERMINAL_WORDS:
+        if _starts_with_term(value, term):
+            return "completed"
+    if _COMPLETION_VETO_RE.search(value):
+        return "review"
+    return None
+
+
+def terminal_status_class(status: str) -> str | None:
+    """Classify an explicit lifecycle value without adding a schema enum."""
+    status_class = _lifecycle_class(status)
+    return status_class if status_class in {"non-operational", "completed"} else None
+
+
+def is_terminal_status(status: str) -> bool:
+    """Return whether an explicit feature or backlog status is terminal."""
+    return terminal_status_class(status) is not None
+
+
+def _parse_frontmatter(text: str) -> tuple[dict[str, list[str]], int]:
+    """Return simple frontmatter fields and the first body line index."""
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return {}, 0
+    fields: dict[str, list[str]] = {}
+    for index, line in enumerate(lines[1:], start=1):
+        if line.strip() == "---":
+            return fields, index + 1
+        match = _FRONTMATTER_FIELD_RE.fullmatch(line.strip())
+        if match:
+            key = _normalized_field_name(match.group(1))
+            fields.setdefault(key, []).append(match.group(2).strip())
+    return {}, 0
+
+
+def _artifact_metadata(path: Path) -> tuple[dict[str, list[str]], list[str]]:
+    """Read frontmatter first, else bounded initial body metadata full lines."""
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return {}, []
+    fields, body_start = _parse_frontmatter(text)
+    frontmatter_values = [
+        value
+        for key in _LIFECYCLE_FIELD_PRECEDENCE
+        for value in fields.get(key, [])
+    ]
+    if frontmatter_values:
+        return fields, frontmatter_values
+
+    values: list[str] = []
+    for line in text.splitlines()[body_start:body_start + _BODY_METADATA_LINE_LIMIT]:
+        if line.lstrip().startswith("## "):
+            break
+        match = _LIFECYCLE_FIELD_RE.fullmatch(line)
+        if match:
+            values.append(match.group(1).strip())
+    return fields, values
+
+
+def _artifact_lifecycle_values(path: Path) -> list[str]:
+    return _artifact_metadata(path)[1]
+
+
+def _owning_artifact(feature_dir: Path) -> Path | None:
+    """Return the sole artifact allowed to own the feature lifecycle."""
+    spec = feature_dir / "spec.md"
+    if spec.is_file():
+        return spec
+
+    markdown = sorted(feature_dir.glob("*.md"))
+    if len(markdown) == 1:
+        fields, _values = _artifact_metadata(markdown[0])
+        if any(value.strip().lower() == "feature" for value in fields.get("type", [])):
+            return markdown[0]
+
+    design = feature_dir / "DESIGN.md"
+    if design.is_file():
+        return design
+    tasks = feature_dir / "tasks.md"
+    if tasks.is_file():
+        return tasks
+    return None
+
+
+def _owning_lifecycle(feature_dir: Path) -> tuple[Path | None, list[str], set[str]]:
+    owner = _owning_artifact(feature_dir)
+    values = _artifact_lifecycle_values(owner) if owner is not None else []
+    classes = {
+        status_class for value in values
+        if (status_class := _lifecycle_class(value)) is not None
+    }
+    return owner, values, classes
+
+
+def feature_terminal_disposition(feature_dir: Path) -> str | None:
+    """Resolve terminal evidence across a feature directory conservatively.
+
+    Explicit non-operational evidence wins over completed evidence. This makes
+    contradictory terminal artifacts safe: they can never become IN-FLIGHT.
+    """
+    _owner, _values, classes = _owning_lifecycle(feature_dir)
+    for path in validation_files(feature_dir):
+        if any(
+            _lifecycle_class(value) == "non-operational"
+            for value in _artifact_lifecycle_values(path)
+        ):
+            classes.add("non-operational")
+    if "non-operational" in classes:
+        return "non-operational"
+    if "review" in classes:
+        return None
+    if "completed" in classes:
+        return "completed"
+    return None
 
 
 def _normalize_status_to_stage(status: str) -> str | None:
@@ -82,23 +297,24 @@ def _normalize_status_to_stage(status: str) -> str | None:
     s = status.strip().lower()
     if not s:
         return None
-    if "done" in s or "shipped" in s:
+    lifecycle_class = _lifecycle_class(s)
+    if lifecycle_class == "completed":
         return "DONE"
-    if "review" in s:
+    if lifecycle_class == "review":
         return "REVIEW"
-    if "implement" in s:
+    if any(_starts_with_term(s, term) for term in ("implement", "implementing", "implementation")):
         return "IMPLEMENT"
-    if "task" in s:
+    if any(_starts_with_term(s, term) for term in ("task", "tasks")):
         return "TASKS"
-    if "plan" in s:
+    if _starts_with_term(s, "plan"):
         return "PLAN"
-    if "draft" in s or "spec" in s:
+    if _starts_with_term(s, "draft") or _starts_with_term(s, "spec"):
         return "SPEC"
-    if "clarif" in s or "exploration" in s or "pre-spec" in s:
+    if any(_starts_with_term(s, term) for term in ("clarification", "exploration", "pre-spec")):
         return "CLARIFY"
-    if "backlog" in s:
+    if _starts_with_term(s, "backlog"):
         return "BACKLOG"
-    if "idea" in s:
+    if _starts_with_term(s, "idea"):
         return "IDEA"
     return None
 
@@ -106,15 +322,10 @@ def _normalize_status_to_stage(status: str) -> str | None:
 def detect_stage(feature_dir: Path) -> tuple[str, str, str]:
     """Return (stage, status_line, notes).
 
-    Order of precedence (SDD-002 AC4, reconciled by SDD-050 with the B-2 gate):
-      1. REQUIRED-item completeness (shared ``done_check.validation_complete``)
-         -> DONE, regardless of a stale Status line and WITHOUT requiring a
-         per-dir RETRO.md. Only ``## Required Items`` count; optional items and
-         split ``validation-*.md`` files are handled by the shared helper.
-      2. Explicit ``Status:`` line in spec.md -> trusted, except a ``done``
-         status with unchecked REQUIRED items is demoted to REVIEW (not truth).
-      3. REQUIRED-item ratio -> infer IMPLEMENT/REVIEW (never DONE from a ratio).
-      4. Artifact presence (tasks/plan/spec/design) -> coarse stage.
+     Semantic precedence is validation non-operational override, owning artifact
+     non-operational, owning review veto, owning completed, required-item
+     completeness, explicit owning status, required-item ratio, then artifact
+     presence. The displayed status is the value that wins that classification.
     """
     has_design = (feature_dir / "DESIGN.md").is_file()
     has_spec = (feature_dir / "spec.md").is_file()
@@ -124,17 +335,47 @@ def detect_stage(feature_dir: Path) -> tuple[str, str, str]:
     has_validation = bool(v_files)
     has_retro = (feature_dir / "RETRO.md").is_file()
 
-    status_line = ""
-    if has_spec:
-        text = (feature_dir / "spec.md").read_text(encoding="utf-8", errors="replace")
-        m = _STATUS_RE.search(text)
-        if m:
-            status_line = m.group(1).strip()
+    owner, lifecycle_values, lifecycle_classes = _owning_lifecycle(feature_dir)
+    status_line = lifecycle_values[0] if lifecycle_values else ""
 
-    # 1. Evidence-first (SDD-050): all REQUIRED items checked == DONE, even if
-    #    the Status line is stale and even with no RETRO.md. This is the shared
-    #    truth used by the B-2 gate (done_check.validation_complete).
-    if has_validation and validation_complete(feature_dir):
+    validation_non_operational = next((
+        value
+        for path in v_files
+        for value in _artifact_lifecycle_values(path)
+        if _lifecycle_class(value) == "non-operational"
+    ), None)
+    if validation_non_operational is not None:
+        return (
+            "REVIEW", validation_non_operational,
+            "validation non-operational override",
+        )
+
+    owning_non_operational = next((
+        value for value in lifecycle_values
+        if _lifecycle_class(value) == "non-operational"
+    ), None)
+    if owning_non_operational is not None:
+        return "REVIEW", owning_non_operational, "owning artifact non-operational"
+
+    owning_review = next((
+        value for value in lifecycle_values
+        if _lifecycle_class(value) == "review"
+    ), None)
+    if owning_review is not None:
+        return "REVIEW", owning_review, "owning artifact review veto"
+
+    owning_completed = next((
+        value for value in lifecycle_values
+        if _lifecycle_class(value) == "completed"
+    ), None)
+    if owning_completed is not None:
+        owner_name = owner.name if owner is not None else "owning artifact"
+        return "DONE", owning_completed, f"{owner_name} completed status"
+
+    checked_count = sum(len(required_checked(path)) for path in v_files)
+    unchecked_count = sum(len(required_unchecked(path)) for path in v_files)
+    required_count = checked_count + unchecked_count
+    if has_validation and required_count > 0 and validation_complete(feature_dir):
         note = "validation required-complete"
         if has_retro:
             note += ", RETRO present"
@@ -142,26 +383,13 @@ def detect_stage(feature_dir: Path) -> tuple[str, str, str]:
 
     explicit = _normalize_status_to_stage(status_line)
     if explicit:
-        if explicit == "DONE":
-            if not has_validation:
-                # No validation file to contradict the claim -> trust the status.
-                note = "Status: done (no validation file)"
-                if has_retro:
-                    note += ", RETRO present"
-                return "DONE", status_line, note
-            # Validation present but REQUIRED items still open -> not truthfully done.
-            return "REVIEW", status_line, "Status: done but validation required items unchecked"
-        # For all other explicit stages, trust the spec line.
         return explicit, status_line, f"Status: {status_line}"
 
     # 2. REQUIRED-item ratio (known incomplete here -> never DONE).
     if has_validation:
-        unchecked = 0
-        checked = 0
-        for f in v_files:
-            unchecked += len(required_unchecked(f))
-            checked += len(required_checked(f))
-        total = unchecked + checked
+        unchecked = unchecked_count
+        checked = checked_count
+        total = required_count
         if total > 0:
             pct = round(checked * 100 / total)
             stage = "REVIEW" if pct >= 80 else "IMPLEMENT"
@@ -183,7 +411,13 @@ def load_features(sdd_root: Path) -> list[Feature]:
     for d in sorted(specs_dir.iterdir()):
         if not d.is_dir():
             continue
+        terminal_disposition = feature_terminal_disposition(d)
+        if terminal_disposition == "non-operational":
+            continue
         stage, status_line, notes = detect_stage(d)
+        if terminal_disposition == "completed":
+            stage = "DONE"
+            notes = "explicit completed terminal disposition"
         name = d.name
         m = re.match(r"(\d{4}-\d{2}-\d{2})-(.+)", name)
         created = m.group(1) if m else ""
@@ -290,28 +524,48 @@ class BacklogItem:
     status: str
 
 
-_BACKLOG_ROW = re.compile(
-    r"^\|\s*([A-Z]{2,}-\d{2,3})\s*"
-    r"\|\s*(.+?)\s*"
-    r"\|\s*(P[1-4])\s*"
-    r"\|\s*[^|]*\s*\|\s*[^|]*\s*\|\s*[^|]*\s*\|\s*[^|]*\s*"   # R / I / C / E
-    r"\|\s*([\d\.]+)\s*"
-    r"\|\s*([^|]*?)\s*"
-    r"\|\s*([^|]*?)\s*\|\s*$",
-    re.MULTILINE,
-)
+_BACKLOG_ID_RE = re.compile(r"^[A-Z]{2,}-\d{2,3}$")
+_BACKLOG_ROW = re.compile(r"^\|\s*([A-Z]{2,}-\d{2,3})\s*\|", re.MULTILINE)
+
+
+def _markdown_table_cells(line: str) -> list[str]:
+    """Return stripped cells for one simple pipe-delimited Markdown row."""
+    stripped = line.strip()
+    if not stripped.startswith("|") or not stripped.endswith("|"):
+        return []
+    return [cell.strip() for cell in stripped[1:-1].split("|")]
 
 
 def load_backlog(sdd_root: Path) -> list[BacklogItem]:
     p = sdd_root / "backlog" / "BACKLOG.md"
     if not p.is_file():
         return []
-    text = p.read_text(encoding="utf-8")
-    return [
-        BacklogItem(pid=m.group(1), title=m.group(2), priority=m.group(3),
-                    rice=m.group(4), sprint=m.group(5), status=m.group(6))
-        for m in _BACKLOG_ROW.finditer(text)
-    ]
+    items: list[BacklogItem] = []
+    columns: dict[str, int] | None = None
+    required = {"id", "title", "priority", "rice", "sprint", "status"}
+    for line in p.read_text(encoding="utf-8").splitlines():
+        cells = _markdown_table_cells(line)
+        if not cells:
+            columns = None
+            continue
+        normalized = [cell.casefold() for cell in cells]
+        if normalized and normalized[0] == "id" and required <= set(normalized):
+            columns = {name: normalized.index(name) for name in required}
+            continue
+        if columns is None or len(cells) <= max(columns.values()):
+            continue
+        pid = cells[columns["id"]]
+        if not _BACKLOG_ID_RE.fullmatch(pid):
+            continue
+        items.append(BacklogItem(
+            pid=pid,
+            title=cells[columns["title"]],
+            priority=cells[columns["priority"]],
+            rice=cells[columns["rice"]],
+            sprint=cells[columns["sprint"]],
+            status=cells[columns["status"]],
+        ))
+    return items
 
 
 # ---------------------------------------------------------------------------- #
@@ -875,6 +1129,12 @@ def _derive_next_action_fallback(
 
 
 def derive_next_action(sdd_root: Path, pi: PIBlock | None, features: list[Feature]) -> tuple[str, str, str | None]:
+    if pi is None:
+        return (
+            "No feature scheduled",
+            "No active PI or sprint; owner-approved triage is required before scheduling work.",
+            "spec-driven-development/backlog/BACKLOG.md",
+        )
     sprint_focus = _derive_current_sprint_focus(sdd_root, pi, features)
     if sprint_focus:
         return sprint_focus

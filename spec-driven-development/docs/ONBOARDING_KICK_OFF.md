@@ -18,8 +18,8 @@ Read order:
 1. Sections 0-8 of this file (project framing, architecture, lifecycle, structure)
 2. [`RULES.md`](RULES.md) -- the 13 binding rules + HITL gates
 3. [`HIGH_LEVEL_DEV_TRACKER.md`](HIGH_LEVEL_DEV_TRACKER.md) -- current PI/sprint state
-4. Active PI's [`Management/PI-N/INDEX.md`](Management/) -- PI-level navigation
-5. Your sprint's [`Management/PI-N/Sprint-N-{title}/SPEC.md`](Management/) -- deep spec
+4. If a PI is active, its [`Management/PI-N/INDEX.md`](Management/) -- PI-level navigation
+5. If a sprint is active, its [`Management/PI-N/Sprint-N-{title}/SPEC.md`](Management/) -- deep spec
 6. Sections 13-16 of this file (codebase reading guide, getting started, what's next)
 
 ---
@@ -56,8 +56,13 @@ before touching code. In order:
 | 1 | [`ONBOARDING_KICK_OFF.md`](ONBOARDING_KICK_OFF.md) (this file) | Project framing, architecture, lifecycle |
 | 2 | [`RULES.md`](RULES.md) | 13 binding rules + 11 HITL gates |
 | 3 | [`HIGH_LEVEL_DEV_TRACKER.md`](HIGH_LEVEL_DEV_TRACKER.md) | Current PI/sprint state + dependency graph |
-| 4 | Active PI's [`Management/PI-N/INDEX.md`](Management/) | PI-level decisions, sprint list, what-was-done |
-| 5 | Your sprint's [`Management/PI-N/Sprint-N-{title}/SPEC.md`](Management/) | Sprint spec, tasks, validation contract |
+| 4 | Active PI's [`Management/PI-N/INDEX.md`](Management/), when one exists | PI-level decisions, sprint list, what-was-done |
+| 5 | Your sprint's [`Management/PI-N/Sprint-N-{title}/SPEC.md`](Management/), when one exists | Sprint spec, tasks, validation contract |
+
+As of 2026-08-06 there is no active PI, sprint, product feature, or scheduled
+work. Do not infer current work from a historical example. Confirm current truth
+in `constitution/roadmap.md`, the applicable `sprints/PI-*/CURRENT_PI.md`, and
+generated `exec/state.md`; owner-approved triage is required before scheduling.
 
 If you are a Principal, also read:
 - `constitution/principles.md` -- the 12 binding articles
@@ -433,7 +438,7 @@ Each lives in its own directory under `specs/YYYY-MM-DD-feature-name/` with co-l
 | fleet-cli | DONE |
 | qa-cli | DONE |
 | retro-cli | DONE |
-| retro-closure | TASKS |
+| retro-closure | DONE |
 | schema-lint | DONE |
 | sprint-c-validation | BACKLOG |
 | state-builder | DONE |
@@ -738,26 +743,23 @@ python spec-driven-development/cli/bootstrap.py brownfield ../my-existing-projec
 
 ## 16. What Is Next
 
-### Immediate (in-flight)
+### Current pipeline: between PIs
 
-- **Unblock SDD-009/010** (Dashboard About + Freshness) -- the human needs to run 9 Azure HITL provisioning steps for OIDC federated credential, then dispatch T-003 + T-004 to workers
-- **Curate PI-2 lessons** (LESSON-006 through LESSON-010 are still OPEN) via `/evolve`
+There is no active PI, sprint, product feature, or scheduled work as of
+2026-08-06. The next product move begins only after owner-approved triage and
+normal lifecycle gates. Historical plans and examples below do not create
+backlog, PI, sprint, or implementation authority.
 
-### PI-3: Portability Validation
+### Unscheduled candidate themes
 
-- **Bootstrap SDD onto the Day-to-Day Agent project** (brownfield) -- the portability test
-- Validate that `bootstrap.py brownfield` works on a real established codebase
-- Run one feature through the full SDD lifecycle in the host project
-- Publish `GENERALIZATION_SDD.md` v1.0 after second-project test
-- Establish SDD process metrics baseline (cycle time, defect escape rate, fleet utilization)
-
-### Future PIs
-
-- GitHub template repo packaging for easy distribution
-- GitHub Issues integration (`/taskstoissues`)
-- Bridge dashboard v3 (D3 force-directed graph, WebSocket live push)
-- Fleet ledger schema migration scripts
+- Second-project portability validation
+- Template-repository packaging
+- Issue-tracker integration
+- Fleet-ledger migration support
 - Domain skill library expansion
+
+These themes are not scheduled. Consult `backlog/BACKLOG.md` for authoritative
+product status and `constitution/roadmap.md` for PI status before acting.
 
 ### Open Design Questions
 

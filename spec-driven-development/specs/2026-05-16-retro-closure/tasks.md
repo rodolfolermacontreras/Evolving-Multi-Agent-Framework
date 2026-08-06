@@ -19,9 +19,9 @@ feature: 2026-05-16-retro-closure
 
 | Task ID | Tag | Description | File Scope | Acceptance Test | Effort | Deps | Mode | Fleet | Status |
 |---------|-----|-------------|------------|-----------------|--------|------|------|-------|--------|
-| T-001 | [P] | Write RETRO.md for fleet-cli feature (SDD-003). | `specs/2026-05-16-fleet-cli/RETRO.md` | RETRO.md exists with what-worked, what-didn't, lessons sections | S | None | AFK | Yes | pending |
-| T-002 | [P] | Write RETRO.md for qa-cli feature (SDD-004). | `specs/2026-05-16-qa-cli/RETRO.md` | RETRO.md exists with what-worked, what-didn't, lessons sections | S | None | AFK | Yes | pending |
-| T-003 | [P] | Write RETRO.md for retro-cli feature (SDD-005). | `specs/2026-05-16-retro-cli/RETRO.md` | RETRO.md exists with what-worked, what-didn't, lessons sections | S | None | AFK | Yes | pending |
+| T-001 | [P] | Write RETRO.md for fleet-cli feature (SDD-003). | `specs/2026-05-16-fleet-cli/RETRO.md` | RETRO.md exists with what-worked, what-didn't, lessons sections | S | None | AFK | Yes | done |
+| T-002 | [P] | Write RETRO.md for qa-cli feature (SDD-004). | `specs/2026-05-16-qa-cli/RETRO.md` | RETRO.md exists with what-worked, what-didn't, lessons sections | S | None | AFK | Yes | done |
+| T-003 | [P] | Write RETRO.md for retro-cli feature (SDD-005). | `specs/2026-05-16-retro-cli/RETRO.md` | RETRO.md exists with what-worked, what-didn't, lessons sections | S | None | AFK | Yes | done |
 
 ## Notes
 

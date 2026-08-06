@@ -35,6 +35,12 @@ CONSTITUTION_FILES = (
 BACKLOG_FILES = ("IDEAS.md", "BACKLOG.md")
 PLACEHOLDER_PATTERN = re.compile(r"\{\{(PROJECT_NAME|OWNER|DATE)\}\}")
 FRONTMATTER_PATTERN = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
+PYTEST_REQUIREMENT = "pytest>=8,<9"
+PYTEST_VERSION_PROBE = (
+    "from importlib.metadata import version\n"
+    "major = int(version('pytest').split('.', 1)[0])\n"
+    "raise SystemExit(0 if 8 <= major < 9 else 1)"
+)
 
 
 class BootstrapError(Exception):
@@ -1024,12 +1030,36 @@ def write_owner_config(root: Path, owner: str | None) -> str:
     return f"owner recorded at {owner_file}"
 
 
-def _run_check(root: Path, args: list[str]) -> tuple[int, str]:
-    """Run a checker subprocess from root; return (exit_code, combined_output)."""
-    result = subprocess.run(
-        [sys.executable, *args],
-        cwd=str(root), capture_output=True, text=True, check=False,
-    )
+def _venv_python(root: Path, *, platform_name: str | None = None) -> Path:
+    """Return the repo-local venv interpreter path for the target platform."""
+    platform_name = platform_name or os.name
+    if platform_name == "nt":
+        return root / ".venv" / "Scripts" / "python.exe"
+    return root / ".venv" / "bin" / "python"
+
+
+def _run_check(
+    root: Path,
+    args: list[str],
+    *,
+    executable: Path | None = None,
+) -> tuple[int, str]:
+    """Run a Python checker from root; prefer the repo-local venv."""
+    if executable is None:
+        venv_dir = root / ".venv"
+        if venv_dir.exists():
+            executable = _venv_python(root)
+            if not executable.is_file():
+                return 1, f".venv interpreter missing at {executable}"
+        else:
+            executable = Path(sys.executable)
+    try:
+        result = subprocess.run(
+            [str(executable), *args],
+            cwd=str(root), capture_output=True, text=True, check=False,
+        )
+    except OSError as exc:
+        return 1, f"unable to launch Python interpreter at {executable}: {exc}"
     return result.returncode, (result.stdout + result.stderr).strip()
 
 
@@ -1049,43 +1079,74 @@ def run_setup(root: Path, owner: str | None = None, *,
         )
         print("Remediation: install Python 3.12 or newer and re-run setup.", file=sys.stderr)
         return 1
-    print(f"  [1/6] Python {sys.version_info.major}.{sys.version_info.minor} OK")
+    print(f"  [1/7] Python {sys.version_info.major}.{sys.version_info.minor} OK")
 
     venv_dir = root / ".venv"
-    if not make_venv or venv_dir.exists():
-        reason = "already present" if venv_dir.exists() else "skipped (--skip-venv)"
-        print(f"  [2/6] .venv {reason}")
+    if not make_venv:
+        print("  [2/7] .venv skipped (--skip-venv)")
+    elif venv_dir.exists():
+        print("  [2/7] .venv already present")
     else:
-        code, output = _run_check(root, ["-m", "venv", str(venv_dir)])
+        code, output = _run_check(
+            root,
+            ["-m", "venv", str(venv_dir)],
+            executable=Path(sys.executable),
+        )
         if code != 0:
             print(f"ERROR: failed to create .venv: {output}", file=sys.stderr)
             return 1
-        print(f"  [3/6] .venv created at {venv_dir}")
+        print(f"  [2/7] .venv created at {venv_dir}")
+
+    check_python = _venv_python(root) if make_venv else Path(sys.executable)
+    if make_venv and not check_python.is_file():
+        print(f"ERROR: .venv interpreter missing at {check_python}", file=sys.stderr)
+        return 1
+
+    if make_venv:
+        code, _ = _run_check(
+            root,
+            ["-c", PYTEST_VERSION_PROBE],
+            executable=check_python,
+        )
+        if code != 0:
+            code, output = _run_check(
+                root,
+                ["-m", "pip", "install", PYTEST_REQUIREMENT],
+                executable=check_python,
+            )
+            if code != 0:
+                print(f"ERROR: failed to install pytest in .venv:\n{output}", file=sys.stderr)
+                return 1
+            print("  [3/7] pytest installed in .venv")
+        else:
+            print("  [3/7] pytest already available in .venv")
 
     try:
         initialize_ledger(root)
     except BootstrapError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
-    print("  [3/6] fleet ledger initialized from schema.sql")
+    print("  [4/7] fleet ledger initialized from schema.sql")
 
-    print(f"  [4/6] {install_commit_msg_hook(root)}")
-    print(f"  [5/6] {write_owner_config(root, owner)}")
+    print(f"  [5/7] {install_commit_msg_hook(root)}")
+    print(f"  [6/7] {write_owner_config(root, owner)}")
 
     if not run_checks:
-        print("  [6/6] schema_lint + tests skipped (--skip-checks)")
+        print("  [7/7] schema_lint + tests skipped (--skip-checks)")
         print("\nSetup complete (checks skipped). Talk to the Executive Manager to begin.")
         return 0
 
     schema_lint = root / "spec-driven-development" / "cli" / "schema_lint.py"
-    code, output = _run_check(root, [str(schema_lint)])
+    code, output = _run_check(root, [str(schema_lint)], executable=check_python)
     if code != 0:
         print(f"ERROR: schema_lint failed:\n{output}", file=sys.stderr)
         return 1
-    print("  [6/6] schema_lint clean; running test suite...")
+    print("  [7/7] schema_lint clean; running test suite...")
 
     code, output = _run_check(
-        root, ["-m", "pytest", "spec-driven-development", "--tb=no", "-q"]
+        root,
+        ["-m", "pytest", "spec-driven-development", "--tb=no", "-q"],
+        executable=check_python,
     )
     if code != 0:
         print(f"ERROR: test suite failed:\n{output}", file=sys.stderr)

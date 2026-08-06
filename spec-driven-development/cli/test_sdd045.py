@@ -17,6 +17,7 @@ Covers:
 
 from pathlib import Path
 import ast
+import io
 import json
 import os
 import sqlite3
@@ -24,6 +25,9 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import venv
+from contextlib import redirect_stderr, redirect_stdout
+from unittest import mock
 
 CLI_DIR = Path(__file__).resolve().parent
 if str(CLI_DIR) not in sys.path:
@@ -186,6 +190,25 @@ class TestGovernanceCheck(unittest.TestCase):
 class TestSetup(unittest.TestCase):
     """R-5 / R-6: run_setup succeeds and is idempotent."""
 
+    def test_repo_local_venv_is_ignored(self) -> None:
+        gitignore = (FRAMEWORK_ROOT / ".gitignore").read_text(encoding="utf-8")
+        self.assertIn(".venv/", gitignore.splitlines())
+
+    def test_quick_start_documents_setup_environment_and_doctor(self) -> None:
+        readme = (FRAMEWORK_ROOT / "README.md").read_text(encoding="utf-8")
+        for promise in (
+            "creates or reuses the repo-local `.venv`",
+            "ensures `pytest` is installed",
+            "initializes the local `fleet.db` ledger",
+            "runs health checks and tests",
+            "through that environment",
+        ):
+            self.assertIn(promise, readme)
+        self.assertIn(
+            "python spec-driven-development/cli/bootstrap.py doctor",
+            readme,
+        )
+
     def test_setup_happy_path(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = _make_target(Path(tmp))
@@ -209,8 +232,280 @@ class TestSetup(unittest.TestCase):
             self.assertEqual(count, 0)
 
 
+class TestSetupVenvContract(unittest.TestCase):
+    """Fresh-clone setup installs and checks through its repo-local venv."""
+
+    def test_venv_python_uses_windows_and_posix_conventions(self) -> None:
+        root = Path("repo")
+        self.assertEqual(
+            bootstrap._venv_python(root, platform_name="nt"),
+            root / ".venv" / "Scripts" / "python.exe",
+        )
+        self.assertEqual(
+            bootstrap._venv_python(root, platform_name="posix"),
+            root / ".venv" / "bin" / "python",
+        )
+
+    def test_setup_uses_newly_created_venv_for_install_and_checks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = _make_target(Path(tmp))
+            venv_python = target / ".venv" / "bin" / "python"
+            calls: list[tuple[list[str], Path | None]] = []
+
+            def fake_run_check(
+                _root: Path,
+                args: list[str],
+                *,
+                executable: Path | None = None,
+            ) -> tuple[int, str]:
+                calls.append((args, executable))
+                if args[:2] == ["-m", "venv"]:
+                    venv_python.parent.mkdir(parents=True)
+                    venv_python.touch()
+                    return 0, ""
+                if args[:1] == ["-c"]:
+                    return 1, "pytest missing"
+                return 0, "1 passed"
+
+            with mock.patch("bootstrap._venv_python", return_value=venv_python), \
+                 mock.patch("bootstrap._run_check", side_effect=fake_run_check):
+                code = bootstrap.run_setup(target)
+
+            self.assertEqual(code, 0)
+            self.assertEqual(calls[0][1], Path(sys.executable))
+            self.assertTrue(all(executable == venv_python for _, executable in calls[1:]))
+
+    def test_default_check_runner_prefers_existing_venv_for_doctor(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            venv_python = target / ".venv" / "bin" / "python"
+            venv_python.parent.mkdir(parents=True)
+            venv_python.touch()
+            completed = subprocess.CompletedProcess([], 0, "ok", "")
+
+            with mock.patch("bootstrap._venv_python", return_value=venv_python), \
+                 mock.patch("bootstrap.subprocess.run", return_value=completed) as run:
+                code, output = bootstrap._run_check(target, ["-m", "pytest"])
+
+            self.assertEqual((code, output), (0, "ok"))
+            self.assertEqual(run.call_args.args[0][0], str(venv_python))
+
+    def test_default_check_runner_uses_ambient_python_without_venv(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            completed = subprocess.CompletedProcess([], 0, "ok", "")
+
+            with mock.patch("bootstrap.subprocess.run", return_value=completed) as run:
+                code, output = bootstrap._run_check(target, ["-m", "pytest"])
+
+            self.assertEqual((code, output), (0, "ok"))
+            self.assertEqual(run.call_args.args[0][0], sys.executable)
+
+    def test_default_check_runner_rejects_existing_venv_without_interpreter(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            (target / ".venv").mkdir()
+
+            with mock.patch("bootstrap.subprocess.run") as run:
+                code, output = bootstrap._run_check(target, ["-m", "pytest"])
+
+            self.assertNotEqual(code, 0)
+            self.assertIn(".venv interpreter missing", output)
+            run.assert_not_called()
+
+    def test_default_check_runner_reports_corrupt_venv_interpreter(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp)
+            venv_python = bootstrap._venv_python(target)
+            venv_python.parent.mkdir(parents=True)
+            venv_python.write_text("not an executable", encoding="utf-8")
+
+            code, output = bootstrap._run_check(target, ["-m", "pytest"])
+
+            self.assertNotEqual(code, 0)
+            self.assertIn("unable to launch Python interpreter", output)
+            self.assertIn(str(venv_python), output)
+
+    def test_skip_venv_uses_current_interpreter_when_valid_venv_exists(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = _make_target(Path(tmp))
+            venv.EnvBuilder(with_pip=False).create(target / ".venv")
+            calls: list[tuple[list[str], Path | None]] = []
+
+            def fake_run_check(
+                _root: Path,
+                args: list[str],
+                *,
+                executable: Path | None = None,
+            ) -> tuple[int, str]:
+                calls.append((args, executable))
+                return 0, "1 passed"
+
+            with mock.patch("bootstrap._run_check", side_effect=fake_run_check):
+                code = bootstrap.run_setup(target, make_venv=False)
+
+            self.assertEqual(code, 0)
+            self.assertTrue(calls)
+            self.assertTrue(
+                all(executable == Path(sys.executable) for _, executable in calls)
+            )
+            self.assertFalse(any(args[:3] == ["-m", "pip", "install"] for args, _ in calls))
+
+    def test_setup_installs_pytest_and_runs_checks_with_venv_python(self) -> None:
+        for relative_python in (
+            Path(".venv/Scripts/python.exe"),
+            Path(".venv/bin/python"),
+        ):
+            with self.subTest(relative_python=relative_python), \
+                 tempfile.TemporaryDirectory() as tmp:
+                target = _make_target(Path(tmp))
+                venv_python = target / relative_python
+                venv_python.parent.mkdir(parents=True)
+                venv_python.touch()
+                calls: list[tuple[list[str], Path | None]] = []
+
+                def fake_run_check(
+                    _root: Path,
+                    args: list[str],
+                    *,
+                    executable: Path | None = None,
+                ) -> tuple[int, str]:
+                    calls.append((args, executable))
+                    if args[:1] == ["-c"]:
+                        return 1, "ModuleNotFoundError: No module named 'pytest'"
+                    return 0, "1 passed"
+
+                with mock.patch("bootstrap._venv_python", return_value=venv_python), \
+                     mock.patch("bootstrap._run_check", side_effect=fake_run_check):
+                    code = bootstrap.run_setup(target)
+
+                self.assertEqual(code, 0)
+                self.assertIn(
+                    (["-m", "pip", "install", "pytest>=8,<9"], venv_python),
+                    calls,
+                )
+                self.assertTrue(calls)
+                self.assertTrue(all(executable == venv_python for _, executable in calls))
+
+    def test_setup_reports_pytest_install_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = _make_target(Path(tmp))
+            venv_python = target / ".venv" / "bin" / "python"
+            venv_python.parent.mkdir(parents=True)
+            venv_python.touch()
+
+            def fake_run_check(
+                _root: Path,
+                args: list[str],
+                *,
+                executable: Path | None = None,
+            ) -> tuple[int, str]:
+                if args[:1] == ["-c"]:
+                    return 1, "pytest missing"
+                if args[:3] == ["-m", "pip", "install"]:
+                    return 1, "network unavailable"
+                self.fail(f"unexpected command after install failure: {args}")
+
+            stderr = io.StringIO()
+            with mock.patch("bootstrap._venv_python", return_value=venv_python), \
+                 mock.patch("bootstrap._run_check", side_effect=fake_run_check), \
+                 redirect_stderr(stderr):
+                code = bootstrap.run_setup(target)
+
+            self.assertEqual(code, 1)
+            self.assertIn("failed to install pytest", stderr.getvalue())
+            self.assertIn("network unavailable", stderr.getvalue())
+
+    def test_setup_does_not_reinstall_available_pytest(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = _make_target(Path(tmp))
+            venv_python = target / ".venv" / "bin" / "python"
+            venv_python.parent.mkdir(parents=True)
+            venv_python.touch()
+            installed = False
+            install_count = 0
+
+            def fake_run_check(
+                _root: Path,
+                args: list[str],
+                *,
+                executable: Path | None = None,
+            ) -> tuple[int, str]:
+                nonlocal installed, install_count
+                self.assertEqual(executable, venv_python)
+                if args[:1] == ["-c"]:
+                    return (0, "") if installed else (1, "pytest missing")
+                if args[:3] == ["-m", "pip", "install"]:
+                    install_count += 1
+                    installed = True
+                return 0, "1 passed"
+
+            with mock.patch("bootstrap._venv_python", return_value=venv_python), \
+                 mock.patch("bootstrap._run_check", side_effect=fake_run_check):
+                self.assertEqual(bootstrap.run_setup(target), 0)
+                self.assertEqual(bootstrap.run_setup(target), 0)
+
+            self.assertEqual(install_count, 1)
+
+    def test_setup_reinstalls_pytest_outside_supported_range(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = _make_target(Path(tmp))
+            venv_python = target / ".venv" / "bin" / "python"
+            venv_python.parent.mkdir(parents=True)
+            venv_python.touch()
+            calls: list[list[str]] = []
+
+            def fake_run_check(
+                _root: Path,
+                args: list[str],
+                *,
+                executable: Path | None = None,
+            ) -> tuple[int, str]:
+                self.assertEqual(executable, venv_python)
+                calls.append(args)
+                if args[0] == "-c":
+                    return 1, "pytest 9 is outside supported range"
+                return 0, "1 passed"
+
+            with mock.patch("bootstrap._venv_python", return_value=venv_python), \
+                 mock.patch("bootstrap._run_check", side_effect=fake_run_check):
+                code = bootstrap.run_setup(target)
+
+            self.assertEqual(code, 0)
+            self.assertTrue(any("importlib.metadata" in " ".join(args) for args in calls))
+            self.assertIn(["-m", "pip", "install", "pytest>=8,<9"], calls)
+
+
 class TestDoctor(unittest.TestCase):
     """R-8: source health is green, then red when a tracked input leaks."""
+
+    def test_doctor_reports_invalid_existing_venv_as_failed_check(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = _make_target(Path(tmp))
+            (target / ".venv").mkdir()
+            ledger = target / "spec-driven-development" / "ledger" / "fleet.db"
+            connection = sqlite3.connect(ledger)
+            try:
+                connection.execute("CREATE TABLE dispatches (pi TEXT NOT NULL)")
+                connection.commit()
+            finally:
+                connection.close()
+
+            stdout = io.StringIO()
+            with mock.patch("bootstrap.framework_root", return_value=target), \
+                 mock.patch("governance_check.check_governance", return_value=(True, [])), \
+                 mock.patch("origin_lint.find_tracked_dbs", return_value=[]), \
+                 mock.patch("origin_lint.scan_origin_tokens", return_value=[]), \
+                 mock.patch("staledoc_lint.scan", return_value=[]), \
+                 mock.patch("tdd_gate_check.changed_files", return_value=[]), \
+                 mock.patch("tdd_gate_check.evaluate", return_value=(True, [])), \
+                 mock.patch("bootstrap.current_pi_name", return_value=None), \
+                 redirect_stdout(stdout):
+                code = bootstrap.run_doctor(target, run_tests=False, mode="local")
+
+            self.assertEqual(code, 1)
+            self.assertIn("[FAIL] schema_lint clean", stdout.getvalue())
+            self.assertIn(".venv interpreter missing", stdout.getvalue())
 
     def test_ci_doctor_green_on_framework_source(self) -> None:
         code = bootstrap.run_doctor(FRAMEWORK_ROOT, run_tests=False, mode="ci")

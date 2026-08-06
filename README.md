@@ -20,22 +20,26 @@ Clone, run one setup command, then talk to the Executive Manager:
 # 1. Clone
 git clone <this-repo-url> && cd Evolving-Multi-Agent-Framework
 
-# 2. Set up (creates a fresh local ledger, runs health checks)
+# 2. Set up (creates/reuses .venv, installs pytest, initializes the ledger, runs checks/tests)
 make setup
 #   or, without make:
 #   python spec-driven-development/cli/bootstrap.py setup --owner "Your Name"
 
 # 3. Verify the install is healthy at any time
 make doctor
+#   or, without make:
+#   python spec-driven-development/cli/bootstrap.py doctor
 ```
 
 Then open the **Principal Executive Manager** agent in VS Code Copilot Chat and
 describe what you want to do. The EM is your single entry point -- it routes work,
 reports status, and surfaces decisions.
 
-`make setup` is idempotent (safe to re-run) and gives every clone its own empty
-`fleet.db` ledger; the personal ledger is never shared through git. `make doctor`
-exits non-zero and names the failed check if anything is wrong.
+`make setup` creates or reuses the repo-local `.venv`, ensures `pytest` is installed
+there, initializes the local `fleet.db` ledger, and runs health checks and tests
+through that environment. It is idempotent (safe to re-run); the personal ledger
+is never shared through git. `make doctor` exits non-zero and names the failed
+check if anything is wrong.
 
 ### Adopt SDD on another project
 

@@ -1,9 +1,9 @@
 ---
 id: SDD-20260608AZUREDECOM-validation
 type: validation
-status: active
+status: archived
 owner: principal-cloud-security-architect
-updated: 2026-06-08
+updated: 2026-08-06
 feature: 2026-06-08-azure-decommission
 ---
 
@@ -13,6 +13,25 @@ feature: 2026-06-08-azure-decommission
 - Contract Date: 2026-06-08
 - Author: Principal Cloud Security Architect (EM dispatch, Phase A.3)
 - Lock Point: **AT SCAFFOLD (2026-06-08)** -- no CLARIFY round needed
+
+---
+
+## Historical disposition -- 2026-08-06
+
+SDD-035 is **ABANDONED / HISTORICAL**, not DONE. The owner explicitly approved
+preserving partial evidence, removing the feature from active views, and requiring
+fresh authorization for any future Azure cleanup. Checked items below remain valid
+evidence of work actually completed. Unchecked REQUIRED and optional items remain
+unchecked and must not be inferred, waived, or marked complete. No Azure action is
+authorized by this archival update.
+
+Exact approval context from the owner conversation:
+
+> "The owner has now explicitly approved the recommendation on 2026-08-06:
+> classify SDD-035 Azure decommission as ABANDONED/HISTORICAL, preserve partial
+> evidence, remove it from active views, and require fresh authorization for any
+> future Azure cleanup. The owner previously approved Option 1 (setup repair then
+> truth reconciliation) and said \"les go\" to proceed."
 
 ---
 

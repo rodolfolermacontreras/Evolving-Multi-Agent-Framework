@@ -35,6 +35,7 @@ Stdlib-only (Article V): argparse, pathlib, re, sys. Reuses the in-tree sibling
 from __future__ import annotations
 
 from dataclasses import dataclass
+from html.parser import HTMLParser
 from pathlib import Path
 import argparse
 import re
@@ -48,6 +49,11 @@ SESSION_START_DOCS = (
     Path("spec-driven-development") / "CONTEXT.md",
     Path("spec-driven-development") / "docs" / "HIGH_LEVEL_DEV_TRACKER.md",
     Path("spec-driven-development") / "docs" / "ONBOARDING_KICK_OFF.md",
+    Path("spec-driven-development") / "docs" / "LEADERSHIP-ONE-PAGER.html",
+)
+
+_LEADERSHIP_DOC = (
+    Path("spec-driven-development") / "docs" / "LEADERSHIP-ONE-PAGER.html"
 )
 
 # Inline marker exempting a line from the guard (for a legitimate historical
@@ -62,6 +68,25 @@ _ARTICLE_ROMAN_RE = re.compile(
 )
 # "Current PI: PI-N" / "**Current PI** | PI-N" (tolerant of markdown between).
 _CURRENT_PI_RE = re.compile(r"current\s+pi\b[^\n]*?PI-(\d+)", re.IGNORECASE)
+_LEADERSHIP_ACTIVE_PI_CANDIDATE_RE = re.compile(
+    r"(?:\bPI-\d+\b[^;,.!?<>]{0,60}?\bactive\b|"
+    r"\bactive\s+(?:PI\s+)?PI-\d+\b)",
+    re.IGNORECASE,
+)
+_LEADERSHIP_ACTIVE_NEGATION_RE = re.compile(
+    r"\b(?:is|was)\s+(?:not|no\s+longer|never)\s+active\b|"
+    r"\b(?:isn't|wasn't)\s+active\b|\bno\s+active\s+PI\b|\binactive\b",
+    re.IGNORECASE,
+)
+_LEADERSHIP_ACTIVE_WORK_RE = re.compile(r"\bnow\s+building\b", re.IGNORECASE)
+_UNAUTHORIZED_LEADERSHIP_ID_RE = re.compile(r"\bSDD-06[0-8]\b", re.IGNORECASE)
+_LEADERSHIP_HTML_INPUT_LIMIT = 64 * 1024
+_LEADERSHIP_VISIBLE_TEXT_LIMIT = 16 * 1024
+_LEADERSHIP_CLAUSE_LIMIT = 512
+_LEADERSHIP_BLOCK_TAGS = frozenset({
+    "p", "div", "li", "h1", "h2", "h3", "h4", "h5", "h6", "section",
+    "br", "td", "tr",
+})
 
 
 @dataclass(frozen=True)
@@ -70,13 +95,69 @@ class Finding:
 
     path: Path
     lineno: int
-    kind: str  # "article" | "pi"
+    kind: str  # article | pi | bounded leadership checks
     detail: str
     line: str
 
 
 class StaleDocError(Exception):
     """Expected guard failure with a human-readable remediation."""
+
+
+class _LeadershipVisibleTextParser(HTMLParser):
+    """Extract leadership-visible text while preserving block boundaries."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.parts: list[str] = []
+        self.hidden_depth = 0
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        del attrs
+        normalized = tag.lower()
+        if normalized in {"script", "style"}:
+            self.hidden_depth += 1
+        elif normalized in _LEADERSHIP_BLOCK_TAGS:
+            self.parts.append("\n")
+
+    def handle_endtag(self, tag: str) -> None:
+        normalized = tag.lower()
+        if normalized in {"script", "style"}:
+            self.hidden_depth = max(0, self.hidden_depth - 1)
+        elif normalized in _LEADERSHIP_BLOCK_TAGS:
+            self.parts.append("\n")
+
+    def handle_data(self, data: str) -> None:
+        if self.hidden_depth == 0:
+            self.parts.append(data)
+
+
+def _leadership_visible_clauses(html_text: str) -> tuple[list[str], str | None]:
+    """Return bounded visible-text clauses or a conservative overflow reason."""
+    if len(html_text) > _LEADERSHIP_HTML_INPUT_LIMIT:
+        return [], "HTML input exceeds 64 KiB"
+    parser = _LeadershipVisibleTextParser()
+    parser.feed(html_text)
+    parser.close()
+    visible_text = "".join(parser.parts)
+    if len(visible_text) > _LEADERSHIP_VISIBLE_TEXT_LIMIT:
+        return [], "visible text exceeds 16 KiB"
+    clauses = [
+        clause.strip()
+        for clause in re.split(r"[;,.!?\n]+", visible_text)
+        if clause.strip()
+    ]
+    if len(clauses) > _LEADERSHIP_CLAUSE_LIMIT:
+        return [], "visible text exceeds 512 clauses"
+    return clauses, None
+
+
+def _asserts_active_pi(clause: str) -> bool:
+    """Detect a positive active-PI assertion within one bounded clause."""
+    return any(
+        not _LEADERSHIP_ACTIVE_NEGATION_RE.search(candidate.group(0))
+        for candidate in _LEADERSHIP_ACTIVE_PI_CANDIDATE_RE.finditer(clause)
+    )
 
 
 def framework_root() -> Path:
@@ -179,6 +260,33 @@ def scan_file(
                     f"says Current PI PI-{match.group(1)}; live is PI-{current_pi}",
                     line.strip(),
                 ))
+        if rel == _LEADERSHIP_DOC:
+            for match in _UNAUTHORIZED_LEADERSHIP_ID_RE.finditer(line):
+                findings.append(Finding(
+                    rel, lineno, "leadership-unauthorized-id",
+                    f"uses unauthorized product label {match.group(0).upper()}",
+                    line.strip(),
+                ))
+    if rel == _LEADERSHIP_DOC and current_pi is None:
+        clauses, overflow = _leadership_visible_clauses(text)
+        if overflow is not None:
+            findings.append(Finding(
+                rel, 1, "leadership-html-overflow", overflow, overflow,
+            ))
+        else:
+            for clause in clauses:
+                if _asserts_active_pi(clause):
+                    findings.append(Finding(
+                        rel, 1, "leadership-active-pi",
+                        "asserts an active PI while live sources have no active PI",
+                        clause,
+                    ))
+                if _LEADERSHIP_ACTIVE_WORK_RE.search(clause):
+                    findings.append(Finding(
+                        rel, 1, "leadership-active-work",
+                        "asserts Now building while live sources have no active PI",
+                        clause,
+                    ))
     return findings
 
 

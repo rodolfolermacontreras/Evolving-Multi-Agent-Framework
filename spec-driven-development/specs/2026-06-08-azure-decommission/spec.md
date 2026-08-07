@@ -1,9 +1,9 @@
 ---
 id: SDD-20260608AZUREDECOM-spec
 type: spec
-status: active
+status: archived
 owner: principal-cloud-security-architect
-updated: 2026-06-08
+updated: 2026-08-06
 feature: 2026-06-08-azure-decommission
 ---
 
@@ -11,10 +11,28 @@ feature: 2026-06-08-azure-decommission
 
 - Date: 2026-06-08
 - Author: Principal Cloud Security Architect (EM dispatch, Phase A.3)
-- Status: ACTIVE (scaffolded; pending Level-2 owner approval before T-035-05 teardown)
+- Status: **ABANDONED / HISTORICAL 2026-08-06.** Partial evidence is preserved;
+  this feature is not DONE, and its incomplete requirements remain incomplete.
 - Priority: P1
-- Sprint: Out-of-band (this week, 2026-06-08..2026-06-13); NOT folded into Sprint 8
+- Sprint: Historical out-of-band work; no active PI or sprint allocation
 - Spec ID: SDD-035
+
+---
+
+> ## OWNER DISPOSITION -- 2026-08-06
+>
+> Exact approval context from the owner conversation:
+> "The owner has now explicitly approved the recommendation on 2026-08-06:
+> classify SDD-035 Azure decommission as ABANDONED/HISTORICAL, preserve partial
+> evidence, remove it from active views, and require fresh authorization for any
+> future Azure cleanup. The owner previously approved Option 1 (setup repair then
+> truth reconciliation) and said \"les go\" to proceed."
+>
+> This disposition archives the attempted feature without completing it. Existing
+> inventory, scan, ADR, plan, task, and validation artifacts remain as historical
+> evidence. No Azure operation, teardown, documentation purge, requirement waiver,
+> or completion claim is authorized. Any future Azure cleanup requires fresh,
+> explicit owner authorization and a newly established execution scope.
 
 ---
 

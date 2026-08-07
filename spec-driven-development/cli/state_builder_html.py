@@ -30,6 +30,7 @@ from state_builder_data import (  # noqa: E402  -- in-tree sibling import (ADR-0
     Feature,
     LedgerView,
     PIBlock,
+    is_terminal_status,
     load_backlog,
     repo_root_for,
 )
@@ -1230,7 +1231,10 @@ def render_work_index(
         [f for f in features if f.stage in ("IMPLEMENT", "TASKS", "PLAN", "SPEC", "CLARIFY")],
         key=lambda x: x.created,
     )
-    queued = [b for b in backlog if b.priority in ("P1", "P2", "P3")]
+    queued = [
+        b for b in backlog
+        if b.priority in ("P1", "P2", "P3") and not is_terminal_status(b.status)
+    ]
 
     lines = [
         "# Work Index",

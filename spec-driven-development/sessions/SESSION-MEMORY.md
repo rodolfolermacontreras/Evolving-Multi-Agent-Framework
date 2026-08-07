@@ -1,23 +1,19 @@
 # Session Memory — Evolving Multi-Agent Framework
 
-**Latest checkpoint (2026-08-06):** Owner-authorized truth-reconciliation
-maintenance remains ACTIVE / REVIEW. T-TR-20 is complete, and the independent
-Stage 2 verdict is APPROVED with zero CRITICAL and zero IMPORTANT findings;
-T-TR-15 is complete. The package awaits the owner's decision on a local
-review-approved commit and any later, separately authorized integration. V-20
-and V-25 remain pending; no commit, push, merge, integration, terminal metadata,
-closure, or DONE claim exists. PI-1 through PI-9 are closed, with no active PI,
-sprint, product feature, or scheduled work.
+**Latest checkpoint (2026-08-06):** Truth-reconciliation maintenance is DONE.
+PR #4 integrated the exact review-approved commits at merge SHA
+`f8b6b24edaff7112c2a783da09faed3e11e853bf`; Greptile Review and Doctor
+push/PR jobs on Ubuntu and Windows passed. The owner then explicitly authorized
+the closure gate. V-20 and V-25 are complete, all 29 required validations are
+evidenced, and terminal metadata is applied. PI-1 through PI-9 remain closed,
+with no active PI, sprint, product feature, or scheduled work.
 
-**Implementation handoff:** The final anchored Markdown terminal-presentation
-repair and independent real-source oracle are complete test-first. Exact V-29
-passed 17/17, focused artifact suites passed 416/416, Article X passed 3/3,
-doctor with tests skipped was green, generated parity matched as defined, and
-the recorded full doctor passed 1239 tests with 5 skipped. SDD-035 remains
-ABANDONED / HISTORICAL; SDD-008 and SDD-059 remain unscheduled. Preserve the
-uncommitted review-approved package for the owner's local commit decision; this
-maintenance grants no Azure action, push, merge, integration, closure, or DONE
-authority.
+**Current handoff:** Generated executive outputs use the documented closure
+generation basis `f8b6b24` and show this maintenance as DONE, absent from
+IN-FLIGHT and QUEUED, with zero active PI/sprint/feature. SDD-035 remains
+ABANDONED / HISTORICAL; SDD-008 and SDD-059 remain unscheduled. No PI-10, new
+SDD identifier, Azure action, or additional implementation is authorized. The
+next gate is owner-led product triage.
 
 ---
 

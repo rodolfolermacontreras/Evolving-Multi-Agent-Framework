@@ -38,16 +38,16 @@ Read [`RULES.md`](RULES.md) for the binding rules.
 | **Scheduled work** | None -- owner-approved triage is required before any new allocation |
 | **Cadence** | Symbolic; ~1 day per sprint, ~5 sprints per PI (ADR-0003) |
 | **Tests passing** | See the live count in [`exec/state.md`](../exec/state.md) and the ledger (schema_lint clean) |
-| **Branch state** | Owner-authorized truth-reconciliation maintenance is local and uncommitted for independent review; it creates no product allocation |
+| **Branch state** | Truth-reconciliation implementation integrated through PR #4 and owner-authorized terminal closure recorded; no product allocation exists |
 | **PI history** | PI-1..PI-9 closed; no current PI -- see [`constitution/roadmap.md`](../constitution/roadmap.md) |
 
 ---
 
 ## Top 3 Next Moves
 
-1. **Independently review the local truth-reconciliation maintenance package.**
-  Review does not authorize a commit, push, PI, sprint, or product feature.
-2. **Keep the repository between PIs.** The owner must triage and explicitly
+1. **Run owner-led product triage.** Closure authorizes no implementation; the
+  next decision is which existing unscheduled candidate, if any, merits work.
+2. **Keep the repository between PIs until triage completes.** The owner must triage and explicitly
   authorize a candidate before any product work is scheduled.
 3. **Use authoritative live sources for status.** Read
   [`constitution/roadmap.md`](../constitution/roadmap.md), the applicable

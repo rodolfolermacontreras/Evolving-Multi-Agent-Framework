@@ -1,8 +1,8 @@
 ---
 id: MAINT-2026-08-06-TRUTH-RECONCILIATION-spec
 type: spec
-status: active
-lifecycle_status: review
+status: done
+lifecycle_status: done
 owner: principal-architect
 updated: 2026-08-06
 feature: 2026-08-06-truth-reconciliation-maintenance
@@ -393,3 +393,17 @@ stops implementation and returns to the appropriate owner gate.
 proceed only under the locked validation contract and the sequence above. This
 approval does not authorize a PI, sprint, SDD ID, Azure action, commit, push, or
 merge.
+
+---
+
+## Closure gate -- 2026-08-06
+
+**DONE.** Owner-authorized closure followed independent Stage 2 approval and
+integration of the exact approved implementation through PR #4. The integrated
+baseline is merge commit `f8b6b24edaff7112c2a783da09faed3e11e853bf`, whose
+ancestry contains `6bd215c07a9f17f64017eabbebf3616b0192e8a0` and
+`9487cd05dc99be62592e83dc4240a1fadc1c6d6c`. Required PR and push Doctor jobs
+for Ubuntu and Windows, plus Greptile Review, completed successfully.
+
+This terminal transition creates no PI, sprint, product allocation, or new SDD
+identifier. The next gate is owner-led product triage.

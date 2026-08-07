@@ -61,6 +61,7 @@ No active PI.
 | 2026-07-10 | fresh-checkout-ci-doctor-repair | `specs/2026-07-10-fresh-checkout-ci-doctor-repair/` |
 | 2026-07-10 | sprint-23-dashboard-polish | `specs/2026-07-10-sprint-23-dashboard-polish/` |
 | 2026-07-12 | brownfield-bootstrap-correctness | `specs/2026-07-12-brownfield-bootstrap-correctness/` |
+| 2026-08-06 | truth-reconciliation-maintenance | `specs/2026-08-06-truth-reconciliation-maintenance/` |
 
 ## 2. IN-FLIGHT -- Currently being worked on (coordinate before touching)
 

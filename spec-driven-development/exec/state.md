@@ -55,7 +55,7 @@ Active focus: No feature scheduled
 | fresh-checkout-ci-doctor-repair | DONE | active | validation required-complete |
 | sprint-23-dashboard-polish | DONE | done | explicit completed terminal disposition |
 | brownfield-bootstrap-correctness | DONE | done | explicit completed terminal disposition |
-| truth-reconciliation-maintenance | REVIEW | review | owning artifact review veto |
+| truth-reconciliation-maintenance | DONE | done | explicit completed terminal disposition |
 
 ## Sprint Plan
 

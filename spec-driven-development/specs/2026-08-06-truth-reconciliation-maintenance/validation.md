@@ -164,11 +164,11 @@ evidence obligation, or historical planning intent.
   ignored. Non-operational evidence wins over review, review wins over owning
   done/shipped, then validation/stage inference and file presence apply.
 
-- [x] **V-20 (review and integration lifecycle).** The maintenance spec remains
-  `status: active` with `lifecycle_status: review`; tasks and validation remain
-  active; generated outputs classify the package as REVIEW and never Already
-  shipped. Owning completion is not asserted before the later commit and
-  integration gate, and independent Stage 2 re-review remains pending.
+- [x] **V-20 (review and integration lifecycle).** The maintenance spec remained
+  `status: active` with `lifecycle_status: review`; tasks and validation remained
+  active; generated outputs classified the package as REVIEW and never Already
+  shipped through independent Stage 2 approval and the later integration gate.
+  No owning completion was asserted before those gates completed.
 
 - [x] **V-21 (bounded lifecycle and leadership negation).** Focused tests prove
   frontmatter precedes body lifecycle metadata, body metadata is accepted only
@@ -202,12 +202,12 @@ evidence obligation, or historical planning intent.
   positives and negations, adjacent blocks, later positives, hidden noise, and
   conservative findings at 64 KiB input, 16 KiB visible text, and 512 clauses.
 
-- [x] **V-25 (REVIEW lifecycle and closure contract).** The package remains
+- [x] **V-25 (REVIEW lifecycle and closure contract).** The package remained
   `status: active` and `lifecycle_status: review` through T-TR-15/V-20.
-  APPROVED means independent review approval awaiting separately
-  owner-authorized integration, not DONE. Terminal metadata may be applied only
-  at the closure gate after Stage 2 approval and authorized integration, then
-  the builder must run before DONE.
+  APPROVED meant independent review approval awaiting separately
+  owner-authorized integration, not DONE. Terminal metadata was applied only at
+  the closure gate after Stage 2 approval and authorized integration, then the
+  builder ran before DONE.
 
 - [x] **V-26 (commit-semantic HTML parity).** Markdown state and work index
   match no-write renders exactly. HTML differs only at the three documented

@@ -51,7 +51,7 @@ T-TR-03 -> T-TR-07
 T-TR-03 -> T-TR-08
 T-TR-01 -> T-TR-09
 T-TR-04 + T-TR-06..09 -> T-TR-10 -> T-TR-11 -> T-TR-12 -> T-TR-13
-T-TR-13 -> T-TR-14 -> T-TR-16 -> T-TR-17 -> T-TR-18 -> T-TR-19 -> T-TR-20 -> T-TR-15
+T-TR-13 -> T-TR-14 -> T-TR-16 -> T-TR-17 -> T-TR-18 -> T-TR-19 -> T-TR-20 -> T-TR-15 -> PR #4 integration -> T-TR-21
 ```
 
 T-TR-07 and T-TR-08 are file-disjoint and parallelizable. All implementation in

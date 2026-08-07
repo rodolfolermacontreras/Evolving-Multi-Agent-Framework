@@ -1,7 +1,7 @@
 ---
 id: MAINT-2026-08-06-TRUTH-RECONCILIATION-validation
 type: validation
-status: active
+status: done
 owner: principal-architect
 updated: 2026-08-06
 feature: 2026-08-06-truth-reconciliation-maintenance
@@ -164,11 +164,11 @@ evidence obligation, or historical planning intent.
   ignored. Non-operational evidence wins over review, review wins over owning
   done/shipped, then validation/stage inference and file presence apply.
 
-- [ ] **V-20 (review and integration lifecycle).** The maintenance spec remains
-  `status: active` with `lifecycle_status: review`; tasks and validation remain
-  active; generated outputs classify the package as REVIEW and never Already
-  shipped. Owning completion is not asserted before the later commit and
-  integration gate, and independent Stage 2 re-review remains pending.
+- [x] **V-20 (review and integration lifecycle).** The maintenance spec remained
+  `status: active` with `lifecycle_status: review`; tasks and validation remained
+  active; generated outputs classified the package as REVIEW and never Already
+  shipped through independent Stage 2 approval and the later integration gate.
+  No owning completion was asserted before those gates completed.
 
 - [x] **V-21 (bounded lifecycle and leadership negation).** Focused tests prove
   frontmatter precedes body lifecycle metadata, body metadata is accepted only
@@ -202,12 +202,12 @@ evidence obligation, or historical planning intent.
   positives and negations, adjacent blocks, later positives, hidden noise, and
   conservative findings at 64 KiB input, 16 KiB visible text, and 512 clauses.
 
-- [ ] **V-25 (REVIEW lifecycle and closure contract).** The package remains
+- [x] **V-25 (REVIEW lifecycle and closure contract).** The package remained
   `status: active` and `lifecycle_status: review` through T-TR-15/V-20.
-  APPROVED means independent review approval awaiting separately
-  owner-authorized integration, not DONE. Terminal metadata may be applied only
-  at the closure gate after Stage 2 approval and authorized integration, then
-  the builder must run before DONE.
+  APPROVED meant independent review approval awaiting separately
+  owner-authorized integration, not DONE. Terminal metadata was applied only at
+  the closure gate after Stage 2 approval and authorized integration, then the
+  builder ran before DONE.
 
 - [x] **V-26 (commit-semantic HTML parity).** Markdown state and work index
   match no-write renders exactly. HTML differs only at the three documented
@@ -310,9 +310,18 @@ executive file.
 | Repository evidence | `bootstrap.py doctor --skip-tests` was green; generated parity was exact/semantic as defined; `git diff --check` was clean; the recorded full doctor passed 1239 tests with 5 skipped. |
 | Disposition | T-TR-15 is complete. The package is ready only for an owner decision on a local review-approved commit. No push, merge, integration, terminal metadata, closure, or DONE authority is implied. |
 
-V-20 and V-25 remain pending until separately owner-authorized integration and
-closure. The package remains ACTIVE / REVIEW; no commit, integration, terminal
-metadata, or DONE claim is recorded.
+### Integration and closure evidence -- 2026-08-06
+
+| Validation | Concrete evidence |
+|------------|-------------------|
+| V-20 | PR [#4](https://github.com/rodolfolermacontreras/Evolving-Multi-Agent-Framework/pull/4) merged the exact review-approved commits `6bd215c07a9f17f64017eabbebf3616b0192e8a0` and `9487cd05dc99be62592e83dc4240a1fadc1c6d6c` to `origin/master` at merge SHA `f8b6b24edaff7112c2a783da09faed3e11e853bf`. Git ancestry checks passed. Greptile Review and Doctor push/PR jobs on Ubuntu and Windows all completed successfully. The package remained ACTIVE / REVIEW through independent Stage 2 approval and integration; no earlier owning DONE assertion occurred. |
+| V-25 | After PR #4 integration, the owner explicitly authorized this closure gate, including terminal metadata, rebuild, closure commit, push, PR, and merge under normal repository protections. Only now were `spec.md`, `tasks.md`, and `validation.md` moved to DONE. This authorization creates no PI-10, sprint, SDD assignment, SDD-059 schedule, or additional implementation. |
+| Generation basis | The terminal executive rebuild uses pre-commit HEAD `f8b6b24edaff7112c2a783da09faed3e11e853bf`, which exists and is represented in the generated commit feed. The future closure commit cannot appear in artifacts stored by that same commit. No post-commit regeneration follow-up is contractually required: each regeneration commit would create a newer HEAD and recursively invalidate exact HEAD-feed parity. Pre-commit no-write parity is the coherent repository convention and evidence boundary. |
+| Local closure validation | Focused state-builder and stale-doc suites passed 417/417; exact Article X lock passed 3/3; focused and repository schema, origin/tracked-database, governance, stale-doc, TDD, parity, forbidden-ID, scope, and `git diff --check` gates passed. The single full `bootstrap.py doctor` run passed all checks with 1240 tests passed and 5 skipped in 354.25 seconds. The temporary Windows `python3.exe` hard-link shim was removed in `finally`. |
+
+V-20 and V-25 are complete. All 29 required items are evidenced; the package is
+terminal DONE after review-approved integration and explicit owner closure
+authorization.
 
 ---
 

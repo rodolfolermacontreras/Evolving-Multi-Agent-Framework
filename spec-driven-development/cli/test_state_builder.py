@@ -4878,6 +4878,35 @@ class TestTruthReconciliationTerminalStatus:
         done_section = result["work_index"].split("## 2.", 1)[0]
         assert "truth-reconciliation-maintenance" not in done_section
 
+    def test_maintenance_terminal_metadata_renders_done_not_inflight(
+        self, tmp_path: Path
+    ) -> None:
+        sdd = _seed_sdd_root(tmp_path)
+        feature = sdd / "specs" / "2026-08-06-truth-reconciliation-maintenance"
+        feature.mkdir()
+        for filename, artifact_type in (
+            ("spec.md", "spec"),
+            ("tasks.md", "tasks"),
+            ("validation.md", "validation"),
+        ):
+            (feature / filename).write_text(
+                f"---\ntype: {artifact_type}\nstatus: done\nlifecycle_status: done\n---\n",
+                encoding="utf-8",
+            )
+
+        result = build(sdd_root=sdd, write=False, fixed_date="2026-08-06")
+
+        feature_row = next(
+            item
+            for item in load_features(sdd)
+            if item.name == "truth-reconciliation-maintenance"
+        )
+        assert feature_row.stage == "DONE"
+        done_section, inflight_and_later = result["work_index"].split("## 2.", 1)
+        assert "truth-reconciliation-maintenance" in done_section
+        inflight_section = inflight_and_later.split("## 2A.", 1)[0]
+        assert "truth-reconciliation-maintenance" not in inflight_section
+
 
 class TestTruthReconciliationBacklogFiltering:
     @pytest.mark.parametrize(

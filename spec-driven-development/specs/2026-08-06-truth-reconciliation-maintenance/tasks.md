@@ -1,7 +1,7 @@
 ---
 id: MAINT-2026-08-06-TRUTH-RECONCILIATION-tasks
 type: tasks
-status: active
+status: done
 owner: principal-software-developer
 updated: 2026-08-06
 feature: 2026-08-06-truth-reconciliation-maintenance
@@ -40,6 +40,7 @@ feature: 2026-08-06-truth-reconciliation-maintenance
 | T-TR-17 | [S][AFK] | Run final pre-rebuild gates, builder-only regeneration, generated truth/parity assertions, and one full bootstrap doctor; preserve REVIEW lifecycle for independent re-review. | generated outputs, `tasks.md`, `validation.md` | T-TR-16 | All required gates and generated assertions pass; doctor is green | done |
 | T-TR-18 | [S][AFK] | Implement the second Architect-adjudicated candidate-local negation and canonical backlog parser repairs test-first, including real SDD-035/008/059 source coverage. | `cli/test_staledoc_lint.py`, `cli/staledoc_lint.py`, `cli/test_state_builder.py`, `cli/state_builder_data.py`, `backlog/BACKLOG.md` | T-TR-17 | Exact RED selectors fail for intended defects, then exact selectors and both complete focused files pass | done |
 | T-TR-19 | [S][AFK] | Run pre-rebuild gates, builder-only regeneration, lifecycle/truth assertions, and semantic generated-output parity at the recorded HEAD basis; run doctor once. | generated outputs, `tasks.md`, `validation.md` | T-TR-18 | V-25..V-28 and required repository gates pass; generated REVIEW outputs are current | done |
+| T-TR-21 | [S][AFK] | Execute the owner-authorized closure gate after PR #4 integration: record merge/check evidence, complete V-20/V-25, apply terminal metadata, rebuild executive outputs, and validate zero-active truth. | `spec.md`, `tasks.md`, `validation.md`, current handoff docs, generated outputs | T-TR-15 and PR #4 integration | Closure evidence is durable; generated state is DONE with nothing in flight; required gates pass | done |
 
 ## Dependency Graph
 
@@ -50,7 +51,7 @@ T-TR-03 -> T-TR-07
 T-TR-03 -> T-TR-08
 T-TR-01 -> T-TR-09
 T-TR-04 + T-TR-06..09 -> T-TR-10 -> T-TR-11 -> T-TR-12 -> T-TR-13
-T-TR-13 -> T-TR-14 -> T-TR-16 -> T-TR-17 -> T-TR-18 -> T-TR-19 -> T-TR-20 -> T-TR-15
+T-TR-13 -> T-TR-14 -> T-TR-16 -> T-TR-17 -> T-TR-18 -> T-TR-19 -> T-TR-20 -> T-TR-15 -> PR #4 integration -> T-TR-21
 ```
 
 T-TR-07 and T-TR-08 are file-disjoint and parallelizable. All implementation in
@@ -66,3 +67,4 @@ this invocation remains serial where immediate focused validation is required.
 - **Checkpoint F:** T-TR-18 and T-TR-19 -- second adjudicated repair and regenerated review evidence complete before T-TR-15.
 - **Checkpoint G:** T-TR-20 -- sole remaining local Stage 2 repair and regenerated review evidence complete before T-TR-15.
 - **Checkpoint H:** T-TR-15 -- independent Stage 2 verdict APPROVED with zero CRITICAL and zero IMPORTANT findings; package remains ACTIVE / REVIEW pending separately owner-authorized commit, integration, and closure decisions.
+- **Checkpoint I:** T-TR-21 -- PR #4 integrated the exact approved commits; owner authorized closure; V-20/V-25 and terminal metadata are complete; executive outputs are rebuilt from the recorded pre-commit basis; maintenance is DONE with no successor PI or sprint.
